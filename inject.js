@@ -32,11 +32,54 @@ if (location.pathname.indexOf('prod_list/7-') !== -1) {
   document.head.appendChild(hideStyle);
 }
 document.addEventListener('DOMContentLoaded', function() {
-  // Mobile logo resize
+  // Mobile header redesign (ajd.co.kr style)
   if (window.innerWidth <= 768) {
-    var mobileLogoStyle = document.createElement('style');
-    mobileLogoStyle.textContent = 'a.logo, a.logo img { width: 100px !important; height: auto !important; }';
-    document.head.appendChild(mobileLogoStyle);
+    // 1. Extract event banner from icon list and make it full-width top bar
+    var iconList = document.querySelector('ul.inline_wrap.header_m_icon');
+    var headerEl = document.querySelector('header');
+    if (iconList && headerEl) {
+      var eventLi = iconList.querySelector('li:first-child');
+      var eventLink = eventLi ? eventLi.querySelector('a') : null;
+      if (eventLink && eventLink.textContent.indexOf('이벤트') !== -1) {
+        // Create full-width banner
+        var banner = document.createElement('div');
+        banner.id = 'bj-top-banner';
+        banner.innerHTML = '<a href="' + eventLink.href + '">' + eventLink.textContent.trim() + '</a>';
+        headerEl.insertBefore(banner, headerEl.firstChild);
+        eventLi.style.display = 'none';
+      }
+
+      // 2. Move search and cart icons next to hamburger row
+      var headerTop = document.querySelector('.header__top');
+      if (headerTop) {
+        // Move icon list into header__top for proper flex layout
+        iconList.id = 'bj-header-icons';
+        headerTop.appendChild(iconList);
+      }
+    }
+
+    // 3. Inject mobile header CSS
+    var mobileHeaderCSS = document.createElement('style');
+    mobileHeaderCSS.textContent = [
+      '/* Full-width event banner */',
+      '#bj-top-banner { background: #0838f8; text-align: center; padding: 8px 16px; }',
+      '#bj-top-banner a { color: #fff; font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.3px; }',
+      '',
+      '/* Compact header row */',
+      'header .wide-inner { padding: 0 16px !important; margin: 0 !important; width: 100% !important; }',
+      '.header__top { display: flex !important; align-items: center !important; height: 50px !important; padding: 0 !important; gap: 0 !important; }',
+      '.gnb__hamburger { flex-shrink: 0 !important; width: auto !important; height: auto !important; display: flex !important; align-items: center !important; padding: 0 8px 0 0 !important; }',
+      '.gnb__hamburger img { width: 22px !important; height: auto !important; }',
+      'a.logo { flex-shrink: 0 !important; width: auto !important; height: auto !important; margin: 0 !important; position: static !important; order: 0 !important; }',
+      'a.logo img { width: 80px !important; height: auto !important; }',
+      '#bj-header-icons { display: flex !important; align-items: center !important; gap: 16px !important; margin-left: auto !important; padding: 0 !important; list-style: none !important; flex-shrink: 0 !important; }',
+      '#bj-header-icons li { display: flex !important; align-items: center !important; padding: 0 !important; margin: 0 !important; }',
+      '#bj-header-icons img { width: 22px !important; height: 22px !important; }',
+      '',
+      '/* Category nav stays as-is */',
+      '.category__wrap { padding: 8px 12px !important; gap: 8px 16px !important; border-top: 1px solid #eee; }',
+    ].join('\n');
+    document.head.appendChild(mobileHeaderCSS);
   }
 
   // Replace LG구독 with LG 케어+ and 현대렌탈케어 with 현대큐밍
