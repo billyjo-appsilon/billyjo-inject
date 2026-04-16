@@ -597,6 +597,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Filter out rows without price numbers
         fil=fil.filter(function(r){return r.dp>0||r.fp>0});
+        // Remove duplicate rows (same t+p+c+pm+fp)
+        var seen={};fil=fil.filter(function(r){var key=r.t+'|'+r.p+'|'+r.c+'|'+r.pm+'|'+r.fp;if(seen[key])return false;seen[key]=true;return true;});
         if(!fil.length){document.getElementById('livePriceTable').classList.add('lpt-empty');return}
         document.getElementById('lptTitle').textContent=fil[0].mk;
 
