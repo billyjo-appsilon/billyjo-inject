@@ -472,7 +472,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var prodNameEl = document.querySelector('.prod_name b');
     var prodNameText = prodNameEl ? prodNameEl.textContent : '';
     var isJeongsugi = prodNameText.indexOf('정수기') !== -1;
-    if (!isJeongsugi) { /* skip price table for non-정수기 */ }
+    var isLGsub = false;
+    document.querySelectorAll('.month_box').forEach(function(mb) { if ((mb.getAttribute('data-supname')||'').indexOf('LG구독') !== -1) isLGsub = true; });
+    if (!isJeongsugi || isLGsub) { /* skip price table for non-정수기 or LG구독 */ }
     else {
     var modelEl = document.querySelector('.model_name small');
     if (modelEl) {
