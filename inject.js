@@ -453,6 +453,12 @@ document.addEventListener('DOMContentLoaded', function() {
   var carProdIds = ['2509','23613','2493','2337','9213','2345'];
   var isCarProd = carProdIds.some(function(id) { return location.pathname.indexOf('prod_view/' + id) !== -1; });
   if (location.pathname.indexOf('prod_view') !== -1 && !isCarProd) {
+    // Only show price table for 정수기 products
+    var prodNameEl = document.querySelector('.prod_name b');
+    var prodNameText = prodNameEl ? prodNameEl.textContent : '';
+    var isJeongsugi = prodNameText.indexOf('정수기') !== -1;
+    if (!isJeongsugi) { /* skip price table for non-정수기 */ }
+    else {
     var modelEl = document.querySelector('.model_name small');
     if (modelEl) {
       var fullModelText = modelEl.textContent.trim();
@@ -572,6 +578,8 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         }
 
+        // Filter out rows without price numbers
+        fil=fil.filter(function(r){return r.dp>0||r.fp>0});
         if(!fil.length){document.getElementById('livePriceTable').classList.add('lpt-empty');return}
         document.getElementById('lptTitle').textContent=fil[0].mk;
 
@@ -644,6 +652,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('livePriceTable').classList.add('lpt-empty');
       });
     }
+  } // end isJeongsugi
   }
 });
 
