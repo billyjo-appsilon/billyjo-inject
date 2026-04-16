@@ -450,6 +450,21 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // === Live Price Table (product detail pages only, skip 신차렌트 products) ===
+  // Reorder 인기 카테고리: 정수기, 공기청정기, 에어컨 first
+  var priorityOrder = ['정수기', '공기청정기', '에어컨'];
+  document.querySelectorAll('ul.new-mc__list').forEach(function(ul) {
+    var items = Array.from(ul.children);
+    var priority = [];
+    var rest = [];
+    priorityOrder.forEach(function(name) {
+      items.forEach(function(li) {
+        if (li.textContent.trim() === name && priority.indexOf(li) === -1) priority.push(li);
+      });
+    });
+    items.forEach(function(li) { if (priority.indexOf(li) === -1) rest.push(li); });
+    priority.concat(rest).forEach(function(li) { ul.appendChild(li); });
+  });
+
   var carProdIds = ['2509','23613','2493','2337','9213','2345'];
   var isCarProd = carProdIds.some(function(id) { return location.pathname.indexOf('prod_view/' + id) !== -1; });
   if (location.pathname.indexOf('prod_view') !== -1 && !isCarProd) {
