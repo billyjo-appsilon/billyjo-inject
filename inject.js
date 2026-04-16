@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '',
       '/* Category nav */',
       '.category__wrap { padding: 8px 12px !important; gap: 8px 16px !important; border-top: 1px solid #eee; }',
-    ].join('\\n');
+    ].join('\n');
     document.head.appendChild(mobileHeaderCSS);
   }
 
