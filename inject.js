@@ -34,25 +34,24 @@ if (location.pathname.indexOf('prod_list/7-') !== -1) {
 document.addEventListener('DOMContentLoaded', function() {
   // Mobile header redesign (ajd.co.kr style)
   if (window.innerWidth <= 768) {
-    // 1. Extract event banner from icon list and make it full-width top bar
     var iconList = document.querySelector('ul.inline_wrap.header_m_icon');
     var headerEl = document.querySelector('header');
     if (iconList && headerEl) {
+      // 1. Extract event banner link, create full-width top bar
       var eventLi = iconList.querySelector('li:first-child');
       var eventLink = eventLi ? eventLi.querySelector('a') : null;
       if (eventLink && eventLink.textContent.indexOf('이벤트') !== -1) {
-        // Create full-width banner
         var banner = document.createElement('div');
         banner.id = 'bj-top-banner';
         banner.innerHTML = '<a href="' + eventLink.href + '">' + eventLink.textContent.trim() + '</a>';
         headerEl.insertBefore(banner, headerEl.firstChild);
-        eventLi.style.display = 'none';
+        // Remove event LI entirely from DOM
+        eventLi.remove();
       }
 
-      // 2. Move search and cart icons next to hamburger row
+      // 2. Move remaining icons (search, cart) into header__top
       var headerTop = document.querySelector('.header__top');
       if (headerTop) {
-        // Move icon list into header__top for proper flex layout
         iconList.id = 'bj-header-icons';
         headerTop.appendChild(iconList);
       }
@@ -66,19 +65,19 @@ document.addEventListener('DOMContentLoaded', function() {
       '#bj-top-banner a { color: #fff; font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.3px; }',
       '',
       '/* Compact header row */',
-      'header .wide-inner { padding: 0 16px !important; margin: 0 !important; width: 100% !important; }',
-      '.header__top { display: flex !important; align-items: center !important; height: 50px !important; padding: 0 !important; gap: 0 !important; }',
-      '.gnb__hamburger { flex-shrink: 0 !important; width: auto !important; height: auto !important; display: flex !important; align-items: center !important; padding: 0 8px 0 0 !important; }',
+      'header .wide-inner { padding: 0 16px !important; margin: 0 !important; width: 100% !important; box-sizing: border-box !important; }',
+      '.header__top { display: flex !important; align-items: center !important; height: 50px !important; padding: 0 !important; gap: 0 !important; position: relative !important; }',
+      '.gnb__hamburger { position: static !important; flex-shrink: 0 !important; width: auto !important; height: auto !important; display: flex !important; align-items: center !important; padding: 0 12px 0 0 !important; float: none !important; }',
       '.gnb__hamburger img { width: 22px !important; height: auto !important; }',
-      'a.logo { flex-shrink: 0 !important; width: auto !important; height: auto !important; margin: 0 !important; position: static !important; order: 0 !important; }',
+      'a.logo { position: static !important; flex-shrink: 0 !important; width: auto !important; height: auto !important; margin: 0 !important; float: none !important; display: inline-block !important; }',
       'a.logo img { width: 80px !important; height: auto !important; }',
-      '#bj-header-icons { display: flex !important; align-items: center !important; gap: 16px !important; margin-left: auto !important; padding: 0 !important; list-style: none !important; flex-shrink: 0 !important; }',
+      '#bj-header-icons { position: static !important; display: flex !important; align-items: center !important; gap: 18px !important; margin-left: auto !important; padding: 0 !important; list-style: none !important; flex-shrink: 0 !important; float: none !important; }',
       '#bj-header-icons li { display: flex !important; align-items: center !important; padding: 0 !important; margin: 0 !important; }',
       '#bj-header-icons img { width: 22px !important; height: 22px !important; }',
       '',
-      '/* Category nav stays as-is */',
+      '/* Category nav */',
       '.category__wrap { padding: 8px 12px !important; gap: 8px 16px !important; border-top: 1px solid #eee; }',
-    ].join('\n');
+    ].join('\\n');
     document.head.appendChild(mobileHeaderCSS);
   }
 
