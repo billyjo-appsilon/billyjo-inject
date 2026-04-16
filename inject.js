@@ -75,15 +75,22 @@ document.addEventListener('DOMContentLoaded', function() {
       '#bj-header-icons li { display: flex !important; align-items: center !important; padding: 0 !important; margin: 0 !important; }',
       '#bj-header-icons img { width: 22px !important; height: 22px !important; }',
       '',
-      '/* Category nav - sticky */',
-      '.hide-default.show-768 { position: sticky !important; top: 0 !important; z-index: 999 !important; background: #fff !important; }',
+      '/* Category nav */',
       '.category__wrap { padding: 8px 12px !important; gap: 8px 16px !important; border-top: 1px solid #eee; }',
       '',
-      '/* Scroll states */',
-      'header.bj-scrolled #bj-top-banner { transform: translateY(-100%); opacity: 0; height: 0; padding: 0; overflow: hidden; }',
-      'header.bj-scrolled .wide-inner { transform: translateY(-100%); opacity: 0; height: 0; overflow: hidden; }',
+      '/* Fixed scroll bar (cloned) */',
+      '#bj-scroll-header { position: fixed !important; top: 0; left: 0; right: 0; z-index: 9998; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transform: translateY(-100%); transition: transform 0.3s ease; }',
+      '#bj-scroll-header.show { transform: translateY(0); }',
+      '#bj-scroll-header .bj-sh-logo { display: none; align-items: center; height: 50px; padding: 0 16px; position: relative; }',
+      '#bj-scroll-header.with-logo .bj-sh-logo { display: flex; }',
+      '#bj-scroll-header .bj-sh-logo .bj-sh-hamburger { width: 22px; height: auto; flex-shrink: 0; margin-right: 12px; }',
+      '#bj-scroll-header .bj-sh-logo .bj-sh-logo-img { position: absolute; left: 50%; transform: translateX(-50%); width: 80px; height: auto; }',
+      '#bj-scroll-header .bj-sh-logo .bj-sh-icons { display: flex; gap: 18px; margin-left: auto; }',
+      '#bj-scroll-header .bj-sh-logo .bj-sh-icons img { width: 22px; height: 22px; }',
+      '#bj-scroll-header .bj-sh-cat { display: flex; justify-content: center; gap: 8px 16px; flex-wrap: wrap; padding: 8px 12px; border-top: 1px solid #eee; }',
+      '#bj-scroll-header .bj-sh-cat a { font-size: 14px; color: #333; text-decoration: none; line-height: 1.5; }',
+      '#bj-scroll-header .bj-sh-cat a:hover { color: #0838f8; }',
       'header.bj-hide-banner #bj-top-banner { display: none !important; }',
-      'header.bj-show-logo .wide-inner { transform: none !important; opacity: 1 !important; height: auto !important; overflow: visible !important; }',
     ].join('\n');
     document.head.appendChild(mobileHeaderCSS);
 
@@ -91,13 +98,43 @@ document.addEventListener('DOMContentLoaded', function() {
     var hdr = document.querySelector('header');
     if (hdr) hdr.classList.add('bj-ready');
 
-    // 4. Scroll behavior
+    // 4. Build fixed scroll header (separate from original header)
+    var scrollHeader = document.createElement('div');
+    scrollHeader.id = 'bj-scroll-header';
+
+    // Logo row
+    var shLogo = document.createElement('div');
+    shLogo.className = 'bj-sh-logo';
+    shLogo.innerHTML = '<img class="bj-sh-hamburger" src="https://billyjo.kr/image/common/m_menu.png">'
+      + '<img class="bj-sh-logo-img" src="' + (document.querySelector('a.logo img') ? document.querySelector('a.logo img').src : '') + '">'
+      + '<div class="bj-sh-icons"><a href="javascript:void(0)"><img src="https://billyjo.kr/image/common/search_icon.png"></a><a href="/html/order/cart"><img src="https://billyjo.kr/image/common/cart_icon.png"></a></div>';
+    shLogo.querySelector('.bj-sh-hamburger').addEventListener('click', function() {
+      var orig = document.querySelector('.gnb__hamburger');
+      if (orig) orig.click();
+    });
+    scrollHeader.appendChild(shLogo);
+
+    // Category row (clone links from original)
+    var shCat = document.createElement('div');
+    shCat.className = 'bj-sh-cat';
+    var origCats = document.querySelectorAll('.category__wrap > a');
+    origCats.forEach(function(a) {
+      if (getComputedStyle(a).display !== 'none') {
+        var clone = document.createElement('a');
+        clone.href = a.href;
+        clone.textContent = a.textContent;
+        shCat.appendChild(clone);
+      }
+    });
+    scrollHeader.appendChild(shCat);
+    document.body.appendChild(scrollHeader);
+
+    // 5. Scroll behavior
     var isMainPage = location.pathname === '/' || location.pathname === '/index.php' || location.pathname === '';
     var lastScrollY = window.scrollY;
-    var scrollThreshold = 10;
+    var headerHeight = hdr.offsetHeight;
 
     if (!isMainPage) {
-      // Non-main pages: hide banner immediately
       hdr.classList.add('bj-hide-banner');
     }
 
@@ -106,26 +143,22 @@ document.addEventListener('DOMContentLoaded', function() {
       var delta = currentY - lastScrollY;
 
       if (isMainPage) {
-        // Main page: scroll down → hide banner+logo, keep category sticky
-        if (currentY > 88) {
-          hdr.classList.add('bj-scrolled');
+        // Main: scroll past header → show fixed category only
+        if (currentY > headerHeight) {
+          scrollHeader.classList.add('show');
+          scrollHeader.classList.remove('with-logo');
         } else {
-          hdr.classList.remove('bj-scrolled');
+          scrollHeader.classList.remove('show');
         }
       } else {
-        // Non-main: scroll down → hide all, scroll up → show logo+category
-        if (delta > scrollThreshold) {
-          // Scrolling down
-          hdr.classList.add('bj-scrolled');
-          hdr.classList.remove('bj-show-logo');
-        } else if (delta < -scrollThreshold) {
-          // Scrolling up
-          hdr.classList.add('bj-scrolled');
-          hdr.classList.add('bj-show-logo');
-        }
+        // Sub: scroll down → hide all, scroll up → show logo+category
         if (currentY <= 10) {
-          hdr.classList.remove('bj-scrolled');
-          hdr.classList.remove('bj-show-logo');
+          scrollHeader.classList.remove('show');
+        } else if (delta > 5) {
+          scrollHeader.classList.remove('show');
+        } else if (delta < -5) {
+          scrollHeader.classList.add('show');
+          scrollHeader.classList.add('with-logo');
         }
       }
       lastScrollY = currentY;
