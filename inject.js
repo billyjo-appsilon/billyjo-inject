@@ -91,6 +91,8 @@ document.addEventListener('DOMContentLoaded', function() {
       '#bj-scroll-header .bj-sh-cat a { font-size: 14px; color: #333; text-decoration: none; line-height: 1.5; }',
       '#bj-scroll-header .bj-sh-cat a:hover { color: #0838f8; }',
       'header.bj-hide-banner #bj-top-banner { display: none !important; }',
+      '/* Disable original site fix class on mobile */',
+      'header.fix { position: relative !important; top: auto !important; }',
     ].join('\n');
     document.head.appendChild(mobileHeaderCSS);
 
