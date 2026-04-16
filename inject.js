@@ -154,7 +154,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
       } else {
         // Sub: scroll down → hide all, scroll up → show logo+category
-        if (currentY <= 10) {
+        if (currentY <= headerHeight) {
           scrollHeader.classList.remove('show');
         } else if (delta > 5) {
           scrollHeader.classList.remove('show');
