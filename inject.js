@@ -61,11 +61,11 @@ document.addEventListener('DOMContentLoaded', function() {
     var mobileHeaderCSS = document.createElement('style');
     mobileHeaderCSS.textContent = [
       '/* Full-width event banner */',
-      '#bj-top-banner { background: #0838f8; text-align: center; padding: 8px 16px; }',
+      '#bj-top-banner { background: #0838f8; text-align: center; padding: 8px 16px; transition: transform 0.3s ease, opacity 0.3s ease; }',
       '#bj-top-banner a { color: #fff; font-size: 13px; font-weight: 700; text-decoration: none; letter-spacing: 0.3px; }',
       '',
       '/* Compact header row */',
-      'header .wide-inner { padding: 0 16px !important; margin: 0 !important; width: 100% !important; box-sizing: border-box !important; }',
+      'header .wide-inner { padding: 0 16px !important; margin: 0 !important; width: 100% !important; box-sizing: border-box !important; transition: transform 0.3s ease, opacity 0.3s ease; }',
       '.header__top { display: flex !important; align-items: center !important; height: 50px !important; padding: 0 !important; gap: 0 !important; position: relative !important; }',
       '.gnb__hamburger { position: static !important; flex-shrink: 0 !important; width: auto !important; height: auto !important; display: flex !important; align-items: center !important; padding: 0 12px 0 0 !important; float: none !important; }',
       '.gnb__hamburger img { width: 22px !important; height: auto !important; }',
@@ -75,14 +75,61 @@ document.addEventListener('DOMContentLoaded', function() {
       '#bj-header-icons li { display: flex !important; align-items: center !important; padding: 0 !important; margin: 0 !important; }',
       '#bj-header-icons img { width: 22px !important; height: 22px !important; }',
       '',
-      '/* Category nav */',
+      '/* Category nav - sticky */',
+      '.hide-default.show-768 { position: sticky !important; top: 0 !important; z-index: 999 !important; background: #fff !important; }',
       '.category__wrap { padding: 8px 12px !important; gap: 8px 16px !important; border-top: 1px solid #eee; }',
+      '',
+      '/* Scroll states */',
+      'header.bj-scrolled #bj-top-banner { transform: translateY(-100%); opacity: 0; height: 0; padding: 0; overflow: hidden; }',
+      'header.bj-scrolled .wide-inner { transform: translateY(-100%); opacity: 0; height: 0; overflow: hidden; }',
+      'header.bj-hide-banner #bj-top-banner { display: none !important; }',
+      'header.bj-show-logo .wide-inner { transform: none !important; opacity: 1 !important; height: auto !important; overflow: visible !important; }',
     ].join('\n');
     document.head.appendChild(mobileHeaderCSS);
 
     // Reveal header after redesign
     var hdr = document.querySelector('header');
     if (hdr) hdr.classList.add('bj-ready');
+
+    // 4. Scroll behavior
+    var isMainPage = location.pathname === '/' || location.pathname === '/index.php' || location.pathname === '';
+    var lastScrollY = window.scrollY;
+    var scrollThreshold = 10;
+
+    if (!isMainPage) {
+      // Non-main pages: hide banner immediately
+      hdr.classList.add('bj-hide-banner');
+    }
+
+    window.addEventListener('scroll', function() {
+      var currentY = window.scrollY;
+      var delta = currentY - lastScrollY;
+
+      if (isMainPage) {
+        // Main page: scroll down → hide banner+logo, keep category sticky
+        if (currentY > 88) {
+          hdr.classList.add('bj-scrolled');
+        } else {
+          hdr.classList.remove('bj-scrolled');
+        }
+      } else {
+        // Non-main: scroll down → hide all, scroll up → show logo+category
+        if (delta > scrollThreshold) {
+          // Scrolling down
+          hdr.classList.add('bj-scrolled');
+          hdr.classList.remove('bj-show-logo');
+        } else if (delta < -scrollThreshold) {
+          // Scrolling up
+          hdr.classList.add('bj-scrolled');
+          hdr.classList.add('bj-show-logo');
+        }
+        if (currentY <= 10) {
+          hdr.classList.remove('bj-scrolled');
+          hdr.classList.remove('bj-show-logo');
+        }
+      }
+      lastScrollY = currentY;
+    }, { passive: true });
   }
 
   // Replace LG구독 with LG 케어+ and 현대렌탈케어 with 현대큐밍
