@@ -180,6 +180,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  // Unhide product detail images (platform sets inline display:none)
+  document.querySelectorAll('.prod_view_detail img').forEach(function(img) {
+    if (img.style.display === 'none' && !img.src.includes('9353658f')) {
+      img.style.display = '';
+    }
+  });
+
   // Replace LG구독 with LG 케어+ and 현대렌탈케어 with 현대큐밍
   document.querySelectorAll('label').forEach(function(el) {
     el.childNodes.forEach(function(node) {
