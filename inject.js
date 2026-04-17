@@ -167,6 +167,19 @@ document.addEventListener('DOMContentLoaded', function() {
     }, { passive: true });
   }
 
+  // Populate search hashtags with popular keywords
+  var searchTags = document.querySelector('.tag.inline_wrap.col02');
+  if (searchTags) {
+    var keywords = ['정수기', '공기청정기', '에어컨', '비데', '냉장고', '세탁기'];
+    searchTags.innerHTML = '';
+    keywords.forEach(function(kw) {
+      var li = document.createElement('li');
+      li.textContent = '#' + kw;
+      li.onclick = function() { mobile_search_result(kw); };
+      searchTags.appendChild(li);
+    });
+  }
+
   // Replace LG구독 with LG 케어+ and 현대렌탈케어 with 현대큐밍
   document.querySelectorAll('label').forEach(function(el) {
     el.childNodes.forEach(function(node) {
