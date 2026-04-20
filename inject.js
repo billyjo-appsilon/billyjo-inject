@@ -209,7 +209,7 @@ document.addEventListener('DOMContentLoaded', function() {
       rightGroup.style.cssText = 'display:flex;align-items:flex-end;gap:24px;flex-shrink:0;white-space:nowrap;margin-left:auto;';
       var gnbRight = dTopRight.querySelector('.gnb__right');
       if (gnbRight) {
-        gnbRight.style.cssText = 'display:flex !important;align-items:center !important;gap:20px !important;position:relative !important;top:4px !important;';
+        gnbRight.style.cssText = 'display:flex !important;align-items:center !important;gap:20px !important;position:relative !important;top:8px !important;';
         // Hide event button inside gnb__right
         gnbRight.querySelectorAll('a.right__event').forEach(function(a) {
           if (a.textContent.includes('이벤트')) a.style.display = 'none';
