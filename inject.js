@@ -204,16 +204,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
       dRow.appendChild(leftGroup);
 
-      // Right group: extract individual links + search, align baseline
+      // Right group: move .gnb__right (고객센터+장바구니) + search
       var rightGroup = document.createElement('div');
-      rightGroup.style.cssText = 'display:flex;align-items:baseline;gap:24px;flex-shrink:0;white-space:nowrap;margin-left:auto;';
-      dTopRight.querySelectorAll('a').forEach(function(a) {
-        var t = a.textContent.trim();
-        if (t.includes('고객센터') || t.includes('장바구니')) {
-          a.style.cssText += 'font-size:15px !important;line-height:1 !important;padding-bottom:4px !important;';
-          rightGroup.appendChild(a);
-        }
-      });
+      rightGroup.style.cssText = 'display:flex;align-items:flex-end;gap:24px;flex-shrink:0;white-space:nowrap;margin-left:auto;padding-bottom:4px;';
+      var gnbRight = dTopRight.querySelector('.gnb__right');
+      if (gnbRight) {
+        gnbRight.style.cssText = 'display:flex !important;align-items:center !important;gap:20px !important;';
+        // Hide event button inside gnb__right
+        gnbRight.querySelectorAll('a.right__event').forEach(function(a) {
+          if (a.textContent.includes('이벤트')) a.style.display = 'none';
+        });
+        rightGroup.appendChild(gnbRight);
+      }
       var dSearchWrap = dTopRight.querySelector('.search__wrap');
       if (dSearchWrap) rightGroup.appendChild(dSearchWrap);
       dTopRight.style.display = 'none';
