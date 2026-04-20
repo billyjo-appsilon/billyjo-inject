@@ -167,11 +167,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }, { passive: true });
   }
 
-  // Desktop search box style (line → bordered box)
-  var pcSearchCSS = document.createElement('style');
-  pcSearchCSS.textContent = '@media (min-width: 769px) { .search__wrap { border: 1px solid #ccc !important; border-radius: 4px !important; padding: 6px 12px !important; display: flex !important; align-items: center !important; } .search__wrap input[name="search_value"] { border: none !important; outline: none !important; background: transparent !important; } }';
-  document.head.appendChild(pcSearchCSS);
-
   // Desktop header redesign: single row [Logo | Categories | Utils + Search]
   if (window.innerWidth > 768) {
     var dHeader = document.querySelector('header.new-header');
@@ -191,20 +186,26 @@ document.addEventListener('DOMContentLoaded', function() {
       var dRow = document.createElement('div');
       dRow.style.cssText = 'display:flex;align-items:center;padding:14px 40px;width:100%;max-width:1500px;margin:0 auto;box-sizing:border-box;';
 
-      // Move logo (smaller)
-      dLogo.style.cssText += 'margin:0 !important;float:none !important;';
+      // Left group: logo + categories
+      var leftGroup = document.createElement('div');
+      leftGroup.style.cssText = 'display:flex;align-items:center;flex:1;min-width:0;';
+
+      // Move logo
+      dLogo.style.cssText += 'margin:0 30px 0 0 !important;float:none !important;flex-shrink:0 !important;';
       var logoImg = dLogo.querySelector('img');
       if (logoImg) logoImg.style.cssText = 'height:36px !important;width:auto !important;';
-      dRow.appendChild(dLogo);
+      leftGroup.appendChild(dLogo);
 
-      // Move categories (flex:1, centered)
-      dGnbWrap.style.cssText = 'flex:1 !important;height:auto !important;border:none !important;background:none !important;';
+      // Move categories next to logo
+      dGnbWrap.style.cssText = 'height:auto !important;border:none !important;background:none !important;flex-shrink:0 !important;';
       var dGnb = dGnbWrap.querySelector('ul.new-gnb');
-      if (dGnb) dGnb.style.cssText += 'justify-content:center !important;gap:10px !important;padding:0 20px !important;';
-      dRow.appendChild(dGnbWrap);
+      if (dGnb) dGnb.style.cssText += 'justify-content:flex-start !important;gap:8px !important;padding:0 !important;';
+      leftGroup.appendChild(dGnbWrap);
 
-      // Move right utils (search, 고객센터, 장바구니)
-      dTopRight.style.cssText = 'display:flex !important;align-items:center !important;gap:20px !important;flex-shrink:0 !important;white-space:nowrap !important;';
+      dRow.appendChild(leftGroup);
+
+      // Right group: 고객센터 + 장바구니 + Search
+      dTopRight.style.cssText = 'display:flex !important;align-items:center !important;gap:20px !important;flex-shrink:0 !important;white-space:nowrap !important;margin-left:auto !important;';
       dRow.appendChild(dTopRight);
 
       // Hide original wide-inner, insert new row
