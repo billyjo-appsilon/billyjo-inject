@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Create single-row flex container
       var dRow = document.createElement('div');
-      dRow.style.cssText = 'display:flex;align-items:flex-end;padding:20px 40px 16px;width:100%;max-width:1500px;margin:0 auto;box-sizing:border-box;';
+      dRow.style.cssText = 'display:flex;align-items:flex-end;padding:28px 40px 22px;width:100%;max-width:1500px;margin:0 auto;box-sizing:border-box;';
 
       // Left group: logo + categories
       var leftGroup = document.createElement('div');
@@ -211,9 +211,9 @@ document.addEventListener('DOMContentLoaded', function() {
       if (dSearchWrap) dTopRight.appendChild(dSearchWrap);
       dRow.appendChild(dTopRight);
 
-      // Search underline style (no box border)
+      // Search underline + right utils baseline align
       var dSearchStyle = document.createElement('style');
-      dSearchStyle.textContent = '@media(min-width:769px){.search__wrap{border:none !important;border-bottom:1px solid #333 !important;border-radius:0 !important;padding:0 !important;}.search__wrap input[name="search_value"]{border:none !important;outline:none !important;}}';
+      dSearchStyle.textContent = '@media(min-width:769px){.search__wrap{border:none !important;border-bottom:1px solid #333 !important;border-radius:0 !important;padding:0 !important;}.search__wrap input[name="search_value"]{border:none !important;outline:none !important;}.top__right a,.top__right span,.top__right .cart__count{vertical-align:baseline !important;line-height:1 !important;padding-bottom:0 !important;margin-bottom:0 !important;}}';
       document.head.appendChild(dSearchStyle);
 
       // Hide original wide-inner, insert new row
