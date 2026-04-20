@@ -204,9 +204,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
       dRow.appendChild(leftGroup);
 
-      // Right group: 고객센터 + 장바구니 + Search
+      // Right group: 고객센터 + 장바구니 + Search (reorder so search is last)
       dTopRight.style.cssText = 'display:flex !important;align-items:center !important;gap:20px !important;flex-shrink:0 !important;white-space:nowrap !important;margin-left:auto !important;';
+      // Move search to the end of top__right
+      var dSearchWrap = dTopRight.querySelector('.search__wrap');
+      if (dSearchWrap) dTopRight.appendChild(dSearchWrap);
       dRow.appendChild(dTopRight);
+
+      // Search underline style (no box border)
+      var dSearchStyle = document.createElement('style');
+      dSearchStyle.textContent = '@media(min-width:769px){.search__wrap{border:none !important;border-bottom:1px solid #333 !important;border-radius:0 !important;padding:0 !important;}.search__wrap input[name="search_value"]{border:none !important;outline:none !important;}}';
+      document.head.appendChild(dSearchStyle);
 
       // Hide original wide-inner, insert new row
       if (dWideInner) dWideInner.style.display = 'none';
