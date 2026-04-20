@@ -183,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Unhide product detail images (platform sets inline display:none)
   function unhideDetailImages() {
     document.querySelectorAll('.prod_view_detail img').forEach(function(img) {
-      if (img.style.display === 'none' && !img.src.includes('9353658f') && !img.src.includes('3192f27b6a6a5731b45fa17f3f4f0885_1002')) {
+      if (img.style.display === 'none' && !img.src.includes('9353658f') && !(img.src.includes('3192f27b') && img.src.match(/\.png/i))) {
         img.style.display = '';
       }
     });
