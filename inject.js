@@ -204,16 +204,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
       dRow.appendChild(leftGroup);
 
-      // Right group: 고객센터 + 장바구니 + Search (reorder so search is last)
-      dTopRight.style.cssText = 'display:flex !important;align-items:flex-end !important;gap:24px !important;flex-shrink:0 !important;white-space:nowrap !important;margin-left:auto !important;';
-      // Move search to the end of top__right
+      // Right group: extract individual links + search, align baseline
+      var rightGroup = document.createElement('div');
+      rightGroup.style.cssText = 'display:flex;align-items:baseline;gap:24px;flex-shrink:0;white-space:nowrap;margin-left:auto;';
+      dTopRight.querySelectorAll('a').forEach(function(a) {
+        var t = a.textContent.trim();
+        if (t.includes('고객센터') || t.includes('장바구니')) {
+          a.style.cssText += 'font-size:15px !important;line-height:1 !important;';
+          rightGroup.appendChild(a);
+        }
+      });
       var dSearchWrap = dTopRight.querySelector('.search__wrap');
-      if (dSearchWrap) dTopRight.appendChild(dSearchWrap);
-      dRow.appendChild(dTopRight);
+      if (dSearchWrap) rightGroup.appendChild(dSearchWrap);
+      dTopRight.style.display = 'none';
+      dRow.appendChild(rightGroup);
 
       // Search underline + right utils baseline align
       var dSearchStyle = document.createElement('style');
-      dSearchStyle.textContent = '@media(min-width:769px){.search__wrap{border:none !important;border-bottom:1px solid #333 !important;border-radius:0 !important;padding:0 !important;}.search__wrap input[name="search_value"]{border:none !important;outline:none !important;}.top__right>a,.top__right>div>a,.top__right .right__link>a{font-size:15px !important;line-height:25.05px !important;}}';
+      dSearchStyle.textContent = '@media(min-width:769px){.search__wrap{border:none !important;border-bottom:1px solid #333 !important;border-radius:0 !important;padding:0 !important;}.search__wrap input[name="search_value"]{border:none !important;outline:none !important;}}';
       document.head.appendChild(dSearchStyle);
 
       // Hide original wide-inner, insert new row
