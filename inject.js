@@ -232,6 +232,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
 
+  // Hide sidebar nav dots for hidden categories
+  var hiddenCats = ['업소용·창업', '건강·뷰티', '가구·침구', '신차렌트', '상조+가전'];
+  document.querySelectorAll('ul.nav li').forEach(function(li) {
+    var txt = li.querySelector('.txt');
+    if (txt && hiddenCats.indexOf(txt.textContent.trim()) !== -1) {
+      li.style.display = 'none';
+    }
+  });
+
   // Populate search hashtags with popular keywords
   var searchTags = document.querySelector('.tag.inline_wrap.col02');
   if (searchTags) {
