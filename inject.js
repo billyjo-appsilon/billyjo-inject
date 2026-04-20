@@ -184,11 +184,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Create single-row flex container
       var dRow = document.createElement('div');
-      dRow.style.cssText = 'display:flex;align-items:center;padding:14px 40px;width:100%;max-width:1500px;margin:0 auto;box-sizing:border-box;';
+      dRow.style.cssText = 'display:flex;align-items:flex-end;padding:20px 40px 16px;width:100%;max-width:1500px;margin:0 auto;box-sizing:border-box;';
 
       // Left group: logo + categories
       var leftGroup = document.createElement('div');
-      leftGroup.style.cssText = 'display:flex;align-items:center;flex:1;min-width:0;';
+      leftGroup.style.cssText = 'display:flex;align-items:flex-end;flex:1;min-width:0;';
 
       // Move logo
       dLogo.style.cssText += 'margin:0 30px 0 0 !important;float:none !important;flex-shrink:0 !important;';
@@ -205,7 +205,7 @@ document.addEventListener('DOMContentLoaded', function() {
       dRow.appendChild(leftGroup);
 
       // Right group: 고객센터 + 장바구니 + Search (reorder so search is last)
-      dTopRight.style.cssText = 'display:flex !important;align-items:center !important;gap:20px !important;flex-shrink:0 !important;white-space:nowrap !important;margin-left:auto !important;';
+      dTopRight.style.cssText = 'display:flex !important;align-items:flex-end !important;gap:24px !important;flex-shrink:0 !important;white-space:nowrap !important;margin-left:auto !important;';
       // Move search to the end of top__right
       var dSearchWrap = dTopRight.querySelector('.search__wrap');
       if (dSearchWrap) dTopRight.appendChild(dSearchWrap);
