@@ -167,6 +167,47 @@ document.addEventListener('DOMContentLoaded', function() {
     }, { passive: true });
   }
 
+  // Desktop header redesign: single row [Logo | Categories | Utils + Search]
+  if (window.innerWidth > 768) {
+    var dHeader = document.querySelector('header.new-header');
+    var dLogo = document.querySelector('a.logo');
+    var dGnbWrap = document.querySelector('.new-gnb__wrap');
+    var dTopRight = document.querySelector('.top__right');
+    var dWideInner = dHeader ? dHeader.querySelector('.wide-inner') : null;
+
+    if (dHeader && dLogo && dGnbWrap && dTopRight) {
+      // Hide phone number and event button
+      var phoneEl = document.querySelector('.top__info');
+      if (phoneEl) phoneEl.style.display = 'none';
+      var eventBtn = dTopRight.querySelector('a[href*="display"]');
+      if (eventBtn) eventBtn.style.display = 'none';
+
+      // Create single-row flex container
+      var dRow = document.createElement('div');
+      dRow.style.cssText = 'display:flex;align-items:center;padding:14px 40px;width:100%;max-width:1500px;margin:0 auto;box-sizing:border-box;';
+
+      // Move logo (smaller)
+      dLogo.style.cssText += 'margin:0 !important;float:none !important;';
+      var logoImg = dLogo.querySelector('img');
+      if (logoImg) logoImg.style.cssText = 'height:36px !important;width:auto !important;';
+      dRow.appendChild(dLogo);
+
+      // Move categories (flex:1, centered)
+      dGnbWrap.style.cssText = 'flex:1 !important;height:auto !important;border:none !important;background:none !important;';
+      var dGnb = dGnbWrap.querySelector('ul.new-gnb');
+      if (dGnb) dGnb.style.cssText += 'justify-content:center !important;gap:10px !important;padding:0 20px !important;';
+      dRow.appendChild(dGnbWrap);
+
+      // Move right utils (search, 고객센터, 장바구니)
+      dTopRight.style.cssText = 'display:flex !important;align-items:center !important;gap:20px !important;flex-shrink:0 !important;white-space:nowrap !important;';
+      dRow.appendChild(dTopRight);
+
+      // Hide original wide-inner, insert new row
+      if (dWideInner) dWideInner.style.display = 'none';
+      dHeader.insertBefore(dRow, dHeader.firstChild);
+    }
+  }
+
   // Populate search hashtags with popular keywords
   var searchTags = document.querySelector('.tag.inline_wrap.col02');
   if (searchTags) {
