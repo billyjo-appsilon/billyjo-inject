@@ -167,6 +167,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }, { passive: true });
   }
 
+  // Desktop search box style (line → bordered box)
+  var pcSearchCSS = document.createElement('style');
+  pcSearchCSS.textContent = '@media (min-width: 769px) { .search__wrap { border: 1px solid #ccc !important; border-radius: 4px !important; padding: 6px 12px !important; display: flex !important; align-items: center !important; } .search__wrap input[name="search_value"] { border: none !important; outline: none !important; background: transparent !important; } }';
+  document.head.appendChild(pcSearchCSS);
+
   // Desktop header redesign: single row [Logo | Categories | Utils + Search]
   if (window.innerWidth > 768) {
     var dHeader = document.querySelector('header.new-header');
