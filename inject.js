@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Search underline + right utils baseline align
       var dSearchStyle = document.createElement('style');
-      dSearchStyle.textContent = '@media(min-width:769px){.search__wrap{border:none !important;border-bottom:1px solid #333 !important;border-radius:0 !important;padding:0 !important;}.search__wrap input[name="search_value"]{border:none !important;outline:none !important;}.top__right a,.top__right span,.top__right .cart__count{vertical-align:baseline !important;line-height:1 !important;padding-bottom:0 !important;margin-bottom:0 !important;}}';
+      dSearchStyle.textContent = '@media(min-width:769px){.search__wrap{border:none !important;border-bottom:1px solid #333 !important;border-radius:0 !important;padding:0 !important;}.search__wrap input[name="search_value"]{border:none !important;outline:none !important;}.top__right>a,.top__right>div>a,.top__right .right__link>a{font-size:15px !important;line-height:25.05px !important;}}';
       document.head.appendChild(dSearchStyle);
 
       // Hide original wide-inner, insert new row
