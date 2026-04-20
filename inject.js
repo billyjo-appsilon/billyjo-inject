@@ -210,7 +210,7 @@ document.addEventListener('DOMContentLoaded', function() {
       dTopRight.querySelectorAll('a').forEach(function(a) {
         var t = a.textContent.trim();
         if (t.includes('고객센터') || t.includes('장바구니')) {
-          a.style.cssText += 'font-size:15px !important;line-height:1 !important;';
+          a.style.cssText += 'font-size:15px !important;line-height:1 !important;padding-bottom:4px !important;';
           rightGroup.appendChild(a);
         }
       });
