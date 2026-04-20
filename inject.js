@@ -206,10 +206,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Right group: move .gnb__right (고객센터+장바구니) + search
       var rightGroup = document.createElement('div');
-      rightGroup.style.cssText = 'display:flex;align-items:flex-end;gap:24px;flex-shrink:0;white-space:nowrap;margin-left:auto;padding-bottom:12px;';
+      rightGroup.style.cssText = 'display:flex;align-items:flex-end;gap:24px;flex-shrink:0;white-space:nowrap;margin-left:auto;';
       var gnbRight = dTopRight.querySelector('.gnb__right');
       if (gnbRight) {
-        gnbRight.style.cssText = 'display:flex !important;align-items:center !important;gap:20px !important;';
+        gnbRight.style.cssText = 'display:flex !important;align-items:center !important;gap:20px !important;position:relative !important;top:4px !important;';
         // Hide event button inside gnb__right
         gnbRight.querySelectorAll('a.right__event').forEach(function(a) {
           if (a.textContent.includes('이벤트')) a.style.display = 'none';
