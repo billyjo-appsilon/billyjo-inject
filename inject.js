@@ -44,12 +44,12 @@ if (location.pathname.indexOf('prod_list/7-') !== -1) {
   var slug = BANNER_BY_ID[m[1]];
   var imgUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/images/internet/' + slug + '.png';
 
-  // CSS to style the injected banner consistently + hide existing long carrier banner
+  // CSS — match blue banner (49d) wrap pattern: 1100px wide, 30px top padding
   var bannerCss = document.createElement('style');
   bannerCss.id = 'bj-internet-banner-css';
   bannerCss.textContent =
-    '.bj-internet-banner { display: block !important; width: 100% !important; max-width: 1100px !important; margin: 0 auto 24px !important; height: auto !important; border-radius: 0 !important; }' +
-    '.bj-internet-banner-wrap { width: 100% !important; max-width: 1100px !important; margin: 0 auto !important; padding: 0 !important; }' +
+    '.bj-internet-banner { display: block !important; width: 1100px !important; max-width: 100% !important; margin: 0 auto !important; height: auto !important; border-radius: 0 !important; }' +
+    '.bj-internet-banner-wrap { padding: 30px 0 0 !important; margin: 0 !important; }' +
     /* 기존 통신사 비교 배너(3192f27b... 11321.jpg / 1141.png)만 숨김.
        49d... 파란 "다양한 렌탈사 보유" 배너는 같은 .img_wrap 컨테이너에
        있으므로 wrap 통째로 숨기지 말고 img만 숨겨야 함. */
@@ -60,15 +60,26 @@ if (location.pathname.indexOf('prod_list/7-') !== -1) {
     var detail = document.querySelector('.prod_view_detail');
     if (!detail) return false;
     if (detail.querySelector('.bj-internet-banner')) return true;
+
+    // Match the platform's .img_wrap pattern so 49d 파란 배너와 동일한 박스 스타일.
     var wrap = document.createElement('div');
-    wrap.className = 'bj-internet-banner-wrap';
+    wrap.className = 'img_wrap bj-internet-banner-wrap';
     var img = document.createElement('img');
     img.src = imgUrl;
     img.alt = slug + ' 인터넷 요금 안내';
     img.className = 'bj-internet-banner';
     img.loading = 'eager';
     wrap.appendChild(img);
-    detail.insertBefore(wrap, detail.firstChild);
+
+    // Insert AFTER the 49d (파란 "다양한 렌탈사 보유") img_wrap so blue stays on top.
+    var blueImg = detail.querySelector('img[src*="49d1341011fb32fe0a14390db9314d35"]');
+    var blueWrap = blueImg ? blueImg.closest('.img_wrap') : null;
+    if (blueWrap && blueWrap.parentNode === detail) {
+      blueWrap.parentNode.insertBefore(wrap, blueWrap.nextSibling);
+    } else {
+      // Fallback: append to end of detail
+      detail.appendChild(wrap);
+    }
     return true;
   }
   if (document.readyState === 'loading') {
