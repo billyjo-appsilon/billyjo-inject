@@ -31,6 +31,39 @@ if (location.pathname.indexOf('prod_list/7-') !== -1) {
   hideStyle.textContent = '.prod_list { opacity: 0 !important; transition: opacity 0.3s; }';
   document.head.appendChild(hideStyle);
 }
+// === 인터넷 카테고리 (6-1198): 1G WiFi 단독 3종(KT/LGU/SK)만 표시 ===
+if (location.pathname.indexOf('prod_list/6-1198') !== -1) {
+  // 31628 KT 1G 단독, 31617 LGU 기가1G WiFi, 31624 SK 1G WiFi
+  var INTERNET_KEEP = ['31628','31617','31624'];
+  var bjInternetHide = document.createElement('style');
+  bjInternetHide.id = 'bj-internet-hide';
+  bjInternetHide.textContent = '.prod_list .item.bj-internet-hide { display: none !important; }';
+  document.head.appendChild(bjInternetHide);
+  function bjMarkInternetItems() {
+    var items = document.querySelectorAll('.prod_list .item');
+    items.forEach(function(item) {
+      var link = item.querySelector('a[href*="prod_view"]');
+      if (!link) return;
+      var m = (link.getAttribute('href') || '').match(/prod_view\/(\d+)/);
+      if (!m) return;
+      if (INTERNET_KEEP.indexOf(m[1]) === -1) {
+        item.classList.add('bj-internet-hide');
+      } else {
+        item.classList.remove('bj-internet-hide');
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', bjMarkInternetItems);
+  } else {
+    bjMarkInternetItems();
+  }
+  var bjInternetTries = 0;
+  var bjInternetInterval = setInterval(function() {
+    bjMarkInternetItems();
+    if (++bjInternetTries >= 10) clearInterval(bjInternetInterval);
+  }, 400);
+}
 document.addEventListener('DOMContentLoaded', function() {
   // Mobile header redesign (ajd.co.kr style)
   if (window.innerWidth <= 768) {
