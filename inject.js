@@ -50,10 +50,10 @@ if (location.pathname.indexOf('prod_list/7-') !== -1) {
   bannerCss.textContent =
     '.bj-internet-banner { display: block !important; width: 100% !important; max-width: 1100px !important; margin: 0 auto 24px !important; height: auto !important; border-radius: 0 !important; }' +
     '.bj-internet-banner-wrap { width: 100% !important; max-width: 1100px !important; margin: 0 auto !important; padding: 0 !important; }' +
-    /* 기존 통신사 비교 배너(3192f27b... 11321.jpg / 1141.png) 숨김 */
-    '.prod_view_detail img[src*="3192f27b"] { display: none !important; }' +
-    '.prod_view_detail .img_wrap:has(> img[src*="3192f27b"]),' +
-    '.prod_view_detail .img_wrap:has(img[src*="3192f27b"]) { display: none !important; }';
+    /* 기존 통신사 비교 배너(3192f27b... 11321.jpg / 1141.png)만 숨김.
+       49d... 파란 "다양한 렌탈사 보유" 배너는 같은 .img_wrap 컨테이너에
+       있으므로 wrap 통째로 숨기지 말고 img만 숨겨야 함. */
+    '.prod_view_detail img[src*="3192f27b"] { display: none !important; }';
   document.head.appendChild(bannerCss);
 
   function injectBanner() {
