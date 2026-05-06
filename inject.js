@@ -31,6 +31,53 @@ if (location.pathname.indexOf('prod_list/7-') !== -1) {
   hideStyle.textContent = '.prod_list { opacity: 0 !important; transition: opacity 0.3s; }';
   document.head.appendChild(hideStyle);
 }
+// === 인터넷 상품 detail: 통신사별 디자인 배너 prepend ===
+// 31628 KT 1G 단독 / 31617 LGU 기가1G WiFi / 31624 SK 1G WiFi
+(function injectInternetCarrierBanner() {
+  var BANNER_BY_ID = {
+    '31628': 'kt',
+    '31617': 'lguplus',
+    '31624': 'sk'
+  };
+  var m = location.pathname.match(/prod_view\/(\d+)/);
+  if (!m || !BANNER_BY_ID[m[1]]) return;
+  var slug = BANNER_BY_ID[m[1]];
+  var imgUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/images/internet/' + slug + '.png';
+
+  // CSS to style the injected banner consistently
+  var bannerCss = document.createElement('style');
+  bannerCss.id = 'bj-internet-banner-css';
+  bannerCss.textContent =
+    '.bj-internet-banner { display: block !important; width: 100% !important; max-width: 1100px !important; margin: 0 auto 24px !important; height: auto !important; border-radius: 0 !important; }' +
+    '.bj-internet-banner-wrap { width: 100% !important; max-width: 1100px !important; margin: 0 auto !important; padding: 0 !important; }';
+  document.head.appendChild(bannerCss);
+
+  function injectBanner() {
+    var detail = document.querySelector('.prod_view_detail');
+    if (!detail) return false;
+    if (detail.querySelector('.bj-internet-banner')) return true;
+    var wrap = document.createElement('div');
+    wrap.className = 'bj-internet-banner-wrap';
+    var img = document.createElement('img');
+    img.src = imgUrl;
+    img.alt = slug + ' 인터넷 요금 안내';
+    img.className = 'bj-internet-banner';
+    img.loading = 'eager';
+    wrap.appendChild(img);
+    detail.insertBefore(wrap, detail.firstChild);
+    return true;
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', injectBanner);
+  } else {
+    injectBanner();
+  }
+  var bjBannerTries = 0;
+  var bjBannerInterval = setInterval(function() {
+    if (injectBanner() || ++bjBannerTries >= 12) clearInterval(bjBannerInterval);
+  }, 400);
+})();
+
 // === 인터넷 카테고리 (6-1198): 1G WiFi 단독 3종(KT/LGU/SK)만 표시 ===
 if (location.pathname.indexOf('prod_list/6-1198') !== -1) {
   // 31628 KT 1G 단독, 31617 LGU 기가1G WiFi, 31624 SK 1G WiFi
