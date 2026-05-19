@@ -1124,4 +1124,30 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   }, 400);
 })();
 
+// Hide 전원방식/규격 spec rows on prod_view/1791
+(function() {
+  if (location.pathname.indexOf('prod_view/1791') === -1) return;
+  var HIDE_LABELS = ['전원방식', '규격'];
+  function hideRows() {
+    var rows = document.querySelectorAll('.prod_table tr');
+    rows.forEach(function(tr) {
+      var th = tr.querySelector('th');
+      if (!th) return;
+      if (HIDE_LABELS.indexOf(th.textContent.trim()) !== -1) {
+        tr.style.display = 'none';
+      }
+    });
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hideRows);
+  } else {
+    hideRows();
+  }
+  var tries = 0;
+  var iv = setInterval(function() {
+    hideRows();
+    if (++tries >= 8) clearInterval(iv);
+  }, 400);
+})();
+
 })();
