@@ -1150,4 +1150,115 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   }, 400);
 })();
 
+// === 메인 페이지: 주요 카테고리 ↔ 이달의 추천제품 사이 v5 컨텐츠 주입 ===
+(function injectMainPageV5() {
+  var V5_URL = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/preview-detail-page-v5.html';
+  var CDN_BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main';
+  var INJECTED_ID = 'bj-v5-injected';
+
+  function findTargetHeading() {
+    var nodes = document.querySelectorAll('h2');
+    for (var i = 0; i < nodes.length; i++) {
+      if ((nodes[i].textContent || '').indexOf('이달의 추천제품') !== -1) return nodes[i];
+    }
+    return null;
+  }
+
+  function isInjected() { return !!document.getElementById(INJECTED_ID); }
+
+  function wrapZones(pageEl) {
+    var children = Array.prototype.slice.call(pageEl.children);
+    var groups = [];
+    var i = 0;
+    while (i < children.length) {
+      var child = children[i];
+      if (child.classList && child.classList.contains('pill-wrap')) {
+        var start = i, end = i + 1;
+        while (end < children.length) {
+          var next = children[end], cls = next.classList;
+          if (cls && (cls.contains('pill-wrap') || cls.contains('section-divider'))) break;
+          end++;
+        }
+        groups.push([start, end]);
+        i = end;
+      } else { i++; }
+    }
+    var colors = ['zone-sky', 'zone-white'];
+    for (var g = groups.length - 1; g >= 0; g--) {
+      var zone = document.createElement('div');
+      zone.className = 'zone ' + colors[g % 2];
+      pageEl.insertBefore(zone, children[groups[g][0]]);
+      for (var k = groups[g][0]; k < groups[g][1]; k++) zone.appendChild(children[k]);
+    }
+  }
+
+  function injectContent(html) {
+    if (isInjected()) return;
+    var target = findTargetHeading();
+    if (!target) return;
+    try {
+      var doc = new DOMParser().parseFromString(html, 'text/html');
+      var v5Style = doc.querySelector('style');
+      var v5Sprite = doc.querySelector('body > svg[aria-hidden="true"]');
+      var v5Page = doc.querySelector('.page');
+
+      if (v5Style && !document.getElementById('bj-v5-css')) {
+        var s = document.createElement('style');
+        s.id = 'bj-v5-css';
+        s.textContent = v5Style.textContent.replace(
+          /url\((['"]?)\.\/images\//g,
+          "url($1" + CDN_BASE + "/images/"
+        );
+        document.head.appendChild(s);
+      }
+      if (v5Sprite && !document.getElementById('bj-v5-sprite')) {
+        var sprite = v5Sprite.cloneNode(true);
+        sprite.id = 'bj-v5-sprite';
+        document.body.appendChild(sprite);
+      }
+      if (!v5Page) return;
+
+      // 이미지 src를 CDN 절대 경로로
+      var imgs = v5Page.querySelectorAll('img');
+      for (var ii = 0; ii < imgs.length; ii++) {
+        var src = imgs[ii].getAttribute('src');
+        if (src && src.indexOf('./images/') === 0) {
+          imgs[ii].setAttribute('src', CDN_BASE + '/' + src.substring(2));
+        }
+      }
+      var toneBanner = v5Page.querySelector('.tone-banner');
+      if (toneBanner) toneBanner.parentNode.removeChild(toneBanner);
+
+      var pageEl = v5Page.cloneNode(true);
+      pageEl.id = INJECTED_ID;
+      target.parentNode.insertBefore(pageEl, target);
+      wrapZones(pageEl);
+    } catch (e) { console.error('[bj-v5] inject failed:', e); }
+  }
+
+  function start() {
+    if (isInjected()) return;
+    fetch(V5_URL)
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+      .then(function(html) {
+        if (findTargetHeading()) { injectContent(html); return; }
+        var observer = new MutationObserver(function() {
+          if (findTargetHeading() && !isInjected()) {
+            observer.disconnect();
+            injectContent(html);
+          }
+        });
+        observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
+        setTimeout(function() { observer.disconnect(); }, 15000);
+      })
+      .catch(function(err) { console.error('[bj-v5] fetch failed:', err); });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+
 })();

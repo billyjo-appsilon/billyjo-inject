@@ -1,0 +1,1478 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>빌리조 상세페이지 v5 — 10개 항목 반영 + 실로고 통합</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<style>
+  :root {
+    --bg: #EAEEFB;
+    --bg-soft: #F4F6FC;
+    --card: #FFFFFF;
+    --primary: #0838F8;
+    --primary-soft: #4A6BFA;
+    --primary-pale: #EEF2FF;
+    --text: #1A1F36;
+    --text-sub: #475569;
+    --text-mute: #94A3B8;
+    --accent: #FF5A36;
+    --accent-pale: #FFF1EC;
+    --line: #E5E9F2;
+    --good: #16A34A;
+    --warn-bg: #FFFBEA;
+    --shadow-sm: 0 2px 8px rgba(20,30,80,0.05);
+    --shadow-md: 0 6px 18px rgba(20,30,80,0.07);
+    --shadow-lg: 0 12px 32px rgba(8,56,248,0.16);
+    --container: 1000px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--bg); }
+  body {
+    font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    color: var(--text);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "tnum" 1;
+  }
+  .page {
+    max-width: var(--container);
+    margin: 0 auto;
+    background: var(--bg);
+    padding: 0 30px 160px;
+    position: relative;
+  }
+
+  .tone-banner {
+    position: sticky; top: 0; z-index: 200;
+    background: #0F172A; color: #fff;
+    text-align: center; padding: 12px 20px;
+    font-size: 13px; font-weight: 500; letter-spacing: -0.2px;
+  }
+  .tone-banner b { color: #FFCE00; }
+
+  .pill-wrap { text-align: center; margin: 80px 0 32px; }
+  .pill {
+    display: inline-block;
+    background: var(--primary); color: #fff;
+    padding: 14px 40px; border-radius: 999px;
+    font-weight: 700; font-size: 20px;
+    letter-spacing: -0.4px;
+    box-shadow: 0 8px 22px rgba(8,56,248,0.28);
+  }
+
+  section { margin-bottom: 28px; text-align: center; }
+  section .lead {
+    font-size: 28px; font-weight: 800; color: var(--text);
+    letter-spacing: -0.7px; line-height: 1.4;
+    max-width: 700px; margin: 0 auto;
+  }
+  section .lead strong { color: var(--primary); }
+  section .lead .accent { color: var(--accent); }
+  section .lead .sub-inline {
+    display: block; font-size: 17px; font-weight: 600;
+    color: var(--text-sub); margin-top: 8px;
+  }
+  section .sub {
+    font-size: 14px; color: var(--text-mute); margin-top: 12px;
+    letter-spacing: -0.2px;
+  }
+  section .desc {
+    font-size: 16px; color: var(--text-sub); margin-top: 10px;
+    letter-spacing: -0.2px; line-height: 1.6;
+    max-width: 600px; margin: 10px auto 0;
+  }
+
+  .chip {
+    display: inline-block;
+    font-size: 12px; font-weight: 700;
+    padding: 5px 12px; border-radius: 999px;
+    background: var(--primary); color: #fff;
+    margin-bottom: 14px;
+  }
+  .chip.new { background: var(--primary); }
+  .chip.outline {
+    background: transparent; color: var(--primary);
+    border: 1.5px solid var(--primary);
+  }
+  .badge-list { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+  .badge {
+    font-size: 13px; font-weight: 700;
+    padding: 7px 14px; border-radius: 8px;
+    background: var(--accent-pale); color: var(--accent);
+  }
+  .badge.blue { background: var(--primary-pale); color: var(--primary); }
+  .badge.gray { background: #F1F5F9; color: var(--text-sub); }
+
+  /* ============ BILLYJO 워드마크 ============ */
+  .bj-logo {
+    display: inline-block;
+    color: var(--primary);
+    font-weight: 800;
+    letter-spacing: -1px;
+    font-size: 22px;
+    line-height: 1;
+  }
+  .bj-logo.large { font-size: 32px; }
+  .bj-logo .dot { display: none; }
+
+  /* Hero 안에만 들어가는 빌리조 공식 로고 이미지 (원색 — 파랑, 크게) */
+  .bj-hero-logo {
+    display: inline-block;
+    height: 1.3em;
+    width: auto;
+    vertical-align: -0.28em;
+    margin: 0 0.05em;
+  }
+
+  /* ============ HERO (블루 메인 컬러 + 그라데이션) ============ */
+  .hero {
+    background:
+      radial-gradient(ellipse 700px 400px at 20% 15%,
+        rgba(120, 145, 255, 0.28) 0%,
+        transparent 60%),
+      linear-gradient(135deg,
+        #0530D0 0%,
+        #0838F8 45%,
+        #2855FF 100%);
+    color: #fff; border-radius: 26px;
+    padding: 48px 40px 40px;
+    margin: 0 0 24px; text-align: center;
+    box-shadow: var(--shadow-lg);
+    position: relative;
+    overflow: hidden;
+  }
+  .hero > * { position: relative; z-index: 1; }
+  .hero .badge-hero {
+    display: inline-block;
+    background: rgba(255,255,255,0.16);
+    padding: 6px 14px; border-radius: 999px;
+    font-size: 13px; font-weight: 700; margin-bottom: 18px;
+    letter-spacing: -0.2px;
+    color: #fff;
+    backdrop-filter: blur(6px);
+  }
+  .hero h1 {
+    font-size: 34px; font-weight: 800; letter-spacing: -1px;
+    line-height: 1.35; margin-bottom: 14px;
+    color: #fff;
+  }
+  .hero h1 .yellow { color: #FFCE00; }
+  .hero p {
+    font-size: 15px; line-height: 1.5;
+    letter-spacing: -0.3px;
+    color: rgba(255,255,255,0.92);
+  }
+  .trust-chips {
+    display: flex; justify-content: center; gap: 10px;
+    margin-top: 24px;
+    padding-top: 22px;
+    border-top: 1px solid rgba(255,255,255,0.18);
+    flex-wrap: wrap;
+  }
+  .trust-chip {
+    background: rgba(255,255,255,0.14);
+    padding: 9px 18px; border-radius: 999px;
+    font-size: 13px; font-weight: 700;
+    letter-spacing: -0.2px;
+    color: #fff;
+    display: inline-flex; align-items: center; gap: 6px;
+    backdrop-filter: blur(6px);
+  }
+  .trust-chip::before {
+    content: "✓"; color: #FFCE00;
+    font-weight: 800;
+  }
+
+  /* ============ BRAND GRID (#9 이미지 + 텍스트 혼합) ============ */
+  .brand-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr);
+    gap: 12px; padding: 10px 0;
+    max-width: 720px; margin: 22px auto 0;
+  }
+  .brand-cell {
+    background: #fff; border-radius: 14px;
+    aspect-ratio: 2.1;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: var(--shadow-sm);
+    padding: 14px 18px;
+    overflow: hidden;
+  }
+  .brand-cell.dark {
+    background: #2C3543;
+  }
+  .brand-cell img {
+    max-width: 100%;
+    max-height: 36px;
+    width: auto; height: auto;
+    object-fit: contain;
+    display: block;
+  }
+  .brand-cell .text-only {
+    font-size: 13px; font-weight: 700;
+    color: var(--text-sub);
+    text-align: center; line-height: 1.25;
+    letter-spacing: -0.3px;
+  }
+  .brand-cell .text-only.small { font-size: 12px; }
+
+  /* ============ 3 차별점 카드 (#8, #10) ============ */
+  .diff-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 18px; margin-top: 24px;
+  }
+  .diff-card {
+    background: #fff; border-radius: 22px;
+    padding: 32px 24px;
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    position: relative;
+    border: 2px solid transparent;
+    transition: all 0.2s ease;
+  }
+  .diff-card:hover {
+    border-color: var(--primary);
+    transform: translateY(-4px);
+  }
+  .diff-card .num-circle {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-soft) 100%);
+    color: #fff; font-weight: 800; font-size: 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 6px 14px rgba(8,56,248,0.25);
+  }
+  .diff-card .icon { font-size: 44px; margin-bottom: 12px; line-height: 1; }
+  .diff-card .t {
+    font-size: 25px; font-weight: 800;
+    letter-spacing: -0.5px; margin-bottom: 12px;
+    color: var(--text);
+  }
+  .diff-card .d {
+    font-size: 17px; color: var(--text-sub);
+    line-height: 1.6; letter-spacing: -0.2px;
+  }
+  .diff-card .d strong { color: var(--primary); }
+  .diff-card .vs-mini {
+    margin-top: 22px; padding-top: 20px;
+    border-top: 1px dashed var(--line);
+    display: flex; justify-content: space-between;
+    font-size: 17px; gap: 12px;
+  }
+  .diff-card .vs-mini .col { flex: 1; }
+  .diff-card .vs-mini .label {
+    color: var(--text-mute); font-weight: 600;
+    margin-bottom: 6px; font-size: 14px;
+    min-height: 18px;
+  }
+  .diff-card .vs-mini .val-other { color: var(--text-mute); }
+  .diff-card .vs-mini .val-billy {
+    color: var(--primary); font-weight: 700;
+  }
+
+  /* ============ PRICE COMPARE (#3 옵션A — 사은품 비교) ============ */
+  .price-compare {
+    background: transparent;
+    padding: 0;
+    text-align: left;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 32px; align-items: start;
+    margin-top: 24px;
+  }
+  .pc-screenshot {
+    border-radius: 16px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: var(--shadow-sm);
+  }
+  .pc-screenshot img {
+    width: 100%; height: auto;
+    display: block;
+  }
+  .pc-title {
+    font-size: 15px; color: var(--text-sub);
+    font-weight: 600; margin-bottom: 16px;
+  }
+  .pc-row {
+    display: flex; justify-content: space-between;
+    align-items: flex-start; padding: 18px 22px;
+    border-radius: 14px; margin-bottom: 10px;
+  }
+  .pc-row.other { background: #F4F6FA; }
+  .pc-row.billy {
+    background: linear-gradient(90deg, #EEF2FF 0%, #F8F9FF 100%);
+    border: 2px solid var(--primary);
+    position: relative;
+    flex-direction: column; align-items: stretch;
+  }
+  .pc-row.billy::before {
+    content: "BEST"; position: absolute;
+    top: -10px; right: 18px;
+    background: var(--primary); color: #fff;
+    font-size: 11px; font-weight: 800;
+    padding: 4px 10px; border-radius: 5px;
+    letter-spacing: 0.5px;
+  }
+  .pc-row .label { font-weight: 700; font-size: 16px; display: flex; align-items: center; gap: 8px; }
+  .pc-row .price-block { text-align: right; }
+  .pc-row .price {
+    font-size: 18px; font-weight: 700;
+    font-feature-settings: "tnum" 1;
+  }
+  .pc-row .price.bold { color: var(--primary); font-size: 20px; }
+  .pc-row .price-note {
+    font-size: 12px; color: var(--text-mute); margin-top: 4px;
+  }
+  .pc-billy-top {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 14px;
+  }
+  .pc-gift-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px; margin-top: 6px;
+  }
+  .pc-gift-cell {
+    background: rgba(255,255,255,0.7);
+    border-radius: 10px; padding: 10px 12px;
+    font-size: 11.5px; line-height: 1.4;
+    text-align: left;
+  }
+  .pc-gift-cell .em { font-size: 18px; display: block; margin-bottom: 4px; }
+  .pc-gift-cell .amt { color: var(--primary); font-weight: 800; font-size: 11px; }
+  .pc-gift-cell .name { color: var(--text); font-weight: 600; margin-top: 2px; }
+  .pc-savings {
+    text-align: center; margin-top: 16px;
+    padding: 16px; background: var(--primary-pale);
+    color: var(--primary); border-radius: 14px;
+    font-weight: 800; font-size: 15px;
+  }
+  .pc-savings .big {
+    font-size: 26px; display: block; margin-top: 4px;
+  }
+  .pc-footnote {
+    font-size: 11.5px; color: var(--text-mute);
+    margin-top: 14px; line-height: 1.6;
+  }
+
+  /* ============ A/S 섹션 (카드 제거 후 재구성) ============ */
+  .as-chips {
+    display: flex; justify-content: center; gap: 10px;
+    flex-wrap: wrap;
+    max-width: 760px; margin: 28px auto 0;
+  }
+  .as-chip {
+    background: #fff;
+    color: var(--primary);
+    padding: 12px 22px; border-radius: 999px;
+    font-size: 15px; font-weight: 700;
+    letter-spacing: -0.2px;
+    box-shadow: var(--shadow-sm);
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .as-chip::before {
+    content: "✓"; color: var(--primary); font-weight: 800;
+  }
+
+  .as-panel {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-soft) 100%);
+    color: #fff; border-radius: 22px;
+    padding: 32px 40px; margin: 32px 0 0;
+    box-shadow: var(--shadow-md);
+    display: flex; align-items: center; gap: 24px;
+    text-align: left;
+  }
+  .as-panel .as-icon { font-size: 56px; line-height: 1; flex-shrink: 0; }
+  .as-panel .as-text { flex: 1; }
+  .as-panel .as-t {
+    font-size: 22px; font-weight: 800;
+    letter-spacing: -0.4px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 6px;
+    flex-wrap: wrap;
+  }
+  .as-panel .as-d {
+    font-size: 15px; opacity: 0.95; line-height: 1.6;
+    letter-spacing: -0.2px;
+  }
+  .as-panel .bj-logo {
+    color: #FFCE00 !important;
+  }
+
+  /* ============ MOVE/CANCEL CARDS ============ */
+  .move-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-top: 24px;
+  }
+  .move-card {
+    background: #fff; border-radius: 20px; padding: 28px 18px;
+    text-align: center; box-shadow: var(--shadow-sm);
+  }
+  .move-card .icon { font-size: 44px; margin-bottom: 12px; }
+  .move-card .t {
+    font-size: 17px; font-weight: 800; color: var(--primary);
+    margin-bottom: 6px; letter-spacing: -0.3px;
+  }
+  .move-card .d { font-size: 13.5px; color: var(--text-sub); line-height: 1.55; }
+  .move-card .free-tag {
+    display: inline-block; margin-top: 12px;
+    background: var(--primary-pale); color: var(--primary);
+    font-size: 11px; font-weight: 800;
+    padding: 4px 10px; border-radius: 5px;
+  }
+
+  /* ============ CARD DISCOUNT (#5 단순화) ============ */
+  .card-simple {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-soft) 100%);
+    color: #fff; border-radius: 22px; padding: 32px 40px;
+    box-shadow: var(--shadow-md);
+    display: flex; align-items: center; gap: 28px;
+    margin: 24px 0 0;
+  }
+  .card-simple .icon-big { font-size: 56px; line-height: 1; }
+  .card-simple .text-block { flex: 1; text-align: left; }
+  .card-simple .t {
+    font-size: 22px; font-weight: 800;
+    letter-spacing: -0.5px; margin-bottom: 6px;
+  }
+  .card-simple .d {
+    font-size: 14px; opacity: 0.9; line-height: 1.55;
+  }
+  .card-simple .card-logos {
+    display: flex; gap: 8px; margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .card-simple .card-chip {
+    background: rgba(255,255,255,0.2);
+    padding: 6px 12px; border-radius: 8px;
+    font-size: 12px; font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+
+  /* ============ NO-AD (#1 — 카톡 X, 셀프+전화) ============ */
+  .noad-card {
+    background: linear-gradient(135deg, #1A1F36 0%, #2A3055 100%);
+    color: #fff; border-radius: 24px; padding: 40px 48px;
+    box-shadow: var(--shadow-md);
+    display: grid; grid-template-columns: auto 1fr;
+    gap: 36px; align-items: center;
+  }
+  .noad-card .icon-big { font-size: 64px; line-height: 1; }
+  .noad-card .text-block { text-align: left; }
+  .noad-card .t {
+    font-size: 30px; font-weight: 800;
+    letter-spacing: -0.7px; margin-bottom: 10px;
+    line-height: 1.25;
+  }
+  .noad-card .t span { color: #FFCE00; }
+  .noad-card .d {
+    font-size: 16px; opacity: 0.9; line-height: 1.55;
+    letter-spacing: -0.2px;
+  }
+  .noad-card .d b { color: #FFCE00; }
+  .noad-card .row-mini {
+    display: flex; gap: 24px;
+    margin-top: 20px; padding-top: 20px;
+    border-top: 1px solid rgba(255,255,255,0.15);
+  }
+  .noad-card .row-mini > div { font-size: 13px; opacity: 0.85; }
+  .noad-card .row-mini b { color: #FFCE00; }
+
+  /* ============ LIFESTYLE ============ */
+  .life-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;
+    margin-top: 24px;
+  }
+  .life-card {
+    background: #fff; border-radius: 20px; padding: 28px 20px;
+    box-shadow: var(--shadow-sm); text-align: center;
+    position: relative; overflow: hidden;
+  }
+  .life-card.recommend {
+    background: linear-gradient(135deg, #FFF1EC 0%, #FFE0D4 100%);
+    border: 2px solid var(--accent);
+  }
+  .life-card.recommend::before {
+    content: "PICK"; position: absolute;
+    top: 12px; right: 12px;
+    background: var(--accent); color: #fff;
+    font-size: 11px; font-weight: 800;
+    padding: 4px 8px; border-radius: 5px;
+  }
+  .life-card .icon { font-size: 42px; margin-bottom: 12px; }
+  .life-card .t {
+    font-size: 17px; font-weight: 800;
+    letter-spacing: -0.3px; margin-bottom: 4px;
+  }
+  .life-card .d {
+    font-size: 13.5px; color: var(--text-sub); line-height: 1.55;
+  }
+
+  /* ============ REVIEW MARQUEE (무한 루프) ============ */
+  .review-section {
+    max-width: 1000px; margin: 24px auto 0;
+    position: relative;
+  }
+  .review-track-wrap {
+    position: relative;
+    overflow: hidden;
+    padding: 6px 0 12px;
+    mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+    -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 6%, black 94%, transparent 100%);
+  }
+  @keyframes review-marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  .review-track {
+    display: flex;
+    gap: 16px;
+    width: max-content;
+    animation: review-marquee 60s linear infinite;
+  }
+  .review-track:hover {
+    animation-play-state: paused;
+  }
+  .review-item {
+    flex: 0 0 320px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 28px 22px;
+    box-shadow: var(--shadow-md);
+    text-align: center;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  }
+  .review-item .cat-badge {
+    display: inline-block;
+    background: var(--primary-pale);
+    color: var(--primary);
+    font-size: 12px; font-weight: 700;
+    padding: 5px 12px; border-radius: 999px;
+    margin-bottom: 14px;
+    align-self: center;
+  }
+  .review-item .stars {
+    color: #FFB800; font-size: 17px;
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+  .review-item .quote {
+    font-size: 15px; font-weight: 500;
+    color: var(--text); line-height: 1.6;
+    letter-spacing: -0.2px;
+    margin-bottom: 18px;
+    flex: 1;
+  }
+  .review-item .author {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: #F1F5F9; color: var(--text-sub);
+    font-size: 12px; font-weight: 600;
+    padding: 7px 14px; border-radius: 999px;
+    align-self: center;
+  }
+
+  /* ============ PENALTY (#4 — 최하단) ============ */
+  .penalty-wrap {
+    max-width: 720px; margin: 24px auto 0;
+  }
+  .penalty-card {
+    background: #fff; border-radius: 22px;
+    padding: 36px; box-shadow: var(--shadow-md);
+  }
+  .penalty-table {
+    width: 100%; border-collapse: separate; border-spacing: 0;
+    margin-top: 18px; border-radius: 14px; overflow: hidden;
+  }
+  .penalty-table th, .penalty-table td {
+    padding: 16px 14px; text-align: center;
+    font-size: 15px; border-bottom: 1px solid var(--line);
+  }
+  .penalty-table th {
+    background: var(--bg-soft); font-weight: 700;
+    color: var(--text-sub); font-size: 14px;
+  }
+  .penalty-table td { font-weight: 600; }
+  .penalty-table td.rate {
+    color: var(--accent); font-weight: 800; font-size: 17px;
+  }
+  .penalty-table td.rate.low { color: var(--good); }
+  .penalty-table tr:last-child td { border-bottom: none; }
+  .penalty-formula {
+    background: var(--warn-bg); padding: 16px 18px;
+    border-radius: 12px; margin-top: 18px;
+    font-size: 14px; color: #6B5A1F; line-height: 1.65;
+    border-left: 4px solid #FFCE00;
+  }
+  .penalty-formula b { color: var(--text); }
+  .legal-note {
+    margin-top: 16px; padding: 12px 16px;
+    background: var(--primary-pale); border-radius: 10px;
+    font-size: 13px; color: var(--primary);
+    text-align: center; font-weight: 600;
+  }
+  .penalty-warn {
+    margin-top: 14px; padding: 14px 16px;
+    background: #FFF5F2;
+    border-left: 4px solid var(--accent);
+    border-radius: 10px;
+    font-size: 13px; line-height: 1.6;
+  }
+  .penalty-warn b { display: block; color: var(--accent); margin-bottom: 4px; font-size: 13.5px; }
+  .penalty-warn span { color: var(--text-sub); font-size: 12.5px; }
+
+  /* ============ FAQ ============ */
+  .faq-wrap { max-width: 800px; margin: 0 auto; }
+  .faq {
+    background: #fff; border-radius: 22px;
+    padding: 8px 6px; box-shadow: var(--shadow-md);
+    text-align: left;
+  }
+  .faq details {
+    padding: 22px 28px; border-bottom: 1px solid var(--line);
+  }
+  .faq details:last-child { border-bottom: none; }
+  .faq summary {
+    font-weight: 700; font-size: 16px; cursor: pointer;
+    list-style: none; color: var(--text);
+    display: flex; align-items: flex-start; gap: 14px;
+    letter-spacing: -0.3px; line-height: 1.5;
+  }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::before {
+    content: "Q"; color: var(--primary); font-weight: 800;
+    flex-shrink: 0; background: var(--primary-pale);
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .faq details[open] summary { color: var(--primary); }
+  .faq .answer {
+    margin-top: 14px; padding-left: 42px;
+    font-size: 15px; color: var(--text-sub);
+    line-height: 1.7;
+  }
+  .faq .answer b { color: var(--text); }
+  .faq .answer .formula {
+    display: block; margin-top: 10px; padding: 14px 16px;
+    background: var(--warn-bg); border-radius: 10px;
+    font-size: 14px; color: #6B5A1F;
+    border-left: 4px solid #FFCE00;
+  }
+
+  /* ============ STEP4 ============ */
+  .step4-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    margin-top: 24px;
+  }
+  .step4-cell {
+    background: #fff; border-radius: 22px; padding: 40px 24px;
+    text-align: center; box-shadow: var(--shadow-sm);
+  }
+  .step4-cell .label {
+    font-size: 14px; font-weight: 700;
+    background: var(--primary-pale); color: var(--primary);
+    padding: 6px 14px;
+    border-radius: 8px; margin-bottom: 20px; display: inline-block;
+  }
+  .step4-cell .icon {
+    font-size: 56px; margin-bottom: 12px;
+    color: var(--primary);
+  }
+  .step4-cell .d {
+    font-size: 15px; color: var(--text-sub);
+    line-height: 1.55; margin-top: 6px;
+  }
+
+  /* ============ FLOATING CTA (#1 — 카톡 X) ============ */
+  .floating-cta {
+    position: fixed; bottom: 20px; left: 50%;
+    transform: translateX(-50%);
+    width: calc(100% - 40px); max-width: 940px;
+    display: flex; gap: 12px; z-index: 150;
+  }
+  .floating-cta button {
+    border: none; border-radius: 16px;
+    padding: 18px 12px; font-weight: 800; font-size: 16px;
+    letter-spacing: -0.3px; cursor: pointer;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.15);
+    font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px;
+  }
+  .floating-cta .btn-call {
+    background: #fff; color: var(--text);
+    flex: 1; border: 2px solid var(--text);
+  }
+  .floating-cta .btn-self {
+    background: var(--primary-pale); color: var(--primary);
+    flex: 1; border: 2px solid var(--primary);
+  }
+  .floating-cta .btn-apply {
+    background: var(--primary); color: #fff;
+    flex: 1.5;
+  }
+
+  /* ============ HIGHLIGHT BAR ============ */
+  .highlight-bar {
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-soft) 100%);
+    color: #fff; border-radius: 18px; padding: 22px 28px;
+    margin: 22px 0; display: flex; align-items: center; gap: 18px;
+    box-shadow: var(--shadow-md);
+  }
+  .highlight-bar .icon { font-size: 38px; }
+  .highlight-bar .text { flex: 1; text-align: left; }
+  .highlight-bar .t {
+    font-size: 18px; font-weight: 800; letter-spacing: -0.3px;
+  }
+  .highlight-bar .d {
+    font-size: 14px; opacity: 0.9; margin-top: 3px;
+  }
+
+  .section-divider {
+    height: 1px; background: var(--line);
+    margin: 60px 0 36px;
+  }
+  .penalty-divider {
+    height: 1px; background: var(--line);
+    margin: 80px 0 36px;
+  }
+
+  /* ============ ALTERNATING ZONES (흰색 ↔ 하늘 풀폭, pill = 섹션 구분점) ============ */
+  html, body { background: #FFFFFF; }
+  .page { background: transparent; }
+  .zone {
+    /* 풀폭 — 좌우 마진까지 같은 컬러로 */
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-right: calc(50% - 50vw);
+    padding-left: max(30px, calc(50vw - 470px));
+    padding-right: max(30px, calc(50vw - 470px));
+    padding-top: 40px;
+    padding-bottom: 60px;
+  }
+  .zone-white { background: #FFFFFF; }
+  .zone-sky { background: #ECF3FF; }
+  /* Zone 안의 첫 pill-wrap은 위 margin 제거 (zone padding이 spacing 담당) */
+  .zone > .pill-wrap:first-child { margin-top: 0; }
+
+  /* ============ STROKE ICON 시스템 ============ */
+  .ico {
+    display: inline-block;
+    width: 1em; height: 1em;
+    stroke: currentColor;
+    fill: none;
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vertical-align: -0.16em;
+    flex-shrink: 0;
+  }
+  .ico-block {
+    display: block;
+    margin: 0 auto;
+  }
+</style>
+</head>
+<body>
+
+<!-- ============ SVG ICON SPRITE ============ -->
+<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0" aria-hidden="true">
+  <defs>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M20 10c0 7-8 13-8 13s-8-6-8-13a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></symbol>
+    <symbol id="i-coins" viewBox="0 0 24 24"><circle cx="8" cy="8" r="6"/><path d="M18.09 10.37A6 6 0 1 1 10.34 18"/><path d="M7 6h1v4"/><path d="m16.71 13.88.7.71-2.82 2.82"/></symbol>
+    <symbol id="i-wrench" viewBox="0 0 24 24"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></symbol>
+    <symbol id="i-gift" viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="4" rx="1"/><path d="M12 8v13"/><path d="M19 12v7a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2v-7"/><path d="M7.5 8a2.5 2.5 0 0 1 0-5C11 3 12 7 12 8c0-1 1-5 4.5-5a2.5 2.5 0 0 1 0 5"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></symbol>
+    <symbol id="i-phone-off" viewBox="0 0 24 24"><path d="M10.68 13.31a16 16 0 0 0 3.41 2.6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7 2 2 0 0 1 1.72 2v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.42 19.42 0 0 1-3.33-2.67m-2.67-3.34a19.79 19.79 0 0 1-3.07-8.63A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91"/><line x1="22" x2="2" y1="2" y2="22"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+    <symbol id="i-headphones" viewBox="0 0 24 24"><path d="M3 14h3a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H4a1 1 0 0 1-1-1v-6a9 9 0 0 1 18 0v6a1 1 0 0 1-1 1h-2a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3"/></symbol>
+    <symbol id="i-truck" viewBox="0 0 24 24"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></symbol>
+    <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></symbol>
+    <symbol id="i-coffee" viewBox="0 0 24 24"><path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><line x1="6" x2="6" y1="2" y2="4"/><line x1="10" x2="10" y1="2" y2="4"/><line x1="14" x2="14" y1="2" y2="4"/></symbol>
+    <symbol id="i-utensils" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-scale" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
+    <symbol id="i-calendar" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/></symbol>
+    <symbol id="i-clipboard" viewBox="0 0 24 24"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></symbol>
+    <symbol id="i-message" viewBox="0 0 24 24"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></symbol>
+    <symbol id="i-ticket" viewBox="0 0 24 24"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></symbol>
+    <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3z"/></symbol>
+  </defs>
+</svg>
+
+<div class="tone-banner">
+  📌 v5 시안 (1000px) — 10개 항목 모두 반영: 메인 카피 변경 · 카톡X셀프전화 · 후기 3장 carousel · 사은품 우선 · 위약금 최하단 · 3 차별점 카드 · <b>실 로고 10개 통합</b>
+</div>
+
+<div class="page">
+
+  <!-- ============================================
+       SECTION 1: HERO (#6 + Stats 신뢰 chip)
+       ============================================ -->
+  <div style="height: 40px;"></div>
+  <div class="hero">
+    <span class="badge-hero"><svg class="ico"><use href="#i-pin"/></svg> 본사 & 파트너사 직계약 가전 렌탈 비교 플랫폼</span>
+    <h1>
+      설치 케어는 <span class="yellow">본사</span>에서<br>
+      서비스 혜택은 <span class="yellow">빌리조</span>에서
+    </h1>
+    <p>본사 동급 A/S, 풍성한 사은품 혜택<br>설치비·등록비 0원으로 부담없이</p>
+    <div class="trust-chips">
+      <span class="trust-chip">본사 &amp; 파트너사 직계약</span>
+      <span class="trust-chip">100% 정품 보장</span>
+      <span class="trust-chip">공정위 약관 준수</span>
+    </div>
+  </div>
+
+  <!-- ============================================
+       SECTION 2: 부담없이 시작하세요 (#6 — 숫자 제거)
+       ============================================ -->
+  <div class="pill-wrap"><span class="pill">부담없이 시작하세요</span></div>
+  <section>
+    <p class="lead">
+      <strong>다양한 가전 제품</strong>을 <strong>최대 72개월</strong>까지<br>
+      설치비·등록비 <strong>0원</strong>으로 부담없이
+    </p>
+    <div class="badge-list">
+      <span class="badge blue">설치비 0원</span>
+      <span class="badge blue">등록비 0원</span>
+      <span class="badge blue">최대 72개월</span>
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 3: 본사 & 파트너사 (#7, #9 — 로고 통합)
+       ============================================ -->
+  <section style="margin-top: 50px;">
+    <p class="lead">
+      <strong>20개+ 본사 &amp; 파트너사 직계약</strong>
+      <span class="sub-inline">중간 대리점 없이 본사 &amp; 파트너사 물류 그대로 배송</span>
+    </p>
+    <div class="brand-grid">
+      <!-- Row 1 -->
+      <div class="brand-cell"><img src="./images/brands/lg-care.jpg" alt="LG케어솔루션"></div>
+      <div class="brand-cell"><img src="./images/brands/samsung.jpg" alt="SAMSUNG"></div>
+      <div class="brand-cell"><img src="./images/brands/lg-hellovision.png" alt="LG헬로비전"></div>
+      <div class="brand-cell"><img src="./images/brands/cuckoo.jpg" alt="CUCKOO"></div>
+      <!-- Row 2 -->
+      <div class="brand-cell"><img src="./images/brands/chungho.jpg" alt="청호나이스"></div>
+      <div class="brand-cell"><img src="./images/brands/quming.png" alt="Quming 현대큐밍"></div>
+      <div class="brand-cell"><img src="./images/brands/ruhens.jpg" alt="RUHENS"></div>
+      <div class="brand-cell"><img src="./images/brands/coway.jpg" alt="coway"></div>
+      <!-- Row 3 -->
+      <div class="brand-cell"><img src="./images/brands/cesco.png" alt="CESCO 세스코"></div>
+      <div class="brand-cell"><img src="./images/brands/cozyma.jpg" alt="COZYMA"></div>
+      <div class="brand-cell"><img src="./images/brands/wells.png" alt="wells"></div>
+      <div class="brand-cell"><img src="./images/brands/bson.jpg" alt="BS ON"></div>
+      <!-- Row 4 -->
+      <div class="brand-cell"><img src="./images/brands/carrier.jpg" alt="Carrier"></div>
+      <div class="brand-cell"><img src="./images/brands/ubus-mall.png" alt="UBUS mall"></div>
+      <div class="brand-cell"><img src="./images/brands/60-smart.jpg" alt="60 SMART RENTAL"></div>
+      <div class="brand-cell"><img src="./images/brands/sk-magic.jpg" alt="SK매직"></div>
+    </div>
+
+    <div class="highlight-bar">
+      <div class="icon"><svg class="ico"><use href="#i-shield"/></svg></div>
+      <div class="text">
+        <div class="t">100% 정품 새제품 보장</div>
+        <div class="d">아닐 시 전액 환불 · 본사·파트너사 인증 정품</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 4: 본사보다 빌리조가 좋은 점 — 3 차별점 카드 (#8, #10)
+       ============================================ -->
+  <div class="pill-wrap"><span class="pill">본사보다 빌리조가 좋은 점</span></div>
+  <section>
+    <p class="lead">
+      같은 정품·같은 A/S,<br>
+      <strong>가격·관리·혜택 모두 빌리조에서</strong>
+    </p>
+
+    <div class="diff-grid">
+      <!-- Card 1: 최저가 보장 -->
+      <div class="diff-card">
+        <div class="num-circle">01</div>
+        <div class="icon"><svg class="ico"><use href="#i-coins"/></svg></div>
+        <div class="t">최저가 보장</div>
+        <div class="d">
+          본사·공식몰과 동일한<br>
+          <strong>시장 최저가</strong>
+        </div>
+        <div class="vs-mini">
+          <div class="col">
+            <div class="label">본사 공식몰</div>
+            <div class="val-other">정가</div>
+          </div>
+          <div class="col">
+            <div class="label"><span class="bj-logo" style="font-size:17px;">빌리조</span></div>
+            <div class="val-billy">동일가</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 2: 본사 직접 관리 -->
+      <div class="diff-card">
+        <div class="num-circle">02</div>
+        <div class="icon"><svg class="ico"><use href="#i-wrench"/></svg></div>
+        <div class="t">본사 직접 관리</div>
+        <div class="d">
+          코디·매니저·플래너<br>
+          <strong>본사 전문가가 직접</strong>
+        </div>
+        <div class="vs-mini">
+          <div class="col">
+            <div class="label">정품 인증</div>
+            <div class="val-billy">✓ 본사</div>
+          </div>
+          <div class="col">
+            <div class="label">A/S 처리</div>
+            <div class="val-billy">✓ 본사</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Card 3: 빌리조만의 혜택 -->
+      <div class="diff-card">
+        <div class="num-circle">03</div>
+        <div class="icon"><svg class="ico"><use href="#i-gift"/></svg></div>
+        <div class="t">빌리조만의 혜택</div>
+        <div class="d">
+          풍성한 사은품 패키지<br>
+          <strong>+ 제휴카드 할인</strong>
+        </div>
+        <div class="vs-mini">
+          <div class="col">
+            <div class="label">본사 공식몰</div>
+            <div class="val-other">상품권</div>
+          </div>
+          <div class="col">
+            <div class="label"><span class="bj-logo" style="font-size:17px;">빌리조</span></div>
+            <div class="val-billy"><svg class="ico"><use href="#i-gift"/></svg> 사은품</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 5: 같은 가격, 더 풍성한 혜택 (#3 옵션A)
+       ============================================ -->
+  <div class="pill-wrap"><span class="pill">같은 가격, 더 풍성한 혜택</span></div>
+  <section>
+    <p class="lead">
+      <span class="bj-logo large">빌리조</span>는 <strong>본사 직계약 대량 유통점</strong>
+      <span class="sub-inline">중간 마진 없이 본사가 그대로, 풍성한 사은품으로 보답</span>
+    </p>
+
+    <div class="price-compare">
+      <div>
+        <div class="pc-screenshot">
+          <img src="./images/coway-vs-billyjo.png" alt="코웨이 공식몰 vs 빌리조 가격 비교">
+        </div>
+      </div>
+      <div>
+        <span class="chip new">실시간 혜택 비교</span>
+        <div class="pc-title">코웨이 아이콘 정수기 동일 모델 기준</div>
+
+        <div class="pc-row other">
+          <div>
+            <div class="label">코웨이 공식몰</div>
+            <div style="font-size: 12px; color: var(--text-mute); margin-top: 6px;">사은품: 없음</div>
+          </div>
+          <div class="price-block">
+            <div class="price">월 45,400원</div>
+            <div class="price-note">카드 할인 시 월 30,400원~</div>
+          </div>
+        </div>
+
+        <div class="pc-row billy">
+          <div class="pc-billy-top">
+            <div class="label">
+              <span class="bj-logo" style="font-size:22px;">빌리조</span>
+            </div>
+            <div class="price-block">
+              <div class="price bold">월 45,400원</div>
+              <div class="price-note">카드 할인 시 월 15,400원</div>
+            </div>
+          </div>
+          <div style="font-size: 13px; font-weight: 700; color: var(--primary); margin-bottom: 8px;"><svg class="ico"><use href="#i-gift"/></svg> 사은품 3중 택 1</div>
+          <div class="pc-gift-grid">
+            <div class="pc-gift-cell">
+              <span class="em"><svg class="ico"><use href="#i-gift"/></svg></span>
+              <div class="amt">OO만원 상당</div>
+              <div class="name">이벤트 상품 1</div>
+            </div>
+            <div class="pc-gift-cell">
+              <span class="em"><svg class="ico"><use href="#i-sparkles"/></svg></span>
+              <div class="amt">OO만원 상당</div>
+              <div class="name">이벤트 상품 2</div>
+            </div>
+            <div class="pc-gift-cell">
+              <span class="em"><svg class="ico"><use href="#i-ticket"/></svg></span>
+              <div class="amt">OO만원 상당</div>
+              <div class="name">상품권</div>
+            </div>
+          </div>
+          <div style="font-size: 13px; font-weight: 700; color: var(--primary); background: rgba(8,56,248,0.08); padding: 10px 14px; border-radius: 10px; margin-top: 12px; display: flex; align-items: center; gap: 8px;">
+            <svg class="ico"><use href="#i-gift"/></svg> 결합 구독 시 추가 사은품 혜택이 있습니다
+          </div>
+          <div style="font-size: 10.5px; color: var(--text-mute); margin-top: 10px;">
+            * 사은품의 경우 구매가격에 따라 중복 선택이 가능할 수도 있습니다
+          </div>
+        </div>
+
+        <div class="pc-savings">
+          빌리조 사은품 혜택 총합
+          <span class="big">약 OO만원 상당</span>
+        </div>
+
+        <div class="pc-footnote">
+          * 2026년 5월 코웨이 공식몰 기준 동일 모델·동일 약정 비교<br>
+          * 빌리조와 본사 공식몰 가격은 동일 (시장 최저가)<br>
+          * 출처: cowaymall.co.kr (캡쳐 화면 첨부)
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 6: A/S 4단계
+       ============================================ -->
+  <div class="pill-wrap"><span class="pill">A/S 신청도 빌리조에서</span></div>
+  <section>
+    <p class="lead">
+      A/S 접수부터 처리까지<br>
+      <span class="bj-logo" style="font-size:30px;">빌리조</span>가 함께 챙겨드려요
+    </p>
+    <p class="desc">품질·설치·정기 관리는 본사 기준 그대로,<br>사후 문의 창구는 빌리조가 일원화해드립니다.</p>
+
+    <div class="as-chips">
+      <span class="as-chip">무상 A/S</span>
+      <span class="as-chip">본사 직접 관리</span>
+      <span class="as-chip">정품 필터 교체</span>
+      <span class="as-chip">일원화 창구</span>
+    </div>
+
+    <div class="as-panel">
+      <div class="as-icon"><svg class="ico"><use href="#i-phone"/></svg></div>
+      <div class="as-text">
+        <div class="as-t">A/S 신청은 <span class="bj-logo" style="font-size:24px;">빌리조</span>로</div>
+        <div class="as-d">원하시면 렌탈하신 본사(예: 코웨이·LG·SK매직 등)로도 직접 신청 가능합니다</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 7: 이사·해지 안심
+       ============================================ -->
+  <div class="pill-wrap"><span class="pill">이사·신혼도 안심하세요</span></div>
+  <section>
+    <p class="lead">
+      <strong>신혼·이사가 잦은 시기에도</strong><br>
+      유연하게 대응할 수 있게
+    </p>
+
+    <div class="move-grid">
+      <div class="move-card">
+        <div class="icon"><svg class="ico"><use href="#i-user"/></svg></div>
+        <div class="t">본사 직원 직접 설치</div>
+        <div class="d">본사 코디·매니저가<br>방문 설치</div>
+        <div class="free-tag">전문가 방문</div>
+      </div>
+      <div class="move-card">
+        <div class="icon"><svg class="ico"><use href="#i-clipboard"/></svg></div>
+        <div class="t">위약금 사전 계산</div>
+        <div class="d">가입 전 계산서<br>모든 경우 시뮬레이션</div>
+        <div class="free-tag">투명 공개</div>
+      </div>
+      <div class="move-card">
+        <div class="icon"><svg class="ico"><use href="#i-message"/></svg></div>
+        <div class="t">평생 문의 창구</div>
+        <div class="d">가입 후에도<br>빌리조 상담 가능</div>
+        <div class="free-tag">평생 지원</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 8: 제휴카드 혜택 (#5 — 단순화)
+       ============================================ -->
+  <div class="pill-wrap"><span class="pill">제휴카드 추가 혜택</span></div>
+  <section>
+    <div class="card-simple">
+      <div class="icon-big"><svg class="ico"><use href="#i-card"/></svg></div>
+      <div class="text-block">
+        <div class="t">제휴카드 할인 혜택 지원</div>
+        <div class="d">가입 단계에서 카드사별 혜택을 자동 계산해드려요</div>
+        <div class="card-logos">
+          <span class="card-chip">현대</span>
+          <span class="card-chip">삼성</span>
+          <span class="card-chip">신한</span>
+          <span class="card-chip">국민</span>
+          <span class="card-chip">하나</span>
+          <span class="card-chip">롯데</span>
+          <span class="card-chip">우리</span>
+          <span class="card-chip">NH</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 9: 광고 전화 없습니다 (#1 — 셀프/전화)
+       ============================================ -->
+  <div class="pill-wrap"><span class="pill">영업 전화 걱정 없이</span></div>
+  <section>
+    <div class="noad-card">
+      <div class="icon-big"><svg class="ico"><use href="#i-phone-off"/></svg></div>
+      <div class="text-block">
+        <div class="t">광고 전화 <span>없습니다</span></div>
+        <div class="d">
+          가입은 <b>셀프 신청</b> 또는 <b>1:1 전화 상담</b>으로 진행<br>
+          끊임없는 영업 전화에 시달릴 일 없어요
+        </div>
+        <div class="row-mini">
+          <div>💻 셀프 신청 <b>가능</b></div>
+          <div>☎️ 전화 상담 <b>가능</b></div>
+          <div>🤐 광고 발신 <b>OFF</b></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 10: 후기 carousel 3장 (#2)
+       ============================================ -->
+  <div class="pill-wrap"><span class="pill">실제 고객 후기</span></div>
+  <section>
+    <div class="review-section">
+      <div class="review-track-wrap">
+        <div class="review-track">
+          <!-- Set 1 (원본 10) -->
+          <div class="review-item">
+            <span class="cat-badge">정수기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"사은품 패키지 풍성하게 챙겨주셔서 만족해요. 본사가 그대로 들어와 안심."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>이*진님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">공기청정기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"이사 가서 주소 변경 무료로 해주셨어요. 신혼 때 단기 렌탈로 시작한 게 정답."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>김*수님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">비데</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"비교해보고 가입한 거라 후회 없어요. 사은품도 본사보다 더 챙겨주시고."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>박*영님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">안마의자</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"위약금 공식을 가입 전에 다 알려주셔서 결정이 쉬웠어요. 정직한 게 좋아요."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>정*아님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">안마의자</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"부모님 효도 선물로 보냈는데 설치·관리 다 본사에서 해주시니 안심됩니다."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>최*호님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">정수기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"전화로 상담받으면서 신청했는데 응대 빠르고 친절했어요. 어르신들께도 추천."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>윤*민님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">식기세척기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"광고 전화 안 와서 너무 좋아요. 다른 사이트는 가입하자마자 전화 폭탄."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>강*우님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">비데</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"본사 가격과 같은데 사은품을 더 받을 수 있어서 안 할 이유가 없죠."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>송*희님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">공기청정기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"셀프로 신청해서 깔끔하게 끝났어요. 본사 코디 시간 맞춰 잘 와주셨고."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>임*진님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">정수기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"여러 본사 가격을 한 번에 비교할 수 있어서 결정 시간이 확 줄었어요."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>한*솔님 후기 중</span>
+          </div>
+          <!-- Set 2 (seamless loop용 복제) -->
+          <div class="review-item">
+            <span class="cat-badge">정수기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"사은품 패키지 풍성하게 챙겨주셔서 만족해요. 본사가 그대로 들어와 안심."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>이*진님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">공기청정기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"이사 가서 주소 변경 무료로 해주셨어요. 신혼 때 단기 렌탈로 시작한 게 정답."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>김*수님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">비데</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"비교해보고 가입한 거라 후회 없어요. 사은품도 본사보다 더 챙겨주시고."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>박*영님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">안마의자</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"위약금 공식을 가입 전에 다 알려주셔서 결정이 쉬웠어요. 정직한 게 좋아요."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>정*아님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">안마의자</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"부모님 효도 선물로 보냈는데 설치·관리 다 본사에서 해주시니 안심됩니다."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>최*호님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">정수기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"전화로 상담받으면서 신청했는데 응대 빠르고 친절했어요. 어르신들께도 추천."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>윤*민님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">식기세척기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"광고 전화 안 와서 너무 좋아요. 다른 사이트는 가입하자마자 전화 폭탄."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>강*우님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">비데</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"본사 가격과 같은데 사은품을 더 받을 수 있어서 안 할 이유가 없죠."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>송*희님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">공기청정기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"셀프로 신청해서 깔끔하게 끝났어요. 본사 코디 시간 맞춰 잘 와주셨고."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>임*진님 후기 중</span>
+          </div>
+          <div class="review-item">
+            <span class="cat-badge">정수기</span>
+            <div class="stars">★★★★★</div>
+            <div class="quote">"여러 본사 가격을 한 번에 비교할 수 있어서 결정 시간이 확 줄었어요."</div>
+            <span class="author"><svg class="ico"><use href="#i-user"/></svg>한*솔님 후기 중</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 12: FAQ 6개
+       ============================================ -->
+  <div class="pill-wrap"><span class="pill">자주 묻는 질문</span></div>
+  <section>
+    <div class="faq-wrap">
+      <div class="faq">
+        <details open>
+          <summary>본사와 가격 차이가 있나요?</summary>
+          <div class="answer">
+            <b>가격은 본사·공식몰과 동일</b>합니다 (시장 최저가). 빌리조에서는 가격에 더해 <b>풍성한 사은품 패키지</b>를 추가로 드립니다.
+            본사 직계약 대량 유통점이라 가능한 혜택입니다.
+          </div>
+        </details>
+        <details>
+          <summary>A/S는 어디로 연락하나요?</summary>
+          <div class="answer">
+            가입하신 <b>본사로 직접</b> 연락하시면 됩니다. 본사 정품을 그대로 받으셨기 때문에 A/S 절차도 본사와 동일합니다.
+            문의가 어려우실 땐 빌리조 고객센터가 안내해드립니다.
+          </div>
+        </details>
+        <details>
+          <summary>가입은 어떻게 하나요?</summary>
+          <div class="answer">
+            <b>셀프 신청</b> 또는 <b>1:1 전화 상담</b> 두 가지 방식 모두 가능합니다.
+            온라인이 편하신 분은 셀프, 자세한 안내가 필요하신 분은 전화로 진행하세요.
+            카톡이나 광고 전화는 사용하지 않습니다.
+          </div>
+        </details>
+        <details>
+          <summary>사은품은 어떤 게 있나요?</summary>
+          <div class="answer">
+            <b>이벤트 상품 2종 + 상품권 중 1개</b>를 선택하실 수 있습니다 (3중 택 1).
+            구매가격에 따라 <b>중복 선택</b>이 가능할 수도 있으며,
+            <b>결합 구독 시 추가 사은품 혜택</b>이 제공됩니다.
+            상품 비교 단계에서 정확한 사은품 목록을 확인하실 수 있습니다.
+          </div>
+        </details>
+        <details>
+          <summary>제휴 카드는 어떻게 적용되나요?</summary>
+          <div class="answer">
+            상품 비교 단계에서 <b>카드 할인 적용가가 자동으로 계산</b>됩니다.
+            현대·삼성·신한·국민·하나·롯데·우리·NH 8개 카드사 모두 제휴 중입니다.
+            실적 조건은 카드사별 상이하니 상세 화면에서 확인 부탁드립니다.
+          </div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 13: 렌탈 신청 방법
+       ============================================ -->
+  <div class="pill-wrap"><span class="pill">렌탈 신청 방법</span></div>
+  <section>
+    <p class="lead">
+      어렵지 않아요!<br>
+      <span class="sub-inline">셀프 또는 전화로 간편하게</span>
+    </p>
+
+    <div class="step4-grid">
+      <div class="step4-cell">
+        <div class="label">01 비교</div>
+        <div class="icon"><svg class="ico"><use href="#i-search"/></svg></div>
+        <div class="d">요금·조건<br>한눈에</div>
+      </div>
+      <div class="step4-cell">
+        <div class="label">02 신청</div>
+        <div class="icon"><svg class="ico"><use href="#i-edit"/></svg></div>
+        <div class="d">셀프 or 전화로<br>간편 신청</div>
+      </div>
+      <div class="step4-cell">
+        <div class="label">03 확인</div>
+        <div class="icon"><svg class="ico"><use href="#i-headphones"/></svg></div>
+        <div class="d">해피콜로<br>내역 확인</div>
+      </div>
+      <div class="step4-cell">
+        <div class="label">04 설치</div>
+        <div class="icon"><svg class="ico"><use href="#i-truck"/></svg></div>
+        <div class="d">본사 기사<br>방문 설치</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================
+       SECTION 14: 위약금 — 최하단 (#4)
+       ============================================ -->
+  <div class="penalty-divider"></div>
+  <div class="pill-wrap"><span class="pill">위약금, 숨기지 않습니다</span></div>
+  <section>
+    <p class="lead">
+      <strong>가입 전에 모든 조건을</strong><br>
+      투명하게 공개합니다
+    </p>
+    <p class="desc">중도 해지 위약금 공식, 미리 알려드려요.<br>가입 후 "몰랐다"는 일이 없도록.</p>
+
+    <div class="penalty-wrap">
+      <div class="penalty-card">
+        <div style="text-align: center; font-size: 18px; font-weight: 800; color: var(--primary); margin-bottom: 4px;">
+          중도 해지 위약금 공식
+        </div>
+        <table class="penalty-table">
+          <thead>
+            <tr>
+              <th>사용 기간</th>
+              <th>위약금 비율</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>1년 이내 해지</td>
+              <td class="rate">잔여 렌탈료의 30%</td>
+            </tr>
+            <tr>
+              <td>1년 ~ 2년 사이</td>
+              <td class="rate">잔여 렌탈료의 20%</td>
+            </tr>
+            <tr>
+              <td>2년 ~ 약정 종료 전</td>
+              <td class="rate low">잔여 렌탈료의 10%</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="penalty-formula">
+          <b>예시) 3년 약정 · 월 23,900원 · 6개월 후 해지</b><br>
+          잔여 30개월 × 23,900원 × 30% = <b>215,100원 위약금</b>
+        </div>
+
+        <div class="penalty-warn">
+          <b>중도 해지 시 사은품 및 혜택은 반납이 필요합니다</b>
+          <span>가입 시 받으신 사은품·상품권·등록비 면제 등의 혜택 금액이 위약금에 합산되어 청구될 수 있습니다.</span>
+        </div>
+
+        <div class="legal-note">
+          <svg class="ico"><use href="#i-scale"/></svg> 공정거래위원회 「정수기임대차(구독)표준약관」 의거 산정
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <p style="text-align: center; font-size: 12px; color: var(--text-mute); padding: 40px 20px 0;">
+    빌리조 · 본사 &amp; 파트너사 직계약 가전 렌탈 비교 플랫폼<br>
+    사업자등록번호 000-00-00000 · 통신판매업 신고 0000-0000<br>
+    본사·파트너사 인증 정품 · 공정거래위 표준약관 준수<br>
+    <span style="font-size: 10.5px;">* 본사 공식몰과 동일한 가격 기준. 일부 상품은 카드 할인·사은품 차이로 조건 상이</span>
+  </p>
+
+</div>
+
+<script>
+  // ============ 섹션 zone 자동 래핑: pill 부터 다음 pill 직전까지를 한 zone으로 ============
+  (function () {
+    var page = document.querySelector('.page');
+    if (!page) return;
+    var children = Array.from(page.children);
+    var groups = [];
+    var i = 0;
+    while (i < children.length) {
+      var child = children[i];
+      if (child.classList && child.classList.contains('pill-wrap')) {
+        var start = i;
+        var end = i + 1;
+        while (end < children.length) {
+          var next = children[end];
+          var cls = next.classList;
+          if (cls && (cls.contains('pill-wrap') || cls.contains('section-divider'))) break;
+          end++;
+        }
+        groups.push([start, end]);
+        i = end;
+      } else {
+        i++;
+      }
+    }
+    var colors = ['zone-sky', 'zone-white'];
+    // 뒤에서부터 처리 (insert 시 index 영향 없게)
+    for (var g = groups.length - 1; g >= 0; g--) {
+      var startIdx = groups[g][0];
+      var endIdx = groups[g][1];
+      var zone = document.createElement('div');
+      zone.className = 'zone ' + colors[g % 2];
+      page.insertBefore(zone, children[startIdx]);
+      for (var k = startIdx; k < endIdx; k++) {
+        zone.appendChild(children[k]);
+      }
+    }
+  })();
+</script>
+
+</body>
+</html>
