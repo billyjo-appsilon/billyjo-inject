@@ -378,22 +378,23 @@
     box-shadow: 0 14px 32px rgba(8,56,248,0.10);
     border-color: rgba(8,56,248,0.22);
   }
-  /* Desktop arrow connectors between cards */
+  /* Desktop arrow connectors between cards: gap 18px → midpoint at card_right + 9px */
   .step-card:not(:last-child)::after {
     content: '';
     position: absolute;
-    right: -13px; top: 50%;
+    right: -20px; top: 50%;
     width: 22px; height: 22px;
     transform: translateY(-50%);
     background: #fff;
     border-radius: 999px;
     border: 1.5px solid #E5EAF5;
+    box-shadow: 0 2px 6px rgba(15,30,80,0.06);
     z-index: 2;
   }
   .step-card:not(:last-child)::before {
     content: '';
     position: absolute;
-    right: -8px; top: 50%;
+    right: -13px; top: 50%;
     width: 8px; height: 8px;
     transform: translateY(-50%) rotate(45deg);
     border-top: 2px solid var(--primary);
