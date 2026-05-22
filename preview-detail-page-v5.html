@@ -159,7 +159,7 @@
     color: #fff;
   }
   .hero h1 .yellow { color: #FFCE00; }
-  .hero h1 .nb { white-space: nowrap; }
+  .nb { white-space: nowrap; }
   .hero p {
     font-size: 15px; line-height: 1.5;
     letter-spacing: -0.3px;
@@ -359,68 +359,137 @@
   /* ============ 컨설팅 STEP 섹션 (라이프스타일 + 최저가 설계) ============ */
   .steps-grid {
     display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 16px; margin-top: 28px;
+    gap: 18px; margin-top: 32px;
+    position: relative;
   }
   .step-card {
     background: #fff;
-    border: 1px solid var(--border-soft);
-    border-radius: 24px;
-    padding: 30px 26px;
+    border: 1px solid #E5EAF5;
+    border-radius: 22px;
+    padding: 30px 26px 28px;
     text-align: left;
     position: relative;
-    transition: transform 0.18s, box-shadow 0.18s, border-color 0.18s;
+    box-shadow: 0 3px 14px rgba(15,30,80,0.04);
+    transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    display: flex; flex-direction: column;
   }
   .step-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 28px rgba(8,56,248,0.08);
-    border-color: rgba(8,56,248,0.18);
+    transform: translateY(-3px);
+    box-shadow: 0 14px 32px rgba(8,56,248,0.10);
+    border-color: rgba(8,56,248,0.22);
+  }
+  /* Desktop arrow connectors between cards */
+  .step-card:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    right: -13px; top: 50%;
+    width: 22px; height: 22px;
+    transform: translateY(-50%);
+    background: #fff;
+    border-radius: 999px;
+    border: 1.5px solid #E5EAF5;
+    z-index: 2;
+  }
+  .step-card:not(:last-child)::before {
+    content: '';
+    position: absolute;
+    right: -8px; top: 50%;
+    width: 8px; height: 8px;
+    transform: translateY(-50%) rotate(45deg);
+    border-top: 2px solid var(--primary);
+    border-right: 2px solid var(--primary);
+    z-index: 3;
   }
   .step-card .step-num {
-    display: inline-block;
-    font-size: 11.5px; font-weight: 800;
-    color: var(--primary);
-    background: var(--primary-pale);
-    padding: 5px 11px; border-radius: 999px;
+    display: flex; align-items: baseline; gap: 7px;
     margin-bottom: 18px;
-    letter-spacing: 0.4px;
+    color: var(--primary);
+    font-weight: 800;
+    letter-spacing: -0.2px;
   }
-  .step-card .step-icon {
-    margin-bottom: 14px;
-    display: flex; align-items: center;
+  .step-card .step-num .n {
+    font-size: 28px; line-height: 1;
+    letter-spacing: -0.8px;
   }
-  .step-card .step-icon svg.ico {
-    width: 40px; height: 40px; color: var(--primary);
+  .step-card .step-num .lbl {
+    font-size: 10.5px;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+  }
+  .step-card .step-icon-wrap {
+    width: 60px; height: 60px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #F0F3FF 0%, #E1E8FF 100%);
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 18px;
+  }
+  .step-card .step-icon-wrap svg.ico {
+    width: 28px; height: 28px; color: var(--primary);
   }
   .step-card .step-t {
-    font-size: 20px; font-weight: 800;
+    font-size: 19px; font-weight: 800;
     color: var(--text);
-    letter-spacing: -0.3px;
+    letter-spacing: -0.4px;
     margin-bottom: 10px;
+    line-height: 1.4;
   }
   .step-card .step-d {
     font-size: 14.5px; line-height: 1.65;
     color: var(--text-sub);
     letter-spacing: -0.2px;
   }
-  .step-card .step-d strong { color: var(--primary); }
+  .step-card .step-d strong { color: var(--primary); font-weight: 700; }
+
+  /* Accent card (STEP 3 = 결과) */
+  .step-card.accent {
+    background: linear-gradient(140deg, var(--primary) 0%, #1B4FFF 60%, #2855FF 100%);
+    border-color: transparent;
+    box-shadow: 0 10px 26px rgba(8,56,248,0.22);
+  }
+  .step-card.accent:hover {
+    box-shadow: 0 18px 38px rgba(8,56,248,0.30);
+    border-color: transparent;
+  }
+  .step-card.accent .step-num { color: #FFCE00; }
+  .step-card.accent .step-num .lbl { opacity: 0.85; }
+  .step-card.accent .step-icon-wrap {
+    background: rgba(255,255,255,0.16);
+    backdrop-filter: blur(6px);
+  }
+  .step-card.accent .step-icon-wrap svg.ico { color: #FFCE00; }
+  .step-card.accent .step-t { color: #fff; }
+  .step-card.accent .step-d { color: rgba(255,255,255,0.92); }
+  .step-card.accent .step-d strong { color: #FFCE00; }
 
   .consult-cta {
-    margin-top: 36px; text-align: center;
+    margin-top: 40px; text-align: center;
   }
   .btn-consult {
     display: inline-flex; align-items: center; gap: 10px;
     background: var(--primary); color: #fff;
-    padding: 17px 38px; border-radius: 999px;
+    padding: 18px 40px; border-radius: 999px;
     font-size: 16.5px; font-weight: 800;
     text-decoration: none;
     letter-spacing: -0.3px;
-    box-shadow: 0 8px 22px rgba(8,56,248,0.28);
-    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 10px 26px rgba(8,56,248,0.30);
+    transition: transform 0.18s, box-shadow 0.18s;
+    position: relative;
+  }
+  .btn-consult::before {
+    content: '';
+    position: absolute; inset: -4px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(8,56,248,0.3), rgba(40,85,255,0.3));
+    z-index: -1; opacity: 0;
+    transition: opacity 0.2s;
+    filter: blur(12px);
   }
   .btn-consult:hover {
     transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(8,56,248,0.38);
+    box-shadow: 0 14px 32px rgba(8,56,248,0.40);
   }
+  .btn-consult:hover::before { opacity: 1; }
   .btn-consult svg.ico { width: 19px; height: 19px; }
   .consult-note {
     font-size: 13.5px; color: var(--text-mute);
@@ -866,14 +935,26 @@
     .pc-gift-cell .name { font-size: 13.5px; margin-top: 2px; font-weight: 700; }
 
     /* ===== STEP cards (컨설팅) ===== */
-    .steps-grid { grid-template-columns: 1fr; gap: 12px; margin-top: 22px; }
-    .step-card { padding: 22px 20px; border-radius: 20px; }
-    .step-card .step-num { font-size: 11px; padding: 4px 10px; margin-bottom: 14px; }
-    .step-card .step-icon svg.ico { width: 34px; height: 34px; }
-    .step-card .step-t { font-size: 18px; margin-bottom: 8px; letter-spacing: -0.2px; }
+    .steps-grid { grid-template-columns: 1fr; gap: 14px; margin-top: 22px; }
+    .step-card { padding: 22px 22px 20px; border-radius: 20px; }
+    /* Mobile: 화살표 → 카드 하단 중앙 ↓ 으로 회전 */
+    .step-card:not(:last-child)::after {
+      right: 50%; top: auto; bottom: -12px;
+      transform: translateX(50%);
+    }
+    .step-card:not(:last-child)::before {
+      right: 50%; top: auto; bottom: -3px;
+      transform: translateX(50%) rotate(135deg);
+    }
+    .step-card .step-num { margin-bottom: 14px; gap: 6px; }
+    .step-card .step-num .n { font-size: 24px; }
+    .step-card .step-num .lbl { font-size: 10px; letter-spacing: 1px; }
+    .step-card .step-icon-wrap { width: 50px; height: 50px; margin-bottom: 14px; }
+    .step-card .step-icon-wrap svg.ico { width: 24px; height: 24px; }
+    .step-card .step-t { font-size: 18px; margin-bottom: 8px; letter-spacing: -0.3px; }
     .step-card .step-d { font-size: 14px; line-height: 1.6; }
-    .consult-cta { margin-top: 26px; }
-    .btn-consult { padding: 15px 30px; font-size: 15.5px; gap: 9px; }
+    .consult-cta { margin-top: 32px; }
+    .btn-consult { padding: 16px 32px; font-size: 15.5px; gap: 9px; }
     .btn-consult svg.ico { width: 17px; height: 17px; }
     .consult-note { font-size: 12.5px; margin-top: 12px; }
 
@@ -972,7 +1053,10 @@
     .diff-card { padding: 22px 20px; }
     .diff-card .t { font-size: 20px; }
     .diff-card .d { font-size: 14px; }
-    .step-card { padding: 20px 18px; }
+    .step-card { padding: 20px 18px 18px; }
+    .step-card .step-num .n { font-size: 22px; }
+    .step-card .step-icon-wrap { width: 46px; height: 46px; }
+    .step-card .step-icon-wrap svg.ico { width: 22px; height: 22px; }
     .step-card .step-t { font-size: 17px; }
     .step-card .step-d { font-size: 13.5px; }
     .btn-consult { padding: 14px 26px; font-size: 15px; }
@@ -1297,29 +1381,42 @@
   <div class="pill-wrap"><span class="pill">빌리조만의 컨설팅</span></div>
   <section>
     <p class="lead">
-      당신의 <span class="nb">라이프스타일에 맞춘</span><br>
-      <strong>최저가 가전 라인업 설계</strong>
+      <span class="nb">당신의 라이프스타일에 맞춘</span><br>
+      <strong><span class="nb">최저가 가전 라인업</span> <span class="nb">설계</span></strong>
     </p>
-    <p class="desc">단순 가격 비교가 아닙니다. <span class="bj-logo" style="font-size:18px;">빌리조</span> 전담 매니저가 본사·파트너사 전수 비교로<br>당신만의 최적 조합을 1:1 설계해드립니다.</p>
+    <p class="desc">
+      <span class="nb">단순 가격 비교가 아닙니다.</span><br>
+      <span class="bj-logo" style="font-size:18px;">빌리조</span> <span class="nb">전담 매니저가 본사·파트너사를 전수 비교해</span><br>
+      <span class="nb">당신만의 최적 조합을 1:1로 설계해드립니다.</span>
+    </p>
 
     <div class="steps-grid">
       <div class="step-card">
-        <span class="step-num">STEP 1</span>
-        <div class="step-icon"><svg class="ico"><use href="#i-message"/></svg></div>
-        <div class="step-t">1:1 라이프스타일 진단</div>
-        <div class="step-d">가족 구성·평수·사용 패턴을 듣고 <strong>진짜 필요한 제품만</strong> 추려드려요</div>
+        <div class="step-num"><span class="n">01</span><span class="lbl">STEP</span></div>
+        <div class="step-icon-wrap"><svg class="ico"><use href="#i-message"/></svg></div>
+        <div class="step-t"><span class="nb">1:1 라이프스타일 진단</span></div>
+        <div class="step-d">
+          <span class="nb">가족 구성·평수·사용 패턴을 분석</span>해<br>
+          <strong><span class="nb">진짜 필요한 제품만</span></strong> 추려드립니다
+        </div>
       </div>
       <div class="step-card">
-        <span class="step-num">STEP 2</span>
-        <div class="step-icon"><svg class="ico"><use href="#i-scale"/></svg></div>
-        <div class="step-t">본사·파트너사 전수 비교</div>
-        <div class="step-d">공식가, 카드 할인, 사은품 패키지까지 <strong>모든 변수를 한 번에</strong> 검토</div>
+        <div class="step-num"><span class="n">02</span><span class="lbl">STEP</span></div>
+        <div class="step-icon-wrap"><svg class="ico"><use href="#i-scale"/></svg></div>
+        <div class="step-t"><span class="nb">본사·파트너사 전수 비교</span></div>
+        <div class="step-d">
+          <span class="nb">공식가·카드 할인·사은품까지</span><br>
+          <strong><span class="nb">모든 변수를 한 번에</span></strong> 검토
+        </div>
       </div>
-      <div class="step-card">
-        <span class="step-num">STEP 3</span>
-        <div class="step-icon"><svg class="ico"><use href="#i-sparkles"/></svg></div>
-        <div class="step-t">최저가 설계안 제안</div>
-        <div class="step-d">결합·시점 최적화로 <strong>표시가보다 더 절감된</strong> 맞춤 견적 제공</div>
+      <div class="step-card accent">
+        <div class="step-num"><span class="n">03</span><span class="lbl">RESULT</span></div>
+        <div class="step-icon-wrap"><svg class="ico"><use href="#i-sparkles"/></svg></div>
+        <div class="step-t"><span class="nb">최저가 라인업 설계</span></div>
+        <div class="step-d">
+          <span class="nb">결합·시점 최적화로</span><br>
+          <strong><span class="nb">표시가보다 더 절감된</span></strong> <span class="nb">맞춤 견적</span>
+        </div>
       </div>
     </div>
 
@@ -1328,7 +1425,10 @@
         <svg class="ico"><use href="#i-message"/></svg>
         무료 상담 신청하기
       </a>
-      <div class="consult-note">평일 09:00 ~ 18:00 · 30초 신청 후 빌리조 매니저가 직접 연락드립니다</div>
+      <div class="consult-note">
+        <span class="nb">평일 09:00 ~ 18:00</span> ·
+        <span class="nb">30초 신청 후 빌리조 매니저가 직접 연락드립니다</span>
+      </div>
     </div>
   </section>
 
