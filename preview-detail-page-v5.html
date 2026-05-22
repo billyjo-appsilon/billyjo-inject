@@ -739,6 +739,144 @@
     margin: 80px 0 36px;
   }
 
+  /* ============ MOBILE (≤768px) ============ */
+  @media (max-width: 768px) {
+    .page { padding: 0 16px 80px; }
+
+    /* Hero */
+    .hero { border-radius: 18px; padding: 36px 22px 30px; }
+    .hero .badge-hero { font-size: 11px; padding: 5px 12px; margin-bottom: 14px; }
+    .hero h1 { font-size: 25px; letter-spacing: -0.6px; margin-bottom: 10px; }
+    .hero p { font-size: 13px; line-height: 1.5; }
+    .trust-chips { gap: 6px; margin-top: 18px; padding-top: 16px; }
+    .trust-chip { padding: 6px 12px; font-size: 11px; gap: 4px; }
+
+    /* Pill / Section header */
+    .pill-wrap { margin: 40px 0 18px; }
+    .pill { font-size: 15px; padding: 9px 22px; }
+    section .lead { font-size: 21px; letter-spacing: -0.5px; line-height: 1.4; }
+    section .lead .sub-inline { font-size: 14px; }
+    section .desc { font-size: 13.5px; }
+    section .sub { font-size: 12px; }
+
+    /* Zone padding (mobile) */
+    .zone { padding-top: 28px; padding-bottom: 36px; }
+    .zone > .pill-wrap:first-child { margin-top: 0; }
+
+    /* 본사 & 파트너사 브랜드 그리드: 4 → 3 columns */
+    .brand-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .brand-cell { aspect-ratio: 1.6; padding: 10px 12px; border-radius: 10px; }
+    .brand-cell img { max-height: 28px; }
+    .brand-cell .text-only { font-size: 11px; }
+    .brand-cell .text-only.small { font-size: 10px; }
+
+    /* Highlight bar */
+    .highlight-bar { padding: 16px 18px; gap: 12px; border-radius: 14px; }
+    .highlight-bar .icon { font-size: 28px; }
+    .highlight-bar .t { font-size: 15px; }
+    .highlight-bar .d { font-size: 12px; line-height: 1.5; }
+
+    /* 3 차별점 카드: 3 → 1 col */
+    .diff-grid { grid-template-columns: 1fr; gap: 12px; }
+    .diff-card { padding: 26px 20px; border-radius: 18px; }
+    .diff-card .num-circle { width: 36px; height: 36px; font-size: 13px; margin-bottom: 12px; }
+    .diff-card .icon { font-size: 36px; margin-bottom: 10px; }
+    .diff-card .t { font-size: 20px; margin-bottom: 8px; }
+    .diff-card .d { font-size: 14px; }
+    .diff-card .vs-mini { font-size: 14px; gap: 10px; margin-top: 16px; padding-top: 14px; }
+    .diff-card .vs-mini .label { font-size: 11.5px; }
+
+    /* 가격 비교: 2 → 1 col stacked */
+    .price-compare { grid-template-columns: 1fr; gap: 16px; }
+    .pc-row { padding: 14px 16px; border-radius: 12px; }
+    .pc-row .label { font-size: 14px; }
+    .pc-row .price { font-size: 15px; }
+    .pc-row .price.bold { font-size: 18px; }
+    .pc-row .price-note { font-size: 11px; }
+    .pc-row.billy::before { font-size: 10px; padding: 3px 8px; top: -9px; right: 12px; }
+    .pc-savings { font-size: 14px; padding: 14px; border-radius: 12px; }
+    .pc-savings .big { font-size: 22px; }
+    .pc-footnote { font-size: 10px; }
+    .pc-gift-grid { grid-template-columns: 1fr 1fr 1fr; gap: 5px; }
+    .pc-gift-cell { padding: 8px 6px; }
+    .pc-gift-cell .em { font-size: 16px; }
+    .pc-gift-cell .amt { font-size: 10px; }
+    .pc-gift-cell .name { font-size: 10.5px; }
+
+    /* A/S panel */
+    .as-panel { flex-direction: column; padding: 26px 22px; gap: 14px; text-align: center; border-radius: 18px; }
+    .as-panel .as-icon { font-size: 48px; }
+    .as-panel .as-text { text-align: center; }
+    .as-panel .as-t { font-size: 19px; justify-content: center; flex-wrap: wrap; margin-bottom: 6px; }
+    .as-panel .as-d { font-size: 13px; line-height: 1.5; }
+    .as-chips { gap: 6px; max-width: 100%; margin-top: 22px; }
+    .as-chip { padding: 9px 14px; font-size: 13px; }
+
+    /* 이사 카드: 3 → 1 col */
+    .move-grid { grid-template-columns: 1fr; gap: 10px; }
+    .move-card { padding: 22px 18px; border-radius: 16px; }
+    .move-card .icon { font-size: 36px; margin-bottom: 10px; }
+    .move-card .t { font-size: 15px; }
+    .move-card .d { font-size: 13px; }
+    .move-card .free-tag { font-size: 10px; margin-top: 10px; }
+
+    /* 제휴카드 (card-simple) */
+    .card-simple { flex-direction: column; padding: 26px 22px; gap: 14px; text-align: center; border-radius: 18px; }
+    .card-simple .icon-big { font-size: 44px; }
+    .card-simple .text-block { text-align: center; }
+    .card-simple .t { font-size: 19px; }
+    .card-simple .d { font-size: 13px; }
+    .card-simple .card-logos { justify-content: center; gap: 6px; margin-top: 10px; }
+    .card-simple .card-chip { font-size: 11px; padding: 5px 10px; }
+
+    /* 광고 전화 없습니다 */
+    .noad-card { grid-template-columns: 1fr; padding: 26px 22px; gap: 16px; text-align: center; border-radius: 18px; }
+    .noad-card .icon-big { font-size: 50px; }
+    .noad-card .text-block { text-align: center; }
+    .noad-card .t { font-size: 24px; line-height: 1.25; }
+    .noad-card .d { font-size: 14px; line-height: 1.5; }
+    .noad-card .row-mini { flex-direction: column; gap: 8px; align-items: center; margin-top: 14px; padding-top: 14px; }
+
+    /* 후기 marquee */
+    .review-item { flex: 0 0 280px; padding: 22px 18px; min-height: 200px; }
+    .review-item .quote { font-size: 14px; }
+    .review-item .cat-badge { font-size: 11px; padding: 4px 10px; }
+
+    /* FAQ */
+    .faq details { padding: 18px 20px; }
+    .faq summary { font-size: 14px; gap: 10px; }
+    .faq summary::before { width: 24px; height: 24px; font-size: 12px; }
+    .faq .answer { font-size: 13px; padding-left: 34px; line-height: 1.65; }
+
+    /* 신청 방법: 4 → 2x2 */
+    .step4-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+    .step4-cell { padding: 28px 16px; border-radius: 16px; }
+    .step4-cell .icon { font-size: 42px; }
+    .step4-cell .label { font-size: 12px; padding: 5px 10px; margin-bottom: 14px; }
+    .step4-cell .d { font-size: 13px; }
+
+    /* 위약금 */
+    .penalty-card { padding: 26px 22px; border-radius: 18px; }
+    .penalty-table th, .penalty-table td { padding: 12px 8px; font-size: 12.5px; }
+    .penalty-table td.rate { font-size: 14px; }
+    .penalty-formula { font-size: 12.5px; padding: 14px; }
+    .penalty-warn { font-size: 12.5px; padding: 12px 14px; }
+    .penalty-warn b { font-size: 13px; }
+    .penalty-warn span { font-size: 11.5px; }
+    .legal-note { font-size: 12px; }
+  }
+
+  /* ============ MOBILE SMALL (≤420px) ============ */
+  @media (max-width: 420px) {
+    .hero h1 { font-size: 22px; }
+    .pill { font-size: 14px; padding: 8px 20px; }
+    section .lead { font-size: 19px; }
+    .brand-grid { gap: 6px; }
+    .review-item { flex: 0 0 250px; }
+    .pc-gift-cell .name { font-size: 10px; }
+    .as-chip { font-size: 12px; padding: 8px 12px; }
+  }
+
   /* ============ ALTERNATING ZONES (흰색 ↔ 하늘 풀폭, pill = 섹션 구분점) ============ */
   html, body { background: #FFFFFF; }
   .page { background: transparent; }
