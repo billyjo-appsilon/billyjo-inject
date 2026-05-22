@@ -1152,8 +1152,8 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 
 // === 메인 페이지: 주요 카테고리 ↔ 이달의 추천제품 사이 v5 컨텐츠 주입 ===
 (function injectMainPageV5() {
-  var V5_URL = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@e927aa4/preview-detail-page-v5.html';
-  var CDN_BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@e927aa4';
+  var V5_URL = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@5986864/preview-detail-page-v5.html';
+  var CDN_BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@5986864';
   var INJECTED_ID = 'bj-v5-injected';
 
   function findTargetHeading() {
