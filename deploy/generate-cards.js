@@ -1,6 +1,6 @@
 /**
  * 카드 자동 생성기 (v1, family-templated).
- * 입력: /tmp/scraped-10.json (제품 스크래핑 데이터)
+ * 입력: /tmp/scraped-batch.json (제품 스크래핑 데이터)
  * 출력: skin-css/works/cards/{prodNo}.html
  *
  * 알고리즘:
@@ -14,7 +14,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const SCRAPED = JSON.parse(fs.readFileSync('/tmp/scraped-10.json', 'utf-8'));
+const SCRAPED = JSON.parse(fs.readFileSync('/tmp/scraped-batch.json', 'utf-8'));
 const TEMPLATE = fs.readFileSync('/Users/appsilon/repos/billyJo/skin-css/works/cards/10914.html', 'utf-8');
 const OUT_DIR = '/Users/appsilon/repos/billyJo/skin-css/works/cards';
 
