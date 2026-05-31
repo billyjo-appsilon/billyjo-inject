@@ -1271,45 +1271,46 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   if (location.pathname.indexOf('/prod_view/24578') === -1) return;
   var INJECTED_FLAG = 'bj-reco-injected';
 
-  // 24578(코웨이 아이콘 V2 얼음정수기 — 카드할인가 15,400원/월) 컨텍스트 시연.
+  // 24578(코웨이 아이콘 V2 얼음정수기 — 카드할인가 15,400원/월) 컨텍스트 — 실제 빌리조 상품.
   // 본격 적용 시 admin2 백엔드 /v1/products/recommendations API로 교체.
-  var IMG_BASE = 'https://rentalshop.site/_data/file/goodsImages/';
+  // 배지 = 각 카드의 명확한 차별점/혜택 (모호한 용어 금지)
+  var PV_BASE = 'https://billyjo.co.kr/html/dh_prod/prod_view/';
   var RECOMMENDATIONS = [
     {
-      badge: '최고 매칭', badgeStyle: 'primary',
-      brand: 'SK매직',
-      name: 'SK매직 메가 ICE 얼음정수기 mini WPUIAC606',
-      price: 16900, priceDiff: 1500,
+      badge: '월 500원 더 저렴', badgeStyle: 'primary',
+      brand: '청호나이스',
+      name: '청호나이스 얼음냉온정수기 550 (WI-55S90510M)',
+      price: 14900, priceDiff: -500,
       grade: 'A+',
-      strengths: ['얼음', '셀프형', '4개월 관리'],
+      strengths: ['얼음', '슬림형', '2개월 관리'],
       personaIcon: '👨‍👩‍👧',
-      personaText: '비슷한 <b>4인 가족</b> 사용자에게 인기',
-      image: IMG_BASE + '19c21befb2e2fb3d08da43ba1241243d.jpg',
-      href: '#'
+      personaText: '비슷한 <b>4인 가족</b>에게 인기',
+      image: 'https://rentalshop.site/_data/file/goodsImages/0853eaaa6d9d16017d361d113287c156.png',
+      href: PV_BASE + '22730'
     },
     {
-      badge: '사은품 혜택 ↑', badgeStyle: 'accent',
-      brand: '청호나이스',
-      name: '청호나이스 이과수 얼음냉온정수기 WPI-7900M',
+      badge: '초고온수 + 슬림', badgeStyle: 'accent',
+      brand: '쿠쿠',
+      name: '쿠쿠 제로백 슬림 직수 초고온수 얼음냉온정수기 (CP-AHS100HEW)',
       price: 17900, priceDiff: 2500,
       grade: 'A',
-      strengths: ['얼음', '방문관리', '저소음'],
-      personaIcon: '🧊',
-      personaText: '<b>여름철 사용량</b> 많은 분께 추천',
-      image: IMG_BASE + '31c63404208272f21c2d504f8165f615.jpg',
-      href: '#'
+      strengths: ['얼음', '초고온수', '슬림'],
+      personaIcon: '🍵',
+      personaText: '<b>차·분유</b> 자주 사용하는 분께',
+      image: 'https://rentalshop.site/_data/file/goodsImages/f2893878cae90b01372b29db1b907a66.png',
+      href: PV_BASE + '20276'
     },
     {
-      badge: '본사 직배정', badgeStyle: 'primary',
-      brand: '현대렌탈케어',
-      name: '현대 큐밍 슈퍼 얼음냉온정수기 H-WPI82N',
-      price: 18400, priceDiff: 3000,
+      badge: '살균 특화', badgeStyle: 'primary',
+      brand: '세스코',
+      name: '세스코 살균온 얼음정수기 (EWDD951)',
+      price: 18900, priceDiff: 3500,
       grade: 'A+',
-      strengths: ['얼음', '방문관리', 'UV살균'],
+      strengths: ['얼음', '살균', 'UV'],
       personaIcon: '👶',
-      personaText: '<b>영유아 가정</b>에게 추천',
-      image: IMG_BASE + '3e886e08a016ba0818332fa75c5ed040.jpg',
-      href: '#'
+      personaText: '<b>위생 민감</b> 가정 추천',
+      image: 'https://rentalshop.site/_data/file/goodsImages/28fb66c2489ddd775e20eadf77051c80.png',
+      href: PV_BASE + '22064'
     }
   ];
 
