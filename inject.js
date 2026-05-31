@@ -1262,6 +1262,168 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 })();
 
 // =============================================================================
+// 자동생성카드(ai) 하단 유사상품 추천 3개 (v0.6.1) — 시연용 정적 데이터
+//   배포 후 디자인 검토 → 승인 시 admin2 백엔드 API로 교체.
+//   롤백: 이 IIFE 또는 commit 자체를 revert + jsDelivr purge.
+// =============================================================================
+(function billyjoSimilarRecommendations() {
+  if (location.pathname.indexOf('/prod_view/') === -1) return;
+  var INJECTED_FLAG = 'bj-reco-injected';
+
+  // 임시 정적 추천 데이터 — 디자인 검증 후 동적 API로 교체
+  var RECOMMENDATIONS = [
+    {
+      badge: '최고 매칭', badgeStyle: 'primary',
+      brand: 'SK매직',
+      name: 'SK매직 올인원 직수정수기 (냉온정) WPUI700C',
+      price: 29900, priceDiff: -1000,
+      grade: 'A+',
+      strengths: ['자가관리', '3년 무상AS'],
+      personaIcon: '👨‍👩‍👧',
+      personaText: '비슷한 <b>4인 가족</b> 사용자에게 인기',
+      href: '#'
+    },
+    {
+      badge: '사은품 혜택 ↑', badgeStyle: 'accent',
+      brand: '청호나이스',
+      name: '청호나이스 이과수 직수정수기 WP-A801G',
+      price: 28900, priceDiff: -2000,
+      grade: 'A',
+      strengths: ['자가관리', '콤팩트형'],
+      personaIcon: '🏠',
+      personaText: '<b>1-2인 가구</b>에게 추천',
+      href: '#'
+    },
+    {
+      badge: '상위 평가', badgeStyle: 'primary',
+      brand: '현대렌탈케어',
+      name: '현대 큐밍 슈퍼 직수 냉온정수기 H-WPU52N',
+      price: 31900, priceDiff: 1000,
+      grade: 'A+',
+      strengths: ['방문관리', 'UV살균'],
+      personaIcon: '👶',
+      personaText: '<b>영유아 가정</b>에게 추천',
+      href: '#'
+    }
+  ];
+
+  function injectStyle() {
+    if (document.getElementById('bj-reco-style')) return;
+    var s = document.createElement('style');
+    s.id = 'bj-reco-style';
+    s.textContent = "\
+.bj-reco-section { margin-top: 24px; clear: both; }\
+.bj-reco-header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }\
+.bj-reco-title { font-size: 18px; font-weight: 800; color: #1A1F36; display: flex; align-items: center; gap: 8px; margin: 0; }\
+.bj-reco-title-icon { color: #0838F8; flex-shrink: 0; }\
+.bj-reco-sub { font-size: 12px; color: #475569; }\
+.bj-reco-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }\
+.bj-reco-card { background: #fff; border: 1px solid #E5E9F2; border-radius: 18px; padding: 14px; text-decoration: none; color: inherit; transition: transform .18s, box-shadow .18s, border-color .18s; display: flex; flex-direction: column; gap: 10px; position: relative; cursor: pointer; }\
+.bj-reco-card:hover { transform: translateY(-3px); box-shadow: 0 6px 18px rgba(20,30,80,.07); border-color: #4A6BFA; }\
+.bj-reco-card.is-best { border-color: #0838F8; box-shadow: 0 0 0 2px rgba(8,56,248,.08); }\
+.bj-reco-badge { position: absolute; top: -8px; left: 14px; background: #0838F8; color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: .3px; }\
+.bj-reco-badge.is-accent { background: #FF5A36; }\
+.bj-reco-img { width: 100%; aspect-ratio: 4/3; border-radius: 12px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; color: #94A3B8; font-size: 10px; text-align: center; line-height: 1.4; }\
+.bj-reco-brand { font-size: 10px; color: #94A3B8; font-weight: 600; letter-spacing: .3px; }\
+.bj-reco-name { font-size: 13px; font-weight: 700; color: #1A1F36; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }\
+.bj-reco-price-row { display: flex; align-items: baseline; gap: 6px; padding: 8px 0; border-top: 1px solid #E5E9F2; }\
+.bj-reco-price { font-size: 17px; font-weight: 800; color: #0838F8; letter-spacing: -.5px; }\
+.bj-reco-price-suffix { font-size: 10px; color: #94A3B8; }\
+.bj-reco-price-diff { margin-left: auto; font-size: 10px; font-weight: 700; }\
+.bj-reco-price-diff.is-down { color: #16A34A; }\
+.bj-reco-price-diff.is-up { color: #475569; }\
+.bj-reco-strengths { display: flex; flex-wrap: wrap; gap: 4px; }\
+.bj-reco-chip { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; background: #F4F6FC; border-radius: 999px; font-size: 10px; color: #475569; font-weight: 600; }\
+.bj-reco-chip.is-grade { background: #EEF2FF; color: #0838F8; }\
+.bj-reco-persona { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: #FFF1EC; border-radius: 10px; font-size: 11px; color: #B43E22; font-weight: 600; line-height: 1.3; }\
+.bj-reco-cta { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 9px 10px; background: #F4F6FC; color: #0838F8; border: 1px solid #EEF2FF; border-radius: 10px; font-size: 12px; font-weight: 700; text-decoration: none; transition: all .15s; }\
+.bj-reco-card:hover .bj-reco-cta { background: #0838F8; color: #fff; border-color: #0838F8; }\
+.bj-reco-foot { font-size: 10px; color: #94A3B8; text-align: center; margin-top: 14px; }\
+@media (max-width: 600px) { .bj-reco-grid { grid-template-columns: 1fr; } .bj-reco-card { flex-direction: row; align-items: stretch; gap: 12px; } .bj-reco-card .bj-reco-img { width: 110px; aspect-ratio: 1; flex-shrink: 0; } .bj-reco-card > .bj-reco-brand, .bj-reco-card > .bj-reco-name, .bj-reco-card > .bj-reco-price-row, .bj-reco-card > .bj-reco-strengths, .bj-reco-card > .bj-reco-persona, .bj-reco-card > .bj-reco-cta { } .bj-reco-card { display: grid; grid-template-columns: 110px 1fr; grid-template-areas: 'img body'; } .bj-reco-img { grid-area: img; } .bj-reco-card .bj-reco-body { grid-area: body; display: flex; flex-direction: column; gap: 6px; min-width: 0; } .bj-reco-card .bj-reco-cta { display: none; } .bj-reco-name { min-height: 0; } .bj-reco-badge { top: -6px; left: 8px; } }\
+";
+    document.head.appendChild(s);
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  function renderCard(item, idx) {
+    var diffCls = item.priceDiff < 0 ? 'is-down' : 'is-up';
+    var diffStr = (item.priceDiff > 0 ? '+' : '') + item.priceDiff.toLocaleString() + '원 ' + (item.priceDiff < 0 ? '▼' : '▲');
+    var strengths = '<span class="bj-reco-chip is-grade">' + escapeHtml(item.grade) + '</span>';
+    for (var i = 0; i < item.strengths.length; i++) {
+      strengths += '<span class="bj-reco-chip">' + escapeHtml(item.strengths[i]) + '</span>';
+    }
+    var bestCls = idx === 0 ? ' is-best' : '';
+    var badgeCls = item.badgeStyle === 'accent' ? ' is-accent' : '';
+    var imgHtml = item.image
+      ? '<img src="' + escapeHtml(item.image) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px">'
+      : '<div>제품 이미지</div>';
+    return '<a class="bj-reco-card' + bestCls + '" href="' + escapeHtml(item.href) + '">' +
+      '<span class="bj-reco-badge' + badgeCls + '">' + escapeHtml(item.badge) + '</span>' +
+      '<div class="bj-reco-img">' + imgHtml + '</div>' +
+      '<div class="bj-reco-body" style="display:flex;flex-direction:column;gap:10px;min-width:0">' +
+      '<div class="bj-reco-brand">' + escapeHtml(item.brand) + '</div>' +
+      '<div class="bj-reco-name">' + escapeHtml(item.name) + '</div>' +
+      '<div class="bj-reco-price-row">' +
+      '<span class="bj-reco-price">' + item.price.toLocaleString() + '</span>' +
+      '<span class="bj-reco-price-suffix">원/월</span>' +
+      '<span class="bj-reco-price-diff ' + diffCls + '">' + diffStr + '</span>' +
+      '</div>' +
+      '<div class="bj-reco-strengths">' + strengths + '</div>' +
+      '<div class="bj-reco-persona"><span>' + item.personaIcon + '</span><span>' + item.personaText + '</span></div>' +
+      '<span class="bj-reco-cta">자세히 보기 →</span>' +
+      '</div></a>';
+  }
+
+  function buildHtml() {
+    var cards = '';
+    for (var i = 0; i < RECOMMENDATIONS.length; i++) cards += renderCard(RECOMMENDATIONS[i], i);
+    return '<div class="bj-reco-section" data-' + INJECTED_FLAG + '>' +
+      '<div class="bj-reco-header">' +
+      '<h3 class="bj-reco-title">' +
+      '<svg class="bj-reco-title-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>' +
+      '비슷한 분들이 함께 본 제품' +
+      '</h3>' +
+      '<div class="bj-reco-sub">가격·성능·페르소나가 비슷한 추천 3선</div>' +
+      '</div>' +
+      '<div class="bj-reco-grid">' + cards + '</div>' +
+      '<div class="bj-reco-foot">추천 기준: 가격대(±20%) · 동일 카테고리 · 페르소나 매칭도 ≥75 · 평가 등급 A 이상 · 사은품 한도 상위</div>' +
+      '</div>';
+  }
+
+  function tryInject() {
+    if (document.querySelector('[data-' + INJECTED_FLAG + ']')) return true;
+    var v5 = document.getElementById('bj-v5-injected');
+    if (!v5) return false;
+    var lastZone = v5.querySelector('.zone:last-of-type') || v5.querySelector('.zone');
+    var host = document.createElement('div');
+    host.innerHTML = buildHtml();
+    var section = host.firstChild;
+    if (lastZone) lastZone.appendChild(section);
+    else v5.appendChild(section);
+    return true;
+  }
+
+  function start() {
+    injectStyle();
+    if (tryInject()) return;
+    var tries = 0;
+    var iv = setInterval(function() {
+      if (tryInject() || ++tries >= 60) clearInterval(iv);
+    }, 250);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', start);
+  } else {
+    start();
+  }
+})();
+
+// =============================================================================
 // 상담신청 모달 — 전환 최적화 패키지 (v0.6.0)
 //   - 원탭 통화(tel:) + DTMF 자동 코드 전송
 //   - 상담사 카드(사진/이름/오늘건수/평점) = 신뢰 시그널
