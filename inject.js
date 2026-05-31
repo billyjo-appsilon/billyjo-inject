@@ -1267,7 +1267,8 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 //   롤백: 이 IIFE 또는 commit 자체를 revert + jsDelivr purge.
 // =============================================================================
 (function billyjoSimilarRecommendations() {
-  if (location.pathname.indexOf('/prod_view/') === -1) return;
+  // 시연용 — 특정 상품 페이지(24578)에서만 활성. 검증 후 전체 상세페이지로 확장.
+  if (location.pathname.indexOf('/prod_view/24578') === -1) return;
   var INJECTED_FLAG = 'bj-reco-injected';
 
   // 임시 정적 추천 데이터 — 디자인 검증 후 동적 API로 교체
