@@ -1400,23 +1400,23 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       '</div>';
   }
 
-  function tryInject() {
+  function tryInject(allowFallback) {
     if (document.querySelector('[data-' + INJECTED_FLAG + ']')) return true;
     // 위치 우선순위:
     //   1. #ai-card-lpt-section 직후 (AI 카드 SLOT 8 약정기간 표 끝난 자리, 카드 내부)
     //   2. #ai-card-root 직후 (AI 카드 전체 끝난 자리)
-    //   3. fallback: .prod_view_bot.mt10 직전 (상품정보 영역 직전)
+    //   3. fallback (allowFallback=true일 때만): .prod_view_bot.mt10 직전
     var anchor = document.querySelector('#ai-card-root #ai-card-lpt-section')
               || document.querySelector('#ai-card-root');
-    var prodBot = document.querySelector('.prod_view_bot.mt10');
+    if (!anchor && !allowFallback) return false;  // AI 카드 도착 기다리기
+
+    var prodBot = !anchor ? document.querySelector('.prod_view_bot.mt10') : null;
     if (!anchor && !prodBot) return false;
 
     var host = document.createElement('div');
     host.innerHTML = buildHtml();
     var section = host.firstChild;
     var zone = document.createElement('div');
-    // AI 카드 안에 들어가면 zone-sky 배경 제거 (카드 디자인과 통일).
-    // 카드 밖에 들어가면 옅은 하늘색 zone 배경으로 시각 분리.
     var insideCard = !!anchor;
     zone.style.cssText = insideCard
       ? 'padding:18px 0 6px;margin:0;clear:both;border-top:1px solid #E5E9F2;'
@@ -1425,7 +1425,6 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     zone.appendChild(section);
 
     if (anchor) {
-      // anchor 직후 sibling으로 삽입
       anchor.parentNode.insertBefore(zone, anchor.nextSibling);
     } else {
       prodBot.parentNode.insertBefore(zone, prodBot);
@@ -1435,11 +1434,18 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 
   function start() {
     injectStyle();
-    if (tryInject()) return;
+    if (tryInject(false)) return;
+    // 1단계: 15초 동안 250ms 간격으로 AI 카드 anchor 대기
     var tries = 0;
     var iv = setInterval(function() {
-      if (tryInject() || ++tries >= 60) clearInterval(iv);
+      if (tryInject(false) || ++tries >= 60) clearInterval(iv);
     }, 250);
+    // 2단계: 20초 후에도 AI 카드 없으면 fallback (.prod_view_bot.mt10 직전)
+    setTimeout(function() {
+      if (!document.querySelector('[data-' + INJECTED_FLAG + ']')) {
+        tryInject(true);
+      }
+    }, 20000);
   }
 
   if (document.readyState === 'loading') {
