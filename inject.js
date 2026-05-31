@@ -1442,15 +1442,82 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     return true;
   }
 
+  /* v0.6.2: admin2 백엔드 /v1/products/recommendations 호출 시도.
+     응답 items 비면 정적 RECOMMENDATIONS 유지. */
+  function detectPageProduct() {
+    var pid = null, pname = null, monthly = null, cardPrice = null, term = null;
+    var m = location.pathname.match(/\/prod_view\/(\d+)/);
+    if (m) pid = m[1];
+    var nameEl = document.querySelector('.prod_name h2, .prod_name, h1.prod_tit, .prod_view h2');
+    if (nameEl) pname = (nameEl.textContent || '').trim().slice(0, 200);
+    // 가격 추출
+    var priceEl = document.querySelector('.rental_price b');
+    if (priceEl) {
+      var t = (priceEl.textContent || '').replace(/[^0-9]/g, '');
+      if (t) monthly = parseInt(t, 10);
+    }
+    var cardEl = document.querySelector('.card_dc b, .red.card_dc b');
+    if (cardEl) {
+      var ct = (cardEl.textContent || '').replace(/[^0-9]/g, '');
+      if (ct) cardPrice = parseInt(ct, 10);
+    }
+    var termEl = document.querySelector('.bj-ws-term-pill.active .bj-ws-term-period');
+    if (termEl) term = (termEl.textContent || '').trim();
+    return { productId: pid, productName: pname, monthlyFee: monthly, cardDiscountedPrice: cardPrice, contractTerm: term };
+  }
+
+  function fetchRecommendations() {
+    var ctx = detectPageProduct();
+    if (!ctx.productName) return Promise.resolve(null);
+    return fetch('https://admin2-api.billyjo.co.kr/v1/products/recommendations', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(ctx),
+    })
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(j) {
+        var items = j && j.data && j.data.items;
+        if (!items || items.length === 0) return null;
+        return items;
+      })
+      .catch(function() { return null; });
+  }
+
+  function applyDynamicRecos(apiItems) {
+    if (!apiItems || apiItems.length === 0) return;
+    // API 응답을 RECOMMENDATIONS 포맷으로 매핑
+    var mapped = apiItems.slice(0, 3).map(function(it, i) {
+      return {
+        badge: it.badge || '추천',
+        badgeStyle: it.badgeStyle || (i === 0 ? 'primary' : 'accent'),
+        brand: it.rentalCompany || '',
+        name: it.productName || '',
+        price: it.monthlyFee || 0,
+        priceDiff: it.priceDiff || 0,
+        grade: it.grade || 'A',
+        strengths: it.strengths || [],
+        personaIcon: it.personaIcon || '👨‍👩‍👧',
+        personaText: it.personaText || '',
+        image: '',  // TODO: 빌리조 카탈로그 매핑 시 이미지 채움
+        href: '#'
+      };
+    });
+    // RECOMMENDATIONS 전체 치환
+    while (RECOMMENDATIONS.length) RECOMMENDATIONS.pop();
+    mapped.forEach(function(m) { RECOMMENDATIONS.push(m); });
+  }
+
   function start() {
     injectStyle();
+    // 백엔드 추천 비동기 호출 — 1초 내 응답 오면 동적 데이터 적용, 안 오면 정적 그대로
+    var apiPromise = fetchRecommendations();
+    apiPromise.then(applyDynamicRecos);
+
     if (tryInject(false)) return;
-    // 1단계: 15초 동안 250ms 간격으로 AI 카드 anchor 대기
     var tries = 0;
     var iv = setInterval(function() {
       if (tryInject(false) || ++tries >= 60) clearInterval(iv);
     }, 250);
-    // 2단계: 20초 후에도 AI 카드 없으면 fallback (.prod_view_bot.mt10 직전)
     setTimeout(function() {
       if (!document.querySelector('[data-' + INJECTED_FLAG + ']')) {
         tryInject(true);
