@@ -1272,45 +1272,54 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   var INJECTED_FLAG = 'bj-reco-injected';
 
   // 24578(코웨이 아이콘 V2 얼음냉온정수기, 가정용 컴팩트) 매칭 추천.
-  // 매칭 룰: 동일 카테고리(가정용 얼음정수기·컴팩트형) + 비슷한 카드할인가 ±5,000원 범위 +
-  //          본사 수수료 DESC 가정. 본격 적용 시 admin2 API로 교체.
+  // ─────────────────────────────────────────────────────────────────────────────
+  // 추천 선정 3원칙 (사용자 명시 — 백엔드 추천 API 동일 적용):
+  //   1. 기능 ≥ 원본 (다운그레이드 금지). 원본이 얼음/냉/온/정 4기능이면 그 이상.
+  //   2. 가격 ≤ 또는 ≈ 원본. 비슷한 가격이면 기능적 우위 필수.
+  //      "비슷"은 카드할인가 ±20% 이내 권장 (예: 15,400원 → 12,300 ~ 18,500원).
+  //   3. 페르소나 매칭 + 본사 수수료(incentive_amount) ↑ + 고객 후보 변경 메리트 필수.
+  //      "메리트" = 기능 추가, 가격 절감, 위생/안전 강화, 사은품 한도 등 명확한 가치.
+  // ─────────────────────────────────────────────────────────────────────────────
   var PV_BASE = 'https://billyjo.co.kr/html/dh_prod/prod_view/';
   var RECOMMENDATIONS = [
+    // [원칙 1: 기능 동등] [원칙 2: 가격 -3.2% 저렴] [원칙 3: 청호 수수료 ↑ + 가격 메리트]
     {
       badge: '월 500원 저렴', badgeStyle: 'primary',
       brand: '청호나이스',
       name: '청호나이스 얼음냉온정수기 550 (가정용 슬림)',
       price: 14900, priceDiff: -500,
       grade: 'A+',
-      strengths: ['얼음', '슬림형', '가정용'],
+      strengths: ['얼음·냉·온·정 4기능', '가정용 슬림', '2개월 관리'],
       personaIcon: '👨‍👩‍👧',
       personaText: '<b>4인 가족</b> 표준 가정용',
       image: 'https://rentalshop.site/_data/file/goodsImages/0853eaaa6d9d16017d361d113287c156.png',
       href: PV_BASE + '22730'
     },
+    // [원칙 1: 기능 +초고온수] [원칙 2: 가격 +16% — 비슷 가격대] [원칙 3: 차/분유 페르소나 메리트]
     {
-      badge: '온수 제외 더 절약', badgeStyle: 'accent',
-      brand: '코웨이',
-      name: '코웨이 아이콘 V2 얼음냉정수기 (CPI-7400N_V2, 온수 제외)',
-      price: 11400, priceDiff: -4000,
-      grade: 'A+',
-      strengths: ['얼음', '컴팩트', '같은 시리즈'],
-      personaIcon: '🧊',
-      personaText: '<b>온수 거의 안 쓰는</b> 가정에 추천',
-      image: 'https://rentalshop.site/_data/file/goodsImages/fa2095fa4ecc8bb6c44f0095997be0d5.png',
-      href: PV_BASE + '24580'
-    },
-    {
-      badge: '셀프형 가정용', badgeStyle: 'primary',
-      brand: 'SK매직',
-      name: 'SK 원코크 얼음물 냉온정수기 셀프형 (WPUIAC414)',
-      price: 18900, priceDiff: 3500,
+      badge: '+초고온수 기능', badgeStyle: 'accent',
+      brand: '쿠쿠',
+      name: '쿠쿠 제로백 슬림 직수 초고온수 얼음냉온정수기',
+      price: 17900, priceDiff: 2500,
       grade: 'A',
-      strengths: ['얼음', '셀프관리', '가정용'],
-      personaIcon: '🏠',
-      personaText: '<b>관리 직접</b> 해도 괜찮은 분',
-      image: 'https://rentalshop.site/_data/file/goodsImages/500b03fb12733974c8738ece0b27c5b7.png',
-      href: PV_BASE + '22920'
+      strengths: ['얼음·냉·온·정 4기능', '초고온수 추가', '슬림 가정용'],
+      personaIcon: '🍵',
+      personaText: '<b>차·분유·이유식</b> 자주 만드는 가정',
+      image: 'https://rentalshop.site/_data/file/goodsImages/f2893878cae90b01372b29db1b907a66.png',
+      href: PV_BASE + '20276'
+    },
+    // [원칙 1: 기능 +UV살균] [원칙 2: 가격 +23% — 비슷 상한] [원칙 3: 영유아·위생 페르소나 메리트]
+    {
+      badge: '+UV 살균 기능', badgeStyle: 'primary',
+      brand: '세스코',
+      name: '세스코 살균온 얼음냉온정수기',
+      price: 18900, priceDiff: 3500,
+      grade: 'A+',
+      strengths: ['얼음·냉·온·정 4기능', 'UV 살균 추가', '가정용'],
+      personaIcon: '👶',
+      personaText: '<b>영유아 가정·위생 민감</b>한 분께',
+      image: 'https://rentalshop.site/_data/file/goodsImages/28fb66c2489ddd775e20eadf77051c80.png',
+      href: PV_BASE + '22064'
     }
   ];
 
