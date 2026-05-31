@@ -1355,6 +1355,23 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 .bj-reco-cta { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 9px 10px; background: #F4F6FC; color: #0838F8; border: 1px solid #EEF2FF; border-radius: 10px; font-size: 12px; font-weight: 700; text-decoration: none; transition: all .15s; }\
 .bj-reco-card:hover .bj-reco-cta { background: #0838F8; color: #fff; border-color: #0838F8; }\
 .bj-reco-foot { font-size: 10px; color: #94A3B8; text-align: center; margin-top: 14px; }\
+/* 최고 인기 카드 (topPick) — 강조 큰 카드 */\
+.bj-reco-top-card { display: grid; grid-template-columns: 130px 1fr auto; gap: 16px; align-items: center; background: linear-gradient(135deg, #FFF7ED 0%, #FFFBF5 50%, #FFFFFF 100%); border: 2px solid #FB923C; border-radius: 18px; padding: 18px 18px 18px 18px; margin-bottom: 16px; text-decoration: none; color: inherit; position: relative; box-shadow: 0 4px 14px rgba(251, 146, 60, 0.18); transition: transform .15s, box-shadow .15s; }\
+.bj-reco-top-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(251, 146, 60, 0.28); }\
+.bj-reco-top-badge { position: absolute; top: -10px; left: 18px; background: linear-gradient(135deg, #F97316 0%, #DC2626 100%); color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; letter-spacing: .3px; box-shadow: 0 2px 6px rgba(220, 38, 38, .3); }\
+.bj-reco-top-img { width: 130px; height: 120px; border-radius: 14px; background: #FEF3E2; display: flex; align-items: center; justify-content: center; overflow: hidden; }\
+.bj-reco-top-body { min-width: 0; display: flex; flex-direction: column; gap: 6px; }\
+.bj-reco-top-sub { font-size: 11px; font-weight: 700; color: #C2410C; letter-spacing: .2px; }\
+.bj-reco-top-brand { font-size: 11px; color: #9A3412; font-weight: 600; letter-spacing: .3px; }\
+.bj-reco-top-name { font-size: 15px; font-weight: 800; color: #1A1F36; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }\
+.bj-reco-top-price-row { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }\
+.bj-reco-top-price { font-size: 22px; font-weight: 800; color: #DC2626; letter-spacing: -.5px; }\
+.bj-reco-top-price-suffix { font-size: 11px; color: #94A3B8; }\
+.bj-reco-top-diff { font-size: 11px; font-weight: 700; color: #16A34A; margin-left: 4px; }\
+.bj-reco-top-strengths { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }\
+.bj-reco-top-chip { display: inline-flex; padding: 3px 8px; background: #FEF3E2; color: #9A3412; border-radius: 999px; font-size: 10px; font-weight: 600; }\
+.bj-reco-top-cta { background: #DC2626; color: #fff; font-size: 13px; font-weight: 700; padding: 10px 16px; border-radius: 10px; white-space: nowrap; }\
+@media (max-width: 600px) { .bj-reco-top-card { grid-template-columns: 90px 1fr; padding: 14px 12px; } .bj-reco-top-img { width: 90px; height: 90px; } .bj-reco-top-cta { display: none; } .bj-reco-top-name { font-size: 13px; } .bj-reco-top-price { font-size: 18px; } .bj-reco-top-badge { left: 12px; top: -8px; } }\
 @media (max-width: 600px) { .bj-reco-grid { grid-template-columns: 1fr; } .bj-reco-card { flex-direction: row; align-items: stretch; gap: 12px; } .bj-reco-card .bj-reco-img { width: 110px; aspect-ratio: 1; flex-shrink: 0; } .bj-reco-card > .bj-reco-brand, .bj-reco-card > .bj-reco-name, .bj-reco-card > .bj-reco-price-row, .bj-reco-card > .bj-reco-strengths, .bj-reco-card > .bj-reco-persona, .bj-reco-card > .bj-reco-cta { } .bj-reco-card { display: grid; grid-template-columns: 110px 1fr; grid-template-areas: 'img body'; } .bj-reco-img { grid-area: img; } .bj-reco-card .bj-reco-body { grid-area: body; display: flex; flex-direction: column; gap: 6px; min-width: 0; } .bj-reco-card .bj-reco-cta { display: none; } .bj-reco-name { min-height: 0; } .bj-reco-badge { top: -6px; left: 8px; } }\
 ";
     document.head.appendChild(s);
@@ -1394,6 +1411,40 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       '</div></a>';
   }
 
+  // 최고 인기 (topPick) — 정적 fallback (24578 컨텍스트)
+  var TOP_PICK = null;
+
+  function renderTopPick(item) {
+    if (!item) return '';
+    var diffStr = '';
+    if (typeof item.priceDiff === 'number' && item.priceDiff !== 0) {
+      var sign = item.priceDiff > 0 ? '+' : '';
+      diffStr = '<span class="bj-reco-top-diff">(' + sign + item.priceDiff.toLocaleString() + '원)</span>';
+    }
+    var strengths = (item.strengths || []).slice(0, 4).map(function(s){
+      return '<span class="bj-reco-top-chip">' + escapeHtml(s) + '</span>';
+    }).join('');
+    var imgHtml = item.image
+      ? '<img src="' + escapeHtml(item.image) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:14px">'
+      : '<div style="text-align:center;color:#94A3B8;font-size:11px">제품 이미지</div>';
+    return '<a class="bj-reco-top-card" href="' + escapeHtml(item.href || '#') + '">' +
+      '<span class="bj-reco-top-badge">' + escapeHtml(item.badge || '🔥 최고 인기') + '</span>' +
+      '<div class="bj-reco-top-img">' + imgHtml + '</div>' +
+      '<div class="bj-reco-top-body">' +
+        (item.subBadge ? '<div class="bj-reco-top-sub">' + escapeHtml(item.subBadge) + '</div>' : '') +
+        '<div class="bj-reco-top-brand">' + escapeHtml(item.brand || '') + '</div>' +
+        '<div class="bj-reco-top-name">' + escapeHtml(item.name || '') + '</div>' +
+        '<div class="bj-reco-top-price-row">' +
+          '<span class="bj-reco-top-price">' + (item.price || 0).toLocaleString() + '</span>' +
+          '<span class="bj-reco-top-price-suffix">원/월</span>' +
+          diffStr +
+        '</div>' +
+        '<div class="bj-reco-top-strengths">' + strengths + '</div>' +
+      '</div>' +
+      '<span class="bj-reco-top-cta">자세히 보기 →</span>' +
+      '</a>';
+  }
+
   function buildHtml() {
     var cards = '';
     for (var i = 0; i < RECOMMENDATIONS.length; i++) cards += renderCard(RECOMMENDATIONS[i], i);
@@ -1403,10 +1454,11 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       '<svg class="bj-reco-title-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>' +
       '비슷한 분들이 함께 본 제품' +
       '</h3>' +
-      '<div class="bj-reco-sub">가격·성능·페르소나가 비슷한 추천 3선</div>' +
+      '<div class="bj-reco-sub">최고 인기 + 가격·성능·페르소나 비슷한 추천</div>' +
       '</div>' +
+      renderTopPick(TOP_PICK) +
       '<div class="bj-reco-grid">' + cards + '</div>' +
-      '<div class="bj-reco-foot">추천 기준: 가격대(±20%) · 동일 카테고리 · 페르소나 매칭도 ≥75 · 평가 등급 A 이상 · 사은품 한도 상위</div>' +
+      '<div class="bj-reco-foot">추천 기준: 가격대 ±25% · 동일 카테고리 · 페르소나 매칭도 ≥75 · 평가 등급 A 이상 · 본사 직배정 우선</div>' +
       '</div>';
   }
 
@@ -1476,15 +1528,47 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     })
       .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function(j) {
-        var items = j && j.data && j.data.items;
-        if (!items || items.length === 0) return null;
-        return items;
+        var data = j && j.data;
+        if (!data) return null;
+        return {
+          topPick: data.topPick || null,
+          items: data.items || [],
+        };
       })
       .catch(function() { return null; });
   }
 
-  function applyDynamicRecos(apiItems) {
-    if (!apiItems || apiItems.length === 0) return;
+  function applyDynamicRecos(payload) {
+    if (!payload) return;
+    var apiItems = payload.items || [];
+    var apiTop = payload.topPick;
+    var PV = 'https://billyjo.co.kr/html/dh_prod/prod_view/';
+
+    // topPick 매핑
+    if (apiTop) {
+      TOP_PICK = {
+        brand: apiTop.rentalCompany || '',
+        name: apiTop.productName || '',
+        price: apiTop.monthlyFee || 0,
+        priceDiff: apiTop.priceDiff || 0,
+        badge: apiTop.badge || '🔥 최고 인기',
+        subBadge: apiTop.subBadge || '',
+        grade: apiTop.grade || 'A+',
+        strengths: apiTop.strengths || [],
+        image: '',
+        href: apiTop.productId ? (PV + apiTop.productId) : '#',
+      };
+    }
+    if (!apiItems || apiItems.length === 0) {
+      // topPick만 받고 items 없어도 DOM 갱신
+      var existingEl = document.querySelector('[data-' + INJECTED_FLAG + ']');
+      if (existingEl && existingEl.parentNode) {
+        var temp0 = document.createElement('div');
+        temp0.innerHTML = buildHtml();
+        existingEl.parentNode.replaceChild(temp0.firstChild, existingEl);
+      }
+      return;
+    }
     // API 응답을 RECOMMENDATIONS 포맷으로 매핑
     var PV = 'https://billyjo.co.kr/html/dh_prod/prod_view/';
     var mapped = apiItems.slice(0, 3).map(function(it, i) {
