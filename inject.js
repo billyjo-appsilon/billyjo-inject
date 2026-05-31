@@ -1271,46 +1271,46 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   if (location.pathname.indexOf('/prod_view/24578') === -1) return;
   var INJECTED_FLAG = 'bj-reco-injected';
 
-  // 24578(코웨이 아이콘 V2 얼음정수기 — 카드할인가 15,400원/월) 컨텍스트 — 실제 빌리조 상품.
-  // 본격 적용 시 admin2 백엔드 /v1/products/recommendations API로 교체.
-  // 배지 = 각 카드의 명확한 차별점/혜택 (모호한 용어 금지)
+  // 24578(코웨이 아이콘 V2 얼음냉온정수기, 가정용 컴팩트) 매칭 추천.
+  // 매칭 룰: 동일 카테고리(가정용 얼음정수기·컴팩트형) + 비슷한 카드할인가 ±5,000원 범위 +
+  //          본사 수수료 DESC 가정. 본격 적용 시 admin2 API로 교체.
   var PV_BASE = 'https://billyjo.co.kr/html/dh_prod/prod_view/';
   var RECOMMENDATIONS = [
     {
-      badge: '월 500원 더 저렴', badgeStyle: 'primary',
+      badge: '월 500원 저렴', badgeStyle: 'primary',
       brand: '청호나이스',
-      name: '청호나이스 얼음냉온정수기 550 (WI-55S90510M)',
+      name: '청호나이스 얼음냉온정수기 550 (가정용 슬림)',
       price: 14900, priceDiff: -500,
       grade: 'A+',
-      strengths: ['얼음', '슬림형', '2개월 관리'],
+      strengths: ['얼음', '슬림형', '가정용'],
       personaIcon: '👨‍👩‍👧',
-      personaText: '비슷한 <b>4인 가족</b>에게 인기',
+      personaText: '<b>4인 가족</b> 표준 가정용',
       image: 'https://rentalshop.site/_data/file/goodsImages/0853eaaa6d9d16017d361d113287c156.png',
       href: PV_BASE + '22730'
     },
     {
-      badge: '초고온수 + 슬림', badgeStyle: 'accent',
-      brand: '쿠쿠',
-      name: '쿠쿠 제로백 슬림 직수 초고온수 얼음냉온정수기 (CP-AHS100HEW)',
-      price: 17900, priceDiff: 2500,
-      grade: 'A',
-      strengths: ['얼음', '초고온수', '슬림'],
-      personaIcon: '🍵',
-      personaText: '<b>차·분유</b> 자주 사용하는 분께',
-      image: 'https://rentalshop.site/_data/file/goodsImages/f2893878cae90b01372b29db1b907a66.png',
-      href: PV_BASE + '20276'
+      badge: '온수 제외 더 절약', badgeStyle: 'accent',
+      brand: '코웨이',
+      name: '코웨이 아이콘 V2 얼음냉정수기 (CPI-7400N_V2, 온수 제외)',
+      price: 11400, priceDiff: -4000,
+      grade: 'A+',
+      strengths: ['얼음', '컴팩트', '같은 시리즈'],
+      personaIcon: '🧊',
+      personaText: '<b>온수 거의 안 쓰는</b> 가정에 추천',
+      image: 'https://rentalshop.site/_data/file/goodsImages/fa2095fa4ecc8bb6c44f0095997be0d5.png',
+      href: PV_BASE + '24580'
     },
     {
-      badge: '살균 특화', badgeStyle: 'primary',
-      brand: '세스코',
-      name: '세스코 살균온 얼음정수기 (EWDD951)',
+      badge: '셀프형 가정용', badgeStyle: 'primary',
+      brand: 'SK매직',
+      name: 'SK 원코크 얼음물 냉온정수기 셀프형 (WPUIAC414)',
       price: 18900, priceDiff: 3500,
-      grade: 'A+',
-      strengths: ['얼음', '살균', 'UV'],
-      personaIcon: '👶',
-      personaText: '<b>위생 민감</b> 가정 추천',
-      image: 'https://rentalshop.site/_data/file/goodsImages/28fb66c2489ddd775e20eadf77051c80.png',
-      href: PV_BASE + '22064'
+      grade: 'A',
+      strengths: ['얼음', '셀프관리', '가정용'],
+      personaIcon: '🏠',
+      personaText: '<b>관리 직접</b> 해도 괜찮은 분',
+      image: 'https://rentalshop.site/_data/file/goodsImages/500b03fb12733974c8738ece0b27c5b7.png',
+      href: PV_BASE + '22920'
     }
   ];
 
