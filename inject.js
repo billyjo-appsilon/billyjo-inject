@@ -1261,4 +1261,232 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   }
 })();
 
+// =============================================================================
+// 상담신청 모달 — 전환 최적화 패키지 (v0.6.0)
+//   - 원탭 통화(tel:) + DTMF 자동 코드 전송
+//   - 상담사 카드(사진/이름/오늘건수/평점) = 신뢰 시그널
+//   - 실시간 대기인원/평균응답시간 = 사회적 증명
+// 상세페이지에서만 활성 — 빌리조 native 상담 버튼들을 가로채어 새 모달 표시.
+// =============================================================================
+(function billyjoConsultModal() {
+  if (location.pathname.indexOf('/prod_view/') === -1) return; // 상세페이지만
+  var API_BASE = 'https://admin2-api.billyjo.co.kr';
+  var MODAL_ID = 'bj-consult-modal';
+
+  // 페이지 컨텍스트(상품 ID/이름) 추정
+  function detectProduct() {
+    var pid = null, pname = null;
+    var m = location.pathname.match(/\/prod_view\/(\d+)/);
+    if (m) pid = m[1];
+    var nameEl =
+      document.querySelector('.prod_name h2, .prod_name, h1.prod_tit, .prod_view h2');
+    if (nameEl) pname = (nameEl.textContent || '').trim().slice(0, 200);
+    return { productId: pid, productName: pname };
+  }
+
+  function fmtSecs(s) {
+    if (!s || s < 1) return '즉시';
+    if (s < 60) return s + '초';
+    var m = Math.round(s / 60);
+    return m + '분';
+  }
+
+  function injectStyle() {
+    if (document.getElementById('bj-consult-style')) return;
+    var s = document.createElement('style');
+    s.id = 'bj-consult-style';
+    s.textContent = '\
+#bj-consult-modal { position: fixed; inset: 0; z-index: 999999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); padding: 16px; }\
+#bj-consult-modal .bj-card { background: #fff; border-radius: 18px; max-width: 420px; width: 100%; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; max-height: 92vh; overflow-y: auto; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", sans-serif; }\
+#bj-consult-modal .bj-close { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border: none; background: #f5f5f7; border-radius: 50%; font-size: 18px; cursor: pointer; color: #555; }\
+#bj-consult-modal .bj-close:hover { background: #ebebed; }\
+#bj-consult-modal .bj-stats { display: flex; gap: 8px; margin-bottom: 16px; }\
+#bj-consult-modal .bj-stat { flex: 1; background: #f5f9ff; border: 1px solid #e0e8ff; border-radius: 10px; padding: 8px 10px; text-align: center; }\
+#bj-consult-modal .bj-stat-label { font-size: 11px; color: #777; margin-bottom: 2px; }\
+#bj-consult-modal .bj-stat-value { font-size: 14px; font-weight: 700; color: #0838f8; }\
+#bj-consult-modal .bj-stat-value .bj-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #22c55e; margin-right: 4px; animation: bj-pulse 1.4s infinite; }\
+@keyframes bj-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }\
+#bj-consult-modal .bj-agent { display: flex; gap: 14px; align-items: center; padding: 16px; background: linear-gradient(135deg, #f8faff, #eef2ff); border-radius: 14px; margin-bottom: 16px; }\
+#bj-consult-modal .bj-photo { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; flex-shrink: 0; background: #ddd; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }\
+#bj-consult-modal .bj-photo-placeholder { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, #0838f8, #4a7cff); color: #fff; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; flex-shrink: 0; border: 3px solid #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }\
+#bj-consult-modal .bj-agent-name { font-size: 18px; font-weight: 800; color: #222; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }\
+#bj-consult-modal .bj-agent-rating { color: #f5a623; font-size: 12px; }\
+#bj-consult-modal .bj-agent-bio { font-size: 12px; color: #555; line-height: 1.4; }\
+#bj-consult-modal .bj-agent-counts { font-size: 11px; color: #777; margin-top: 4px; }\
+#bj-consult-modal .bj-code-box { text-align: center; margin: 18px 0 14px; padding: 14px; background: #fff4f4; border: 2px dashed #ff3737; border-radius: 12px; }\
+#bj-consult-modal .bj-code-label { font-size: 11px; color: #555; margin-bottom: 4px; }\
+#bj-consult-modal .bj-code { font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #ff3737; }\
+#bj-consult-modal .bj-cta { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 18px; background: #0838f8; color: #fff; border: none; border-radius: 14px; font-size: 18px; font-weight: 800; text-decoration: none; cursor: pointer; transition: all 0.15s ease; }\
+#bj-consult-modal .bj-cta:hover, #bj-consult-modal .bj-cta:active { background: #0626c0; transform: scale(0.98); }\
+#bj-consult-modal .bj-cta svg { width: 22px; height: 22px; fill: #fff; }\
+#bj-consult-modal .bj-secondary { display: block; text-align: center; margin-top: 12px; font-size: 12px; color: #777; }\
+#bj-consult-modal .bj-secondary a { color: #555; text-decoration: underline; cursor: pointer; }\
+#bj-consult-modal .bj-loading, #bj-consult-modal .bj-error { text-align: center; padding: 40px 20px; color: #555; font-size: 14px; }\
+#bj-consult-modal .bj-error { color: #c00; }\
+#bj-consult-modal .bj-spin { display: inline-block; width: 28px; height: 28px; border: 3px solid #ddd; border-top-color: #0838f8; border-radius: 50%; animation: bj-spin 0.8s linear infinite; margin-bottom: 12px; }\
+@keyframes bj-spin { to { transform: rotate(360deg); } }\
+';
+    document.head.appendChild(s);
+  }
+
+  function close() {
+    var m = document.getElementById(MODAL_ID);
+    if (m) m.parentNode.removeChild(m);
+  }
+
+  function buildModal(innerHtml) {
+    close();
+    var wrap = document.createElement('div');
+    wrap.id = MODAL_ID;
+    wrap.innerHTML =
+      '<div class="bj-card">' +
+      '<button class="bj-close" aria-label="닫기">×</button>' +
+      innerHtml +
+      '</div>';
+    document.body.appendChild(wrap);
+    wrap.querySelector('.bj-close').addEventListener('click', close);
+    wrap.addEventListener('click', function(e) {
+      if (e.target === wrap) close();
+    });
+    document.addEventListener('keydown', escHandler);
+    return wrap;
+  }
+  function escHandler(e) {
+    if (e.key === 'Escape') {
+      close();
+      document.removeEventListener('keydown', escHandler);
+    }
+  }
+
+  function showLoading() {
+    return buildModal(
+      '<div class="bj-loading"><div class="bj-spin"></div><div>상담사 배정 중…</div></div>'
+    );
+  }
+
+  function showError(msg) {
+    buildModal(
+      '<div class="bj-error">상담 연결 실패<br><span style="font-size:12px;color:#999">' +
+      (msg || '잠시 후 다시 시도해 주세요.') +
+      '</span></div>'
+    );
+  }
+
+  function ratingStars(r) {
+    if (!r) return '';
+    var full = Math.floor(r);
+    var half = (r - full) >= 0.5 ? 1 : 0;
+    var empty = 5 - full - half;
+    var s = '';
+    for (var i = 0; i < full; i++) s += '★';
+    if (half) s += '☆';
+    for (var j = 0; j < empty; j++) s += '·';
+    return '<span class="bj-agent-rating">' + s + ' ' + r.toFixed(1) + '</span>';
+  }
+
+  function showAssigned(data) {
+    var card = data.consultantCard || {};
+    var stats = data.queueStats || {};
+    var photoHtml = card.photoUrl
+      ? '<img class="bj-photo" src="' + escapeAttr(card.photoUrl) + '" alt="">'
+      : '<div class="bj-photo-placeholder">' + escapeHtml((card.name || '?').charAt(0)) + '</div>';
+    var rating = card.rating ? ratingStars(card.rating) : '';
+    var bio = card.bio ? '<div class="bj-agent-bio">' + escapeHtml(card.bio) + '</div>' : '';
+    var counts =
+      '<div class="bj-agent-counts">오늘 ' + (card.todayCalls || 0) + '건 상담' +
+      (card.totalCalls ? ' · 누적 ' + (card.totalCalls).toLocaleString() + '건' : '') +
+      '</div>';
+
+    var statsHtml =
+      '<div class="bj-stats">' +
+      '<div class="bj-stat"><div class="bj-stat-label">지금 대기</div><div class="bj-stat-value"><span class="bj-dot"></span>' +
+      (stats.nowWaiting || 0) + '명</div></div>' +
+      '<div class="bj-stat"><div class="bj-stat-label">평균 응답</div><div class="bj-stat-value">' +
+      fmtSecs(stats.avgResponseSecs) + '</div></div>' +
+      '<div class="bj-stat"><div class="bj-stat-label">활성 상담사</div><div class="bj-stat-value">' +
+      (stats.activeConsultants || 0) + '명</div></div>' +
+      '</div>';
+
+    var phoneIcon =
+      '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57a1 1 0 0 0-1.02.24l-2.2 2.2a15.05 15.05 0 0 1-6.59-6.58l2.2-2.21a1 1 0 0 0 .25-1.02A11.36 11.36 0 0 1 8.5 4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1c0 9.39 7.61 17 17 17a1 1 0 0 0 1-1v-3.5a1 1 0 0 0-1-1z"/></svg>';
+
+    var cta =
+      '<a class="bj-cta" href="' + escapeAttr(data.telLink || ('tel:,' + data.code)) + '">' +
+      phoneIcon + '<span>지금 ' + escapeHtml(card.name || '상담사') + '님과 통화</span></a>';
+
+    var html =
+      statsHtml +
+      '<div class="bj-agent">' +
+      photoHtml +
+      '<div style="flex:1;min-width:0">' +
+      '<div class="bj-agent-name">' + escapeHtml(card.name || '상담사') + rating + '</div>' +
+      bio + counts +
+      '</div></div>' +
+      '<div class="bj-code-box">' +
+      '<div class="bj-code-label">통화 안내 코드 (자동 전송)</div>' +
+      '<div class="bj-code">' + escapeHtml(data.code) + '</div>' +
+      '</div>' +
+      cta +
+      '<span class="bj-secondary">통화가 연결되면 안내 코드가 자동으로 전송됩니다.</span>';
+    buildModal(html);
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+  function escapeAttr(s) { return escapeHtml(s); }
+
+  function requestConsult() {
+    injectStyle();
+    showLoading();
+    var ctx = detectProduct();
+    fetch(API_BASE + '/v1/consult/quick-assign', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        productId: ctx.productId,
+        productName: ctx.productName
+      })
+    })
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.json();
+      })
+      .then(function(data) { showAssigned(data); })
+      .catch(function(err) {
+        console.error('[bj-consult] failed:', err);
+        showError(err && err.message);
+      });
+  }
+
+  // 빌리조 기본 상담 트리거 가로채기
+  function shouldIntercept(el) {
+    if (!el || el.nodeType !== 1) return false;
+    if (el.closest && el.closest('#bj-consult-modal')) return false;
+    var sel = '.new-qb, .new-qb a, .quick .org, .quick .org a, [data-bj-consult]';
+    if (el.matches && el.matches(sel)) return true;
+    if (el.closest && el.closest(sel)) return true;
+    var txt = (el.textContent || '').trim();
+    if (txt && txt.length < 20 && /상담신청|상담\s*문의|간편\s*실시간\s*문의/.test(txt)) {
+      var tag = el.tagName;
+      if (tag === 'A' || tag === 'BUTTON' || (el.closest && el.closest('a,button'))) return true;
+    }
+    return false;
+  }
+
+  document.addEventListener(
+    'click',
+    function(e) {
+      if (shouldIntercept(e.target)) {
+        e.preventDefault();
+        e.stopPropagation();
+        requestConsult();
+      }
+    },
+    true // capture phase — native handlers 차단
+  );
+})();
+
 })();
