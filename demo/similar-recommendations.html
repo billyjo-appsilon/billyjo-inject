@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>유사 상품 추천 — 데모 (자동생성카드 ai 하단)</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+  <style>
+    :root {
+      --bg: #EAEEFB;
+      --bg-soft: #F4F6FC;
+      --card: #FFFFFF;
+      --primary: #0838F8;
+      --primary-soft: #4A6BFA;
+      --primary-pale: #EEF2FF;
+      --text: #1A1F36;
+      --text-sub: #475569;
+      --text-mute: #94A3B8;
+      --accent: #FF5A36;
+      --accent-pale: #FFF1EC;
+      --line: #E5E9F2;
+      --good: #16A34A;
+      --shadow-sm: 0 2px 8px rgba(20,30,80,0.05);
+      --shadow-md: 0 6px 18px rgba(20,30,80,0.07);
+      --shadow-lg: 0 12px 32px rgba(8,56,248,0.16);
+      --container: 1000px;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: "Pretendard Variable", "Pretendard", -apple-system, BlinkMacSystemFont, sans-serif; color: var(--text); background: var(--bg); -webkit-font-smoothing: antialiased; }
+    .demo-banner { background: #0F172A; color: #fff; text-align: center; padding: 14px 16px; font-size: 13px; letter-spacing: 0.5px; }
+    .demo-banner b { color: #FFD66B; }
+    .page { max-width: var(--container); margin: 0 auto; padding: 0; }
+    .zone { padding: 24px 22px; }
+    .zone-sky { background: #ECF3FF; }
+    .zone-white { background: #FFFFFF; }
+
+    .pill-wrap { text-align: center; margin: 0 0 18px; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: var(--primary); color: #fff; border-radius: 999px; font-size: 12px; font-weight: 700; letter-spacing: 0.4px; }
+
+    /* 기존 자동생성카드(ai) — 데모용 간소 표시 */
+    .card.demo-ai-card {
+      background: #fff;
+      border-radius: 22px;
+      padding: 22px;
+      box-shadow: var(--shadow-md);
+      border: 1px solid var(--line);
+      margin: 0 0 20px;
+      width: 100%;
+    }
+    .ai-label { display: inline-flex; align-items: center; gap: 6px; padding: 4px 12px; background: var(--primary-pale); color: var(--primary); border-radius: 999px; font-size: 11px; font-weight: 700; margin-bottom: 12px; }
+    .ai-label::before { content: "📊"; }
+    .ai-product-title { font-size: 17px; font-weight: 800; color: var(--text); margin: 4px 0; }
+    .ai-product-sub { font-size: 12px; color: var(--text-sub); margin-bottom: 14px; }
+    .ai-grade-row { display: flex; align-items: center; gap: 14px; padding: 12px 16px; background: linear-gradient(90deg, #EEF2FF 0%, #F8F9FF 100%); border-radius: 14px; }
+    .ai-grade { width: 64px; height: 64px; border-radius: 50%; background: var(--primary); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 28px; letter-spacing: -0.5px; flex-shrink: 0; }
+    .ai-grade-meta { font-size: 12px; color: var(--text-sub); line-height: 1.55; }
+    .ai-grade-meta b { color: var(--text); font-size: 13px; }
+    .ai-stub { font-size: 11px; color: var(--text-mute); margin-top: 10px; text-align: center; padding: 14px; background: #FAFBFD; border-radius: 10px; border: 1px dashed var(--line); }
+
+    /* ============ 새 영역: 유사 상품 추천 ============ */
+    .reco-section { margin-top: 12px; }
+    .reco-header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+    .reco-title { font-size: 18px; font-weight: 800; color: var(--text); display: flex; align-items: center; gap: 8px; }
+    .reco-title-icon { color: var(--primary); }
+    .reco-sub { font-size: 12px; color: var(--text-sub); }
+    .reco-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .reco-card {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      position: relative;
+      cursor: pointer;
+    }
+    .reco-card:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); border-color: var(--primary-soft); }
+    .reco-card.is-best { border-color: var(--primary); box-shadow: 0 0 0 2px rgba(8,56,248,0.08); }
+    .reco-badge { position: absolute; top: -8px; left: 14px; background: var(--primary); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; letter-spacing: 0.3px; }
+    .reco-badge.is-accent { background: var(--accent); }
+    .reco-img {
+      width: 100%; aspect-ratio: 4/3; border-radius: 12px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; color: var(--text-mute); font-size: 10px; overflow: hidden;
+    }
+    .reco-img img { width: 100%; height: 100%; object-fit: cover; }
+    .reco-brand { font-size: 10px; color: var(--text-mute); font-weight: 600; letter-spacing: 0.3px; }
+    .reco-name { font-size: 13px; font-weight: 700; color: var(--text); line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }
+    .reco-price-row { display: flex; align-items: baseline; gap: 6px; padding: 8px 0; border-top: 1px solid var(--line); }
+    .reco-price { font-size: 17px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; }
+    .reco-price-suffix { font-size: 10px; color: var(--text-mute); }
+    .reco-price-diff { margin-left: auto; font-size: 10px; color: var(--good); font-weight: 700; }
+    .reco-price-diff.is-warn { color: var(--text-sub); }
+    .reco-strengths { display: flex; flex-wrap: wrap; gap: 4px; }
+    .reco-chip { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; background: var(--bg-soft); border-radius: 999px; font-size: 10px; color: var(--text-sub); font-weight: 600; }
+    .reco-chip.is-grade { background: var(--primary-pale); color: var(--primary); }
+    .reco-persona { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: var(--accent-pale); border-radius: 10px; font-size: 11px; color: #B43E22; font-weight: 600; line-height: 1.3; }
+    .reco-persona-icon { font-size: 14px; }
+    .reco-cta {
+      display: flex; align-items: center; justify-content: center; gap: 4px;
+      padding: 9px 10px;
+      background: #F4F6FC;
+      color: var(--primary);
+      border: 1px solid var(--primary-pale);
+      border-radius: 10px;
+      font-size: 12px; font-weight: 700;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .reco-card:hover .reco-cta { background: var(--primary); color: #fff; border-color: var(--primary); }
+    .reco-foot { font-size: 10px; color: var(--text-mute); text-align: center; margin-top: 14px; }
+    .reco-foot a { color: var(--primary); }
+
+    /* 모바일 */
+    @media (max-width: 600px) {
+      .reco-grid { grid-template-columns: 1fr; }
+      .reco-card { flex-direction: row; align-items: stretch; gap: 12px; }
+      .reco-card .reco-img { width: 110px; aspect-ratio: 1; flex-shrink: 0; }
+      .reco-card .reco-body { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 8px; }
+      .reco-card .reco-cta { display: none; }
+      .reco-name { min-height: 0; }
+      .reco-badge { top: -6px; left: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="demo-banner">
+  💡 <b>예시 페이지</b> — 자동생성카드(ai) 하단에 <b>유사 상품 추천 3개</b>가 표시되는 형태입니다. 배포 전 시안.
+</div>
+
+<div class="page">
+
+  <!-- 기존 자동생성카드(ai) 영역 (간소 표시) -->
+  <div class="zone zone-sky">
+    <div class="pill-wrap"><span class="pill">자동생성카드 (ai)</span></div>
+
+    <div class="card demo-ai-card">
+      <div class="ai-label">빌리조 제품분석</div>
+      <div class="ai-product-title">코웨이 시루 직수정수기 CHP-7211N</div>
+      <div class="ai-product-sub">정수기 · 직수형 · 자가관리</div>
+
+      <div class="ai-grade-row">
+        <div class="ai-grade">S</div>
+        <div class="ai-grade-meta">
+          <b>S등급 (최고 추천)</b> · 종합 평가<br>
+          전체 17개 모델 중 <b>1위</b> · 페르소나 적합도 매우 높음
+        </div>
+      </div>
+
+      <div class="ai-stub">
+        ⓘ 데모 — 실제 카드는 6스펙·페르소나·강점·사은품 등 v0.2.4 룰북 전체 표시
+      </div>
+    </div>
+
+    <!-- ============ 새 영역: 유사 상품 추천 3개 ============ -->
+    <div class="reco-section">
+      <div class="reco-header">
+        <h3 class="reco-title">
+          <svg class="reco-title-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>
+          비슷한 분들이 함께 본 제품
+        </h3>
+        <div class="reco-sub">가격·성능·페르소나가 비슷한 추천 3선</div>
+      </div>
+
+      <div class="reco-grid">
+
+        <a class="reco-card is-best" href="#">
+          <span class="reco-badge">최고 매칭</span>
+          <div class="reco-img">
+            <!-- 실제로는 제품 이미지 -->
+            <div style="text-align:center">제품 이미지<br>(360×270)</div>
+          </div>
+          <div class="reco-body">
+            <div class="reco-brand">SK매직</div>
+            <div class="reco-name">SK매직 올인원 직수정수기 (냉온정) WPUI700C</div>
+            <div class="reco-price-row">
+              <span class="reco-price">29,900</span>
+              <span class="reco-price-suffix">원/월</span>
+              <span class="reco-price-diff">−1,000원 ▼</span>
+            </div>
+            <div class="reco-strengths">
+              <span class="reco-chip is-grade">A+</span>
+              <span class="reco-chip">자가관리</span>
+              <span class="reco-chip">3년 무상AS</span>
+            </div>
+            <div class="reco-persona">
+              <span class="reco-persona-icon">👨‍👩‍👧</span>
+              비슷한 <b style="margin: 0 2px">4인 가족</b> 사용자에게 인기
+            </div>
+            <span class="reco-cta">자세히 보기 →</span>
+          </div>
+        </a>
+
+        <a class="reco-card" href="#">
+          <span class="reco-badge is-accent">사은품 혜택 ↑</span>
+          <div class="reco-img">
+            <div style="text-align:center">제품 이미지<br>(360×270)</div>
+          </div>
+          <div class="reco-body">
+            <div class="reco-brand">청호나이스</div>
+            <div class="reco-name">청호나이스 이과수 직수정수기 WP-A801G</div>
+            <div class="reco-price-row">
+              <span class="reco-price">28,900</span>
+              <span class="reco-price-suffix">원/월</span>
+              <span class="reco-price-diff">−2,000원 ▼</span>
+            </div>
+            <div class="reco-strengths">
+              <span class="reco-chip is-grade">A</span>
+              <span class="reco-chip">자가관리</span>
+              <span class="reco-chip">콤팩트형</span>
+            </div>
+            <div class="reco-persona">
+              <span class="reco-persona-icon">🏠</span>
+              <b style="margin: 0 2px">1-2인 가구</b>에게 추천
+            </div>
+            <span class="reco-cta">자세히 보기 →</span>
+          </div>
+        </a>
+
+        <a class="reco-card" href="#">
+          <span class="reco-badge">상위 평가</span>
+          <div class="reco-img">
+            <div style="text-align:center">제품 이미지<br>(360×270)</div>
+          </div>
+          <div class="reco-body">
+            <div class="reco-brand">현대렌탈케어</div>
+            <div class="reco-name">현대 큐밍 슈퍼 직수 냉온정수기 H-WPU52N</div>
+            <div class="reco-price-row">
+              <span class="reco-price">31,900</span>
+              <span class="reco-price-suffix">원/월</span>
+              <span class="reco-price-diff is-warn">+1,000원 ▲</span>
+            </div>
+            <div class="reco-strengths">
+              <span class="reco-chip is-grade">A+</span>
+              <span class="reco-chip">방문관리</span>
+              <span class="reco-chip">UV살균</span>
+            </div>
+            <div class="reco-persona">
+              <span class="reco-persona-icon">👶</span>
+              <b style="margin: 0 2px">영유아 가정</b>에게 추천
+            </div>
+            <span class="reco-cta">자세히 보기 →</span>
+          </div>
+        </a>
+
+      </div>
+
+      <div class="reco-foot">
+        추천 기준: 가격대(±20%) · 동일 카테고리 · 페르소나 매칭도 ≥75 · 평가 등급 A 이상 · 사은품 한도 상위
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
