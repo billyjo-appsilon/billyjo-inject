@@ -1433,6 +1433,51 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 })();
 
 // =============================================================================
+// 이벤트/기획전 버튼 텍스트 rewrite — "#이벤트/기획전 바로가기!!" → "이벤트 기획전 보기"
+// =============================================================================
+(function billyjoRewriteEventButton() {
+  var TARGET = '이벤트 기획전 보기';
+  function rewrite() {
+    var links = document.querySelectorAll('a[href*="dh_board/lists/display"]');
+    for (var i = 0; i < links.length; i++) {
+      var a = links[i];
+      var txt = (a.textContent || '').trim();
+      if (txt === TARGET) continue;
+      if (txt && (txt.indexOf('이벤트') >= 0 || txt.indexOf('기획전') >= 0 || txt.indexOf('바로가기') >= 0)) {
+        // 이미지/아이콘 자식이 있으면 텍스트 노드만 갈아끼우기
+        var hasChild = a.children && a.children.length > 0;
+        if (hasChild) {
+          // 마지막 텍스트 노드 찾아 교체, 없으면 새 텍스트 노드 append
+          var replaced = false;
+          for (var n = a.childNodes.length - 1; n >= 0; n--) {
+            var node = a.childNodes[n];
+            if (node.nodeType === 3 && (node.nodeValue || '').trim()) {
+              node.nodeValue = TARGET;
+              replaced = true;
+              break;
+            }
+          }
+          if (!replaced) a.appendChild(document.createTextNode(TARGET));
+        } else {
+          a.textContent = TARGET;
+        }
+      }
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', rewrite);
+  } else {
+    rewrite();
+  }
+  // 빌리조 헤더가 늦게 hydrate되는 경우 대비
+  var tries = 0;
+  var iv = setInterval(function() {
+    rewrite();
+    if (++tries >= 8) clearInterval(iv);
+  }, 400);
+})();
+
+// =============================================================================
 // PC sticky bottom-bar 가운데 정렬 보강 — bb-inner를 max-width 1200으로 제한 + auto margin
 // =============================================================================
 (function billyjoStickyCenterFix() {
