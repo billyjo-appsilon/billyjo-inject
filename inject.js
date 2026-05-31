@@ -1271,39 +1271,44 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   if (location.pathname.indexOf('/prod_view/24578') === -1) return;
   var INJECTED_FLAG = 'bj-reco-injected';
 
-  // 임시 정적 추천 데이터 — 디자인 검증 후 동적 API로 교체
+  // 24578(코웨이 아이콘 V2 얼음정수기 — 카드할인가 15,400원/월) 컨텍스트 시연.
+  // 본격 적용 시 admin2 백엔드 /v1/products/recommendations API로 교체.
+  var IMG_BASE = 'https://rentalshop.site/_data/file/goodsImages/';
   var RECOMMENDATIONS = [
     {
       badge: '최고 매칭', badgeStyle: 'primary',
       brand: 'SK매직',
-      name: 'SK매직 올인원 직수정수기 (냉온정) WPUI700C',
-      price: 29900, priceDiff: -1000,
+      name: 'SK매직 메가 ICE 얼음정수기 mini WPUIAC606',
+      price: 16900, priceDiff: 1500,
       grade: 'A+',
-      strengths: ['자가관리', '3년 무상AS'],
+      strengths: ['얼음', '셀프형', '4개월 관리'],
       personaIcon: '👨‍👩‍👧',
       personaText: '비슷한 <b>4인 가족</b> 사용자에게 인기',
+      image: IMG_BASE + '19c21befb2e2fb3d08da43ba1241243d.jpg',
       href: '#'
     },
     {
       badge: '사은품 혜택 ↑', badgeStyle: 'accent',
       brand: '청호나이스',
-      name: '청호나이스 이과수 직수정수기 WP-A801G',
-      price: 28900, priceDiff: -2000,
+      name: '청호나이스 이과수 얼음냉온정수기 WPI-7900M',
+      price: 17900, priceDiff: 2500,
       grade: 'A',
-      strengths: ['자가관리', '콤팩트형'],
-      personaIcon: '🏠',
-      personaText: '<b>1-2인 가구</b>에게 추천',
+      strengths: ['얼음', '방문관리', '저소음'],
+      personaIcon: '🧊',
+      personaText: '<b>여름철 사용량</b> 많은 분께 추천',
+      image: IMG_BASE + '31c63404208272f21c2d504f8165f615.jpg',
       href: '#'
     },
     {
-      badge: '상위 평가', badgeStyle: 'primary',
+      badge: '본사 직배정', badgeStyle: 'primary',
       brand: '현대렌탈케어',
-      name: '현대 큐밍 슈퍼 직수 냉온정수기 H-WPU52N',
-      price: 31900, priceDiff: 1000,
+      name: '현대 큐밍 슈퍼 얼음냉온정수기 H-WPI82N',
+      price: 18400, priceDiff: 3000,
       grade: 'A+',
-      strengths: ['방문관리', 'UV살균'],
+      strengths: ['얼음', '방문관리', 'UV살균'],
       personaIcon: '👶',
       personaText: '<b>영유아 가정</b>에게 추천',
+      image: IMG_BASE + '3e886e08a016ba0818332fa75c5ed040.jpg',
       href: '#'
     }
   ];
@@ -1397,14 +1402,17 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 
   function tryInject() {
     if (document.querySelector('[data-' + INJECTED_FLAG + ']')) return true;
-    var v5 = document.getElementById('bj-v5-injected');
-    if (!v5) return false;
-    var lastZone = v5.querySelector('.zone:last-of-type') || v5.querySelector('.zone');
+    // 위치: 자동생성카드(ai) 아래 + 상품정보(.prod_view_bot.mt10) 위
+    var prodBot = document.querySelector('.prod_view_bot.mt10');
+    if (!prodBot) return false;
     var host = document.createElement('div');
     host.innerHTML = buildHtml();
     var section = host.firstChild;
-    if (lastZone) lastZone.appendChild(section);
-    else v5.appendChild(section);
+    var zone = document.createElement('div');
+    zone.style.cssText = 'background:#ECF3FF;padding:24px 22px;margin:0;clear:both;';
+    zone.setAttribute('data-bj-reco-zone', '1');
+    zone.appendChild(section);
+    prodBot.parentNode.insertBefore(zone, prodBot);
     return true;
   }
 
@@ -1422,6 +1430,20 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   } else {
     start();
   }
+})();
+
+// =============================================================================
+// PC sticky bottom-bar 가운데 정렬 보강 — bb-inner를 max-width 1200으로 제한 + auto margin
+// =============================================================================
+(function billyjoStickyCenterFix() {
+  if (document.getElementById('bj-sticky-center-fix')) return;
+  var s = document.createElement('style');
+  s.id = 'bj-sticky-center-fix';
+  s.textContent =
+    '#billyjo-bottom-bar { display: block !important; }' +
+    '#billyjo-bottom-bar .bb-inner { display: flex !important; width: 100% !important; max-width: 1200px !important; margin-left: auto !important; margin-right: auto !important; box-sizing: border-box !important; }' +
+    '@media (min-width: 768px) { #billyjo-bottom-bar .bb-inner { justify-content: center !important; } }';
+  (document.head || document.documentElement).appendChild(s);
 })();
 
 // =============================================================================
