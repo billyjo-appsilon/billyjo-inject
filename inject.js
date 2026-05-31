@@ -1486,6 +1486,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   function applyDynamicRecos(apiItems) {
     if (!apiItems || apiItems.length === 0) return;
     // API 응답을 RECOMMENDATIONS 포맷으로 매핑
+    var PV = 'https://billyjo.co.kr/html/dh_prod/prod_view/';
     var mapped = apiItems.slice(0, 3).map(function(it, i) {
       return {
         badge: it.badge || '추천',
@@ -1498,13 +1499,20 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         strengths: it.strengths || [],
         personaIcon: it.personaIcon || '👨‍👩‍👧',
         personaText: it.personaText || '',
-        image: '',  // TODO: 빌리조 카탈로그 매핑 시 이미지 채움
-        href: '#'
+        image: '',  // TODO: 빌리조 prod_view 이미지 동적 fetch + 캐시
+        href: it.productId ? (PV + it.productId) : '#'
       };
     });
-    // RECOMMENDATIONS 전체 치환
+    // RECOMMENDATIONS 치환
     while (RECOMMENDATIONS.length) RECOMMENDATIONS.pop();
     mapped.forEach(function(m) { RECOMMENDATIONS.push(m); });
+    // 이미 렌더링됐으면 DOM swap
+    var existing = document.querySelector('[data-' + INJECTED_FLAG + ']');
+    if (existing && existing.parentNode) {
+      var temp = document.createElement('div');
+      temp.innerHTML = buildHtml();
+      existing.parentNode.replaceChild(temp.firstChild, existing);
+    }
   }
 
   function start() {
