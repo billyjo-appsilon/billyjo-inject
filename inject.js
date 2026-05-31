@@ -1402,17 +1402,34 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 
   function tryInject() {
     if (document.querySelector('[data-' + INJECTED_FLAG + ']')) return true;
-    // 위치: 자동생성카드(ai) 아래 + 상품정보(.prod_view_bot.mt10) 위
+    // 위치 우선순위:
+    //   1. #ai-card-lpt-section 직후 (AI 카드 SLOT 8 약정기간 표 끝난 자리, 카드 내부)
+    //   2. #ai-card-root 직후 (AI 카드 전체 끝난 자리)
+    //   3. fallback: .prod_view_bot.mt10 직전 (상품정보 영역 직전)
+    var anchor = document.querySelector('#ai-card-root #ai-card-lpt-section')
+              || document.querySelector('#ai-card-root');
     var prodBot = document.querySelector('.prod_view_bot.mt10');
-    if (!prodBot) return false;
+    if (!anchor && !prodBot) return false;
+
     var host = document.createElement('div');
     host.innerHTML = buildHtml();
     var section = host.firstChild;
     var zone = document.createElement('div');
-    zone.style.cssText = 'background:#ECF3FF;padding:24px 22px;margin:0;clear:both;';
+    // AI 카드 안에 들어가면 zone-sky 배경 제거 (카드 디자인과 통일).
+    // 카드 밖에 들어가면 옅은 하늘색 zone 배경으로 시각 분리.
+    var insideCard = !!anchor;
+    zone.style.cssText = insideCard
+      ? 'padding:18px 0 6px;margin:0;clear:both;border-top:1px solid #E5E9F2;'
+      : 'background:#ECF3FF;padding:24px 22px;margin:0;clear:both;';
     zone.setAttribute('data-bj-reco-zone', '1');
     zone.appendChild(section);
-    prodBot.parentNode.insertBefore(zone, prodBot);
+
+    if (anchor) {
+      // anchor 직후 sibling으로 삽입
+      anchor.parentNode.insertBefore(zone, anchor.nextSibling);
+    } else {
+      prodBot.parentNode.insertBefore(zone, prodBot);
+    }
     return true;
   }
 
