@@ -1280,17 +1280,19 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 })();
 
 // =============================================================================
-// 자동생성카드(ai) 하단 유사상품 추천 (v0.6.6) — 100% 백엔드 API 구동
+// 자동생성카드(ai) 하단 유사상품 추천 (v0.6.7) — 100% 백엔드 API 구동
 //   admin2 /v1/products/recommendations 응답(topPick 1 + items 3 = 4카드)만 표시.
 //   v0.6.5: 정적 fallback 3개 제거 — 라이브와 동일 데이터를 미리 그렸다가 덮어쓰던
 //           중복 렌더 제거. API 응답 도착 후에만 위젯을 주입(응답 없으면 미표시).
 //   v0.6.6: 카드 썸네일 보강 — productId로 빌리조 prod_view og:image를 동적 fetch
 //           + sessionStorage 캐시 후 placeholder를 실제 이미지로 교체(hydrateThumbnails).
+//   v0.6.7: 24578 한정 가드 제거 — 전체 /prod_view/{id} 상세페이지로 확대.
+//           상품별 컨텍스트(detectPageProduct)로 API 호출, 추천 없으면 미표시.
 //   롤백: 이 IIFE 또는 commit 자체를 revert + jsDelivr purge.
 // =============================================================================
 (function billyjoSimilarRecommendations() {
-  // 시연용 — 특정 상품 페이지(24578)에서만 활성. 검증 후 전체 상세페이지로 확장.
-  if (location.pathname.indexOf('/prod_view/24578') === -1) return;
+  // 전체 상품 상세페이지(/prod_view/{숫자id})에서 활성. 추천 산출은 백엔드 API가 상품별 수행.
+  if (!/\/prod_view\/\d+/.test(location.pathname)) return;
   var INJECTED_FLAG = 'bj-reco-injected';
 
   // 24578(코웨이 아이콘 V2 얼음냉온정수기, 가정용 컴팩트) 매칭 추천.
@@ -1545,8 +1547,13 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     var pid = null, pname = null, monthly = null, cardPrice = null, term = null;
     var m = location.pathname.match(/\/prod_view\/(\d+)/);
     if (m) pid = m[1];
-    var nameEl = document.querySelector('.prod_name h2, .prod_name, h1.prod_tit, .prod_view h2');
+    // 상품명: 상세페이지 타이틀 우선, 없으면 og:title 폴백 (모든 prod_view 템플릿 커버)
+    var nameEl = document.querySelector('.prod_name h2, .prod_name, h1.prod_tit, .prod_view h2, .fix_tit');
     if (nameEl) pname = (nameEl.textContent || '').trim().slice(0, 200);
+    if (!pname) {
+      var ogt = document.querySelector('meta[property="og:title"]');
+      if (ogt) pname = (ogt.getAttribute('content') || '').split(' - ')[0].trim().slice(0, 200);
+    }
     // 가격 추출
     var priceEl = document.querySelector('.rental_price b');
     if (priceEl) {
