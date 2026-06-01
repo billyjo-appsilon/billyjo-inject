@@ -1360,7 +1360,9 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 })();
 
 // =============================================================================
-// 자동생성카드(ai) 하단 유사상품 추천 (v0.6.8) — 100% 백엔드 API 구동
+// 자동생성카드(ai) 하단 유사상품 추천 (v0.7.1) — 100% 백엔드 API 구동
+//   v0.7.1: 추천 카드에 전체 제품명 표시 (백엔드 product_names 저장소가 모델코드뿐인
+//           이름을 "삼성전자 그랑데 통버블 세탁기 21kg"처럼 치환) + 모델코드 보조 라벨.
 //   v0.6.8: 가격 미상(monthlyFee 0) 카드 — "0원/월"·가짜 할인 대신 "렌탈료 상세에서 확인".
 //           (정수기 외 카테고리는 cards-index에 가격 없음)
 //   admin2 /v1/products/recommendations 응답(topPick 1 + items 3 = 4카드)만 표시.
@@ -1408,6 +1410,8 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 .bj-reco-img { width: 100%; aspect-ratio: 4/3; border-radius: 12px; background: #F1F5F9; display: flex; align-items: center; justify-content: center; color: #94A3B8; font-size: 10px; text-align: center; line-height: 1.4; }\
 .bj-reco-brand { font-size: 10px; color: #94A3B8; font-weight: 600; letter-spacing: .3px; }\
 .bj-reco-name { font-size: 13px; font-weight: 700; color: #1A1F36; line-height: 1.35; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; min-height: 36px; }\
+.bj-reco-model { font-size: 10px; color: #94A3B8; font-weight: 500; letter-spacing: .2px; margin-top: -4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }\
+.bj-reco-top-model { font-size: 11px; color: #9A3412; font-weight: 500; letter-spacing: .2px; opacity: .8; }\
 .bj-reco-price-row { display: flex; align-items: baseline; gap: 6px; padding: 8px 0; border-top: 1px solid #E5E9F2; }\
 .bj-reco-price { font-size: 17px; font-weight: 800; color: #0838F8; letter-spacing: -.5px; }\
 .bj-reco-price-suffix { font-size: 10px; color: #94A3B8; }\
@@ -1540,6 +1544,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       '<div class="bj-reco-body" style="display:flex;flex-direction:column;gap:10px;min-width:0">' +
       '<div class="bj-reco-brand">' + escapeHtml(item.brand) + '</div>' +
       '<div class="bj-reco-name">' + escapeHtml(item.name) + '</div>' +
+      (item.model ? '<div class="bj-reco-model">' + escapeHtml(item.model) + '</div>' : '') +
       '<div class="bj-reco-price-row">' + priceRow + '</div>' +
       '<div class="bj-reco-strengths">' + strengths + '</div>' +
       '<div class="bj-reco-persona"><span>' + item.personaIcon + '</span><span>' + item.personaText + '</span></div>' +
@@ -1575,6 +1580,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         (item.subBadge ? '<div class="bj-reco-top-sub">' + escapeHtml(item.subBadge) + '</div>' : '') +
         '<div class="bj-reco-top-brand">' + escapeHtml(item.brand || '') + '</div>' +
         '<div class="bj-reco-top-name">' + escapeHtml(item.name || '') + '</div>' +
+        (item.model ? '<div class="bj-reco-top-model">' + escapeHtml(item.model) + '</div>' : '') +
         '<div class="bj-reco-top-price-row">' + topPriceRow + '</div>' +
         '<div class="bj-reco-top-strengths">' + strengths + '</div>' +
       '</div>' +
@@ -1692,6 +1698,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       TOP_PICK = {
         brand: apiTop.rentalCompany || '',
         name: apiTop.productName || '',
+        model: apiTop.modelCode || '',
         price: apiTop.monthlyFee || 0,
         priceDiff: apiTop.priceDiff || 0,
         badge: apiTop.badge || '🔥 최고 인기',
@@ -1710,6 +1717,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         badgeStyle: it.badgeStyle || (i === 0 ? 'primary' : 'accent'),
         brand: it.rentalCompany || '',
         name: it.productName || '',
+        model: it.modelCode || '',
         price: it.monthlyFee || 0,
         priceDiff: it.priceDiff || 0,
         grade: it.grade || 'A',
