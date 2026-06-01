@@ -296,11 +296,16 @@ document.addEventListener('DOMContentLoaded', function() {
       if (eventBtn) eventBtn.style.display = 'none';
 
       // Create single-row flex container
+      // 안정 클래스(bj-inj-*)를 여기서 직접 부여 — 좁은 폭 헤더 보호 CSS가 적용되도록.
+      // (모듈 B tagInject는 prod_view 전용이라 비-상세 페이지에선 클래스가 안 붙어
+      //  rightGroup이 카테고리 영역을 침범하던 버그. 이 클래스 + 아래 CSS로 전역 해소.)
       var dRow = document.createElement('div');
+      dRow.className = 'bj-inj-row';
       dRow.style.cssText = 'display:flex;align-items:flex-end;padding:28px 40px 22px;width:100%;max-width:1500px;margin:0 auto;box-sizing:border-box;';
 
       // Left group: logo + categories
       var leftGroup = document.createElement('div');
+      leftGroup.className = 'bj-inj-left';
       leftGroup.style.cssText = 'display:flex;align-items:flex-end;flex:1;min-width:0;';
 
       // Move logo
@@ -319,6 +324,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Right group: move .gnb__right (고객센터+장바구니) + search
       var rightGroup = document.createElement('div');
+      rightGroup.className = 'bj-inj-right';
       rightGroup.style.cssText = 'display:flex;align-items:flex-end;gap:24px;flex-shrink:0;white-space:nowrap;margin-left:auto;';
       var gnbRight = dTopRight.querySelector('.gnb__right');
       if (gnbRight) {
@@ -336,7 +342,25 @@ document.addEventListener('DOMContentLoaded', function() {
 
       // Search underline + right utils baseline align
       var dSearchStyle = document.createElement('style');
-      dSearchStyle.textContent = '@media(min-width:769px){.search__wrap{border:none !important;border-bottom:1px solid #333 !important;border-radius:0 !important;padding:0 !important;}.search__wrap input[name="search_value"]{border:none !important;outline:none !important;}}';
+      dSearchStyle.textContent =
+        '@media(min-width:769px){.search__wrap{border:none !important;border-bottom:1px solid #333 !important;border-radius:0 !important;padding:0 !important;}.search__wrap input[name="search_value"]{border:none !important;outline:none !important;}}'
+        /* 좁은 PC 폭 헤더 보호 (모듈 A 전역 — 비-상세 페이지에서도 rightGroup이
+           카테고리 영역을 침범하지 않도록). flex-wrap은 실제 넘칠 때만 줄바꿈하므로
+           넓은 화면(여유 있을 때)엔 영향 없음. 모듈 B(prod_view)의 ≤1280 룰과 동일 골격. */
+        + '@media(min-width:1025px) and (max-width:1500px){'
+        +   'header.new-header > .bj-inj-row{ flex-wrap:wrap !important; padding:20px 24px !important; row-gap:10px !important; column-gap:16px !important; }'
+        +   'header.new-header > .bj-inj-row > .bj-inj-left{ flex:1 1 auto !important; min-width:0 !important; flex-wrap:wrap !important; row-gap:10px !important; }'
+        +   'header.new-header > .bj-inj-row > .bj-inj-right{ flex-shrink:1 !important; white-space:normal !important; flex-wrap:wrap !important; margin-left:auto !important; gap:14px !important; justify-content:flex-end !important; align-items:center !important; }'
+        +   'header.new-header .bj-inj-right .gnb__right{ position:static !important; top:0 !important; gap:14px !important; }'
+        +   'header.new-header .bj-inj-right .search__wrap{ max-width:280px }'
+        + '}'
+        /* ≤1024px: rightGroup을 아예 별도 행으로 분리 */
+        + '@media(max-width:1024px){'
+        +   'header.new-header > .bj-inj-row{ flex-direction:column !important; align-items:stretch !important; }'
+        +   'header.new-header > .bj-inj-row > .bj-inj-left{ width:100% !important; flex-wrap:wrap !important; }'
+        +   'header.new-header > .bj-inj-row > .bj-inj-right{ width:100% !important; margin-left:0 !important; justify-content:flex-end !important; border-top:0.5px solid #eee; padding-top:10px; }'
+        +   'header.new-header .bj-inj-right .gnb__right{ position:static !important; top:0 !important; }'
+        + '}';
       document.head.appendChild(dSearchStyle);
 
       // Hide original wide-inner, insert new row
