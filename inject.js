@@ -170,6 +170,23 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     }
 
+    // 2.5 로고를 header__top 햄버거 바로 오른쪽에 배치.
+    // 일부 페이지는 .header__top의 로고 슬롯이 비어 햄버거만 한 줄을 여백으로 차지함
+    // (사용자 피드백). 헤더 내 어디에 있든 .logo를 찾아 햄버거 다음으로 이동 → [햄버거][로고].
+    // 로고가 아예 없는 페이지면 no-op (회귀 없음).
+    if (headerEl) {
+      var headerTopL = document.querySelector('.header__top');
+      var hamburger = headerTopL ? headerTopL.querySelector('.gnb__hamburger') : null;
+      var hdrLogo = headerEl.querySelector('a.logo') || headerEl.querySelector('.logo');
+      if (headerTopL && hamburger && hdrLogo &&
+          hdrLogo !== hamburger && !hamburger.contains(hdrLogo)) {
+        // 이미 header__top 안 햄버거 바로 다음이면 그대로 둠
+        if (hamburger.nextElementSibling !== hdrLogo) {
+          headerTopL.insertBefore(hdrLogo, hamburger.nextSibling);
+        }
+      }
+    }
+
     // 3. Inject mobile header CSS
     var mobileHeaderCSS = document.createElement('style');
     mobileHeaderCSS.textContent = [
@@ -182,7 +199,10 @@ document.addEventListener('DOMContentLoaded', function() {
       '.header__top { display: flex !important; align-items: center !important; height: 50px !important; padding: 0 !important; gap: 0 !important; position: relative !important; }',
       '.gnb__hamburger { position: static !important; flex-shrink: 0 !important; width: auto !important; height: auto !important; display: flex !important; align-items: center !important; padding: 0 12px 0 0 !important; float: none !important; }',
       '.gnb__hamburger img { width: 22px !important; height: auto !important; }',
-      'a.logo { position: absolute !important; left: 50% !important; transform: translateX(-50%) !important; flex-shrink: 0 !important; width: auto !important; height: auto !important; margin: 0 !important; float: none !important; display: inline-block !important; }',
+      /* 로고를 absolute 중앙정렬 → in-flow 좌측정렬로 변경: 햄버거 바로 오른쪽에 붙어
+         [햄버거][로고] 한 그룹으로 좌측 배치. 기존엔 로고가 중앙 absolute라 햄버거만
+         좌측에 덩그러니 남아 한 줄이 여백으로 낭비됐음. (prod_view 모듈 B와 동일 정렬) */
+      'a.logo { position: static !important; transform: none !important; flex-shrink: 0 !important; width: auto !important; height: auto !important; margin: 0 !important; float: none !important; display: inline-flex !important; align-items: center !important; }',
       'a.logo img { width: 80px !important; height: auto !important; }',
       '#bj-header-icons { position: static !important; display: flex !important; align-items: center !important; gap: 18px !important; margin-left: auto !important; padding: 0 !important; list-style: none !important; flex-shrink: 0 !important; float: none !important; z-index: 1 !important; }',
       '#bj-header-icons li { display: flex !important; align-items: center !important; padding: 0 !important; margin: 0 !important; }',
