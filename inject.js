@@ -1861,7 +1861,8 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     s.id = 'bj-consult-style';
     s.textContent = '\
 #bj-consult-modal { position: fixed; inset: 0; z-index: 999999; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,0.5); padding: 16px; }\
-#bj-consult-modal .bj-card { background: #fff; border-radius: 18px; max-width: 420px; width: 100%; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; max-height: 92vh; overflow-y: auto; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", sans-serif; }\
+#bj-consult-modal *, #bj-consult-modal *::before, #bj-consult-modal *::after { box-sizing: border-box; }\
+#bj-consult-modal .bj-card { background: #fff; border-radius: 18px; max-width: 420px; width: 100%; padding: 24px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; max-height: 92vh; overflow-y: auto; overflow-x: hidden; box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Pretendard", "Apple SD Gothic Neo", sans-serif; }\
 #bj-consult-modal .bj-close { position: absolute; top: 14px; right: 14px; width: 32px; height: 32px; border: none; background: #f5f5f7; border-radius: 50%; font-size: 18px; cursor: pointer; color: #555; }\
 #bj-consult-modal .bj-close:hover { background: #ebebed; }\
 #bj-consult-modal .bj-stats { display: flex; gap: 8px; margin-bottom: 16px; }\
