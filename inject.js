@@ -1280,8 +1280,10 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 })();
 
 // =============================================================================
-// 자동생성카드(ai) 하단 유사상품 추천 3개 (v0.6.1) — 시연용 정적 데이터
-//   배포 후 디자인 검토 → 승인 시 admin2 백엔드 API로 교체.
+// 자동생성카드(ai) 하단 유사상품 추천 (v0.6.5) — 100% 백엔드 API 구동
+//   admin2 /v1/products/recommendations 응답(topPick 1 + items 3 = 4카드)만 표시.
+//   v0.6.5: 정적 fallback 3개 제거 — 라이브와 동일 데이터를 미리 그렸다가 덮어쓰던
+//           중복 렌더 제거. API 응답 도착 후에만 위젯을 주입(응답 없으면 미표시).
 //   롤백: 이 IIFE 또는 commit 자체를 revert + jsDelivr purge.
 // =============================================================================
 (function billyjoSimilarRecommendations() {
@@ -1298,48 +1300,8 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   //   3. 페르소나 매칭 + 본사 수수료(incentive_amount) ↑ + 고객 후보 변경 메리트 필수.
   //      "메리트" = 기능 추가, 가격 절감, 위생/안전 강화, 사은품 한도 등 명확한 가치.
   // ─────────────────────────────────────────────────────────────────────────────
-  var PV_BASE = 'https://billyjo.co.kr/html/dh_prod/prod_view/';
-  var RECOMMENDATIONS = [
-    // [원칙 1: 기능 동등] [원칙 2: 가격 -3.2% 저렴] [원칙 3: 청호 수수료 ↑ + 가격 메리트]
-    {
-      badge: '월 500원 저렴', badgeStyle: 'primary',
-      brand: '청호나이스',
-      name: '청호나이스 얼음냉온정수기 550 (가정용 슬림)',
-      price: 14900, priceDiff: -500,
-      grade: 'A+',
-      strengths: ['얼음·냉·온·정 4기능', '가정용 슬림', '2개월 관리'],
-      personaIcon: '👨‍👩‍👧',
-      personaText: '<b>4인 가족</b> 표준 가정용',
-      image: 'https://rentalshop.site/_data/file/goodsImages/0853eaaa6d9d16017d361d113287c156.png',
-      href: PV_BASE + '22730'
-    },
-    // [원칙 1: 기능 +초고온수] [원칙 2: 가격 +16% — 비슷 가격대] [원칙 3: 차/분유 페르소나 메리트]
-    {
-      badge: '+초고온수 기능', badgeStyle: 'accent',
-      brand: '쿠쿠',
-      name: '쿠쿠 제로백 슬림 직수 초고온수 얼음냉온정수기',
-      price: 17900, priceDiff: 2500,
-      grade: 'A',
-      strengths: ['얼음·냉·온·정 4기능', '초고온수 추가', '슬림 가정용'],
-      personaIcon: '🍵',
-      personaText: '<b>차·분유·이유식</b> 자주 만드는 가정',
-      image: 'https://rentalshop.site/_data/file/goodsImages/f2893878cae90b01372b29db1b907a66.png',
-      href: PV_BASE + '20276'
-    },
-    // [원칙 1: 기능 +UV살균] [원칙 2: 가격 +23% — 비슷 상한] [원칙 3: 영유아·위생 페르소나 메리트]
-    {
-      badge: '+UV 살균 기능', badgeStyle: 'primary',
-      brand: '세스코',
-      name: '세스코 살균온 얼음냉온정수기',
-      price: 18900, priceDiff: 3500,
-      grade: 'A+',
-      strengths: ['얼음·냉·온·정 4기능', 'UV 살균 추가', '가정용'],
-      personaIcon: '👶',
-      personaText: '<b>영유아 가정·위생 민감</b>한 분께',
-      image: 'https://rentalshop.site/_data/file/goodsImages/28fb66c2489ddd775e20eadf77051c80.png',
-      href: PV_BASE + '22064'
-    }
-  ];
+  // 추천 카드는 전적으로 백엔드 API(applyDynamicRecos)가 채운다. 정적 데이터 없음.
+  var RECOMMENDATIONS = [];
 
   function injectStyle() {
     if (document.getElementById('bj-reco-style')) return;
@@ -1429,7 +1391,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       '</div></a>';
   }
 
-  // 최고 인기 (topPick) — 정적 fallback (24578 컨텍스트)
+  // 최고 인기 (topPick) — 백엔드 API 응답으로만 채워짐
   var TOP_PICK = null;
 
   function renderTopPick(item) {
@@ -1512,8 +1474,8 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     return true;
   }
 
-  /* v0.6.2: admin2 백엔드 /v1/products/recommendations 호출 시도.
-     응답 items 비면 정적 RECOMMENDATIONS 유지. */
+  /* admin2 백엔드 /v1/products/recommendations 호출.
+     응답이 비거나 실패하면 위젯을 표시하지 않는다(정적 fallback 없음). */
   function detectPageProduct() {
     var pid = null, pname = null, monthly = null, cardPrice = null, term = null;
     var m = location.pathname.match(/\/prod_view\/(\d+)/);
@@ -1557,7 +1519,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   }
 
   function applyDynamicRecos(payload) {
-    if (!payload) return;
+    if (!payload) return;  // API 실패/응답 없음 → 위젯 미표시 (정적 fallback 없음)
     var apiItems = payload.items || [];
     var apiTop = payload.topPick;
     var PV = 'https://billyjo.co.kr/html/dh_prod/prod_view/';
@@ -1577,19 +1539,9 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         href: apiTop.productId ? (PV + apiTop.productId) : '#',
       };
     }
-    if (!apiItems || apiItems.length === 0) {
-      // topPick만 받고 items 없어도 DOM 갱신
-      var existingEl = document.querySelector('[data-' + INJECTED_FLAG + ']');
-      if (existingEl && existingEl.parentNode) {
-        var temp0 = document.createElement('div');
-        temp0.innerHTML = buildHtml();
-        existingEl.parentNode.replaceChild(temp0.firstChild, existingEl);
-      }
-      return;
-    }
-    // API 응답을 RECOMMENDATIONS 포맷으로 매핑
-    var PV = 'https://billyjo.co.kr/html/dh_prod/prod_view/';
-    var mapped = apiItems.slice(0, 3).map(function(it, i) {
+
+    // 그리드 아이템 매핑 (최대 3개 → topPick과 합쳐 총 4카드)
+    RECOMMENDATIONS = apiItems.slice(0, 3).map(function(it, i) {
       return {
         badge: it.badge || '추천',
         badgeStyle: it.badgeStyle || (i === 0 ? 'primary' : 'accent'),
@@ -1605,24 +1557,15 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         href: it.productId ? (PV + it.productId) : '#'
       };
     });
-    // RECOMMENDATIONS 치환
-    while (RECOMMENDATIONS.length) RECOMMENDATIONS.pop();
-    mapped.forEach(function(m) { RECOMMENDATIONS.push(m); });
-    // 이미 렌더링됐으면 DOM swap
-    var existing = document.querySelector('[data-' + INJECTED_FLAG + ']');
-    if (existing && existing.parentNode) {
-      var temp = document.createElement('div');
-      temp.innerHTML = buildHtml();
-      existing.parentNode.replaceChild(temp.firstChild, existing);
-    }
+
+    // 표시할 카드가 하나도 없으면 주입하지 않음
+    if (!TOP_PICK && RECOMMENDATIONS.length === 0) return;
+
+    scheduleInject();
   }
 
-  function start() {
-    injectStyle();
-    // 백엔드 추천 비동기 호출 — 1초 내 응답 오면 동적 데이터 적용, 안 오면 정적 그대로
-    var apiPromise = fetchRecommendations();
-    apiPromise.then(applyDynamicRecos);
-
+  // AI 카드(anchor) 도착을 기다렸다가 위젯을 주입. 데이터가 준비된 뒤에만 호출.
+  function scheduleInject() {
     if (tryInject(false)) return;
     var tries = 0;
     var iv = setInterval(function() {
@@ -1633,6 +1576,12 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         tryInject(true);
       }
     }, 20000);
+  }
+
+  function start() {
+    injectStyle();
+    // 백엔드 추천 호출 — 응답이 와야 위젯을 그린다(정적 선렌더 없음).
+    fetchRecommendations().then(applyDynamicRecos);
   }
 
   if (document.readyState === 'loading') {
