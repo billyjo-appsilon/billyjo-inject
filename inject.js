@@ -1280,10 +1280,12 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 })();
 
 // =============================================================================
-// 자동생성카드(ai) 하단 유사상품 추천 (v0.6.5) — 100% 백엔드 API 구동
+// 자동생성카드(ai) 하단 유사상품 추천 (v0.6.6) — 100% 백엔드 API 구동
 //   admin2 /v1/products/recommendations 응답(topPick 1 + items 3 = 4카드)만 표시.
 //   v0.6.5: 정적 fallback 3개 제거 — 라이브와 동일 데이터를 미리 그렸다가 덮어쓰던
 //           중복 렌더 제거. API 응답 도착 후에만 위젯을 주입(응답 없으면 미표시).
+//   v0.6.6: 카드 썸네일 보강 — productId로 빌리조 prod_view og:image를 동적 fetch
+//           + sessionStorage 캐시 후 placeholder를 실제 이미지로 교체(hydrateThumbnails).
 //   롤백: 이 IIFE 또는 commit 자체를 revert + jsDelivr purge.
 // =============================================================================
 (function billyjoSimilarRecommendations() {
@@ -1360,6 +1362,68 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   function escapeHtml(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  // ── 추천 카드 썸네일: 빌리조 prod_view og:image 동적 fetch + 캐시 ──
+  // cards-index/추천 API에 이미지가 없어 클라이언트에서 보강. prod_view는 동일 출처라 CORS 없음.
+  // 캐시: sessionStorage(탭 단위, '없음'도 ''로 캐시) + in-flight Promise 중복 제거.
+  var THUMB_CACHE_PREFIX = 'bj-reco-thumb:';
+  var THUMB_PROMISES = {};
+
+  function thumbFromCache(pid) {
+    try { return sessionStorage.getItem(THUMB_CACHE_PREFIX + pid); } catch (e) { return null; }
+  }
+  function thumbToCache(pid, url) {
+    try { sessionStorage.setItem(THUMB_CACHE_PREFIX + pid, url || ''); } catch (e) {}
+  }
+
+  function fetchThumb(pid) {
+    if (!pid) return Promise.resolve('');
+    if (THUMB_PROMISES[pid]) return THUMB_PROMISES[pid];
+    var cached = thumbFromCache(pid);
+    if (cached !== null) {
+      var pc = Promise.resolve(cached);
+      THUMB_PROMISES[pid] = pc;
+      return pc;
+    }
+    // 상대 경로로 호출 → 현재 출처(www 여부 무관)와 동일, same-origin 보장
+    var p = fetch('/html/dh_prod/prod_view/' + pid, { credentials: 'same-origin' })
+      .then(function(r) { return r.ok ? r.text() : ''; })
+      .then(function(html) {
+        var url = '';
+        var m = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+             || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+        if (m) url = m[1];
+        thumbToCache(pid, url);
+        return url;
+      })
+      .catch(function() { return ''; });
+    THUMB_PROMISES[pid] = p;
+    return p;
+  }
+
+  function pidFromHref(href) {
+    var m = (href || '').match(/\/prod_view\/(\d+)/);
+    return m ? m[1] : null;
+  }
+
+  // 주입된 섹션의 각 카드 placeholder를 실제 썸네일 <img>로 교체 (비동기, 도착 순)
+  function hydrateThumbnails(root) {
+    if (!root) return;
+    var cards = root.querySelectorAll('a.bj-reco-card, a.bj-reco-top-card');
+    Array.prototype.forEach.call(cards, function(card) {
+      var pid = pidFromHref(card.getAttribute('href'));
+      if (!pid) return;
+      var box = card.querySelector('.bj-reco-top-img') || card.querySelector('.bj-reco-img');
+      if (!box) return;
+      var isTop = box.classList.contains('bj-reco-top-img');
+      fetchThumb(pid).then(function(url) {
+        if (!url) return;  // 못 찾으면 placeholder 유지
+        var radius = isTop ? '14px' : '12px';
+        box.innerHTML = '<img src="' + escapeHtml(url) + '" alt="" ' +
+          'style="width:100%;height:100%;object-fit:cover;border-radius:' + radius + '">';
+      });
+    });
   }
 
   function renderCard(item, idx) {
@@ -1471,6 +1535,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     } else {
       prodBot.parentNode.insertBefore(zone, prodBot);
     }
+    hydrateThumbnails(section);  // placeholder → 실제 prod_view 썸네일
     return true;
   }
 
@@ -1535,7 +1600,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         subBadge: apiTop.subBadge || '',
         grade: apiTop.grade || 'A+',
         strengths: apiTop.strengths || [],
-        image: '',
+        image: '',  // placeholder — hydrateThumbnails가 prod_view og:image로 교체
         href: apiTop.productId ? (PV + apiTop.productId) : '#',
       };
     }
@@ -1553,13 +1618,17 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         strengths: it.strengths || [],
         personaIcon: it.personaIcon || '👨‍👩‍👧',
         personaText: it.personaText || '',
-        image: '',  // TODO: 빌리조 prod_view 이미지 동적 fetch + 캐시
+        image: '',  // placeholder — hydrateThumbnails가 prod_view og:image로 교체
         href: it.productId ? (PV + it.productId) : '#'
       };
     });
 
     // 표시할 카드가 하나도 없으면 주입하지 않음
     if (!TOP_PICK && RECOMMENDATIONS.length === 0) return;
+
+    // 썸네일 선(先)fetch — AI 카드(anchor) 도착 대기 동안 캐시 워밍 (hydrate가 즉시 반영)
+    if (TOP_PICK) fetchThumb(pidFromHref(TOP_PICK.href));
+    RECOMMENDATIONS.forEach(function(it) { fetchThumb(pidFromHref(it.href)); });
 
     scheduleInject();
   }
