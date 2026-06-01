@@ -1933,7 +1933,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 
 
 /* =========================================================================
- * [모듈 B] billyjo-detailcard inject.js v0.5.74 — 제품 상세 페이지 전용
+ * [모듈 B] billyjo-cards inject.js v0.5.74 — 제품 상세 페이지 전용 (구. billyjo-detailcard)
  * ========================================================================= */
 /*!
  * billyjo-detailcard v0.5.74 — 상세페이지 카드 클라이언트 패치
@@ -2010,10 +2010,10 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         if (!src) {
           var scripts = document.getElementsByTagName('script');
           for (var i = scripts.length - 1; i >= 0; i--) {
-            if (/billyjo-detailcard@/.test(scripts[i].src)) { src = scripts[i].src; break; }
+            if (/billyjo-(?:inject|detailcard|cards)@/.test(scripts[i].src)) { src = scripts[i].src; break; }
           }
         }
-        var m = src.match(/billyjo-detailcard@([0-9a-f]{7,40}|main)\//);
+        var m = src.match(/billyjo-(?:inject|detailcard|cards)@([0-9a-f]{7,40}|main)\//);
         return m ? m[1] : 'main';
       } catch(e) { return 'main'; }
     }
@@ -2027,7 +2027,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       if (!wrap) return;
 
       var commit = getCommit();
-      var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-detailcard@' + commit + '/landing/newlywed.js';
+      var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-cards@main/landing/newlywed.js';
 
       var link = document.createElement('a');
       link.className = 'bj-newlywed-cat';
@@ -4652,7 +4652,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   // ─────────────────────────────────────────────────────────────────────────
   // 2.x) 제품별 AI 카드 HTML 주입 (룰북 v0.4.2)
   //
-  //   billyjo-detailcard 레포 cards/{prodNo}.html이 존재하면 페이지에 주입한다.
+  //   billyjo-cards 레포 cards/{prodNo}.html이 존재하면 페이지에 주입한다.
   //   - 자기 inject.js의 commit hash를 추출해 같은 commit의 카드 fetch (캐시 일관성)
   //   - 404면 silent skip — 패치(헤더·하단위젯)만 적용
   //   - 1회만 주입 (window.__bjAiCardFetched 가드)
@@ -4663,10 +4663,10 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       if (!src) {
         var scripts = document.getElementsByTagName('script');
         for (var i = scripts.length - 1; i >= 0; i--) {
-          if (/billyjo-detailcard@/.test(scripts[i].src)) { src = scripts[i].src; break; }
+          if (/billyjo-(?:inject|detailcard|cards)@/.test(scripts[i].src)) { src = scripts[i].src; break; }
         }
       }
-      var m = src.match(/billyjo-detailcard@([0-9a-f]{7,40}|main)\//);
+      var m = src.match(/billyjo-(?:inject|detailcard|cards)@([0-9a-f]{7,40}|main)\//);
       return m ? m[1] : 'main';
     } catch(e) { return 'main'; }
   }
@@ -4679,8 +4679,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     var prodNo = m[1];
     window.__bjAiCardFetched = true;
 
-    var commit = getOwnCommitHash();
-    var url = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-detailcard@' + commit + '/cards/' + prodNo + '.html';
+    var url = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-cards@main/cards/' + prodNo + '.html';
     fetch(url, { cache: 'force-cache' })
       .then(function(r){ return r.ok ? r.text() : null; })
       .then(function(html){
@@ -5131,7 +5130,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     var wrap = document.querySelector('.mobile__gnb .gnb__cateogry .category__wrap, .category__wrap');
     if (!wrap || wrap.querySelector('.bj-newlywed-cat')) return;
     var commit = getOwnCommitHash();
-    var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-detailcard@' + commit + '/landing/newlywed.js';
+    var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-cards@main/landing/newlywed.js';
     var link = document.createElement('a');
     link.className = 'bj-newlywed-cat';
     link.href = '#';
