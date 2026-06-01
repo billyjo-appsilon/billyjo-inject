@@ -189,7 +189,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '#bj-header-icons img { width: 22px !important; height: 22px !important; }',
       '',
       '/* Category nav */',
-      '.category__wrap { padding: 8px 12px !important; gap: 8px 16px !important; border-top: 1px solid #eee; }',
+      '.category__wrap { padding: 8px 10px !important; gap: 6px 9px !important; border-top: 1px solid #eee; }',
       '',
       '/* Fixed scroll bar (cloned) */',
       '#bj-scroll-header { position: fixed !important; top: 0; left: 0; right: 0; z-index: 9998; background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.1); opacity: 0; pointer-events: none; transition: opacity 0.25s ease; }',
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function() {
       '#bj-scroll-header .bj-sh-logo .bj-sh-logo-img { position: absolute; left: 50%; transform: translateX(-50%); width: 80px; height: auto; }',
       '#bj-scroll-header .bj-sh-logo .bj-sh-icons { display: flex; gap: 18px; margin-left: auto; }',
       '#bj-scroll-header .bj-sh-logo .bj-sh-icons img { width: 22px; height: 22px; }',
-      '#bj-scroll-header .bj-sh-cat { display: flex; justify-content: center; gap: 8px 16px; flex-wrap: wrap; padding: 8px 12px; border-top: 1px solid #eee; }',
+      '#bj-scroll-header .bj-sh-cat { display: flex; justify-content: center; gap: 6px 9px; flex-wrap: wrap; padding: 8px 10px; border-top: 1px solid #eee; }',
       '#bj-scroll-header .bj-sh-cat a { font-size: 14px; color: #333; text-decoration: none; line-height: 1.5; }',
       '#bj-scroll-header .bj-sh-cat a:hover { color: #0838f8; }',
       'header.bj-hide-banner #bj-top-banner { display: none !important; }',
@@ -1166,6 +1166,86 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     hideRows();
     if (++tries >= 8) clearInterval(iv);
   }, 400);
+})();
+
+// === 모바일 사이드(aside) 슬라이드 메뉴 로고: 크기 축소 + 한글/영문 2초 cross-fade (v0.6.9) ===
+// 헤더 로고 cross-fade(alternateBillyjoLogo)는 모듈 B(prod_view 전용)에만 있어서
+// 전 페이지에 뜨는 aside 메뉴 로고에는 적용 안 됨 → 모듈 A(전역)에서 별도 처리.
+(function billyjoAsideLogo() {
+  var BJ_LOGO_KO = 'https://admin2.billyjo.co.kr/logo/billyjo-ko.png';
+  var BJ_LOGO_EN = 'https://admin2.billyjo.co.kr/logo/billyjo-en.png';
+  var ASIDE_LOGO_SEL = '.aside__top .top__logo img';
+
+  // 크기 축소 (모바일 한정) — 기존 대비 많이 줄임. 부모를 inline-block+relative로
+  // 만들어 EN overlay 100%x100%가 KO 이미지 크기에 정확히 겹치도록.
+  var css = document.createElement('style');
+  css.id = 'bj-aside-logo-css';
+  css.textContent = [
+    '@media (max-width:768px){',
+    '  .aside__top .top__logo{ display:inline-block !important; position:relative !important; line-height:0 !important; }',
+    '  .aside__top .top__logo img{ width:92px !important; max-width:92px !important; height:auto !important; }',
+    '}'
+  ].join('\n');
+  document.head.appendChild(css);
+
+  function setupAsideLogo() {
+    var imgs = document.querySelectorAll(ASIDE_LOGO_SEL);
+    if (!imgs.length) return false;
+    imgs.forEach(function(img) {
+      if (img.dataset.bjAsideLogoAlt) return;
+      var parent = img.parentNode;
+      if (!parent) return;
+      img.dataset.bjAsideLogoAlt = '1';
+      var cs = window.getComputedStyle(parent);
+      if (cs.position === 'static') parent.style.position = 'relative';
+      // 원본을 한글 로고로
+      img.src = BJ_LOGO_KO;
+      img.classList.add('bj-aside-logo-ko');
+      img.style.transition = 'opacity 0.2s ease-in-out';
+      img.style.opacity = '1';
+      // 영문 로고를 같은 위치에 absolute로 겹치기
+      var enImg = img.cloneNode(false);
+      enImg.removeAttribute('id');
+      enImg.classList.remove('bj-aside-logo-ko');
+      enImg.classList.add('bj-aside-logo-en');
+      enImg.src = BJ_LOGO_EN;
+      enImg.style.position = 'absolute';
+      enImg.style.left = '0';
+      enImg.style.top = '0';
+      enImg.style.width = '100%';
+      enImg.style.height = '100%';
+      enImg.style.objectFit = 'contain';
+      enImg.style.opacity = '0';
+      enImg.style.transition = 'opacity 0.2s ease-in-out';
+      enImg.style.pointerEvents = 'none';
+      parent.appendChild(enImg);
+    });
+    if (!window.__bjAsideLogoInterval) {
+      window.__bjAsideLogoInterval = setInterval(function() {
+        var ko = document.querySelectorAll('img.bj-aside-logo-ko');
+        var en = document.querySelectorAll('img.bj-aside-logo-en');
+        if (!ko.length || !en.length) return;
+        var showEn = ko[0].style.opacity !== '0';
+        ko.forEach(function(i) { i.style.opacity = showEn ? '0' : '1'; });
+        en.forEach(function(i) { i.style.opacity = showEn ? '1' : '0'; });
+      }, 2000);
+    }
+    return true;
+  }
+
+  // aside 메뉴는 스킨이 늦게 렌더할 수 있어 재시도.
+  function tryInit() {
+    if (setupAsideLogo()) return;
+    var tries = 0;
+    var iv = setInterval(function() {
+      if (setupAsideLogo() || ++tries >= 15) clearInterval(iv);
+    }, 400);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', tryInit);
+  } else {
+    tryInit();
+  }
 })();
 
 // === 메인 페이지: 주요 카테고리 ↔ 이달의 추천제품 사이 v5 컨텐츠 주입 ===
