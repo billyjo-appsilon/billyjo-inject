@@ -1280,7 +1280,9 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 })();
 
 // =============================================================================
-// 자동생성카드(ai) 하단 유사상품 추천 (v0.6.7) — 100% 백엔드 API 구동
+// 자동생성카드(ai) 하단 유사상품 추천 (v0.6.8) — 100% 백엔드 API 구동
+//   v0.6.8: 가격 미상(monthlyFee 0) 카드 — "0원/월"·가짜 할인 대신 "렌탈료 상세에서 확인".
+//           (정수기 외 카테고리는 cards-index에 가격 없음)
 //   admin2 /v1/products/recommendations 응답(topPick 1 + items 3 = 4카드)만 표시.
 //   v0.6.5: 정적 fallback 3개 제거 — 라이브와 동일 데이터를 미리 그렸다가 덮어쓰던
 //           중복 렌더 제거. API 응답 도착 후에만 위젯을 주입(응답 없으면 미표시).
@@ -1429,8 +1431,20 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   }
 
   function renderCard(item, idx) {
-    var diffCls = item.priceDiff < 0 ? 'is-down' : 'is-up';
-    var diffStr = (item.priceDiff > 0 ? '+' : '') + item.priceDiff.toLocaleString() + '원 ' + (item.priceDiff < 0 ? '▼' : '▲');
+    // 가격 미상(monthlyFee 0/누락) → "0원/월"·가짜 할인 대신 상세 유도 문구
+    var priceRow;
+    if (item.price) {
+      var diffCls = item.priceDiff < 0 ? 'is-down' : 'is-up';
+      var diffStr = item.priceDiff
+        ? '<span class="bj-reco-price-diff ' + diffCls + '">' +
+            (item.priceDiff > 0 ? '+' : '') + item.priceDiff.toLocaleString() + '원 ' +
+            (item.priceDiff < 0 ? '▼' : '▲') + '</span>'
+        : '';
+      priceRow = '<span class="bj-reco-price">' + item.price.toLocaleString() + '</span>' +
+        '<span class="bj-reco-price-suffix">원/월</span>' + diffStr;
+    } else {
+      priceRow = '<span class="bj-reco-price-suffix" style="font-size:12px">렌탈료 상세에서 확인</span>';
+    }
     var strengths = '<span class="bj-reco-chip is-grade">' + escapeHtml(item.grade) + '</span>';
     for (var i = 0; i < item.strengths.length; i++) {
       strengths += '<span class="bj-reco-chip">' + escapeHtml(item.strengths[i]) + '</span>';
@@ -1446,11 +1460,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       '<div class="bj-reco-body" style="display:flex;flex-direction:column;gap:10px;min-width:0">' +
       '<div class="bj-reco-brand">' + escapeHtml(item.brand) + '</div>' +
       '<div class="bj-reco-name">' + escapeHtml(item.name) + '</div>' +
-      '<div class="bj-reco-price-row">' +
-      '<span class="bj-reco-price">' + item.price.toLocaleString() + '</span>' +
-      '<span class="bj-reco-price-suffix">원/월</span>' +
-      '<span class="bj-reco-price-diff ' + diffCls + '">' + diffStr + '</span>' +
-      '</div>' +
+      '<div class="bj-reco-price-row">' + priceRow + '</div>' +
       '<div class="bj-reco-strengths">' + strengths + '</div>' +
       '<div class="bj-reco-persona"><span>' + item.personaIcon + '</span><span>' + item.personaText + '</span></div>' +
       '<span class="bj-reco-cta">자세히 보기 →</span>' +
@@ -1473,6 +1483,11 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     var imgHtml = item.image
       ? '<img src="' + escapeHtml(item.image) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:14px">'
       : '<div style="text-align:center;color:#94A3B8;font-size:11px">제품 이미지</div>';
+    // 가격 미상 → "0원/월" 대신 상세 유도
+    var topPriceRow = item.price
+      ? '<span class="bj-reco-top-price">' + item.price.toLocaleString() + '</span>' +
+        '<span class="bj-reco-top-price-suffix">원/월</span>' + diffStr
+      : '<span class="bj-reco-top-price-suffix" style="font-size:13px">렌탈료 상세에서 확인</span>';
     return '<a class="bj-reco-top-card" href="' + escapeHtml(item.href || '#') + '">' +
       '<span class="bj-reco-top-badge">' + escapeHtml(item.badge || '🔥 최고 인기') + '</span>' +
       '<div class="bj-reco-top-img">' + imgHtml + '</div>' +
@@ -1480,11 +1495,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         (item.subBadge ? '<div class="bj-reco-top-sub">' + escapeHtml(item.subBadge) + '</div>' : '') +
         '<div class="bj-reco-top-brand">' + escapeHtml(item.brand || '') + '</div>' +
         '<div class="bj-reco-top-name">' + escapeHtml(item.name || '') + '</div>' +
-        '<div class="bj-reco-top-price-row">' +
-          '<span class="bj-reco-top-price">' + (item.price || 0).toLocaleString() + '</span>' +
-          '<span class="bj-reco-top-price-suffix">원/월</span>' +
-          diffStr +
-        '</div>' +
+        '<div class="bj-reco-top-price-row">' + topPriceRow + '</div>' +
         '<div class="bj-reco-top-strengths">' + strengths + '</div>' +
       '</div>' +
       '<span class="bj-reco-top-cta">자세히 보기 →</span>' +
