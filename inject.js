@@ -3651,13 +3651,96 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       });
   }
 
+  /* v0.6.5 (2026-06-02): 위젯 selection 스냅샷 — 사용자가 현재 위젯에서 선택한
+     공급사/약정/옵션/가격을 백엔드에 전달해 상담사가 통화 시작 전 즉시 파악.
+     모든 필드 try/catch 안전망 — DOM 변형돼도 호출 자체는 절대 실패 안 함. */
+  function collectConsultSelection(){
+    var out = {};
+    try {
+      var supEl = document.querySelector('.bj-ws-sup-tab.active') ||
+                  document.querySelector('.bb-sup-tab.active');
+      if (supEl && supEl.textContent) {
+        var s = supEl.textContent.replace(/\s+/g, ' ').trim();
+        if (s) out.supplier = s.slice(0, 60);
+      }
+    } catch(_){}
+    try {
+      var activeTerm = document.querySelector('.bj-ws-term-pill.active') ||
+                       document.querySelector('.bb-month-pill.active');
+      if (activeTerm) {
+        var periodEl = activeTerm.querySelector('.bj-ws-term-period') ||
+                       activeTerm.querySelector('.bb-month-period');
+        if (periodEl) {
+          var nm = (periodEl.textContent || '').match(/(\d+)\s*개월/);
+          if (nm) out.contractTermMonths = parseInt(nm[1], 10);
+        }
+        var priceEl = activeTerm.querySelector('.bj-ws-term-price') ||
+                      activeTerm.querySelector('.bb-month-price');
+        if (priceEl) {
+          var pt = (priceEl.textContent || '').replace(/[^\d]/g, '');
+          if (pt) out.displayedMonthlyFee = parseInt(pt, 10);
+        }
+        var cdEl = activeTerm.querySelector('.bj-ws-term-card-price');
+        if (cdEl) {
+          var cdt = (cdEl.textContent || '').replace(/[^\d]/g, '');
+          if (cdt) {
+            out.cardDiscountedPrice = parseInt(cdt, 10);
+            out.cardDiscountApplied = true;
+          }
+        } else if (activeTerm.classList.contains('has-card-dc') || activeTerm.classList.contains('is-best')) {
+          out.cardDiscountApplied = true;
+        }
+      }
+    } catch(_){}
+    try {
+      var optEl = document.querySelector('.bj-option-clone option[selected]') ||
+                  document.querySelector('.bj-option-clone option:checked') ||
+                  document.querySelector('.option_select option:checked');
+      if (optEl && optEl.textContent) {
+        var ol = optEl.textContent.replace(/\s+/g, ' ').trim();
+        if (ol && ol !== '== 옵션선택 ==' && ol !== '옵션선택') out.optionLabel = ol.slice(0, 120);
+      }
+    } catch(_){}
+    try {
+      var pills = document.querySelectorAll('.bj-ws-term-pill');
+      if (pills && pills.length) {
+        var list = [];
+        Array.prototype.forEach.call(pills, function(p){
+          var row = {};
+          if (out.supplier) row.supplier = out.supplier;
+          var pe = p.querySelector('.bj-ws-term-period');
+          if (pe) {
+            var pm = (pe.textContent || '').match(/(\d+)\s*개월/);
+            if (pm) row.termMonths = parseInt(pm[1], 10);
+          }
+          var pr = p.querySelector('.bj-ws-term-price');
+          if (pr) {
+            var prt = (pr.textContent || '').replace(/[^\d]/g, '');
+            if (prt) row.monthly = parseInt(prt, 10);
+          }
+          var pc = p.querySelector('.bj-ws-term-card-price');
+          if (pc) {
+            var pct = (pc.textContent || '').replace(/[^\d]/g, '');
+            if (pct) row.cardDiscounted = parseInt(pct, 10);
+          }
+          if (row.termMonths || row.monthly) list.push(row);
+        });
+        if (list.length) out.listSnapshot = list.slice(0, 12);
+      }
+    } catch(_){}
+    return Object.keys(out).length ? out : null;
+  }
+
   function assignConsultant(){
     /* v0.5.72: admin2 실 endpoint 호출, mock fallback 폐기. timeout 18s + retry 1회.
-       호스트 override: window.__bjConsultApiUrl */
+       호스트 override: window.__bjConsultApiUrl
+       v0.6.5: selection 스냅샷 첨부 — 백엔드 ConsultRequest.selection_snapshot에 저장 */
     var base = window.__bjConsultApiUrl || 'https://billyjo-admin2.vercel.app';
     var prodId = (location.pathname.match(/prod_view\/(\d+)/) || [])[1] || null;
     var prodName = (document.querySelector('.prod_name b') || document.querySelector('.prod_name') || {}).textContent;
     var body = { productId: prodId, productName: prodName && prodName.trim() };
+    var sel = collectConsultSelection();
+    if (sel) body.selection = sel;
     return _assignFetchOnce(base, body, 18000).catch(function(err){
       /* 1차 실패(주로 cold start 또는 일시 네트워크) → 1.5초 대기 후 재시도 — 두 번째는 더 짧은 timeout */
       return new Promise(function(resolve, reject){
