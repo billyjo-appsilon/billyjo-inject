@@ -202,7 +202,11 @@ document.addEventListener('DOMContentLoaded', function() {
       /* 로고를 absolute 중앙정렬 → in-flow 좌측정렬로 변경: 햄버거 바로 오른쪽에 붙어
          [햄버거][로고] 한 그룹으로 좌측 배치. 기존엔 로고가 중앙 absolute라 햄버거만
          좌측에 덩그러니 남아 한 줄이 여백으로 낭비됐음. (prod_view 모듈 B와 동일 정렬) */
-      'a.logo { position: static !important; transform: none !important; flex-shrink: 0 !important; width: auto !important; height: auto !important; margin: 0 !important; float: none !important; display: inline-flex !important; align-items: center !important; }',
+      /* position:relative (static 아님!) — in-flow 좌측정렬 유지 + 로고 cross-fade의
+         절대배치 EN 오버레이가 a.logo를 기준으로 겹치도록 positioning context 보존.
+         static으로 두면 EN 오버레이가 .header__top(relative) 기준 100%x100%로 퍼져
+         햄버거 위에 영문 로고가 뜨는 버그 발생. */
+      'a.logo { position: relative !important; transform: none !important; left: auto !important; flex-shrink: 0 !important; width: auto !important; height: auto !important; margin: 0 !important; float: none !important; display: inline-flex !important; align-items: center !important; }',
       'a.logo img { width: 80px !important; height: auto !important; }',
       '#bj-header-icons { position: static !important; display: flex !important; align-items: center !important; gap: 18px !important; margin-left: auto !important; padding: 0 !important; list-style: none !important; flex-shrink: 0 !important; float: none !important; z-index: 1 !important; }',
       '#bj-header-icons li { display: flex !important; align-items: center !important; padding: 0 !important; margin: 0 !important; }',
