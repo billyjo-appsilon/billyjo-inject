@@ -3653,8 +3653,11 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   /* (b) 하단 위젯 — CSS specificity 안전망 + 핸들 + 버튼 격상 */
   function forceFixedStyle(wrapper){
     /* v0.5.3: display:block 강제 — billyjo underlying의 display:none override */
+    /* v0.7.2: 수평 위치(left/right)는 인라인에서 제거 — 인라인 left:0!important가
+       PC 중앙정렬 미디어쿼리(left:50%!important)를 덮어써 위젯이 좌측에 쏠리던 버그.
+       수평은 스타일시트가 담당(모바일 base left:0/right:0, ≥1024px left:50% 중앙). */
     wrapper.style.cssText = (wrapper.style.cssText || '') +
-      ';display:block!important;position:fixed!important;bottom:0!important;left:0!important;right:0!important;' +
+      ';display:block!important;position:fixed!important;bottom:0!important;' +
       'z-index:99999!important;margin:0!important;';
   }
 
@@ -5037,7 +5040,9 @@ if (location.pathname.indexOf('prod_view') !== -1) {
          위젯이 오프셋되는 잠재 버그 차단 */
       if (dy > DRAG_TAP_THRESHOLD) {
         dragOffset = Math.min(dy, 200);
-        wrapper.style.setProperty('transform', 'translateY(' + dragOffset + 'px)', 'important');
+        /* v0.7.2: PC(≥1024px)는 중앙정렬 translateX(-50%) 보존 — 안 그러면 드래그 중 좌측 점프 */
+        var tx = window.innerWidth >= 1024 ? 'translateX(-50%) ' : '';
+        wrapper.style.setProperty('transform', tx + 'translateY(' + dragOffset + 'px)', 'important');
       }
       if (e.cancelable && Math.abs(dy) > DRAG_TAP_THRESHOLD) e.preventDefault();
     }
