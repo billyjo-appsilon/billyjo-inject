@@ -1932,6 +1932,23 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 #bj-consult-modal .bj-cta { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 18px; background: #0838f8; color: #fff; border: none; border-radius: 14px; font-size: 18px; font-weight: 800; text-decoration: none; cursor: pointer; transition: all 0.15s ease; }\
 #bj-consult-modal .bj-cta:hover, #bj-consult-modal .bj-cta:active { background: #0626c0; transform: scale(0.98); }\
 #bj-consult-modal .bj-cta svg { width: 22px; height: 22px; fill: #fff; }\
+#bj-consult-modal .bj-agent-field { display: inline-block; font-size: 11.5px; font-weight: 700; color: #0838f8; background: #eef2ff; border: 1px solid #e0e8ff; border-radius: 999px; padding: 2px 10px; margin-top: 6px; }\
+#bj-consult-modal .bj-cta-secondary { background: #fff; color: #0838f8; border: 1.5px solid #0838f8; margin-top: 10px; font-size: 16px; padding: 15px; }\
+#bj-consult-modal .bj-cta-secondary svg { fill: #0838f8; }\
+#bj-consult-modal .bj-cta-secondary:hover, #bj-consult-modal .bj-cta-secondary:active { background: #eef2ff; }\
+#bj-consult-modal .bj-reserve-head { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }\
+#bj-consult-modal .bj-back { background: none; border: none; color: #777; font-size: 14px; cursor: pointer; padding: 4px 6px 4px 0; }\
+#bj-consult-modal .bj-reserve-title { font-size: 18px; font-weight: 800; color: #222; }\
+#bj-consult-modal .bj-reserve-sub { font-size: 12.5px; color: #555; margin-bottom: 16px; }\
+#bj-consult-modal .bj-slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 4px; }\
+#bj-consult-modal .bj-slot { padding: 14px 8px; background: #f5f9ff; border: 1.5px solid #e0e8ff; border-radius: 12px; font-size: 15px; font-weight: 700; color: #1A1F36; cursor: pointer; transition: all 0.13s; }\
+#bj-consult-modal .bj-slot:hover, #bj-consult-modal .bj-slot:active { border-color: #0838f8; background: #eef2ff; color: #0838f8; }\
+#bj-consult-modal .bj-reserve-empty { text-align: center; color: #777; font-size: 13px; padding: 24px 0; }\
+#bj-consult-modal .bj-reserve-done { text-align: center; padding: 8px 0 4px; }\
+#bj-consult-modal .bj-done-check { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%; background: #16a34a; color: #fff; font-size: 32px; line-height: 56px; }\
+#bj-consult-modal .bj-done-title { font-size: 18px; font-weight: 800; color: #222; margin-bottom: 6px; }\
+#bj-consult-modal .bj-done-time { font-size: 20px; font-weight: 800; color: #0838f8; margin-bottom: 8px; }\
+#bj-consult-modal .bj-done-desc { font-size: 13px; color: #555; line-height: 1.5; margin-bottom: 14px; }\
 #bj-consult-modal .bj-secondary { display: block; text-align: center; margin-top: 12px; font-size: 12px; color: #777; }\
 #bj-consult-modal .bj-secondary a { color: #555; text-decoration: underline; cursor: pointer; }\
 #bj-consult-modal .bj-loading, #bj-consult-modal .bj-error { text-align: center; padding: 40px 20px; color: #555; font-size: 14px; }\
@@ -1997,6 +2014,34 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     return '<span class="bj-agent-rating">' + s + ' ' + r.toFixed(1) + '</span>';
   }
 
+  // 상담사 전문 분야 — 백엔드 card.specialty 우선, 없으면 페이지 상품 카테고리로 추론
+  function consultSpecialty(card) {
+    if (card && card.specialty) return card.specialty;
+    var name = (detectProduct().productName || '');
+    var ogt = document.querySelector('meta[property="og:title"]');
+    if (ogt) name += ' ' + (ogt.getAttribute('content') || '');
+    var map = [
+      [/냉온정수기|얼음정수기|정수기|정수/, '정수기 전문'],
+      [/공기청정기|공기청정|청정기|에어워셔/, '공기청정기 전문'],
+      [/비데/, '비데 전문'],
+      [/매트리스|토퍼|모션베드|침대/, '매트리스·침구 전문'],
+      [/안마의자|안마/, '안마의자 전문'],
+      [/세탁기|건조기|드럼세탁|통돌이/, '세탁·건조 전문'],
+      [/김치냉장고|냉장고|냉동고/, '냉장고 전문'],
+      [/에어컨|냉난방/, '냉난방 전문'],
+      [/식기세척기|인덕션|전기레인지/, '주방가전 전문'],
+      [/올레드|QLED|OLED|TV/, '영상가전 전문'],
+      [/제습기|가습기|연수기/, '환경가전 전문'],
+    ];
+    for (var i = 0; i < map.length; i++) { if (map[i][0].test(name)) return map[i][1]; }
+    return '생활가전 전문';
+  }
+
+  var PHONE_ICON =
+    '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57a1 1 0 0 0-1.02.24l-2.2 2.2a15.05 15.05 0 0 1-6.59-6.58l2.2-2.21a1 1 0 0 0 .25-1.02A11.36 11.36 0 0 1 8.5 4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1c0 9.39 7.61 17 17 17a1 1 0 0 0 1-1v-3.5a1 1 0 0 0-1-1z"/></svg>';
+  var CAL_ICON =
+    '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>';
+
   function showAssigned(data) {
     var card = data.consultantCard || {};
     var stats = data.queueStats || {};
@@ -2005,27 +2050,22 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       : '<div class="bj-photo-placeholder">' + escapeHtml((card.name || '?').charAt(0)) + '</div>';
     var rating = card.rating ? ratingStars(card.rating) : '';
     var bio = card.bio ? '<div class="bj-agent-bio">' + escapeHtml(card.bio) + '</div>' : '';
-    var counts =
-      '<div class="bj-agent-counts">오늘 ' + (card.todayCalls || 0) + '건 상담' +
-      (card.totalCalls ? ' · 누적 ' + (card.totalCalls).toLocaleString() + '건' : '') +
-      '</div>';
+    // 누적 상담 횟수 대신 전문 분야 표기
+    var field = '<div><span class="bj-agent-field">' + escapeHtml(consultSpecialty(card)) + '</span></div>';
 
+    // '지금 대기'·'활성 상담사' 제거 — '평균 응답'만 노출
     var statsHtml =
       '<div class="bj-stats">' +
-      '<div class="bj-stat"><div class="bj-stat-label">지금 대기</div><div class="bj-stat-value"><span class="bj-dot"></span>' +
-      (stats.nowWaiting || 0) + '명</div></div>' +
       '<div class="bj-stat"><div class="bj-stat-label">평균 응답</div><div class="bj-stat-value">' +
       fmtSecs(stats.avgResponseSecs) + '</div></div>' +
-      '<div class="bj-stat"><div class="bj-stat-label">활성 상담사</div><div class="bj-stat-value">' +
-      (stats.activeConsultants || 0) + '명</div></div>' +
       '</div>';
-
-    var phoneIcon =
-      '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 15.5c-1.25 0-2.45-.2-3.57-.57a1 1 0 0 0-1.02.24l-2.2 2.2a15.05 15.05 0 0 1-6.59-6.58l2.2-2.21a1 1 0 0 0 .25-1.02A11.36 11.36 0 0 1 8.5 4a1 1 0 0 0-1-1H4a1 1 0 0 0-1 1c0 9.39 7.61 17 17 17a1 1 0 0 0 1-1v-3.5a1 1 0 0 0-1-1z"/></svg>';
 
     var cta =
       '<a class="bj-cta" href="' + escapeAttr(data.telLink || ('tel:,' + data.code)) + '">' +
-      phoneIcon + '<span>지금 ' + escapeHtml(card.name || '상담사') + '님과 통화</span></a>';
+      PHONE_ICON + '<span>지금 ' + escapeHtml(card.name || '상담사') + '님과 통화</span></a>';
+    var reserveBtn =
+      '<button type="button" class="bj-cta bj-cta-secondary" id="bj-reserve-open">' +
+      CAL_ICON + '<span>상담 예약 (2시간 이내)</span></button>';
 
     var html =
       statsHtml +
@@ -2033,15 +2073,90 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       photoHtml +
       '<div style="flex:1;min-width:0">' +
       '<div class="bj-agent-name">' + escapeHtml(card.name || '상담사') + rating + '</div>' +
-      bio + counts +
+      bio + field +
       '</div></div>' +
       '<div class="bj-code-box">' +
       '<div class="bj-code-label">통화 안내 코드 (자동 전송)</div>' +
       '<div class="bj-code">' + escapeHtml(data.code) + '</div>' +
       '</div>' +
-      cta +
+      cta + reserveBtn +
       '<span class="bj-secondary">통화가 연결되면 안내 코드가 자동으로 전송됩니다.</span>';
-    buildModal(html);
+    var wrap = buildModal(html);
+    var rb = wrap.querySelector('#bj-reserve-open');
+    if (rb) rb.addEventListener('click', function() { showReservation(data); });
+  }
+
+  // 예약 가능 슬롯 — 지금부터 2시간 이내(고객 전환율 ↓ 방지)로만. 20분 간격.
+  function genReserveSlots() {
+    var now = new Date();
+    var start = new Date(now.getTime() + 20 * 60000); // 최소 20분 뒤
+    start.setSeconds(0, 0);
+    start.setMinutes(Math.ceil(start.getMinutes() / 20) * 20);
+    var limit = new Date(now.getTime() + 2 * 60 * 60000); // +2시간 상한
+    var slots = [];
+    for (var t = new Date(start); t.getTime() <= limit.getTime(); t = new Date(t.getTime() + 20 * 60000)) {
+      slots.push(new Date(t));
+    }
+    return slots;
+  }
+  function fmtSlot(d) {
+    var h = d.getHours(), m = d.getMinutes();
+    var ap = h < 12 ? '오전' : '오후';
+    var h12 = h % 12; if (h12 === 0) h12 = 12;
+    return ap + ' ' + h12 + ':' + (m < 10 ? '0' + m : m);
+  }
+
+  function showReservation(data) {
+    var card = data.consultantCard || {};
+    var slots = genReserveSlots();
+    var slotsHtml = slots.length
+      ? '<div class="bj-slots">' + slots.map(function(d) {
+          return '<button type="button" class="bj-slot" data-iso="' + escapeAttr(d.toISOString()) +
+            '" data-label="' + escapeAttr(fmtSlot(d)) + '">' + escapeHtml(fmtSlot(d)) + '</button>';
+        }).join('') + '</div>'
+      : '<div class="bj-reserve-empty">지금은 예약 가능한 시간이 없습니다.<br>바로 통화를 이용해 주세요.</div>';
+    var html =
+      '<div class="bj-reserve-head">' +
+      '<button type="button" class="bj-back" id="bj-reserve-back">‹ 뒤로</button>' +
+      '<div class="bj-reserve-title">상담 예약</div></div>' +
+      '<div class="bj-reserve-sub">' + escapeHtml(card.name || '상담사') + ' 상담사 · 지금부터 2시간 이내 예약 가능</div>' +
+      slotsHtml +
+      '<span class="bj-secondary">선택한 시간에 상담사가 전화드립니다.</span>';
+    var wrap = buildModal(html);
+    var back = wrap.querySelector('#bj-reserve-back');
+    if (back) back.addEventListener('click', function() { showAssigned(data); });
+    Array.prototype.forEach.call(wrap.querySelectorAll('.bj-slot'), function(b) {
+      b.addEventListener('click', function() {
+        confirmReservation(data, b.getAttribute('data-iso'), b.getAttribute('data-label'));
+      });
+    });
+  }
+
+  function confirmReservation(data, iso, label) {
+    var card = data.consultantCard || {};
+    // 백엔드 연동(있으면) — 실패해도 UX는 graceful (접수 안내)
+    try {
+      fetch(API_BASE + '/v1/consult/reserve', {
+        method: 'POST', headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({
+          productId: detectProduct().productId, reserveAt: iso, code: data.code || null,
+          consultantId: card.id || null
+        })
+      }).catch(function() {});
+    } catch (_) {}
+    var codeBox = data.code
+      ? '<div class="bj-code-box"><div class="bj-code-label">통화 안내 코드</div>' +
+        '<div class="bj-code">' + escapeHtml(data.code) + '</div></div>'
+      : '';
+    buildModal(
+      '<div class="bj-reserve-done">' +
+      '<div class="bj-done-check">✓</div>' +
+      '<div class="bj-done-title">예약이 접수되었습니다</div>' +
+      '<div class="bj-done-time">' + escapeHtml(label) + '</div>' +
+      '<div class="bj-done-desc">' + escapeHtml(card.name || '상담사') + ' 상담사가 예약 시간에 전화드립니다.</div>' +
+      codeBox +
+      '</div>'
+    );
   }
 
   function escapeHtml(s) {
