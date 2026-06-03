@@ -1298,8 +1298,8 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 
 // === 메인 페이지: 주요 카테고리 ↔ 이달의 추천제품 사이 v5 컨텐츠 주입 ===
 (function injectMainPageV5() {
-  var V5_URL = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@f07031f/preview-detail-page-v5.html';
-  var CDN_BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@f07031f';
+  var V5_URL = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@d129e58/preview-detail-page-v5.html';
+  var CDN_BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@d129e58';
   var INJECTED_ID = 'bj-v5-injected';
 
   function findTargetHeading() {
@@ -1730,9 +1730,28 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         return {
           topPick: data.topPick || null,
           items: data.items || [],
+          requestedGift: data.requestedGift || null,  // 적정 현금 사은품(원), 매칭 실패 시 null
         };
       })
       .catch(function() { return null; });
+  }
+
+  /* 적정 현금 사은품을 V5 카드의 [data-bj-cash-gift] 슬롯에 채움.
+     모델코드 확신 매칭 시에만 값이 오므로, 값 없으면 슬롯은 숨김 유지(잘못된 금액 미노출). */
+  function fillCashGift(won) {
+    if (!won || won <= 0) return;
+    var man = Math.round(won / 10000);
+    if (man <= 0) return;
+    var tries = 0;
+    (function poll() {
+      var el = document.querySelector('[data-bj-cash-gift]');
+      if (el) {
+        el.textContent = '💰 예상 현금 사은품 최대 약 ' + man.toLocaleString() + '만원';
+        el.style.display = 'flex';
+        return;
+      }
+      if (++tries < 40) setTimeout(poll, 300);  // V5 카드 주입 대기 (최대 ~12s)
+    })();
   }
 
   function applyDynamicRecos(payload) {
@@ -1804,7 +1823,10 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   function start() {
     injectStyle();
     // 백엔드 추천 호출 — 응답이 와야 위젯을 그린다(정적 선렌더 없음).
-    fetchRecommendations().then(applyDynamicRecos);
+    fetchRecommendations().then(function(payload) {
+      applyDynamicRecos(payload);
+      fillCashGift(payload && payload.requestedGift);
+    });
   }
 
   if (document.readyState === 'loading') {
