@@ -1737,24 +1737,51 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       .catch(function() { return null; });
   }
 
-  /* 현금 사은품 범위(적정~한도)를 V5 카드의 [data-bj-cash-gift] 슬롯에 채움.
-     모델코드 확신 매칭 시에만 값이 오므로, 값 없으면 슬롯은 숨김 유지(잘못된 금액 미노출). */
+  /* 현금 사은품 범위(최저~적정)를 카드에 채움.
+     - 생성 AI카드 '.gift-db'(라벨 "예상 최대 지원금"은 옆 .gift-tag) → 값만.
+     - V5 카드 '[data-bj-cash-gift]' → 전체 문구.
+     정합성 매칭 성공 시에만 값이 옴(백엔드). 매칭 실패(범위 없음)면 '.gift-db' 행을 숨김
+     ("내부 DB 연동 예정" 등 잘못된/미완 플레이스홀더가 고객에게 노출되지 않게). */
   function fillCashGift(payload) {
     if (!payload) return;
-    var range = payload.giftRange, low, high;
-    if (range && range.high) { low = range.low || range.high; high = range.high; }
+    var range = payload.giftRange, low = 0, high = 0;
+    if (range && range.high) { high = range.high; low = range.low || range.high; }
     else if (payload.requestedGift) { low = high = payload.requestedGift; }  // 하위호환
-    if (!high || high <= 0) return;
-    var loMan = Math.round(low / 10000), hiMan = Math.round(high / 10000);
-    if (hiMan <= 0) return;
-    var text = (loMan > 0 && loMan < hiMan)
-      ? '💰 예상 현금 사은품 약 ' + loMan.toLocaleString() + '~' + hiMan.toLocaleString() + '만원'
-      : '💰 예상 현금 사은품 최대 약 ' + hiMan.toLocaleString() + '만원';
+    var hasGift = high > 0;
+    var loMan = hasGift ? Math.round(low / 10000) : 0;
+    var hiMan = hasGift ? Math.round(high / 10000) : 0;
+    var rangeText = (loMan > 0 && loMan < hiMan)
+      ? ('약 ' + loMan.toLocaleString() + '~' + hiMan.toLocaleString() + '만원')
+      : ('약 ' + hiMan.toLocaleString() + '만원');
+
     var tries = 0;
     (function poll() {
-      var el = document.querySelector('[data-bj-cash-gift]');
-      if (el) { el.textContent = text; el.style.display = 'flex'; return; }
-      if (++tries < 40) setTimeout(poll, 300);  // V5 카드 주입 대기 (최대 ~12s)
+      var done = false;
+      // (1) 생성 AI카드의 .gift-db
+      var dbEls = document.querySelectorAll('.gift-db');
+      if (dbEls.length) {
+        done = true;
+        for (var i = 0; i < dbEls.length; i++) {
+          if (hasGift) {
+            dbEls[i].textContent = rangeText;
+            dbEls[i].style.color = '#0838f8';
+            dbEls[i].style.fontWeight = '700';
+            dbEls[i].style.border = '0';
+            dbEls[i].style.background = 'transparent';
+          } else {
+            var row = (dbEls[i].closest && dbEls[i].closest('.gift-r')) || dbEls[i].parentNode;
+            if (row) row.style.display = 'none';  // A-(가): 미매칭 행 숨김
+          }
+        }
+      }
+      // (2) V5 카드의 [data-bj-cash-gift] (값 있을 때만 노출)
+      var v5 = document.querySelector('[data-bj-cash-gift]');
+      if (v5) {
+        done = true;
+        if (hasGift) { v5.textContent = '💰 예상 현금 사은품 ' + rangeText; v5.style.display = 'flex'; }
+      }
+      if (done) return;
+      if (++tries < 40) setTimeout(poll, 300);  // 카드 주입 대기 (최대 ~12s)
     })();
   }
 
