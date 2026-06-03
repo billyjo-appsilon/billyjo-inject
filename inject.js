@@ -1730,26 +1730,30 @@ if (location.pathname.indexOf('prod_view') !== -1) {
         return {
           topPick: data.topPick || null,
           items: data.items || [],
-          requestedGift: data.requestedGift || null,  // 적정 현금 사은품(원), 매칭 실패 시 null
+          requestedGift: data.requestedGift || null,  // 하위호환 단일값
+          giftRange: data.giftRange || null,          // {low:적정, high:한도} 또는 null
         };
       })
       .catch(function() { return null; });
   }
 
-  /* 적정 현금 사은품을 V5 카드의 [data-bj-cash-gift] 슬롯에 채움.
+  /* 현금 사은품 범위(적정~한도)를 V5 카드의 [data-bj-cash-gift] 슬롯에 채움.
      모델코드 확신 매칭 시에만 값이 오므로, 값 없으면 슬롯은 숨김 유지(잘못된 금액 미노출). */
-  function fillCashGift(won) {
-    if (!won || won <= 0) return;
-    var man = Math.round(won / 10000);
-    if (man <= 0) return;
+  function fillCashGift(payload) {
+    if (!payload) return;
+    var range = payload.giftRange, low, high;
+    if (range && range.high) { low = range.low || range.high; high = range.high; }
+    else if (payload.requestedGift) { low = high = payload.requestedGift; }  // 하위호환
+    if (!high || high <= 0) return;
+    var loMan = Math.round(low / 10000), hiMan = Math.round(high / 10000);
+    if (hiMan <= 0) return;
+    var text = (loMan > 0 && loMan < hiMan)
+      ? '💰 예상 현금 사은품 약 ' + loMan.toLocaleString() + '~' + hiMan.toLocaleString() + '만원'
+      : '💰 예상 현금 사은품 최대 약 ' + hiMan.toLocaleString() + '만원';
     var tries = 0;
     (function poll() {
       var el = document.querySelector('[data-bj-cash-gift]');
-      if (el) {
-        el.textContent = '💰 예상 현금 사은품 최대 약 ' + man.toLocaleString() + '만원';
-        el.style.display = 'flex';
-        return;
-      }
+      if (el) { el.textContent = text; el.style.display = 'flex'; return; }
       if (++tries < 40) setTimeout(poll, 300);  // V5 카드 주입 대기 (최대 ~12s)
     })();
   }
@@ -1825,7 +1829,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     // 백엔드 추천 호출 — 응답이 와야 위젯을 그린다(정적 선렌더 없음).
     fetchRecommendations().then(function(payload) {
       applyDynamicRecos(payload);
-      fillCashGift(payload && payload.requestedGift);
+      fillCashGift(payload);
     });
   }
 
