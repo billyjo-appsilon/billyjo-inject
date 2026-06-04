@@ -1194,22 +1194,21 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 (function renameWaterAirCategory() {
   var OLD = '정수기·환경';
   var NEW = '물·공기·청소가전';
-  var SCOPES = ['ul.new-gnb', '.category__wrap', '.menu__gsnb', '.all__depth2', '.aside_sub', '.prod_list__cate'];
 
   function rename() {
-    SCOPES.forEach(function(sel) {
-      document.querySelectorAll(sel + ' a').forEach(function(a) {
-        if (a.textContent.trim() !== OLD) return;
-        // Rewrite only the matching text node(s) so any child icons survive
-        var replaced = false;
-        a.childNodes.forEach(function(n) {
-          if (n.nodeType === 3 && n.textContent.indexOf(OLD) !== -1) {
-            n.textContent = n.textContent.replace(OLD, NEW);
-            replaced = true;
-          }
-        });
-        if (!replaced) a.textContent = NEW;
+    // Scan all menu anchors globally — label appears in PC GNB, 카테고리바, and
+    // mobile aside (div.mobile__aside ul.new_menu) which a fixed scope list missed.
+    document.querySelectorAll('a').forEach(function(a) {
+      if (a.textContent.trim() !== OLD) return;
+      // Rewrite only the matching text node(s) so any child icons/imgs survive
+      var replaced = false;
+      a.childNodes.forEach(function(n) {
+        if (n.nodeType === 3 && n.textContent.indexOf(OLD) !== -1) {
+          n.textContent = n.textContent.replace(OLD, NEW);
+          replaced = true;
+        }
       });
+      if (!replaced) a.textContent = NEW;
     });
   }
 
