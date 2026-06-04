@@ -11,7 +11,7 @@ const fs = require('fs');
   // Find ALL prod_view links from various billyjo pages
   var sources = [
     'https://www.billyjo.co.kr/',
-    'https://www.billyjo.co.kr/html/dh_prod/prod_list/1-8',     // 정수기·환경
+    'https://www.billyjo.co.kr/html/dh_prod/prod_list/1-8',     // 물·공기·청소가전 (구 정수기·환경)
     'https://www.billyjo.co.kr/html/dh_prod/prod_list/1-87',
     'https://www.billyjo.co.kr/html/dh_prod/prod_list/1-6',
     'https://www.billyjo.co.kr/html/dh_prod/prod_list/1-1232',
