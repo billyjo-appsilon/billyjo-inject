@@ -1196,20 +1196,23 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   var NEW = '물·공기·청소가전';
 
   function rename() {
-    // Scan all menu anchors globally — label appears in PC GNB, 카테고리바, and
-    // mobile aside (div.mobile__aside ul.new_menu) which a fixed scope list missed.
-    document.querySelectorAll('a').forEach(function(a) {
-      if (a.textContent.trim() !== OLD) return;
-      // Rewrite only the matching text node(s) so any child icons/imgs survive
-      var replaced = false;
-      a.childNodes.forEach(function(n) {
-        if (n.nodeType === 3 && n.textContent.indexOf(OLD) !== -1) {
-          n.textContent = n.textContent.replace(OLD, NEW);
-          replaced = true;
-        }
-      });
-      if (!replaced) a.textContent = NEW;
+    // Browser tab / page title (정수기·환경 > 정수기 → 물·공기·청소가전 > 정수기)
+    if (document.title.indexOf(OLD) !== -1) document.title = document.title.split(OLD).join(NEW);
+    if (!document.body) return;
+    // Replace the label in every visible text node: PC GNB, 카테고리바, mobile aside,
+    // and the category page heading (p.prod_list__tit) which isn't an <a>.
+    // Skip SCRIPT/STYLE/NOSCRIPT so JSON-LD structured data and injected CSS stay intact.
+    var walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(n) {
+        if (n.textContent.indexOf(OLD) === -1) return NodeFilter.FILTER_REJECT;
+        var tag = n.parentNode && n.parentNode.nodeName;
+        if (tag === 'SCRIPT' || tag === 'STYLE' || tag === 'NOSCRIPT') return NodeFilter.FILTER_REJECT;
+        return NodeFilter.FILTER_ACCEPT;
+      }
     });
+    var nodes = [], cur;
+    while ((cur = walker.nextNode())) nodes.push(cur);
+    nodes.forEach(function(n) { n.textContent = n.textContent.split(OLD).join(NEW); });
   }
 
   if (document.readyState === 'loading') {
