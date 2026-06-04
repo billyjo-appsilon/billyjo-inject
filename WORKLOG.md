@@ -89,3 +89,16 @@ skin-css/
 **다음 작업 시 참고:**
 - 로컬 Windows에서는 `C:\Users\CJPARK\billyjo-inject\`이 canonical (예전 `billyjo-rename`은 디버깅 자료만 남음)
 - 서버에서는 작업 후 `git push` 하면 jsDelivr CDN이 자동으로 새 commit 서빙 (URL의 `@HASH` 부분 갱신만 하면 됨)
+
+### 2026-06-04 — 주문 페이지 '희망 차량' 라벨 조건부 적용
+**커밋:** `5b7267a` (fix) → logscript `@5b7267a` 배포
+
+**문제:** `dh_order/rental` 주문 페이지가 상품 종류와 무관하게 무조건 고객메모 라벨을 "희망 차량"으로 + 차량용 placeholder로 바꿔, **정수기 등 가전 상담/주문에도 차량으로 표시**됨.
+
+**해결:** 주문 상품 셀(`.cart-list td.prod`)의 `.name`/`.brand`로 차량 여부 판별.
+- 차량 신호: `brand="차량렌트서비스"`, `name`이 국산차/수입차/캐스퍼 등 (정규식 `VEHICLE_RE`)
+- 가전 신호: `brand="코웨이"`/`"LG"` 등 제조사
+- 차량 주문 → "희망 차량" + 차량 placeholder (+ 기타국산차→국산차 치환) 유지
+- 그 외 → native "고객메모" 유지 + 가전용 안내 placeholder 보강
+
+**검증(라이브):** 국산차 주문 → "희망 차량" ✓ / 정수기(코웨이) 주문 → "고객메모" ✓
