@@ -662,18 +662,32 @@ document.addEventListener('DOMContentLoaded', function() {
     setTimeout(function() { clearInterval(gukInterval); var ih = document.getElementById('img-hide'); if (ih) ih.remove(); }, 15000);
   }
 
-  // === Order page: 고객메모 → 희망 차량, 기타 국산차 → 국산차 ===
+  // === Order page: 차량 주문일 때만 고객메모 → 희망 차량 (정수기·가전 등은 native '고객메모' 유지) ===
   if (location.pathname.indexOf('dh_order/rental') !== -1) {
+    // 주문 상품 카테고리 판별 — 상품 셀(.cart-list td.prod)의 상품명/브랜드로 차량 여부 결정
+    // (차량: brand="차량렌트서비스", name="국산차/수입차/캐스퍼…" / 가전: brand="코웨이/LG…")
+    var VEHICLE_RE = /차량렌트|차량렌탈|국산차|수입차|캐스퍼|신차|중고차|렌트카|렌터카/;
     var memoLabel = document.querySelector('label[for="du-msg"]');
-    if (memoLabel) memoLabel.textContent = '희망 차량';
     var memoArea = document.getElementById('tx_content');
-    if (memoArea) memoArea.placeholder = '원하시는 차량의 브랜드, 모델명, 연식을 적어주세요. (예: 현대 팰리세이드 2025년식)';
-    // 기타 국산차 → 국산차
-    document.querySelectorAll('td, th, a, span, p, b, strong').forEach(function(el) {
-      if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3 && el.textContent.indexOf('기타 국산차') !== -1) {
-        el.textContent = el.textContent.replace('기타 국산차', '국산차');
-      }
+    var isVehicleOrder = false;
+    document.querySelectorAll('.cart-list td.prod, td.prod').forEach(function(td) {
+      var nm = (td.querySelector('.name') || {}).textContent || '';
+      var br = (td.querySelector('.brand') || {}).textContent || '';
+      if (VEHICLE_RE.test(nm) || VEHICLE_RE.test(br)) isVehicleOrder = true;
     });
+    if (isVehicleOrder) {
+      if (memoLabel) memoLabel.textContent = '희망 차량';
+      if (memoArea) memoArea.placeholder = '원하시는 차량의 브랜드, 모델명, 연식을 적어주세요. (예: 현대 팰리세이드 2025년식)';
+      // 기타 국산차 → 국산차
+      document.querySelectorAll('td, th, a, span, p, b, strong').forEach(function(el) {
+        if (el.childNodes.length === 1 && el.childNodes[0].nodeType === 3 && el.textContent.indexOf('기타 국산차') !== -1) {
+          el.textContent = el.textContent.replace('기타 국산차', '국산차');
+        }
+      });
+    } else {
+      // 차량 외(정수기·가전 등): native '고객메모' 라벨 유지, 안내 placeholder만 보강
+      if (memoArea && !memoArea.placeholder) memoArea.placeholder = '설치 희망일, 희망 색상, 기타 요청사항을 적어주세요.';
+    }
   }
 
   // === 수입차 detail page: image + thin font ===
