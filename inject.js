@@ -2081,9 +2081,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 #bj-consult-modal .bj-agent-rating { color: #f5a623; font-size: 12px; }\
 #bj-consult-modal .bj-agent-bio { font-size: 12px; color: #555; line-height: 1.4; }\
 #bj-consult-modal .bj-agent-counts { font-size: 11px; color: #777; margin-top: 4px; }\
-#bj-consult-modal .bj-code-box { text-align: center; margin: 18px 0 14px; padding: 14px; background: #fff4f4; border: 2px dashed #ff3737; border-radius: 12px; }\
-#bj-consult-modal .bj-code-label { font-size: 11px; color: #555; margin-bottom: 4px; }\
-#bj-consult-modal .bj-code { font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #ff3737; }\
+#bj-consult-modal .bj-code-box { text-align: center; margin: 18px 0 14px; padding: 14px; background: #0838f8; border: none; border-radius: 12px; box-shadow: 0 4px 14px rgba(8,56,248,0.25); }\
+#bj-consult-modal .bj-code-label { font-size: 11px; color: rgba(255,255,255,0.85); margin-bottom: 4px; }\
+#bj-consult-modal .bj-code { font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #fff; }\
+#bj-consult-modal .bj-phone-label { font-size: 13px; font-weight: 700; color: #333; margin: 14px 0 6px; }\
+#bj-consult-modal .bj-phone-input { width: 100%; padding: 14px; border: 1.5px solid #d0d8ff; border-radius: 10px; font-size: 18px; text-align: center; letter-spacing: 2px; outline: none; }\
+#bj-consult-modal .bj-phone-input:focus { border-color: #0838f8; }\
+#bj-consult-modal .bj-phone-err { font-size: 12px; color: #ff3737; margin-top: 6px; min-height: 16px; text-align: center; }\
 #bj-consult-modal .bj-cta { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 18px; background: #0838f8; color: #fff; border: none; border-radius: 14px; font-size: 18px; font-weight: 800; text-decoration: none; cursor: pointer; transition: all 0.15s ease; }\
 #bj-consult-modal .bj-cta:hover, #bj-consult-modal .bj-cta:active { background: #0626c0; transform: scale(0.98); }\
 #bj-consult-modal .bj-cta svg { width: 22px; height: 22px; fill: #fff; }\
@@ -2287,31 +2291,77 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     });
   }
 
+  /* 예약 2단계: 콜백 받을 전화번호 입력 — 번호 없이는 상담사가 발신할 수 없음.
+     (구버전은 존재하지 않는 /v1/consult/reserve로 POST + 번호 미수집 →
+      예약이 백엔드에 한 건도 접수되지 않던 버그. 2026-06-08 수정) */
   function confirmReservation(data, iso, label) {
     var card = data.consultantCard || {};
-    // 백엔드 연동(있으면) — 실패해도 UX는 graceful (접수 안내)
-    try {
-      fetch(API_BASE + '/v1/consult/reserve', {
-        method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          productId: detectProduct().productId, reserveAt: iso, code: data.code || null,
-          consultantId: card.id || null
-        })
-      }).catch(function() {});
-    } catch (_) {}
-    var codeBox = data.code
-      ? '<div class="bj-code-box"><div class="bj-code-label">통화 안내 코드</div>' +
-        '<div class="bj-code">' + escapeHtml(data.code) + '</div></div>'
-      : '';
-    buildModal(
-      '<div class="bj-reserve-done">' +
-      '<div class="bj-done-check">✓</div>' +
-      '<div class="bj-done-title">예약이 접수되었습니다</div>' +
-      '<div class="bj-done-time">' + escapeHtml(label) + '</div>' +
-      '<div class="bj-done-desc">' + escapeHtml(card.name || '상담사') + ' 상담사가 예약 시간에 전화드립니다.</div>' +
-      codeBox +
-      '</div>'
-    );
+    var html =
+      '<div class="bj-reserve-head">' +
+      '<button type="button" class="bj-back" id="bj-phone-back">‹ 뒤로</button>' +
+      '<div class="bj-reserve-title">전화번호 입력</div></div>' +
+      '<div class="bj-reserve-sub">' + escapeHtml(label) + '에 ' + escapeHtml(card.name || '상담사') +
+      ' 상담사가 전화드립니다.</div>' +
+      '<div class="bj-phone-label">콜백 받으실 휴대전화 번호</div>' +
+      '<input type="tel" class="bj-phone-input" id="bj-phone-input" placeholder="010-0000-0000" maxlength="13" autocomplete="tel">' +
+      '<div class="bj-phone-err" id="bj-phone-err"></div>' +
+      '<button type="button" class="bj-cta" id="bj-reserve-confirm">' + CAL_ICON + '<span>예약 확정</span></button>';
+    var wrap = buildModal(html);
+    var back = wrap.querySelector('#bj-phone-back');
+    if (back) back.addEventListener('click', function() { showReservation(data); });
+    var input = wrap.querySelector('#bj-phone-input');
+    // 자동 하이픈
+    input.addEventListener('input', function() {
+      var v = input.value.replace(/[^\d]/g, '').slice(0, 11);
+      if (v.length > 7) v = v.slice(0, 3) + '-' + v.slice(3, 7) + '-' + v.slice(7);
+      else if (v.length > 3) v = v.slice(0, 3) + '-' + v.slice(3);
+      input.value = v;
+    });
+    wrap.querySelector('#bj-reserve-confirm').addEventListener('click', function() {
+      var digits = (input.value || '').replace(/[^\d]/g, '');
+      var err = wrap.querySelector('#bj-phone-err');
+      if (digits.length < 10 || digits.length > 11 || digits.indexOf('01') !== 0) {
+        err.textContent = '휴대전화 번호를 정확히 입력해 주세요. (예: 010-1234-5678)';
+        return;
+      }
+      err.textContent = '';
+      submitReservation(data, iso, label, input.value);
+    });
+    setTimeout(function() { try { input.focus(); } catch (_) {} }, 100);
+  }
+
+  function submitReservation(data, iso, label, phone) {
+    var card = data.consultantCard || {};
+    var minutes = Math.max(5, Math.round((new Date(iso).getTime() - Date.now()) / 60000));
+    showLoading();
+    fetch(API_BASE + '/v1/consult/schedule', {
+      method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({
+        code: data.code || null, requestId: data.requestId || null,
+        minutes: minutes, customerPhone: phone
+      })
+    })
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function() {
+        var codeBox = data.code
+          ? '<div class="bj-code-box"><div class="bj-code-label">통화 안내 코드</div>' +
+            '<div class="bj-code">' + escapeHtml(data.code) + '</div></div>'
+          : '';
+        buildModal(
+          '<div class="bj-reserve-done">' +
+          '<div class="bj-done-check">✓</div>' +
+          '<div class="bj-done-title">예약이 접수되었습니다</div>' +
+          '<div class="bj-done-time">' + escapeHtml(label) + '</div>' +
+          '<div class="bj-done-desc">' + escapeHtml(card.name || '상담사') + ' 상담사가 <b>' +
+          escapeHtml(phone) + '</b>로 전화드립니다.</div>' +
+          codeBox +
+          '</div>'
+        );
+      })
+      .catch(function(e) {
+        console.error('[bj-consult] schedule failed:', e);
+        showError('예약 접수에 실패했습니다. 바로 통화를 이용해 주세요.');
+      });
   }
 
   function escapeHtml(s) {
