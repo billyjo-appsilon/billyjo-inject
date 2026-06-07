@@ -709,6 +709,19 @@ function bjHeaderMainInit() {
           "제휴카드 및 카드결제 신청 시, '카드결제' 라고 기재해주시면 담당자가 접수안내 연락드립니다.";
       }
     }
+
+    // 개인정보 동의 — 계좌번호 수집 항목·목적 명시 (메모란 계좌 수집의 동의 범위 정합,
+    // 개인정보보호법 제15조). native 문구의 오탈자(개인식 별정보/성 명/연락처.주소)도 정리.
+    document.querySelectorAll('.oq-terms').forEach(function(box){
+      box.querySelectorAll('p').forEach(function(para){
+        var t = para.textContent || '';
+        if (t.indexOf('개인식') !== -1 && t.indexOf('계좌') === -1) {
+          para.textContent = '개인식별정보(성명, 연락처, 주소), 계좌번호(고객 명의 — 렌탈료 결제 및 사은품 지급 목적)';
+        } else if (t.indexOf('렌탈상담 관련 제안 접수 및 상담') !== -1 && t.indexOf('사은품') === -1) {
+          para.textContent = '렌탈상담 관련 제안 접수 및 상담, 렌탈료 결제(자동이체 신청 안내) 및 사은품 지급';
+        }
+      });
+    });
   }
 
   // === 수입차 detail page: image + thin font ===
