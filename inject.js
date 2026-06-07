@@ -2454,7 +2454,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       if (!wrap) return;
 
       var commit = getCommit();
-      var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-cards@cd3b240/landing/newlywed.js';
+      var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-cards@2ce0c78/landing/newlywed.js';
 
       var link = document.createElement('a');
       link.className = 'bj-newlywed-cat';
@@ -5834,7 +5834,7 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     var wrap = document.querySelector('.mobile__gnb .gnb__cateogry .category__wrap, .category__wrap');
     if (!wrap || wrap.querySelector('.bj-newlywed-cat')) return;
     var commit = getOwnCommitHash();
-    var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-cards@cd3b240/landing/newlywed.js';
+    var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-cards@2ce0c78/landing/newlywed.js';
     var link = document.createElement('a');
     link.className = 'bj-newlywed-cat';
     link.href = '#';
