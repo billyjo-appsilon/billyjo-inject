@@ -5278,10 +5278,18 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var DRAG_TAP_THRESHOLD = 10;   // 이하면 탭으로 간주
     var DRAG_TOGGLE_THRESHOLD = 30; // 이상이면 펼침/접기 전환
     var DRAG_DISMISS_THRESHOLD = 120; // 아래로 이상이면 완전 dismiss
+    /* 터치 후 브라우저가 발사하는 합성(compatibility) mousedown/mouseup 무시용.
+       가드 없으면 touchend 토글(펼침) 직후 합성 mouseup이 또 토글(접힘) →
+       "위젯이 나왔다가 바로 사라지는" 이중 토글 버그 (아이콘 V2 모바일 신고, 2026-06-07).
+       마우스 전용 데스크톱은 touch 이벤트가 없어 가드에 안 걸림. */
+    var lastTouchTs = 0;
+    var TOUCH_MOUSE_SUPPRESS_MS = 800;
 
     function isExpanded(){ return wrapper.classList.contains('bj-bar-expanded'); }
 
     function onStart(e){
+      if (e.touches) { lastTouchTs = Date.now(); }
+      else if (Date.now() - lastTouchTs < TOUCH_MOUSE_SUPPRESS_MS) return; // 합성 마우스 무시
       var t = e.touches ? e.touches[0] : e;
       startY = t.clientY;
       startX = t.clientX;
@@ -5307,6 +5315,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (e.cancelable && Math.abs(dy) > DRAG_TAP_THRESHOLD) e.preventDefault();
     }
     function onEnd(e){
+      if (e.changedTouches) { lastTouchTs = Date.now(); }
+      else if (Date.now() - lastTouchTs < TOUCH_MOUSE_SUPPRESS_MS) return; // 합성 마우스 무시
       if (startY === null) return;
       var t = e.changedTouches ? e.changedTouches[0] : e;
       var dy = t.clientY - startY;
