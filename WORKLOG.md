@@ -102,3 +102,25 @@ skin-css/
 - 그 외 → native "고객메모" 유지 + 가전용 안내 placeholder 보강
 
 **검증(라이브):** 국산차 주문 → "희망 차량" ✓ / 정수기(코웨이) 주문 → "고객메모" ✓
+
+### 2026-06-07 — 모바일 헤더 영구 가림(상단바·햄버거 미표기) fail-safe
+**커밋:** `300ad5d` (fix) → logscript `@300ad5d` 배포
+
+**문제(counsel 페이지에서 보고):** logscript와 inject.js 양쪽의 FOUC guard
+`@media(max-width:768px){header:not(.bj-ready){opacity:0!important}}` 가 폴백 없이
+inject.js 실행에만 의존. `bj-ready`는 ≤768 redesign 분기 끝에서만 부여돼:
+1. **CDN 장애/차단** 시 inject.js 미로드 → 모바일 전 페이지 헤더 영구 invisible (재현 확인)
+2. **>768 로드 후 세로 회전/창 축소** → guard 활성인데 bj-ready 없음 → 헤더 가림
+페이지 특정 아님 — logscript_base는 전 페이지 공통이라 전 페이지 동일 노출.
+
+**해결 (4중 fail-safe):**
+1. guard CSS에 `animation: bjHdrReveal .25s ease 1.2s forwards` 추가 + `opacity:0`의
+   `!important` 제거 (important는 애니메이션보다 우선해 폴백을 죽임) — JS가 아예 안 돌아도
+   1.2s 후 원본 헤더 자동 공개. logscript와 inject.js 내장 CSS 양쪽 모두 갱신.
+2. `bjHeaderMainInit` 진입 직후 safety setTimeout(1s) — 어떤 경로든 bj-ready 보장
+3. 데스크톱(>768) 분기에서도 bj-ready 즉시 부여 — 회전/축소 시나리오 해소
+4. logscript script 태그에 `onerror` → fastly.jsdelivr.net 폴백 + 메인 핸들러
+   DOMContentLoaded 등록에 readyState 가드 (늦은 로드에도 초기화)
+
+**검증(라이브, headless mobile):** counsel/메인/prod_list — 정상 로드 시 redesign 헤더 ✓,
+inject.js 전체 차단 시에도 1.2s 후 원본 헤더+햄버거 표시 ✓, 1024→390 회전 ✓
