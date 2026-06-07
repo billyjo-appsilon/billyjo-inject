@@ -2007,7 +2007,10 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 // 상세페이지에서만 활성 — 빌리조 native 상담 버튼들을 가로채어 새 모달 표시.
 // =============================================================================
 (function billyjoConsultModal() {
-  if (location.pathname.indexOf('/prod_view/') === -1) return; // 상세페이지만
+  // 상세페이지: native 상담 버튼까지 가로채 새 모달 표시.
+  // 그 외 페이지: 명시적 opt-in([data-bj-consult], 예: 신혼부부 패키지 모달 CTA)만 가로챔 —
+  // native 버튼 동작은 건드리지 않으면서 패키지 유입 상담을 전 페이지에서 즉시 배정.
+  var IS_PROD_VIEW = location.pathname.indexOf('/prod_view/') !== -1;
   var API_BASE = 'https://admin2-api.billyjo.co.kr';
   var MODAL_ID = 'bj-consult-modal';
 
@@ -2296,13 +2299,18 @@ if (location.pathname.indexOf('prod_view') !== -1) {
     injectStyle();
     showLoading();
     var ctx = detectProduct();
+    // 외부 컨텍스트(예: 신혼부부 패키지 모달)가 출처·담은 제품을 실어두면 우선 사용 —
+    // 상담사 대기열 카드에서 유입 채널과 고객 요청 제품을 즉시 인지하게 함.
+    var oCtx = window.__bjConsultContext || null;
+    var payload = {
+      productId: (oCtx && oCtx.productId) || ctx.productId,
+      productName: (oCtx && oCtx.productName) || ctx.productName
+    };
+    if (oCtx && oCtx.selection) payload.selection = oCtx.selection;
     fetch(API_BASE + '/v1/consult/quick-assign', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({
-        productId: ctx.productId,
-        productName: ctx.productName
-      })
+      body: JSON.stringify(payload)
     })
       .then(function(r) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -2319,7 +2327,12 @@ if (location.pathname.indexOf('prod_view') !== -1) {
   function shouldIntercept(el) {
     if (!el || el.nodeType !== 1) return false;
     if (el.closest && el.closest('#bj-consult-modal')) return false;
-    var sel = '.new-qb, .new-qb a, .quick .org, .quick .org a, [data-bj-consult]';
+    // 명시적 opt-in은 모든 페이지에서 가로챔 (신혼부부 패키지 등)
+    if (el.matches && el.matches('[data-bj-consult]')) return true;
+    if (el.closest && el.closest('[data-bj-consult]')) return true;
+    // native 상담 트리거 가로채기는 상세페이지에서만 (기존 동작 보존)
+    if (!IS_PROD_VIEW) return false;
+    var sel = '.new-qb, .new-qb a, .quick .org, .quick .org a';
     if (el.matches && el.matches(sel)) return true;
     if (el.closest && el.closest(sel)) return true;
     var txt = (el.textContent || '').trim();
