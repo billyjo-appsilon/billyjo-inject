@@ -2360,9 +2360,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (el.closest && el.closest('[data-bj-consult]')) return true;
     // native 상담 트리거 가로채기는 상세페이지에서만 (기존 동작 보존)
     if (!IS_PROD_VIEW) return false;
-    var sel = '.new-qb, .new-qb a, .quick .org, .quick .org a';
-    if (el.matches && el.matches(sel)) return true;
-    if (el.closest && el.closest(sel)) return true;
+    // '.new-qb a' 광역 셀렉터 제거 (2026-06-08): 같은 컨테이너의 맨 위로(m_top/q_top)·
+    // 최근본상품 버튼까지 상담 모달로 가로채던 버그. 전화/문의 버튼은
+    // billyjoQuickButtonRoles가 data-bj-consult / data-bj-text-inquiry로 명시 마킹하므로
+    // 위 opt-in 분기로 충분. 아래 텍스트 매칭은 기타 native '상담신청' 버튼용 안전망.
     var txt = (el.textContent || '').trim();
     if (txt && txt.length < 20 && /상담신청|상담\s*문의|간편\s*실시간\s*문의/.test(txt)) {
       var tag = el.tagName;
