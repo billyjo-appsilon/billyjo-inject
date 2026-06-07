@@ -976,7 +976,13 @@ if (document.readyState === 'loading') {
   // --- Script block 2 ---
 
 // === Combined Bottom Bar v4 - 2x2 grid layout ===
-if (location.pathname.indexOf('prod_view') !== -1) {
+// [비활성 — 절대 규칙 #33] 하단 위젯은 모듈 B(.prod_view_bot.card.mt40 wrapper)가 단일 소유.
+// 이 모듈 A bar(#billyjo-bottom-bar)는 모듈 B removeStrayBbInner가 생성 즉시 DOM 삭제하던
+// dead code였고, 삭제 후 남은 syncBottomBar가 month_box 클릭마다
+// "Cannot set properties of null" throw + 느린 기기에서 위젯 깜빡임/경합의 원인.
+// 동일 위젯을 두 모듈이 만들면 안 됨 — 재활성화 금지.
+var BJ_MODULE_A_BOTTOM_BAR = false;
+if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   (function initBottomBar() {
     var bbInterval = setInterval(function() {
       var monthBoxes = document.querySelectorAll('.month_box');
@@ -5857,6 +5863,8 @@ if (location.pathname.indexOf('prod_view') !== -1) {
 
   /* v0.5.11: 빌리조 원본 2버튼 sticky 위젯 제거 안전망 (CSS 외 JS도 마크업 제거) */
   function removeOriginalStickyWidget(){
+    /* #33 fail-open: 워치독이 native bar를 복원한 상태면 다시 숨기지 않는다 */
+    if (window.__bjWidgetFailOpen) return;
     document.querySelectorAll('.prod_fix_wrap').forEach(function(el){
       el.style.display = 'none';
       el.setAttribute('data-bj-removed', '1');
@@ -6061,6 +6069,42 @@ if (location.pathname.indexOf('prod_view') !== -1) {
       try { refreshWidgetSelectorIfLptChanged(); } catch(_){}
     }, d);
   });
+
+  /* === 절대 규칙 #33: 하단 위젯 fail-open 워치독 ===
+     어떤 이유로든(런타임 예외, 사이트 DOM 변경, 실행 순서 경합) 하단 위젯이
+     비어 있거나 사라진 채로 끝나면 안 된다. 사용자가 명시적으로 dismiss한
+     경우(bj-bar-slide-hidden)만 예외. 복구 순서:
+     1) wrapper가 없으면 직접 생성 (사이트 DOM 변경 대비)
+     2) 핸들 미구축이면 enhanceBottomBar 재시도 (fallback 콘텐츠 박스 포함)
+     3) 그래도 실패하면 우리가 숨긴 native sticky bar(.prod_fix_wrap) 복원 —
+        위젯이 아예 없는 것보단 native 렌탈신청 UI가 낫다 (fail-open) */
+  function ensureBottomWidgetAlive(){
+    try {
+      var w = document.querySelector('.prod_view_bot.card.mt40');
+      if (w && w.classList.contains('bj-bar-slide-hidden')) return; // 사용자 dismiss 존중
+      if (!w) {
+        w = document.createElement('div');
+        w.className = 'prod_view_bot card mt40';
+        document.body.appendChild(w);
+      }
+      if (!w.querySelector('.bj-bar-handle')) {
+        try { enhanceBottomBar(); } catch(e){}
+      }
+      var r = w.getBoundingClientRect();
+      var cs = getComputedStyle(w);
+      var ok = w.querySelector('.bj-bar-handle') && cs.display !== 'none' &&
+               cs.visibility !== 'hidden' && r.height > 10;
+      if (ok) return;
+      /* 최후 폴백: native sticky bar 복원 + runAll의 재숨김 차단 플래그 */
+      window.__bjWidgetFailOpen = true;
+      document.querySelectorAll('.prod_fix_wrap').forEach(function(el){
+        el.style.setProperty('display', 'block', 'important');
+        el.style.setProperty('visibility', 'visible', 'important');
+        el.removeAttribute('data-bj-removed');
+      });
+    } catch(e){}
+  }
+  [3000, 7000].forEach(function(d){ setTimeout(ensureBottomWidgetAlive, d); });
 
   /* v0.5.71: enhanceBottomBar 1회 가드로 buildWidgetSelector가 LPT 채워지기 전에만 실행되는 문제 보강.
      LPT signature가 변경(또는 채워짐)되면 약정 pill을 새 데이터(타사보상 포함)로 재빌드.
