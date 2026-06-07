@@ -699,8 +699,15 @@ function bjHeaderMainInit() {
         }
       });
     } else {
-      // 차량 외(정수기·가전 등): native '고객메모' 라벨 유지, 안내 placeholder만 보강
-      if (memoArea && !memoArea.placeholder) memoArea.placeholder = '설치 희망일, 희망 색상, 기타 요청사항을 적어주세요.';
+      // 차량 외(정수기·가전 등): native '고객메모' 라벨 유지, 안내 placeholder 확장
+      // (계좌정보·카드결제 안내 추가 — 2026-06-08 사용자 요청. 카드번호 직접 수집은
+      //  여전법/PCI상 금지 → '카드결제' 기재 시 담당자가 안전 채널로 접수 안내)
+      if (memoArea) {
+        memoArea.placeholder =
+          '설치 희망일, 희망 색상, 기타 요청사항을 적어주세요.\n' +
+          '사은품 수령 및 렌탈료 결제용 계좌정보(고객명의) 적어주세요.\n' +
+          "제휴카드 및 카드결제 신청 시, '카드결제' 라고 기재해주시면 담당자가 접수안내 연락드립니다.";
+      }
     }
   }
 
