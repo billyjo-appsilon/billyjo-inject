@@ -176,3 +176,19 @@ inject.js 전체 차단 시에도 1.2s 후 원본 헤더+햄버거 표시 ✓, 1
 **검증:** route-interception(`deploy/verify-2tier.js`)으로 라이브 prod_list/1-8 주입 캡처. 4개 카드
 box 높이 모두 494px 동일(완벽 정렬), 메인 검정·pill 파랑 확인. 목업(`billyjo-rename/price-card-3tier-mockup.html`)
 Jun 승인 후 배포.
+
+### 2026-06-15 — 카드 높이 균일화 (이름 줄 수 차이 정렬 깨짐 fix)
+**커밋:** `1ec86c8` (fix) → logscript `@1ec86c8` 배포
+
+**Jun 보고:** "가끔씩 길이가 안 맞는 프라이스카드". **측정으로 원인 규명**(`deploy/diag-align.js`): 제휴카드
+pill 유무는 **무관**(placeholder 정상, 가격블록 항상 127px). 진짜 원인은 **이름 2줄 제품(~7%)이 1줄 제품보다
+카드 20px 큼**(boxH 514 vs 494). 이름은 `min-height:0` 자동높이라 줄 수에 따라 카드가 들쭉날쭉.
+
+**수정(stretch 방식 — 과거 거부된 '이름 아래/이름-가격 사이' 빈공간 회피, 빈공간을 카드 하단으로):**
+- `.prod_list` `align-items: flex-start → stretch !important` (행 내 카드 같은 높이)
+- `.item[data-bjp]`·`.box` `display:flex; flex-direction:column; flex:1 1 auto`, `.box > a { flex:1 1 auto }`
+  → 흰 `.box`가 행 높이를 채우고, 짧은 카드의 여백은 카드 **맨 아래 흰 여백**으로 감(이름-가격은 상단 타이트).
+- **주의:** `.box`에 `flex:1`(flex-grow) 빠뜨리면 .item만 늘고 흰 카드는 안 늘어남(첫 시도 실패 → 추가하니 해결).
+
+**검증:** route-interception 데스크탑 `0/15`·모바일 `0/23` 행 높이 불일치(`deploy/verify-stretch.js`,
+`shot-stretch.js`). 혼합 높이 행(현대렌탈 1줄+pill / LG 2줄 ×2) 바닥 정렬 캡처 확인 후 배포.
