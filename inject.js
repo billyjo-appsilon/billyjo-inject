@@ -680,7 +680,8 @@ function bjHeaderMainInit() {
       var bjpNm = item.querySelector('.name');
       if (bjpNm) {
         bjpNm.style.setProperty('height', 'auto', 'important');
-        bjpNm.style.setProperty('min-height', '0', 'important');
+        var bjpLh = parseFloat(getComputedStyle(bjpNm).lineHeight);
+        bjpNm.style.setProperty('min-height', (bjpLh ? Math.ceil(bjpLh * 2) : 39) + 'px', 'important');
         bjpNm.style.setProperty('max-height', 'none', 'important');
         bjpNm.style.setProperty('display', '-webkit-box', 'important');
         bjpNm.style.setProperty('-webkit-line-clamp', '2', 'important');
