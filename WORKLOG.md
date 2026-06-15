@@ -208,3 +208,20 @@ pill 유무는 **무관**(placeholder 정상, 가격블록 항상 127px). 진짜
 **트레이드오프:** 1줄 이름 제품은 2줄 자리 예약 → 짧은 이름 아래 일정한 빈공간(388cdd3에서 한 번 없앴던 방식).
 Jun에게 캡처(`deploy/uniform-desktop.png`) 보여주고 "들쭉날쭉 하단여백 < 일정한 이름하단 공간" 트레이드오프로
 **명시 승인받고** 배포. **검증:** route-interception 데스크탑/모바일 boxH 단일 값.
+
+### 2026-06-15 — 모바일 햄버거를 카테고리바 좌측(신혼부부 왼쪽)으로 이동
+**커밋:** `f104f6a` (feat) → logscript `@f104f6a` 배포
+
+**Jun 요청:** 모바일 햄버거(☰)를 "신혼부부 패키지" 왼쪽에 위치. (기존: Row1 좌측 = ☰ + 로고 / Row2 = 신혼부부…)
+
+**구조 파악:** 햄버거 `.gnb__hamburger`(`.header__top` 내). 카테고리바 `.category__wrap`(flex, 모바일 `overflow-x:auto`
+가로스크롤)의 첫 항목이 inject 주입 `.bj-newlywed-cat`(💍 신혼부부). 햄버거 아이콘은 `body .gnb__hamburger::before`
+box-shadow 3줄로 **CSS 렌더**(img는 `> * display:none`) → 노드를 옮겨도 아이콘·클릭핸들러 보존됨.
+
+**구현:** `injectNewlywedInCategoryBar.tryInject`에 `moveHamburgerToCatBar(wrap)` 추가 — `.gnb__hamburger` 노드를
+`.category__wrap` 최좌측(신혼부부 앞)으로 이동(멱등: 이미 firstChild면 skip). CSS(`#bj-mobile-cat-style` 미디어블록):
+`.category__wrap .gnb__hamburger{position:sticky;left:0;z-index:3;background:#fff;box-shadow:-18px 0 0 #fff}` — 가로
+스크롤 시 좌측 고정 + 좌측 16px 패딩에 카테고리 글자 비침을 흰 box-shadow로 가림. Row1은 자동으로 로고+아이콘만 남음.
+
+**검증(route-interception):** 모바일 — 햄버거 카테고리바 최좌측·sticky·스크롤 고정·**클릭 시 슬라이드 메뉴 정상**(노드
+이동에도 핸들러 보존), Row1 로고좌측. 데스크탑 — `.gnb__hamburger` display:none 유지(영향 없음). 스크립트: `deploy/verify-ham.js`.
