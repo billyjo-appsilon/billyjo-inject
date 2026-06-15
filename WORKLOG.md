@@ -192,3 +192,19 @@ pill 유무는 **무관**(placeholder 정상, 가격블록 항상 127px). 진짜
 
 **검증:** route-interception 데스크탑 `0/15`·모바일 `0/23` 행 높이 불일치(`deploy/verify-stretch.js`,
 `shot-stretch.js`). 혼합 높이 행(현대렌탈 1줄+pill / LG 2줄 ×2) 바닥 정렬 캡처 확인 후 배포.
+
+### 2026-06-15 — 카드 높이 전역 통일 (이름 2줄 예약)
+**커밋:** `3b732f2` (fix) → logscript `@3b732f2` 배포
+
+**Jun 보고:** "두 프라이스카드 제휴카드가 하단 흰 여백 크기가 다르다". **원인:** stretch는 같은 **행** 안에서만
+카드를 맞춤 → 2줄 이름 제품이 섞인 행은 더 크고, 그 행 pill 카드들도 하단 여백이 커짐. 행마다 최대 높이가
+달라 행 간 여백 불일치. (측정: 유일한 높이 변동원은 이름 1↔2줄, boxH 494↔514 / 모바일 366↔386. 모델명·`.txt`는
+이름 외 변동 없음 — `deploy/diag-variance.js`.)
+
+**수정:** bjpFormat에서 이름 `min-height`를 `0` → **`line-height*2`(2줄 예약)** 인라인 setProperty(important).
+(⚠️ CSS로는 안 됨 — bjpFormat이 인라인 important로 min-height를 박기 때문. JS에서 바꿔야 함.) → 모든 카드 단일
+높이로 수렴(데스크탑 514·모바일 386, 45개 전부). stretch(1ec86c8)는 안전망으로 유지.
+
+**트레이드오프:** 1줄 이름 제품은 2줄 자리 예약 → 짧은 이름 아래 일정한 빈공간(388cdd3에서 한 번 없앴던 방식).
+Jun에게 캡처(`deploy/uniform-desktop.png`) 보여주고 "들쭉날쭉 하단여백 < 일정한 이름하단 공간" 트레이드오프로
+**명시 승인받고** 배포. **검증:** route-interception 데스크탑/모바일 boxH 단일 값.
