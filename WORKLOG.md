@@ -155,3 +155,24 @@ inject.js 전체 차단 시에도 1.2s 후 원본 헤더+햄버거 표시 ✓, 1
 높이 맞춤. route-interception(`deploy/verify-cap.js`)으로 검증 후 배포까지 진행했으나, **Jun이 이전
 디자인 선호 → 즉시 롤백**(logscript `@d237f37` 재배포, inject.js 원복). 코드 변경분은 git history
 `365521b`에 남아있음(재시도 시 참고).
+
+### 2026-06-15 — 가격카드 2단 재구성 (월 렌탈료 메인 + 제휴카드가)
+**커밋:** `8e796d9` (feat) → logscript `@8e796d9` 배포
+
+**요청(롤백 직후 Jun 새 방향):** 가격을 "정상가 / 월 렌탈료 / 제휴카드가" 3단으로, 단 **카드 크기는
+안 키우고**. 월 렌탈료를 메인 가격으로, 제휴카드가 있는 제품만 추가 표기.
+
+**핵심 발견:** 사이트 데이터엔 `.fee`(월 렌탈료) + `.fee2`(제휴카드 할인) **2개뿐**, "정상가"는 아예
+없음(페이지 전체 정상가/정가 토큰 0). 정상가는 제품당 신규 입력이 필요 → 405개 관리 부담. **Jun이
+'정상가 제외, 2단 확정' 선택.**
+
+**구현(`bjpFormat`):**
+- 메인: `월 렌탈료`(.fee) 큰 글씨 + 색상 파랑→검정(`#1a1a1e`). (이전엔 제휴카드가가 메인 파랑이었음)
+- 추가: `제휴카드가`(.fee2)를 하단 파랑 pill(`.bj-pz-card`, bg `#eaefff`)로. 있는 제품만 표시,
+  단일가 카드는 `.bj-pz-card.bj-pz-ph` 숨김 placeholder로 높이 정렬 유지.
+- 미사용: 취소선(`.bj-pz-orig`)·절감액 배지(`.bj-pz-save`) → HTML에서 제거(CSS는 잔존, 무해).
+- 이름↔구분선 간격 축소(Jun 요청): `.bj-pz` margin-top 10→5 `!important`, padding-top 14→11.
+
+**검증:** route-interception(`deploy/verify-2tier.js`)으로 라이브 prod_list/1-8 주입 캡처. 4개 카드
+box 높이 모두 494px 동일(완벽 정렬), 메인 검정·pill 파랑 확인. 목업(`billyjo-rename/price-card-3tier-mockup.html`)
+Jun 승인 후 배포.
