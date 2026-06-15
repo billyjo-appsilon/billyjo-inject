@@ -2641,38 +2641,52 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         return m ? m[1] : 'main';
       } catch(e) { return 'main'; }
     }
+    function moveHamburgerToCatBar(wrap){
+      /* 모바일 햄버거(.gnb__hamburger)를 카테고리바 최좌측(신혼부부 패키지 왼쪽)으로 이동.
+         노드 자체를 옮겨 클릭 핸들러 + CSS 아이콘(body .gnb__hamburger::before)을 보존.
+         가로 스크롤 시 좌측 유지는 CSS(.category__wrap .gnb__hamburger sticky)로 처리. */
+      var ham = document.querySelector('.gnb__hamburger');
+      if (!ham || !wrap) return;
+      if (ham.parentNode === wrap && wrap.firstElementChild === ham) return; /* 이미 최좌측 */
+      ham.classList.add('bj-cat-ham');
+      wrap.insertBefore(ham, wrap.firstChild);
+    }
     function tryInject(){
       /* 기존 floating fab이 있으면 제거 (v0.5.0 잔재 정리) */
       var old = document.querySelector('.bj-newlywed-floating');
       if (old) old.remove();
-      /* 이미 카테고리바에 삽입됐으면 skip */
-      if (document.querySelector('.bj-newlywed-cat')) return;
       var wrap = document.querySelector('.mobile__gnb .gnb__cateogry .category__wrap, .category__wrap');
       if (!wrap) return;
 
-      var commit = getCommit();
-      var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-cards@0309842/landing/newlywed.js';
+      /* 신혼부부 패키지 항목 — 아직 없을 때만 삽입 */
+      if (!document.querySelector('.bj-newlywed-cat')) {
+        var commit = getCommit();
+        var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-cards@0309842/landing/newlywed.js';
 
-      var link = document.createElement('a');
-      link.className = 'bj-newlywed-cat';
-      link.href = '#';
-      link.innerHTML = '<span style="margin-right:3px">💍</span>신혼부부 패키지';
-      /* 다른 카테고리 항목과 동일 시각, 단 브랜드 파랑 강조 */
-      link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:2px 0;font:700 13px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:transparent;border:0;white-space:nowrap;cursor:pointer;line-height:1.4';
-      link.onclick = function(e){
-        e.preventDefault();
-        if (typeof window.bjOpenNewlywedModal === 'function') {
-          window.bjOpenNewlywedModal();
-        } else if (!window.__bjNwLoading) {
-          window.__bjNwLoading = true;
-          var s = document.createElement('script');
-          s.src = modalJsUrl;
-          s.onload = function(){ if (window.bjOpenNewlywedModal) window.bjOpenNewlywedModal(); };
-          document.head.appendChild(s);
-        }
-      };
-      /* 첫 번째 위치에 삽입 (좌측 정렬, 가장 먼저 보이도록) */
-      wrap.insertBefore(link, wrap.firstChild);
+        var link = document.createElement('a');
+        link.className = 'bj-newlywed-cat';
+        link.href = '#';
+        link.innerHTML = '<span style="margin-right:3px">💍</span>신혼부부 패키지';
+        /* 다른 카테고리 항목과 동일 시각, 단 브랜드 파랑 강조 */
+        link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:2px 0;font:700 13px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:transparent;border:0;white-space:nowrap;cursor:pointer;line-height:1.4';
+        link.onclick = function(e){
+          e.preventDefault();
+          if (typeof window.bjOpenNewlywedModal === 'function') {
+            window.bjOpenNewlywedModal();
+          } else if (!window.__bjNwLoading) {
+            window.__bjNwLoading = true;
+            var s = document.createElement('script');
+            s.src = modalJsUrl;
+            s.onload = function(){ if (window.bjOpenNewlywedModal) window.bjOpenNewlywedModal(); };
+            document.head.appendChild(s);
+          }
+        };
+        /* 첫 번째 위치에 삽입 (좌측 정렬, 가장 먼저 보이도록) */
+        wrap.insertBefore(link, wrap.firstChild);
+      }
+
+      /* 햄버거를 신혼부부 패키지 왼쪽(카테고리바 최좌측)으로 이동 */
+      moveHamburgerToCatBar(wrap);
     }
     if (document.readyState !== 'loading') tryInject();
     document.addEventListener('DOMContentLoaded', tryInject);
@@ -2753,6 +2767,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '    content:none !important; display:none !important;',
       '  }',
       '  .hamburger__btn{display:none !important}',
+      // v0.6.x: 햄버거를 카테고리바 좌측(신혼부부 왼쪽)으로 이동했을 때 — 가로 스크롤에도 좌측 고정
+      '  .category__wrap .gnb__hamburger.gnb__hamburger{',
+      '    position:sticky !important; left:0 !important; z-index:3 !important;',
+      '    background:#fff !important; margin:0 2px 0 0 !important;',
+      '    padding:0 8px 0 0 !important; align-self:center !important; flex:0 0 auto !important;',
+      '    box-shadow:-18px 0 0 0 #fff !important;', /* 좌측 패딩에 카테고리 글자 비침 방지 */
+      '  }',
       '  header .logo.logo, body .logo{ flex:0 1 auto !important; max-width:38vw !important; overflow:hidden !important; }',
       '  header .logo img{ max-width:100% !important; height:26px !important; object-fit:contain !important; }',
       // (3) PC GNB 우측(.bj-inj-right) 모바일·태블릿 hide — 이벤트·고객센터·장바구니·search
