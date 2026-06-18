@@ -429,6 +429,49 @@ function bjHeaderMainInit() {
     });
   }
 
+  // === 상단 검색창 작동 복구 (2026-06-18) ===
+  // 플랫폼 테마 마크업 버그: 데스크탑 헤더 검색창(.search__wrap 안 input#top_search + submit 버튼)이
+  // 어떤 <form>에도 들어있지 않아 Enter·돋보기 클릭 모두 무반응 → 검색 자체가 안 됨(inject 꺼도 동일).
+  // 검색 백엔드(/html/dh/search_result?search_value=)는 정상이므로 Enter/클릭을 잡아 직접 이동시킴.
+  // + 제품명이 영문으로 저장된 카테고리용 한글 구어체 동의어 매핑(티비→TV 등) — 0건 방지.
+  (function fixTopSearch() {
+    var SYNONYMS = [
+      ['텔레비전', 'TV'],
+      ['티브이', 'TV'],
+      ['티비', 'TV']
+    ];
+    function normalize(q) {
+      var out = q;
+      for (var i = 0; i < SYNONYMS.length; i++) {
+        out = out.split(SYNONYMS[i][0]).join(SYNONYMS[i][1]);
+      }
+      return out;
+    }
+    function runSearch(input) {
+      var raw = ((input && input.value) || '').trim();
+      if (!raw) { if (input) input.focus(); return; }
+      location.href = '/html/dh/search_result?search_value=' + encodeURIComponent(normalize(raw));
+    }
+    // 데스크탑 검색창에서 Enter
+    document.addEventListener('keydown', function(e) {
+      if (e.key !== 'Enter' && e.keyCode !== 13) return;
+      var t = e.target;
+      if (t && t.tagName === 'INPUT' && t.id === 'top_search') {
+        e.preventDefault();
+        runSearch(t);
+      }
+    }, true);
+    // 검색창 옆 돋보기(submit) 버튼 클릭
+    document.addEventListener('click', function(e) {
+      if (!e.target || !e.target.closest) return;
+      var btn = e.target.closest('.search__wrap button');
+      if (!btn) return;
+      var wrap = btn.closest('.search__wrap');
+      var input = wrap && (wrap.querySelector('#top_search') || wrap.querySelector('input[name="search_value"]'));
+      if (input) { e.preventDefault(); runSearch(input); }
+    }, true);
+  })();
+
   // Unhide product detail images (platform sets inline display:none)
   function unhideDetailImages() {
     document.querySelectorAll('.prod_view_detail img').forEach(function(img) {
