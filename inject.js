@@ -472,6 +472,20 @@ function bjHeaderMainInit() {
     }, true);
   })();
 
+  // === 검색 결과 페이지(.search_field) 주황 → 파랑 (2026-06-18) ===
+  // 결과 상단 키워드 바: 키워드 텍스트(input#prod_search, color #dd5119),
+  // 돋보기 PNG(input[type=image] btn_search.png), 하단 언더라인(border-bottom #dd5119)이
+  // 네이티브 테마 주황 → 사이트 블루(#0838f8). (헤더 .search__wrap은 별개라 미영향)
+  (function blueSearchField() {
+    var st = document.createElement('style');
+    st.id = 'bj-search-field-blue';
+    st.textContent =
+      '.search_field { border-bottom-color: #0838f8 !important; }' +
+      '.search_field input#prod_search, .search_field input[name="search_value"] { color: #0838f8 !important; }' +
+      '.search_field input.btn, .search_field input[type="image"][src*="btn_search"] { filter: brightness(0) saturate(100%) invert(14%) sepia(100%) saturate(7500%) hue-rotate(228deg) brightness(98%) contrast(103%) !important; }';
+    document.head.appendChild(st);
+  })();
+
   // Unhide product detail images (platform sets inline display:none)
   function unhideDetailImages() {
     document.querySelectorAll('.prod_view_detail img').forEach(function(img) {
