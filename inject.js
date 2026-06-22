@@ -1989,7 +1989,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         for (var i = 0; i < dbEls.length; i++) {
           if (hasGift) {
             dbEls[i].textContent = rangeText;
-            dbEls[i].style.color = '#2a2a2a';   // gift-v와 색상 통일(파랑 강조는 gift-tag로 이동)
+            dbEls[i].style.color = '#0838f8';   // 지원금 값 — 파란색 강조 (gift-v와 통일)
             dbEls[i].style.fontWeight = '700';
             dbEls[i].style.removeProperty('font-size'); // 크기는 .gift-db CSS(16px)로 gift-v와 통일
             dbEls[i].style.lineHeight = '1.45';
@@ -4030,8 +4030,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '  #ai-card-root .gift-db{ padding-left:10px !important }',  /* 지원금 값도 뱃지 글자에 맞춰 정렬 */
     '  #ai-card-root .gift-tag{ font-size:16px !important }',
     '}',
-    /* 뱃지(파랑) 밑 본문의 강조 글씨까지 파랑이면 가독성 저하 → 강조는 진한 회색, 파랑은 뱃지/지원금값만 */
-    '#ai-card-root .gift-v strong{ color:#2a2a2a !important }',
+    /* v0.6.7: 지원금 섹션 값(gift-v 전체·강조)도 파란색으로 통일 — 가독성+포인트 */
+    '#ai-card-root .gift-v, #ai-card-root .gift-v strong{ color:#0838f8 !important }',
     /* v0.6.4: .gift-tag 뱃지 — 파란 배경 + 흰 글씨 */
     '#ai-card-root .gift-tag{ background:#0838f8 !important; color:#fff !important }',
 
