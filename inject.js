@@ -4044,6 +4044,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '#ai-card-root .bj-persona-ic{ width:40px; height:40px; border-radius:50%; background:#e8edff; color:#0838f8; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto }',
     '#ai-card-root .bj-persona-ic svg{ width:22px; height:22px; display:block }',
 
+    /* v0.6.9: 긴 문장 2줄 클램프 + 더보기 토글 */
+    '#ai-card-root .bj-clamp{ display:-webkit-box !important; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden }',
+    '#ai-card-root .bj-clamp.bj-clamp-open{ -webkit-line-clamp:unset !important; display:block !important; overflow:visible }',
+    '#ai-card-root .bj-more{ display:inline-block; margin-top:3px; background:none; border:0; padding:0; color:#0838f8; font-weight:700; font-size:12px; cursor:pointer; font-family:Pretendard,sans-serif }',
+
     /* === v0.6.2: 글씨 크기 조절 컨트롤 — 우측 퀵버튼(.link) 묶음 위에 세로 스타일로 배치 === */
     '.new-qb .quick .link #bj-fs-ctrl{ display:flex; justify-content:center; margin:0 0 8px 0 }',
     '#bj-fs-ctrl .bj-fs-inner{ display:flex; flex-direction:column; align-items:center; gap:5px; background:#fff; border:1px solid #e6e8ee; border-radius:16px; padding:7px 5px; box-shadow:0 2px 8px rgba(0,0,0,.12) }',
@@ -6884,6 +6889,34 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     });
   }
 
+  /* v0.6.9: [다음단계] 긴 문장 2줄 클램프 + '더보기' 토글로 카드 간결화. 우선 canary(24578). */
+  var BJ_CLAMP_ONLY = ['24578'];
+  var BJ_CLAMP_ALL = false;
+  function applyTextClamp(){
+    var m = location.pathname.match(/\/prod_view\/(\d+)/); var pid = m ? m[1] : '';
+    if (!BJ_CLAMP_ALL && BJ_CLAMP_ONLY.indexOf(pid) === -1) return;
+    var root = document.getElementById('ai-card-root'); if (!root) return;
+    ['.a-body', '.p-d'].forEach(function(sel){
+      root.querySelectorAll(sel).forEach(function(el){
+        if (el.getAttribute('data-bj-clamp')) return;
+        el.setAttribute('data-bj-clamp', '1');
+        el.classList.add('bj-clamp');
+        setTimeout(function(){
+          if (el.scrollHeight - el.clientHeight > 3){  // 2줄 초과 → 더보기 노출
+            var btn = document.createElement('button'); btn.className = 'bj-more'; btn.type = 'button'; btn.textContent = '더보기';
+            el.parentNode.insertBefore(btn, el.nextSibling);
+            btn.addEventListener('click', function(){
+              var open = el.classList.toggle('bj-clamp-open');
+              btn.textContent = open ? '접기' : '더보기';
+            });
+          } else {
+            el.classList.remove('bj-clamp');  // 짧으면 클램프 해제
+          }
+        }, 80);
+      });
+    });
+  }
+
   function runAll(){
     injectCSS();
     tagHeaderDom();
@@ -6897,7 +6930,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     arrangePersonaLevelMobile(); /* v0.5.61: 모바일에서 추천강도 라벨을 페르소나명 옆으로 */
     fetchAndInjectAICard();
     moveGiftBeforePersona();   /* v0.6.5: 지원금 섹션을 페르소나 섹션 앞으로 (24578 미리보기) */
-    applyAiCardExampleA();     /* v0.6.8: [예시 A] 섹션 헤더 아이콘 + 페르소나 SVG 아이콘 (24578 미리보기) */
+    applyAiCardExampleA();     /* v0.6.8: [예시 A] 섹션 헤더 아이콘 + 페르소나 SVG 아이콘 */
+    applyTextClamp();          /* v0.6.9: [다음단계] 긴 문장 2줄 클램프+더보기 (24578 테스트) */
     mountFontSizer();          /* v0.6.1: 글씨 크기 조절 컨트롤(돋보기 −/+) */
     fetchAndInjectReviews();   /* 고객 후기 섹션 — .prod_view_top 다음 */
     hideOriginalSpecsAndSimplifyLpt();
