@@ -1989,10 +1989,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         for (var i = 0; i < dbEls.length; i++) {
           if (hasGift) {
             dbEls[i].textContent = rangeText;
-            dbEls[i].style.color = '#0838f8';
-            dbEls[i].style.fontWeight = '800';
-            dbEls[i].style.fontSize = '16px';  // 지원금 섹션 통일 크기(다른 행과 동일)
-            dbEls[i].style.lineHeight = '1.3';
+            dbEls[i].style.color = '#2a2a2a';   // gift-v와 색상 통일(파랑 강조는 gift-tag로 이동)
+            dbEls[i].style.fontWeight = '700';
+            dbEls[i].style.removeProperty('font-size'); // 크기는 .gift-db CSS(16px)로 gift-v와 통일
+            dbEls[i].style.lineHeight = '1.45';
             dbEls[i].style.border = '0';
             dbEls[i].style.background = 'transparent';
             // 라벨 표현 교체: "예상 최대 지원금" → "AI예측 이번주 최대지원금"
@@ -4032,8 +4032,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '}',
     /* 뱃지(파랑) 밑 본문의 강조 글씨까지 파랑이면 가독성 저하 → 강조는 진한 회색, 파랑은 뱃지/지원금값만 */
     '#ai-card-root .gift-v strong{ color:#2a2a2a !important }',
-    /* v0.6.3: 지원금 등 .gift-tag 뱃지 배경만 노란색(#ffd000)으로 — 텍스트 색은 기존 유지 */
-    '#ai-card-root .gift-tag{ background:#ffd000 !important }',
+    /* v0.6.4: .gift-tag 뱃지 — 파란 배경 + 흰 글씨 */
+    '#ai-card-root .gift-tag{ background:#0838f8 !important; color:#fff !important }',
 
     /* === v0.6.2: 글씨 크기 조절 컨트롤 — 우측 퀵버튼(.link) 묶음 위에 세로 스타일로 배치 === */
     '.new-qb .quick .link #bj-fs-ctrl{ display:flex; justify-content:center; margin:0 0 8px 0 }',
@@ -4048,7 +4048,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     /* === v0.6.0: AI 자동생성카드 본문 글씨 전체 +1px 확대 (고객 가독성) + 지원금 섹션 크기 통일 ===
        폭/패딩은 건드리지 않고 font-size만 올려 모바일 가로 넘침 방지 (룰북 #32). */
     /* 지원금 섹션: 라벨·값 모두 동일 크기로 통일(16px). db는 인라인 16px 볼드 유지 */
-    '#ai-card-root .gift-tag, #ai-card-root .gift-v, #ai-card-root .gift-r{ font-size:16px !important; line-height:1.45 !important }',
+    '#ai-card-root .gift-tag, #ai-card-root .gift-v, #ai-card-root .gift-r, #ai-card-root .gift-db{ font-size:16px !important; line-height:1.45 !important }',
     /* 14px 그룹 (기존 12.5~13.5 → +1) */
     '#ai-card-root .sec-t, #ai-card-root .a-head, #ai-card-root .a-body, #ai-card-root .sv, #ai-card-root .step-h, #ai-card-root .step-title, #ai-card-root .rv-photos-tit, #ai-card-root .rv-text{ font-size:14px !important }',
     /* 13px 그룹 (기존 11.5~12 → +1) */
