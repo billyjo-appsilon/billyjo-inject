@@ -6850,7 +6850,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   /* v0.6.8: [예시 A] AI 카드 시각 보강 — 섹션 헤더 아이콘 칩 + 페르소나 아이콘(인라인 SVG) 노출.
      Tabler 폰트 미로드로 .ti 아이콘이 안 보이므로 인라인 SVG로 대체. 우선 canary(24578)에서만. */
   var BJ_CARDX_ONLY = ['24578'];
-  var BJ_CARDX_ALL = false;
+  var BJ_CARDX_ALL = true;  // 전체 상품 적용 (canary 확인 완료)
   function applyAiCardExampleA(){
     var m = location.pathname.match(/\/prod_view\/(\d+)/); var pid = m ? m[1] : '';
     if (!BJ_CARDX_ALL && BJ_CARDX_ONLY.indexOf(pid) === -1) return;
