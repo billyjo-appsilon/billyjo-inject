@@ -4046,6 +4046,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
     /* v0.6.9: 긴 문장 2줄 클램프 + 더보기 토글 */
     '#ai-card-root .bj-clamp{ display:-webkit-box !important; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden }',
+    '#ai-card-root .bj-clamp.bj-lc3{ -webkit-line-clamp:3 }',
     '#ai-card-root .bj-clamp.bj-clamp-open{ -webkit-line-clamp:unset !important; display:block !important; overflow:visible }',
     '#ai-card-root .bj-more{ display:inline-block; margin-top:3px; background:none; border:0; padding:0; color:#0838f8; font-weight:700; font-size:12px; cursor:pointer; font-family:Pretendard,sans-serif }',
 
@@ -6915,11 +6916,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var m = location.pathname.match(/\/prod_view\/(\d+)/); var pid = m ? m[1] : '';
     if (!BJ_CLAMP_ALL && BJ_CLAMP_ONLY.indexOf(pid) === -1) return;
     var root = document.getElementById('ai-card-root'); if (!root) return;
-    ['.a-body', '.p-d'].forEach(function(sel){
-      root.querySelectorAll(sel).forEach(function(el){
+    [{ sel: '.a-body', lc3: false }, { sel: '.p-d', lc3: false }, { sel: '.rv-text', lc3: true }].forEach(function(cf){
+      root.querySelectorAll(cf.sel).forEach(function(el){
         if (el.getAttribute('data-bj-clamp')) return;
         el.setAttribute('data-bj-clamp', '1');
         el.classList.add('bj-clamp');
+        if (cf.lc3) el.classList.add('bj-lc3');  // 후기 본문은 3줄
         setTimeout(function(){
           if (el.scrollHeight - el.clientHeight > 3){  // 2줄 초과 → 더보기 노출
             var btn = document.createElement('button'); btn.className = 'bj-more'; btn.type = 'button'; btn.textContent = '더보기';
