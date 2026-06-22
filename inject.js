@@ -6910,7 +6910,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
   /* v0.6.9: [다음단계] 긴 문장 2줄 클램프 + '더보기' 토글로 카드 간결화. 우선 canary(24578). */
   var BJ_CLAMP_ONLY = ['24578'];
-  var BJ_CLAMP_ALL = false;
+  var BJ_CLAMP_ALL = true;  // 전체 상품 적용 (canary 테스트 완료)
   function applyTextClamp(){
     var m = location.pathname.match(/\/prod_view\/(\d+)/); var pid = m ? m[1] : '';
     if (!BJ_CLAMP_ALL && BJ_CLAMP_ONLY.indexOf(pid) === -1) return;
