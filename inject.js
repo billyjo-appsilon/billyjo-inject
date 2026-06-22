@@ -6669,6 +6669,29 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (plus) plus.disabled = (step >= BJ_FS_MAX);
   }
 
+  /* v0.6.5: 지원금·혜택 섹션(.gift)을 '이런 분에게 추천해요'(.persona) 섹션 바로 앞으로 이동.
+     우선 canary(24578)에서만 미리보기 — 확인 후 BJ_GIFTMOVE_ALL=true 로 전체 적용. */
+  var BJ_GIFTMOVE_ONLY = ['24578'];
+  var BJ_GIFTMOVE_ALL = false;
+  function moveGiftBeforePersona(){
+    var m = location.pathname.match(/\/prod_view\/(\d+)/);
+    var pid = m ? m[1] : '';
+    if (!BJ_GIFTMOVE_ALL && BJ_GIFTMOVE_ONLY.indexOf(pid) === -1) return;
+    var root = document.getElementById('ai-card-root'); if (!root) return;
+    var giftEl = root.querySelector('.gift'); if (!giftEl) return;
+    var giftSec = giftEl.closest('.sec'); if (!giftSec) return;
+    var personaEl = root.querySelector('.persona');
+    var personaSec = personaEl ? personaEl.closest('.sec') : null;
+    if (!personaSec){ // sec-t 텍스트 폴백
+      var secs = root.querySelectorAll('.sec');
+      for (var i = 0; i < secs.length; i++){ var t = secs[i].querySelector('.sec-t'); if (t && /이런\s*분/.test(t.textContent || '')){ personaSec = secs[i]; break; } }
+    }
+    if (!personaSec || giftSec === personaSec) return;
+    if (giftSec.parentNode !== personaSec.parentNode) return;
+    if (giftSec.nextElementSibling === personaSec) return; // 이미 바로 앞
+    personaSec.parentNode.insertBefore(giftSec, personaSec);
+  }
+
   function runAll(){
     injectCSS();
     tagHeaderDom();
@@ -6681,6 +6704,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     personalizePersonaIcons(); /* v0.5.59: 페르소나 카드 아이콘 (현재 1인·신혼 샘플) */
     arrangePersonaLevelMobile(); /* v0.5.61: 모바일에서 추천강도 라벨을 페르소나명 옆으로 */
     fetchAndInjectAICard();
+    moveGiftBeforePersona();   /* v0.6.5: 지원금 섹션을 페르소나 섹션 앞으로 (24578 미리보기) */
     mountFontSizer();          /* v0.6.1: 글씨 크기 조절 컨트롤(돋보기 −/+) */
     fetchAndInjectReviews();   /* 고객 후기 섹션 — .prod_view_top 다음 */
     hideOriginalSpecsAndSimplifyLpt();
