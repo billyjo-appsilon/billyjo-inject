@@ -5748,7 +5748,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var mall=parts[1]||(s.indexOf('쿠팡')>=0?'쿠팡':s.indexOf('에누리')>=0?'에누리':'가격비교');
       return mall; // 실제 몰명: 11번가 / G마켓 / 옥션 …
     }
-    if(/네이버/.test(s)) return '네이버 '+(brand?brand+' ':'')+'공식스토어';
+    if(/네이버/.test(s)) return (brand?brand+' ':'')+'네이버 공식스토어'; // 코웨이 네이버 공식스토어
     return (brand?brand+' ':'')+'공식몰';
   }
   // 같은 출처 연속 3개 이상 방지(최대 2연속). 다른 출처 남아있을 때만 회피.
@@ -5854,13 +5854,22 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var spec = (txt('.prod_table_wrap')+' '+nameTxt), category='';
     for (var k=0;k<MAP.length;k++){ if(spec.indexOf(MAP[k][0])>=0){ category=MAP[k][1]; break; } }
     if(!brand || !category) return; // 분류 불가 → 후기 미표시(다음 runAll 재시도)
+    // 삽입 위치: AI 카드의 '상세 스펙'(SLOT6) 바로 앞 = '이런 분에게 추천해요'(SLOT5) 다음.
+    // 카드는 async 주입이라 로드 대기(최대 4초), 카드 없으면 .prod_view_top 다음으로 폴백.
+    var anchor=null, parent=null, card=document.querySelector('#ai-card-root');
+    if(card){ var secs=card.querySelectorAll('.sec-t'); for(var si=0;si<secs.length;si++){ if(/상세\s*스펙/.test(secs[si].textContent||'')){ anchor=secs[si]; parent=secs[si].parentNode; break; } } }
+    if(!anchor){
+      if(!window.__bjRvFirst) window.__bjRvFirst=Date.now();
+      if(Date.now()-window.__bjRvFirst < 4000) return; // 카드 로드 대기
+      parent=topEl.parentNode; anchor=topEl.nextSibling; // 폴백: 이미지+가격 다음
+    }
     window.__bjReviewsFetched = true;
     if (document.getElementById('bj-reviews-root')) return;
 
     bjRvInjectCss();
     var root=document.createElement('div'); root.id='bj-reviews-root';
     root.style.display='none';
-    topEl.parentNode.insertBefore(root, topEl.nextSibling);
+    (parent||topEl.parentNode).insertBefore(root, anchor);
 
     var API='https://admin2-api.billyjo.co.kr/v1/reviews';
     var shown=8, photoOnly=true, items=[];
@@ -5887,12 +5896,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         h+='<div class="rv-body"><div class="rv-stars">'+bjRvStars(r.stars)+'</div>'
           +(persona?'<div><span class="rv-persona">'+bjRvEsc(persona)+'</span></div>':'')
           +'<div class="rv-text">'+bjRvEsc(r.text)+'</div>'
-          +'<div class="rv-meta"><span class="rv-author">'+bjRvEsc(bjRvAuthor(r.author))+'</span><button class="rv-srcbtn" data-src="'+bjRvEsc(src)+'">출처 보기</button>'+(r.reviewed_at?'<span>· '+bjRvEsc(r.reviewed_at)+'</span>':'')+'</div></div></div>';
+          +'<div class="rv-meta"><span class="rv-author">'+bjRvEsc(src)+' 구매자 후기(출처)</span>'+(r.reviewed_at?'<span>· '+bjRvEsc(r.reviewed_at)+'</span>':'')+'</div></div></div>';
       });
       h+='</div>';
       if(!listSrc.length) h+='<div class="rv-foot" style="text-align:center;padding:10px 0">사진 있는 후기가 아직 없어요. 전체를 눌러보세요.</div>';
       if(listSrc.length>shown) h+='<div class="rv-more"><button id="bj-rv-more">후기 더 보기 ('+(listSrc.length-shown)+'+)</button></div>';
-      h+='<div class="rv-foot">※ 후기는 브랜드 공식 채널·다나와 등에서 수집했으며 각 후기에 출처를 표기합니다. 실제 구매 고객의 후기입니다.</div>';
+      h+='<div class="rv-foot">후기는 공식 판매처·오픈마켓 등 실제 구매처에서 수집한 고객 리뷰입니다.</div>';
       root.innerHTML=h;
       var lb=bjRvLightbox(), lbi=lb.querySelector('img');
       Array.prototype.forEach.call(root.querySelectorAll('.rv-srcbtn'),function(b){ b.onclick=function(){ if(b.classList.contains('shown')) return; b.textContent='출처: '+b.getAttribute('data-src'); b.classList.add('shown'); }; });
