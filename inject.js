@@ -6683,9 +6683,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
  * ─────────────────────────────────────────────────────────────────────────── */
 (function(){
   var path = location.pathname || '';
-  if (!/\/prod_list\//.test(path)) return;
-  var BJ_LIST_ONLY = /\/prod_list\//;          // 전체 리스트 페이지 적용
-  if (!BJ_LIST_ONLY.test(path)) return;
+  var IS_LIST = /\/prod_list\//.test(path);    // 정렬바는 리스트 페이지만. 뱃지는 카드 있는 모든 페이지(메인 포함)
   var API = 'https://admin2-api.billyjo.co.kr/v1/reviews';
   var BMAP = {'SK':'SK매직','웰스':'교원웰스','교원':'교원웰스','청호':'청호나이스','LG구독':'LG','현대렌탈케어':'현대큐밍'};
   var CMAP = [['얼음정수기','정수기'],['정수기','정수기'],['연수기','연수기'],['비데','비데'],['공기청정기','공기청정기'],['청정기','공기청정기'],['제습기','제습기'],['가습기','가습기'],['음식물처리기','음식물처리기'],['제빙기','제빙기'],['의류관리기','의류관리기'],['스타일러','의류관리기'],['식기세척기','식기세척기'],['인덕션','인덕션'],['전기레인지','인덕션'],['세탁기','세탁기'],['건조기','건조기'],['에어컨','에어컨'],['김치냉장고','냉장고'],['냉장고','냉장고'],['로봇청소기','청소기'],['청소기','청소기'],['안마의자','안마의자'],['매트리스','매트리스'],['침대','매트리스'],['노트북','노트북'],['TV','TV']];
@@ -6717,10 +6715,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     document.head.appendChild(st);
   }
   function badges(){
-    var items=document.querySelectorAll('.prod_list .item');
+    var items=document.querySelectorAll('.item');   // 메인·리스트 공통 제품카드(.item .box)
     Array.prototype.forEach.call(items, function(it){
       if(it.getAttribute('data-bj-rv')) return;
-      var be=it.querySelector('p.brand'), ne=it.querySelector('p.name'), im=it.querySelector('img');
+      var ne=it.querySelector('p.name'); if(!ne) return;   // 제품 카드만(p.name 보유)
+      var be=it.querySelector('p.brand'), im=it.querySelector('img');
       // ⚠️ 이 리스트 카드는 p.brand에 모델코드, p.name에 제품명("코웨이 아이콘 V2 ...")이 들어감
       var modelTxt=be?(be.textContent||'').trim():'', name=ne?(ne.textContent||'').trim():'';
       var alt=im?(im.getAttribute('alt')||''):'';
@@ -6754,15 +6753,20 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     });
   }
   function run(){ if(!counts) return; injectCss();
-    // 원래 순서 보존
-    Array.prototype.forEach.call(document.querySelectorAll('.prod_list .item'), function(it,i){ if(!it.getAttribute('data-bj-order')) it.setAttribute('data-bj-order', i); });
-    badges(); sortBar();
+    if(IS_LIST){ Array.prototype.forEach.call(document.querySelectorAll('.prod_list .item'), function(it,i){ if(!it.getAttribute('data-bj-order')) it.setAttribute('data-bj-order', i); }); }
+    badges(); if(IS_LIST) sortBar();
   }
-  fetch(API+'/counts').then(function(r){return r.json();}).then(function(j){
-    counts=j;
-    // 브랜드 키워드 목록 = 후기 보유 브랜드(긴 이름 우선 매칭)
-    brandList=Object.keys(j.by_cat||{}).map(function(k){return k.split('|')[0];}).filter(function(v,i,a){return a.indexOf(v)===i;}).sort(function(a,b){return b.length-a.length;});
-    run();
-    var n=0, iv=setInterval(function(){ run(); if(++n>12) clearInterval(iv); }, 500); // 지연 렌더 대비
-  }).catch(function(){});
+  function fetchCounts(){
+    fetch(API+'/counts').then(function(r){return r.json();}).then(function(j){
+      counts=j;
+      // 브랜드 키워드 목록 = 후기 보유 브랜드(긴 이름 우선 매칭)
+      brandList=Object.keys(j.by_cat||{}).map(function(k){return k.split('|')[0];}).filter(function(v,i,a){return a.indexOf(v)===i;}).sort(function(a,b){return b.length-a.length;});
+      run();
+      var n=0, iv=setInterval(function(){ run(); if(++n>12) clearInterval(iv); }, 500); // 지연 렌더 대비
+    }).catch(function(){});
+  }
+  // 제품 카드가 나타나면 시작(메인 swiper 지연 렌더 대응). 카드 없는 페이지는 미실행(불필요 호출 방지)
+  function start(){ if(window.__bjRvCStarted) return; if(!document.querySelector('.item p.name')) return; window.__bjRvCStarted=true; fetchCounts(); }
+  var pn=0, piv=setInterval(function(){ start(); if(window.__bjRvCStarted || ++pn>20) clearInterval(piv); }, 400);
+  start();
 })();
