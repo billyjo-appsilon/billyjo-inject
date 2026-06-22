@@ -6675,7 +6675,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   /* v0.6.5: 지원금·혜택 섹션(.gift)을 '이런 분에게 추천해요'(.persona) 섹션 바로 앞으로 이동.
      우선 canary(24578)에서만 미리보기 — 확인 후 BJ_GIFTMOVE_ALL=true 로 전체 적용. */
   var BJ_GIFTMOVE_ONLY = ['24578'];
-  var BJ_GIFTMOVE_ALL = false;
+  var BJ_GIFTMOVE_ALL = true;  // 전체 상품 적용 (canary 확인 완료)
   function moveGiftBeforePersona(){
     var m = location.pathname.match(/\/prod_view\/(\d+)/);
     var pid = m ? m[1] : '';
