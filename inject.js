@@ -6656,6 +6656,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       });
       bjFsSyncDisabled(c, bjFsGet());
     }
+    // PC 전화버튼 삽입 로직과의 순서 경합 보정 — 항상 .link 맨 위로
+    var ctrl = document.getElementById('bj-fs-ctrl');
+    if (link && ctrl && link.firstElementChild !== ctrl) link.insertBefore(ctrl, link.firstChild);
     if (bjFsGet() !== 0) bjFsApply(bjFsGet()); // 신규 주입 요소 포함 재반영
   }
   function bjFsSyncDisabled(c, step){
