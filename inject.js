@@ -6719,8 +6719,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     Array.prototype.forEach.call(items, function(it){
       if(it.getAttribute('data-bj-rv')) return;
       var be=it.querySelector('p.brand'), ne=it.querySelector('p.name');
-      var brand=normBrand(be?be.textContent:''), name=ne?(ne.textContent||'').trim():'';
-      var c=countFor(brand, extractModel(name), catOf(name));
+      // ⚠️ 이 리스트 카드는 p.brand에 모델코드, p.name에 제품명("코웨이 아이콘 V2 ...")이 들어감
+      var modelTxt=be?(be.textContent||'').trim():'', name=ne?(ne.textContent||'').trim():'';
+      var brand=normBrand((name.split(/\s+/)[0]||''));  // 제품명 첫 토큰 = 브랜드
+      var c=countFor(brand, extractModel(modelTxt+' '+name), catOf(name));
       it.setAttribute('data-bj-rv','1');
       it.setAttribute('data-bj-rvn', c?c.n:0);
       if(!c) return;
