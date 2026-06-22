@@ -4045,19 +4045,22 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '#bj-fs-ctrl .bj-fs-btn:active{ transform:scale(.9) }',
     '#bj-fs-ctrl .bj-fs-btn[disabled]{ color:#cfd3db; background:#f5f6f8; cursor:default }',
 
-    /* === v0.6.0: AI 자동생성카드 본문 글씨 전체 +1px 확대 (고객 가독성) + 지원금 섹션 크기 통일 ===
-       폭/패딩은 건드리지 않고 font-size만 올려 모바일 가로 넘침 방지 (룰북 #32). */
-    /* 지원금 섹션: 라벨·값 모두 동일 크기로 통일(16px). db는 인라인 16px 볼드 유지 */
-    '#ai-card-root .gift-tag, #ai-card-root .gift-v, #ai-card-root .gift-r, #ai-card-root .gift-db{ font-size:16px !important; line-height:1.45 !important }',
-    /* 14px 그룹 (기존 12.5~13.5 → +1) */
-    '#ai-card-root .sec-t, #ai-card-root .a-head, #ai-card-root .a-body, #ai-card-root .sv, #ai-card-root .step-h, #ai-card-root .step-title, #ai-card-root .rv-photos-tit, #ai-card-root .rv-text{ font-size:14px !important }',
-    /* 13px 그룹 (기존 11.5~12 → +1) */
-    '#ai-card-root .meta, #ai-card-root .field-l, #ai-card-root .ml, #ai-card-root .model-num, #ai-card-root .grade-badge, #ai-card-root .rt-l, #ai-card-root .rt-r, #ai-card-root .rt-v, #ai-card-root .strength-chip, #ai-card-root .step-sum, #ai-card-root .help, #ai-card-root .help summary, #ai-card-root .rec-p-title, #ai-card-root .rv-meta, #ai-card-root .rv-persona, #ai-card-root .rv-fallback, #ai-card-root .bj-lpt-note{ font-size:13px !important }',
-    /* 12px 그룹 (기존 10.5~11 → +1) */
-    '#ai-card-root .lbl, #ai-card-root .sl, #ai-card-root .pill, #ai-card-root .p-d, #ai-card-root .feat-btn, #ai-card-root .step-n, #ai-card-root .rec-p-level-1, #ai-card-root .rec-p-level-2{ font-size:12px !important }',
-    /* 15px 그룹 (기존 14 → +1): 별점 */
+    /* === v0.6.6: AI 카드 본문·제목·라벨·값 전체를 지원금 섹션과 동일한 16px base로 통일 ===
+       → 글씨조절 버튼(±1px)으로 키우거나 줄여도 전 섹션 크기가 함께 움직여 통일감 유지.
+       폭/패딩은 건드리지 않고 font-size만 (모바일 가로 넘침 방지, 룰북 #32). */
+    '#ai-card-root .gift-tag, #ai-card-root .gift-v, #ai-card-root .gift-r, #ai-card-root .gift-db,'
+      + ' #ai-card-root .sec-t, #ai-card-root .a-head, #ai-card-root .a-body, #ai-card-root .sv, #ai-card-root .sl,'
+      + ' #ai-card-root .step-h, #ai-card-root .step-title, #ai-card-root .step-sum, #ai-card-root .rv-photos-tit, #ai-card-root .rv-text,'
+      + ' #ai-card-root .meta, #ai-card-root .field-l, #ai-card-root .ml, #ai-card-root .model-num,'
+      + ' #ai-card-root .rt-l, #ai-card-root .rt-r, #ai-card-root .rt-v, #ai-card-root .help, #ai-card-root .help summary,'
+      + ' #ai-card-root .rec-p-title, #ai-card-root .p-d, #ai-card-root .lbl,'
+      + ' #ai-card-root .rv-meta, #ai-card-root .rv-persona, #ai-card-root .rv-fallback, #ai-card-root .bj-lpt-note'
+      + '{ font-size:16px !important }',
+    '#ai-card-root .gift-tag, #ai-card-root .gift-v, #ai-card-root .gift-r, #ai-card-root .gift-db{ line-height:1.45 !important }',
+    /* 장식용 태그/뱃지/칩/레벨 — 본문보다 작게 유지(12px) */
+    '#ai-card-root .grade-badge, #ai-card-root .strength-chip, #ai-card-root .pill, #ai-card-root .feat-btn, #ai-card-root .step-n, #ai-card-root .rec-p-level-1, #ai-card-root .rec-p-level-2{ font-size:12px !important }',
+    /* 별점 / 후기 출처 푸터 */
     '#ai-card-root .rv-stars, #ai-card-root .st{ font-size:15px !important }',
-    /* 10.5px (기존 9 → +1.5): 후기 출처 푸터 */
     '#ai-card-root .rv-foot, #ai-card-root .rv-author{ font-size:10.5px !important }',
 
     /* === v0.5.0: .help-pop ⓘ 툴팁 — 전 페이지 어디서든 viewport 안에 들어오게 강제 ===
