@@ -5695,6 +5695,200 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
+  // 2.y) 고객 후기 섹션 — .prod_view_top 바로 다음에 삽입 (이미지+가격 → 후기 → AI 카드)
+  //   데이터: admin2 /v1/reviews?brand=&category= (CORS *). brand/category는 페이지에서 추출.
+  //   디자인: 사진 있는 후기 우선 + 포토 갤러리 + PC 한 줄에 1건 + 페르소나 칩 + 아이디 마스킹.
+  //   출처는 표시광고법 준수해 정직 표기(de-emphasize는 하되 미표시 금지). 아정당은 admin2에서 hidden→비노출.
+  // ─────────────────────────────────────────────────────────────────────────
+  var BJ_RV_ANALYSIS = {
+    '코웨이|정수기':{avg:4.9,s:'얼음·물맛과 디자인 만족도가 높고, 설치가 친절했다는 평이 많아요.'},
+    '코웨이|공기청정기':{avg:4.8,s:'필터 성능과 디자인에 만족하는 평이 많아요.'},
+    '코웨이|비데':{avg:4.8,s:'설치가 친절하고 사용이 편리하다는 평이 많아요.'},
+    '청호나이스|정수기':{avg:4.9,s:'얼음과 물맛이 좋고, 디자인 만족도가 높다는 평이 많아요.'},
+    '청호나이스|비데':{avg:4.9,s:'설치가 친절하고 가성비가 좋다는 평이 많아요.'},
+    'SK매직|정수기':{avg:5.0,s:'얼음 기능과 디자인 만족도가 높고, 설치가 깔끔했다는 평이 많아요.'},
+    'SK매직|공기청정기':{avg:4.9,s:'성능과 디자인에 만족하고, 소음이 적다는 평이 많아요.'},
+    '쿠쿠|음식물처리기':{avg:4.7,s:'음식물 쓰레기 처리가 편해졌다는 평이 많아요. 냄새 관련 의견은 갈리는 편이에요.'},
+    '쿠쿠|제습기':{avg:4.8,s:'제습력에 만족하는 평이 많아요. 소음 의견도 일부 있어요.'},
+    '쿠쿠|제빙기':{avg:4.8,s:'얼음이 빠르고 넉넉하게 나온다는 평이 많아요.'},
+    '쿠쿠|공기청정기':{avg:4.8,s:'공기 개선 체감과 디자인에 만족하는 평이 많아요.'},
+    '쿠쿠|식기세척기':{avg:4.7,s:'설거지 부담이 줄고 설치가 편했다는 평이 많아요.'},
+    '쿠쿠|청소기':{avg:4.8,s:'가볍고 흡입력·먼지통 관리가 편하다는 평이 많아요.'},
+    '쿠쿠|인덕션':{avg:4.8,s:'화력과 디자인에 만족하는 평이 많아요.'},
+    '위닉스|제습기':{avg:4.8,s:'제습 성능과 디자인에 만족하는 평이 많아요. 작동 소음 의견도 일부 있어요.'},
+    '위닉스|공기청정기':{avg:4.8,s:'디자인과 사용 편의에 만족하고, 배송이 빨랐다는 평이 많아요.'},
+    '위닉스|건조기':{avg:4.9,s:'건조 성능과 디자인에 만족하는 평이 많아요.'},
+    '위닉스|에어컨':{avg:4.7,s:'냉방과 설치에 만족하는 평이 많아요. 작동 소음 의견도 일부 있어요.'},
+    '교원웰스|정수기':{avg:4.9,s:'깔끔한 디자인과 물맛에 만족하고, 설치가 친절했다는 평이 많아요.'},
+    '교원웰스|비데':{avg:4.9,s:'설치가 친절하고 사용이 편하다는 평이 많아요.'},
+    '교원웰스|공기청정기':{avg:4.8,s:'디자인 만족도가 높고, 작동이 조용한 편이라는 평이에요.'},
+    '삼성|정수기':{avg:5.0,s:'전문적인 설치와 기대 이상이라는 평이 많아요.'},
+    '삼성|에어컨':{avg:4.6,s:'냉방·무풍 성능에 만족하는 평이 많아요. 설치 관련 의견도 일부 있어요.'},
+    '삼성|냉장고':{avg:4.8,s:'용량과 디자인에 만족하는 평이 많아요.'},
+    '삼성|청소기':{avg:4.7,s:'흡입력과 가벼움에 만족하는 평이 많아요.'},
+    '삼성|식기세척기':{avg:4.7,s:'설거지 편의와 건조력에 만족하는 평이 많아요.'},
+    'LG|정수기':{avg:5.0,s:'퓨리케어 정수 성능과 친절한 설치, 렌탈 혜택에 만족하는 평이 많아요.'},
+    'LG|의류관리기':{avg:5.0,s:'옷 관리가 편해졌다는 평이 많고, 디자인 만족도도 높아요.'},
+    'LG|에어컨':{avg:4.7,s:'냉방 성능과 디자인에 만족하는 평이 많아요.'},
+    'LG|냉장고':{avg:5.0,s:'성능과 빠른 배송에 만족하는 평이에요.'},
+    'LG|건조기':{avg:5.0,s:'건조 성능에 만족하는 평이 많아요.'},
+    'LG|식기세척기':{avg:5.0,s:'설거지 편의와 디자인에 만족하는 평이 많아요.'},
+    'LG|청소기':{avg:4.9,s:'흡입력과 사용 편의에 만족하는 평이 많아요.'},
+    'LG|공기청정기':{avg:5.0,s:'자동 운전과 공기 개선 체감에 만족하는 평이에요.'},
+    '청호나이스|매트리스':{avg:4.9,s:'단단한 지지력과 편안함에 만족하는 평이 많아요.'}
+  };
+  function bjRvIsOfficialSeller(n){ n=n||''; if(/공식\s*파트너|공식\s*(영업)?\s*대리점/.test(n)) return false; return /공식/.test(n); }
+  function bjRvChannel(s, brand){
+    s=s||'';
+    if(/다나와|쿠팡|에누리/.test(s)){
+      var parts=s.split('·').map(function(x){return x.trim();});
+      var seller=parts[parts.length-1]||'';
+      if(parts.length>=3 && bjRvIsOfficialSeller(seller)) return (brand?brand+' ':'')+'공식 판매채널';
+      var mall=parts[1]||(s.indexOf('쿠팡')>=0?'쿠팡':s.indexOf('에누리')>=0?'에누리':'다나와');
+      return (brand?brand+' · ':'')+mall;
+    }
+    return brand?brand+' 공식 판매채널':'브랜드 공식 판매채널';
+  }
+  function bjRvEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+  function bjRvStars(n){ n=Math.max(1,Math.min(5,Math.round(n||5))); return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n); }
+  function bjRvPhoto(r){ return r.photo_url || (r.photos && r.photos[0]) || ''; }
+  function bjRvPersona(t){
+    t=t||'';
+    var R=[[/아기|유아|아이|육아|이유식|분유|애기|어린이|신생아/,'유아맘'],[/신혼|혼수|결혼|예단|남편|아내|와이프|부부/,'신혼·부부'],
+      [/부모님|어머니|아버지|엄마|아빠|시부모|장모|장인|효도|선물해|선물로/,'부모님 선물'],[/혼자|자취|원룸|1인|혼자살/,'1인가구'],
+      [/강아지|고양이|반려|냥이|댕댕|반려견|반려묘/,'반려가구'],[/사무실|매장|카페|업소|직원|회사|사업장|가게|영업장/,'사업장'],
+      [/이사|새집|입주|신축|새 ?아파트/,'새집·이사'],[/부모님댁|친정|시댁/,'부모님댁']];
+    for(var i=0;i<R.length;i++){ if(R[i][0].test(t)) return R[i][1]; } return '';
+  }
+  function bjRvAuthor(a){ a=(a==null?'':String(a)).trim(); if(!a) return '익명고객'; if(a.indexOf('*')>=0) return a; return a.slice(0, a.length<=2?1:2)+'***'; }
+
+  function bjRvInjectCss(){
+    if (document.getElementById('bj-rv-style')) return;
+    var st=document.createElement('style'); st.id='bj-rv-style';
+    st.textContent=[
+      "#bj-reviews-root{font-family:'Pretendard',sans-serif;background:#fff;border:1px solid #e6e8ee;border-radius:12px;padding:20px;margin:14px 0;min-width:0;clear:both;box-sizing:border-box;color:#222}",
+      "#bj-reviews-root *{box-sizing:border-box}",
+      "#bj-reviews-root .rv-summary{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid #e6e8ee;margin-bottom:14px;min-width:0}",
+      "#bj-reviews-root .rv-score{text-align:center;flex:0 0 auto}",
+      "#bj-reviews-root .rv-score .big{font-size:30px;font-weight:800;color:#0838F8;line-height:1}",
+      "#bj-reviews-root .rv-score .big small{font-size:15px;color:#aab;font-weight:600}",
+      "#bj-reviews-root .rv-score .st{color:#ffb400;font-size:14px;letter-spacing:1px;margin-top:4px}",
+      "#bj-reviews-root .rv-score .lbl{font-size:11px;color:#667;margin-top:3px}",
+      "#bj-reviews-root .rv-analysis{flex:1 1 280px;min-width:0;background:linear-gradient(135deg,#eef3ff,#f7f9ff);border:1px solid #d6e0ff;border-radius:12px;padding:11px 13px}",
+      "#bj-reviews-root .rv-analysis .a-head{font-size:12.5px;font-weight:800;color:#0838F8;margin-bottom:3px}",
+      "#bj-reviews-root .rv-analysis .a-body{font-size:13px;color:#33405c;line-height:1.5;word-break:keep-all}",
+      "#bj-reviews-root .rv-photos-tit{font-size:13px;font-weight:800;margin:2px 0 9px}",
+      "#bj-reviews-root .rv-photos-tit span{color:#667;font-weight:600;font-size:12px}",
+      "#bj-reviews-root .rv-photos{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px;-webkit-overflow-scrolling:touch}",
+      "#bj-reviews-root .rv-photos img{width:96px;height:96px;flex:0 0 auto;border-radius:10px;object-fit:cover;background:#eef1f6;cursor:pointer;border:1px solid #e6e8ee}",
+      "#bj-reviews-root .rv-filter{display:flex;gap:6px;margin-bottom:12px}",
+      "#bj-reviews-root .rv-filter button{font:inherit;font-size:12px;padding:5px 12px;border-radius:999px;cursor:pointer;border:1px solid #e6e8ee;background:#fff;color:#555}",
+      "#bj-reviews-root .rv-filter button.on{background:#eef3ff;border-color:#0838F8;color:#0838F8;font-weight:700}",
+      "#bj-reviews-root .rv-list{display:flex;flex-direction:column}",
+      "#bj-reviews-root .rv-card{display:flex;gap:14px;padding:15px 0;border-bottom:1px solid #e6e8ee;min-width:0}",
+      "#bj-reviews-root .rv-card:last-child{border-bottom:0}",
+      "#bj-reviews-root .rv-photo{width:118px;height:118px;flex:0 0 auto;border-radius:10px;object-fit:cover;background:#eef1f6;cursor:pointer;border:1px solid #e6e8ee}",
+      "#bj-reviews-root .rv-body{flex:1 1 auto;min-width:0}",
+      "#bj-reviews-root .rv-stars{color:#ffb400;font-size:14px;letter-spacing:1px}",
+      "#bj-reviews-root .rv-persona{display:inline-block;font-size:11.5px;font-weight:700;color:#0838F8;background:#eef3ff;border:1px solid #d6e0ff;border-radius:999px;padding:3px 11px;margin:5px 0 2px}",
+      "#bj-reviews-root .rv-text{font-size:13.5px;line-height:1.6;color:#333;margin:6px 0 8px;word-break:break-word}",
+      "#bj-reviews-root .rv-meta{font-size:11.5px;color:#99a;display:flex;gap:7px;flex-wrap:wrap;align-items:center;min-width:0}",
+      "#bj-reviews-root .rv-author{color:#8a909a;font-weight:600}",
+      "#bj-reviews-root .rv-src{color:#c9ced6;font-weight:400;font-size:10.5px}",
+      "#bj-reviews-root .rv-more{text-align:center;margin-top:16px}",
+      "#bj-reviews-root .rv-more button{font:inherit;font-size:13px;padding:10px 22px;border-radius:9px;border:1px solid #e6e8ee;background:#fff;color:#444;cursor:pointer}",
+      "#bj-reviews-root .rv-foot{font-size:11px;color:#aab;margin-top:14px;line-height:1.5}",
+      "#bj-rv-lb{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;z-index:100000;padding:20px}",
+      "#bj-rv-lb.on{display:flex}",
+      "#bj-rv-lb img{max-width:100%;max-height:90vh;border-radius:8px}",
+      "#bj-rv-lb .x{position:absolute;top:16px;right:18px;color:#fff;font-size:32px;cursor:pointer;line-height:1}",
+      "@media(max-width:600px){#bj-reviews-root{padding:14px}#bj-reviews-root .rv-photo{width:88px;height:88px}#bj-reviews-root .rv-photos img{width:84px;height:84px}#bj-reviews-root .rv-score .big{font-size:26px}}"
+    ].join('');
+    document.head.appendChild(st);
+  }
+  function bjRvLightbox(){
+    var lb=document.getElementById('bj-rv-lb');
+    if(!lb){ lb=document.createElement('div'); lb.id='bj-rv-lb'; lb.innerHTML='<span class="x">&times;</span><img alt="">';
+      lb.addEventListener('click', function(){ lb.classList.remove('on'); }); document.body.appendChild(lb); }
+    return lb;
+  }
+
+  function fetchAndInjectReviews(){
+    if (window.__bjReviewsFetched) return;
+    if (!/\/prod_view\/\d+/.test(location.pathname||'')) return;
+    var topEl = document.querySelector('.prod_view_top');
+    if (!topEl) return; // 페이지 미렌더 — 다음 runAll 재시도
+    // 브랜드 추출 (스펙표 '브랜드' 행 → 없으면 제품명 첫 토큰)
+    function txt(sel){ var e=document.querySelector(sel); return e?(e.textContent||'').replace(/\s+/g,' ').trim():''; }
+    var nameTxt = txt('.prod_name b') || txt('.prod_name') || document.title || '';
+    var brand='';
+    var ths = document.querySelectorAll('.prod_table th');
+    for (var i=0;i<ths.length;i++){ if(/브랜드/.test(ths[i].textContent||'')){ var td=ths[i].nextElementSibling; if(td) brand=(td.textContent||'').trim(); break; } }
+    if(!brand) brand=(nameTxt.split(/\s+/)[0]||'').trim();
+    var BMAP={'SK':'SK매직','웰스':'교원웰스','교원':'교원웰스','청호':'청호나이스','LG구독':'LG','현대렌탈케어':'현대큐밍'};
+    brand = BMAP[brand] || brand;
+    // 카테고리 (제품명+스펙 키워드)
+    var MAP=[['얼음정수기','정수기'],['정수기','정수기'],['연수기','연수기'],['비데','비데'],['공기청정기','공기청정기'],['청정기','공기청정기'],['제습기','제습기'],['가습기','가습기'],['음식물처리기','음식물처리기'],['음식물 처리기','음식물처리기'],['제빙기','제빙기'],['의류관리기','의류관리기'],['스타일러','의류관리기'],['식기세척기','식기세척기'],['인덕션','인덕션'],['전기레인지','인덕션'],['세탁기','세탁기'],['건조기','건조기'],['에어컨','에어컨'],['김치냉장고','냉장고'],['냉장고','냉장고'],['로봇청소기','청소기'],['청소기','청소기'],['안마의자','안마의자'],['매트리스','매트리스'],['침대','매트리스']];
+    var spec = (txt('.prod_table_wrap')+' '+nameTxt), category='';
+    for (var k=0;k<MAP.length;k++){ if(spec.indexOf(MAP[k][0])>=0){ category=MAP[k][1]; break; } }
+    if(!brand || !category) return; // 분류 불가 → 후기 미표시(다음 runAll 재시도)
+    window.__bjReviewsFetched = true;
+    if (document.getElementById('bj-reviews-root')) return;
+
+    bjRvInjectCss();
+    var root=document.createElement('div'); root.id='bj-reviews-root';
+    root.style.display='none';
+    topEl.parentNode.insertBefore(root, topEl.nextSibling);
+
+    var API='https://admin2-api.billyjo.co.kr/v1/reviews';
+    var shown=8, photoOnly=true, items=[];
+    function render(){
+      var withP=items.filter(function(r){return bjRvPhoto(r);});
+      var noP=items.filter(function(r){return !bjRvPhoto(r);});
+      var listSrc = photoOnly ? withP : withP.concat(noP);
+      if(!items.length){ root.style.display='none'; return; }
+      root.style.display='';
+      var an=BJ_RV_ANALYSIS[brand+'|'+category];
+      var avg=an?an.avg:(items.reduce(function(a,r){return a+(r.stars||5);},0)/items.length);
+      var h='';
+      h+='<div class="rv-summary"><div class="rv-score"><div class="big">'+avg.toFixed(1)+'<small>/5</small></div><div class="st">'+bjRvStars(avg)+'</div><div class="lbl">구매 만족도</div></div>';
+      if(an){ h+='<div class="rv-analysis"><div class="a-head">📊 빌리조 분석</div><div class="a-body">'+bjRvEsc(an.s)+'</div></div>'; }
+      h+='</div>';
+      if(withP.length){ h+='<div class="rv-photos-tit">📸 포토리뷰 <span>'+withP.length+'장</span></div><div class="rv-photos">';
+        withP.slice(0,20).forEach(function(r){ h+='<img loading="lazy" src="'+bjRvEsc(bjRvPhoto(r))+'" alt="포토리뷰" data-full="'+bjRvEsc(bjRvPhoto(r))+'">'; }); h+='</div>'; }
+      h+='<div class="rv-filter"><button data-f="1" class="'+(photoOnly?'on':'')+'">📷 포토리뷰만 ('+withP.length+')</button><button data-f="0" class="'+(photoOnly?'':'on')+'">전체 ('+items.length+')</button></div>';
+      h+='<div class="rv-list">';
+      listSrc.slice(0,shown).forEach(function(r){
+        var ph=bjRvPhoto(r), src=bjRvChannel(r.source,r.brand), persona=bjRvPersona(r.text);
+        h+='<div class="rv-card">';
+        if(ph) h+='<img class="rv-photo" loading="lazy" src="'+bjRvEsc(ph)+'" alt="후기사진" data-full="'+bjRvEsc(ph)+'">';
+        h+='<div class="rv-body"><div class="rv-stars">'+bjRvStars(r.stars)+'</div>'
+          +(persona?'<div><span class="rv-persona">'+bjRvEsc(persona)+'</span></div>':'')
+          +'<div class="rv-text">'+bjRvEsc(r.text)+'</div>'
+          +'<div class="rv-meta"><span class="rv-author">'+bjRvEsc(bjRvAuthor(r.author))+'</span><span class="rv-src">'+bjRvEsc(src)+'</span>'+(r.reviewed_at?'<span>· '+bjRvEsc(r.reviewed_at)+'</span>':'')+'</div></div></div>';
+      });
+      h+='</div>';
+      if(!listSrc.length) h+='<div class="rv-foot" style="text-align:center;padding:10px 0">사진 있는 후기가 아직 없어요. 전체를 눌러보세요.</div>';
+      if(listSrc.length>shown) h+='<div class="rv-more"><button id="bj-rv-more">후기 더 보기 ('+(listSrc.length-shown)+'+)</button></div>';
+      h+='<div class="rv-foot">※ 후기는 브랜드 공식 채널·다나와 등에서 수집했으며 각 후기에 출처를 표기합니다. 실제 구매 고객의 후기입니다.</div>';
+      root.innerHTML=h;
+      var lb=bjRvLightbox(), lbi=lb.querySelector('img');
+      Array.prototype.forEach.call(root.querySelectorAll('[data-full]'),function(im){ im.onclick=function(){ lbi.src=im.getAttribute('data-full'); lb.classList.add('on'); }; });
+      Array.prototype.forEach.call(root.querySelectorAll('.rv-filter button'),function(b){ b.onclick=function(){ photoOnly=b.getAttribute('data-f')==='1'; shown=8; render(); }; });
+      var mb=document.getElementById('bj-rv-more'); if(mb) mb.onclick=function(){ shown+=8; render(); };
+    }
+    function go(brandQ){
+      fetch(API+'?brand='+encodeURIComponent(brandQ)+'&category='+encodeURIComponent(category)+'&limit=80')
+        .then(function(r){return r.json();}).then(function(j){
+          items=(j&&j.items)||[];
+          if(!items.length && brandQ===brand){ root.style.display='none'; } // 후기 없으면 섹션 숨김
+          else render();
+        }).catch(function(){ root.style.display='none'; });
+    }
+    go(brand);
+  }
+
+  // ─────────────────────────────────────────────────────────────────────────
   // 2.z) 페이지 본문 정리 — AI 카드와 중복되는 .prod_table_wrap hide +
   //      #livePriceTable 컬럼 축소 (약정기간 + 최종 할인가만)
   //
@@ -6330,6 +6524,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     personalizePersonaIcons(); /* v0.5.59: 페르소나 카드 아이콘 (현재 1인·신혼 샘플) */
     arrangePersonaLevelMobile(); /* v0.5.61: 모바일에서 추천강도 라벨을 페르소나명 옆으로 */
     fetchAndInjectAICard();
+    fetchAndInjectReviews();   /* 고객 후기 섹션 — .prod_view_top 다음 */
     hideOriginalSpecsAndSimplifyLpt();
     setupBottomBarVisibility();
     injectNewlywedGnb();
