@@ -5738,16 +5738,33 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '청호나이스|매트리스':{avg:4.9,s:'단단한 지지력과 편안함에 만족하는 평이 많아요.'}
   };
   function bjRvIsOfficialSeller(n){ n=n||''; if(/공식\s*파트너|공식\s*(영업)?\s*대리점/.test(n)) return false; return /공식/.test(n); }
+  // 이상적 출처 표기 = 실제 채널을 구체적으로 (정확·다양·신뢰·준법)
   function bjRvChannel(s, brand){
     s=s||'';
     if(/다나와|쿠팡|에누리/.test(s)){
       var parts=s.split('·').map(function(x){return x.trim();});
       var seller=parts[parts.length-1]||'';
-      if(parts.length>=3 && bjRvIsOfficialSeller(seller)) return (brand?brand+' ':'')+'공식 판매채널';
-      var mall=parts[1]||(s.indexOf('쿠팡')>=0?'쿠팡':s.indexOf('에누리')>=0?'에누리':'다나와');
-      return (brand?brand+' · ':'')+mall;
+      if(parts.length>=3 && bjRvIsOfficialSeller(seller)) return (brand?brand+' ':'')+'공식스토어';
+      var mall=parts[1]||(s.indexOf('쿠팡')>=0?'쿠팡':s.indexOf('에누리')>=0?'에누리':'가격비교');
+      return mall; // 실제 몰명: 11번가 / G마켓 / 옥션 …
     }
-    return brand?brand+' 공식 판매채널':'브랜드 공식 판매채널';
+    if(/네이버/.test(s)) return '네이버 '+(brand?brand+' ':'')+'공식스토어';
+    return (brand?brand+' ':'')+'공식몰';
+  }
+  // 같은 출처 연속 3개 이상 방지(최대 2연속). 다른 출처 남아있을 때만 회피.
+  function bjRvSpread(arr){
+    var bk={}, order=[];
+    arr.forEach(function(x){ var k=bjRvChannel(x.source,x.brand); if(!bk[k]){bk[k]=[];order.push(k);} bk[k].push(x); });
+    var out=[], last=null, run=0;
+    while(out.length<arr.length){
+      var cands=order.filter(function(k){return bk[k].length;}).sort(function(a,b){return bk[b].length-bk[a].length;});
+      var pick=null;
+      for(var i=0;i<cands.length;i++){ if(!(cands[i]===last && run>=2)){ pick=cands[i]; break; } }
+      if(pick===null) pick=cands[0];
+      out.push(bk[pick].shift());
+      if(pick===last) run++; else { last=pick; run=1; }
+    }
+    return out;
   }
   function bjRvEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
   function bjRvStars(n){ n=Math.max(1,Math.min(5,Math.round(n||5))); return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n); }
@@ -5794,7 +5811,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       "#bj-reviews-root .rv-text{font-size:13.5px;line-height:1.6;color:#333;margin:6px 0 8px;word-break:break-word}",
       "#bj-reviews-root .rv-meta{font-size:11.5px;color:#99a;display:flex;gap:7px;flex-wrap:wrap;align-items:center;min-width:0}",
       "#bj-reviews-root .rv-author{color:#8a909a;font-weight:600}",
-      "#bj-reviews-root .rv-src{color:#c9ced6;font-weight:400;font-size:10.5px}",
+      "#bj-reviews-root .rv-srcbtn{font:inherit;font-size:10.5px;color:#9aa0aa;background:none;border:0;border-bottom:1px dotted #c4c9d2;padding:0 0 1px;cursor:pointer}",
+      "#bj-reviews-root .rv-srcbtn.shown{border-bottom:0;color:#aab0ba;cursor:default}",
       "#bj-reviews-root .rv-more{text-align:center;margin-top:16px}",
       "#bj-reviews-root .rv-more button{font:inherit;font-size:13px;padding:10px 22px;border-radius:9px;border:1px solid #e6e8ee;background:#fff;color:#444;cursor:pointer}",
       "#bj-reviews-root .rv-foot{font-size:11px;color:#aab;margin-top:14px;line-height:1.5}",
@@ -5845,7 +5863,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     function render(){
       var withP=items.filter(function(r){return bjRvPhoto(r);});
       var noP=items.filter(function(r){return !bjRvPhoto(r);});
-      var listSrc = photoOnly ? withP : withP.concat(noP);
+      var listSrc = photoOnly ? bjRvSpread(withP) : bjRvSpread(withP).concat(bjRvSpread(noP));
       if(!items.length){ root.style.display='none'; return; }
       root.style.display='';
       var an=BJ_RV_ANALYSIS[brand+'|'+category];
@@ -5865,7 +5883,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         h+='<div class="rv-body"><div class="rv-stars">'+bjRvStars(r.stars)+'</div>'
           +(persona?'<div><span class="rv-persona">'+bjRvEsc(persona)+'</span></div>':'')
           +'<div class="rv-text">'+bjRvEsc(r.text)+'</div>'
-          +'<div class="rv-meta"><span class="rv-author">'+bjRvEsc(bjRvAuthor(r.author))+'</span><span class="rv-src">'+bjRvEsc(src)+'</span>'+(r.reviewed_at?'<span>· '+bjRvEsc(r.reviewed_at)+'</span>':'')+'</div></div></div>';
+          +'<div class="rv-meta"><span class="rv-author">'+bjRvEsc(bjRvAuthor(r.author))+'</span><button class="rv-srcbtn" data-src="'+bjRvEsc(src)+'">출처 보기</button>'+(r.reviewed_at?'<span>· '+bjRvEsc(r.reviewed_at)+'</span>':'')+'</div></div></div>';
       });
       h+='</div>';
       if(!listSrc.length) h+='<div class="rv-foot" style="text-align:center;padding:10px 0">사진 있는 후기가 아직 없어요. 전체를 눌러보세요.</div>';
@@ -5873,6 +5891,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       h+='<div class="rv-foot">※ 후기는 브랜드 공식 채널·다나와 등에서 수집했으며 각 후기에 출처를 표기합니다. 실제 구매 고객의 후기입니다.</div>';
       root.innerHTML=h;
       var lb=bjRvLightbox(), lbi=lb.querySelector('img');
+      Array.prototype.forEach.call(root.querySelectorAll('.rv-srcbtn'),function(b){ b.onclick=function(){ if(b.classList.contains('shown')) return; b.textContent='출처: '+b.getAttribute('data-src'); b.classList.add('shown'); }; });
       Array.prototype.forEach.call(root.querySelectorAll('[data-full]'),function(im){ im.onclick=function(){ lbi.src=im.getAttribute('data-full'); lb.classList.add('on'); }; });
       Array.prototype.forEach.call(root.querySelectorAll('.rv-filter button'),function(b){ b.onclick=function(){ photoOnly=b.getAttribute('data-f')==='1'; shown=8; render(); }; });
       var mb=document.getElementById('bj-rv-more'); if(mb) mb.onclick=function(){ shown+=8; render(); };
