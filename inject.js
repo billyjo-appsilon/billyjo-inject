@@ -2504,6 +2504,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function escapeAttr(s) { return escapeHtml(s); }
 
   function requestConsult() {
+    if (bjPersonaNeedsGate()){ bjPersonaGate(function(){ requestConsult(); }); return; }
     injectStyle();
     showLoading();
     var ctx = detectProduct();
@@ -2515,6 +2516,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       productName: (oCtx && oCtx.productName) || ctx.productName
     };
     if (oCtx && oCtx.selection) payload.selection = oCtx.selection;
+    bjConsultExtras(payload);   // utm(광고 인구통계 코드) + 고객 페르소나 위저드 답변
     fetch(API_BASE + '/v1/consult/quick-assign', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -4035,6 +4037,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     /* v0.6.4: .gift-tag 뱃지 — 파란 배경 + 흰 글씨 */
     '#ai-card-root .gift-tag{ background:#0838f8 !important; color:#fff !important }',
 
+    /* v0.6.8: [예시 A] 섹션 헤더 아이콘 칩 + 페르소나 인라인 SVG 아이콘 */
+    '#ai-card-root .sec-t.bj-sx-done{ display:flex !important; align-items:center }',
+    '#ai-card-root .bj-sx-ic{ width:26px; height:26px; border-radius:8px; background:#e8edff; color:#0838f8; display:inline-flex; align-items:center; justify-content:center; margin-right:8px; flex:0 0 auto }',
+    '#ai-card-root .bj-sx-ic svg{ width:17px; height:17px; display:block }',
+    '#ai-card-root .bj-persona-ic{ width:40px; height:40px; border-radius:50%; background:#e8edff; color:#0838f8; display:inline-flex; align-items:center; justify-content:center; flex:0 0 auto }',
+    '#ai-card-root .bj-persona-ic svg{ width:22px; height:22px; display:block }',
+
     /* === v0.6.2: 글씨 크기 조절 컨트롤 — 우측 퀵버튼(.link) 묶음 위에 세로 스타일로 배치 === */
     '.new-qb .quick .link #bj-fs-ctrl{ display:flex; justify-content:center; margin:0 0 8px 0 }',
     '#bj-fs-ctrl .bj-fs-inner{ display:flex; flex-direction:column; align-items:center; gap:5px; background:#fff; border:1px solid #e6e8ee; border-radius:16px; padding:7px 5px; box-shadow:0 2px 8px rgba(0,0,0,.12) }',
@@ -4239,9 +4248,151 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     window.__bjAdmin2Warmed = true;
     var base = window.__bjConsultApiUrl || 'https://billyjo-admin2.vercel.app';
     try { fetch(base + '/health', { method: 'GET', mode: 'cors' }).catch(function(){}); } catch(_){}
+    try { bjFetchPersonaForm(); } catch(_){}   // 페르소나 폼 미리 받아두기(위저드 지연 제거)
   }
 
+  /* ── 고객 페르소나 위저드 (admin2 단일 소스 폼) ────────────────────────────
+     admin2 /v1/persona/form 에서 폼 정의를 받아 동일 렌더 → 답변을 quick-assign
+     personaInput 으로 전송. + 광고 URL의 utm_* 를 명시 전송(서버 Referer 폴백 보강).
+     상담 연결 직전 1회 노출, 건너뛰기 가능(절대 막지 않음).
+     비활성화: window.__bjPersonaWizardEnabled = false */
+  var BJ_PERSONA_FORM_CACHE = null;
+  function bjPersonaBase(){ return window.__bjConsultApiUrl || 'https://billyjo-admin2.vercel.app'; }
+
+  function bjReadUtm(){
+    try {
+      var q = new URLSearchParams(location.search), o = {}, ks = ['source','medium','campaign','content','term'];
+      for (var i = 0; i < ks.length; i++){ var v = q.get('utm_' + ks[i]); if (v) o[ks[i]] = v; }
+      return Object.keys(o).length ? o : null;
+    } catch(_){ return null; }
+  }
+  function bjGetPersonaInput(){
+    if (window.__bjPersonaInput) return window.__bjPersonaInput;
+    try { var s = sessionStorage.getItem('bj_persona_input'); if (s){ window.__bjPersonaInput = JSON.parse(s); return window.__bjPersonaInput; } } catch(_){}
+    return null;
+  }
+  function bjSetPersonaInput(obj){
+    window.__bjPersonaInput = obj;
+    try { sessionStorage.setItem('bj_persona_input', JSON.stringify(obj)); } catch(_){}
+  }
+  /* 두 quick-assign 페이로드에 utm + personaInput 첨부 (있을 때만) */
+  function bjConsultExtras(body){
+    try { var utm = bjReadUtm(); if (utm) body.utm = utm; } catch(_){}
+    try { var pi = bjGetPersonaInput(); if (pi) body.personaInput = pi; } catch(_){}
+    return body;
+  }
+  function bjFetchPersonaForm(){
+    if (BJ_PERSONA_FORM_CACHE) return Promise.resolve(BJ_PERSONA_FORM_CACHE);
+    return fetch(bjPersonaBase() + '/v1/persona/form', { mode: 'cors' })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ BJ_PERSONA_FORM_CACHE = (d && d.fields) || []; return BJ_PERSONA_FORM_CACHE; })
+      .catch(function(){ return []; });
+  }
+  /* 상담 진입 전 게이트 — 미수집·미스킵·활성 상태면 위저드, 아니면 즉시 proceed */
+  function bjPersonaNeedsGate(){
+    return window.__bjPersonaWizardEnabled !== false && !bjGetPersonaInput() && !window.__bjPersonaSkipped;
+  }
+  function bjPersonaGate(proceed){
+    if (!bjPersonaNeedsGate()){ proceed(); return; }
+    bjFetchPersonaForm().then(function(fields){
+      if (!fields || !fields.length){ window.__bjPersonaSkipped = true; proceed(); return; }
+      bjShowPersonaWizard(fields, function(answers){
+        if (answers && Object.keys(answers).length) bjSetPersonaInput(answers);
+        else window.__bjPersonaSkipped = true;
+        proceed();
+      });
+    });
+  }
+  function bjInjectPersonaStyles(){
+    if (document.getElementById('bjpw-style')) return;
+    var s = document.createElement('style'); s.id = 'bjpw-style';
+    s.textContent =
+      '.bjpw-back{position:fixed;inset:0;background:rgba(17,17,17,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px}' +
+      '.bjpw-box{background:#fff;border-radius:18px;max-width:420px;width:100%;max-height:86vh;overflow:auto;padding:20px 18px 16px;box-shadow:0 18px 50px rgba(0,0,0,.25);font-family:inherit}' +
+      '.bjpw-h{font-size:17px;font-weight:800;color:#1a1a1a}.bjpw-sub{font-size:12px;color:#888;margin:3px 0 14px}' +
+      '.bjpw-f{margin-bottom:16px}.bjpw-l{font-size:13.5px;font-weight:700;color:#333}.bjpw-l b{color:#e0492a}' +
+      '.bjpw-hint{font-size:11px;color:#aaa;margin:2px 0 7px}' +
+      '.bjpw-opts{display:flex;flex-wrap:wrap;gap:7px}' +
+      '.bjpw-chip{font-size:12.5px;padding:7px 13px;border-radius:999px;border:1.5px solid #e6e6e6;background:#fff;color:#555;cursor:pointer;transition:.12s}' +
+      '.bjpw-chip.on{border-color:#e0492a;background:#fff1ec;color:#c43c20;font-weight:700}' +
+      '.bjpw-ta{width:100%;min-height:58px;border:1.5px solid #e6e6e6;border-radius:12px;padding:9px 11px;font-size:13px;resize:vertical;box-sizing:border-box}' +
+      '.bjpw-ft{display:flex;gap:9px;margin-top:6px}' +
+      '.bjpw-skip{flex:0 0 auto;background:#f4f4f4;color:#888;border:0;border-radius:12px;padding:11px 14px;font-size:13px;cursor:pointer}' +
+      '.bjpw-go{flex:1;background:#e0492a;color:#fff;border:0;border-radius:12px;padding:11px;font-size:14px;font-weight:800;cursor:pointer}' +
+      '.bjpw-x{position:absolute;top:10px;right:14px;border:0;background:none;font-size:22px;color:#bbb;cursor:pointer;line-height:1}';
+    document.head.appendChild(s);
+  }
+  function bjShowPersonaWizard(fields, done){
+    bjInjectPersonaStyles();
+    var sel = {};
+    var back = document.createElement('div'); back.className = 'bjpw-back';
+    var box = document.createElement('div'); box.className = 'bjpw-box'; box.style.position = 'relative';
+    var html = '<button type="button" class="bjpw-x" aria-label="닫기">×</button>' +
+      '<div class="bjpw-h">🎯 60초 맞춤 진단</div>' +
+      '<div class="bjpw-sub">몇 가지만 알려주시면 상담사가 딱 맞는 제품을 추천해 드려요.</div>';
+    for (var i = 0; i < fields.length; i++){
+      var f = fields[i];
+      html += '<div class="bjpw-f" data-key="' + f.key + '" data-type="' + f.type + '">' +
+        '<div class="bjpw-l">' + bjpwEsc(f.label) + (f.required ? ' <b>*</b>' : '') + '</div>' +
+        (f.helpText ? '<div class="bjpw-hint">' + bjpwEsc(f.helpText) + '</div>' : '');
+      if (f.type === 'text'){
+        html += '<textarea class="bjpw-ta" placeholder="자유롭게 입력…"></textarea>';
+      } else {
+        html += '<div class="bjpw-opts">';
+        for (var j = 0; j < (f.options || []).length; j++){
+          html += '<button type="button" class="bjpw-chip" data-val="' + bjpwEsc(f.options[j]) + '">' + bjpwEsc(f.options[j]) + '</button>';
+        }
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    html += '<div class="bjpw-ft"><button type="button" class="bjpw-skip">건너뛰기</button>' +
+      '<button type="button" class="bjpw-go">상담 연결</button></div>';
+    box.innerHTML = html; back.appendChild(box); document.body.appendChild(back);
+
+    function finish(answers){ try { back.remove(); } catch(_){} done(answers); }
+    box.querySelector('.bjpw-x').addEventListener('click', function(){ finish(null); });
+    box.querySelector('.bjpw-skip').addEventListener('click', function(){ finish(null); });
+    back.addEventListener('click', function(e){ if (e.target === back) finish(null); });
+
+    // 칩 선택 (single=단일, multi=복수)
+    Array.prototype.forEach.call(box.querySelectorAll('.bjpw-f'), function(fEl){
+      var key = fEl.getAttribute('data-key'), type = fEl.getAttribute('data-type');
+      Array.prototype.forEach.call(fEl.querySelectorAll('.bjpw-chip'), function(chip){
+        chip.addEventListener('click', function(){
+          var val = chip.getAttribute('data-val');
+          if (type === 'multi'){
+            chip.classList.toggle('on');
+            var arr = sel[key] || [];
+            var k = arr.indexOf(val);
+            if (k >= 0) arr.splice(k, 1); else arr.push(val);
+            sel[key] = arr;
+          } else {
+            Array.prototype.forEach.call(fEl.querySelectorAll('.bjpw-chip'), function(c){ c.classList.remove('on'); });
+            chip.classList.add('on'); sel[key] = val;
+          }
+        });
+      });
+    });
+
+    box.querySelector('.bjpw-go').addEventListener('click', function(){
+      var out = {};
+      Array.prototype.forEach.call(box.querySelectorAll('.bjpw-f'), function(fEl){
+        var key = fEl.getAttribute('data-key'), type = fEl.getAttribute('data-type');
+        if (type === 'text'){
+          var t = (fEl.querySelector('.bjpw-ta').value || '').trim();
+          if (t) out[key] = t;
+        } else if (sel[key] != null && (!Array.isArray(sel[key]) || sel[key].length)){
+          out[key] = sel[key];
+        }
+      });
+      finish(out);
+    });
+  }
+  function bjpwEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
   function openConsultModal(){
+    if (bjPersonaNeedsGate()){ bjPersonaGate(function(){ openConsultModal(); }); return; }
     var prev = document.getElementById('bj-consult-modal');
     if (prev) prev.remove();
     var modal = document.createElement('div');
@@ -4390,6 +4541,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var body = { productId: prodId, productName: prodName && prodName.trim() };
     var sel = collectConsultSelection();
     if (sel) body.selection = sel;
+    bjConsultExtras(body);   // utm(광고 인구통계 코드) + 고객 페르소나 위저드 답변
     return _assignFetchOnce(base, body, 18000).catch(function(err){
       /* 1차 실패(주로 cold start 또는 일시 네트워크) → 1.5초 대기 후 재시도 — 두 번째는 더 짧은 timeout */
       return new Promise(function(resolve, reject){
@@ -6695,6 +6847,43 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     personaSec.parentNode.insertBefore(giftSec, personaSec);
   }
 
+  /* v0.6.8: [예시 A] AI 카드 시각 보강 — 섹션 헤더 아이콘 칩 + 페르소나 아이콘(인라인 SVG) 노출.
+     Tabler 폰트 미로드로 .ti 아이콘이 안 보이므로 인라인 SVG로 대체. 우선 canary(24578)에서만. */
+  var BJ_CARDX_ONLY = ['24578'];
+  var BJ_CARDX_ALL = false;
+  function applyAiCardExampleA(){
+    var m = location.pathname.match(/\/prod_view\/(\d+)/); var pid = m ? m[1] : '';
+    if (!BJ_CARDX_ALL && BJ_CARDX_ONLY.indexOf(pid) === -1) return;
+    var root = document.getElementById('ai-card-root'); if (!root) return;
+    function svg(inner){ return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + inner + '</svg>'; }
+    var GIFT = '<path d="M3 8m0 1a1 1 0 0 1 1 -1h16a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-16a1 1 0 0 1 -1 -1z" /><path d="M12 8l0 13" /><path d="M19 12v7a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2v-7" /><path d="M7.5 8a2.5 2.5 0 0 1 0 -5a4.8 8 0 0 1 4.5 5a4.8 8 0 0 1 4.5 -5a2.5 2.5 0 0 1 0 5" />';
+    var USERS = '<path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />';
+    var LIST = '<path d="M13 5h8" /><path d="M13 9h5" /><path d="M13 15h8" /><path d="M13 19h5" /><path d="M3 4m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" /><path d="M3 14m0 1a1 1 0 0 1 1 -1h2a1 1 0 0 1 1 1v2a1 1 0 0 1 -1 1h-2a1 1 0 0 1 -1 -1z" />';
+    var CAL = '<path d="M4 7a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v12a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12z" /><path d="M16 3v4" /><path d="M8 3v4" /><path d="M4 11h16" /><path d="M11 15h1" /><path d="M12 15v3" />';
+    var INFO = '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M12 9h.01" /><path d="M11 12h1v4h1" />';
+    var SEC = [ [/지원금|혜택/, GIFT], [/추천|이런\s*분/, USERS], [/스펙/, LIST], [/약정|카드|할인/, CAL], [/기본|설치|정보/, INFO] ];
+    root.querySelectorAll('.sec-t').forEach(function(t){
+      if (t.getAttribute('data-bj-sx')) return;
+      var txt = t.textContent || '', ic = INFO;
+      for (var i = 0; i < SEC.length; i++){ if (SEC[i][0].test(txt)){ ic = SEC[i][1]; break; } }
+      var sp = document.createElement('span'); sp.className = 'bj-sx-ic'; sp.innerHTML = svg(ic);
+      t.insertBefore(sp, t.firstChild); t.classList.add('bj-sx-done'); t.setAttribute('data-bj-sx', '1');
+    });
+    // 페르소나 아이콘 — 안 보이는 .ti <i>를 인라인 SVG 원형으로 교체
+    var UHEART = '<path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h2" /><path d="M18 22l3.35 -3.35a2.1 2.1 0 0 0 -2.97 -2.97l-.38 .39l-.39 -.39a2.1 2.1 0 0 0 -2.97 2.97l3.35 3.35z" />';
+    var HOME = '<path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />';
+    var DROP = '<path d="M6.8 11a6 6 0 1 0 10.4 0l-5.2 -7l-5.2 7z" />';
+    var USER = '<path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />';
+    root.querySelectorAll('.p .p-top i').forEach(function(el){
+      var cls = el.className || '', path = USER;
+      if (/user-heart/.test(cls)) path = UHEART;
+      else if (/home|building|cottage/.test(cls)) path = HOME;
+      else if (/droplet/.test(cls)) path = DROP;
+      var sp = document.createElement('span'); sp.className = 'bj-persona-ic'; sp.innerHTML = svg(path);
+      el.parentNode.replaceChild(sp, el);
+    });
+  }
+
   function runAll(){
     injectCSS();
     tagHeaderDom();
@@ -6708,6 +6897,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     arrangePersonaLevelMobile(); /* v0.5.61: 모바일에서 추천강도 라벨을 페르소나명 옆으로 */
     fetchAndInjectAICard();
     moveGiftBeforePersona();   /* v0.6.5: 지원금 섹션을 페르소나 섹션 앞으로 (24578 미리보기) */
+    applyAiCardExampleA();     /* v0.6.8: [예시 A] 섹션 헤더 아이콘 + 페르소나 SVG 아이콘 (24578 미리보기) */
     mountFontSizer();          /* v0.6.1: 글씨 크기 조절 컨트롤(돋보기 −/+) */
     fetchAndInjectReviews();   /* 고객 후기 섹션 — .prod_view_top 다음 */
     hideOriginalSpecsAndSimplifyLpt();
