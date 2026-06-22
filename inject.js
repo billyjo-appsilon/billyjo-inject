@@ -4032,6 +4032,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '}',
     /* 뱃지(파랑) 밑 본문의 강조 글씨까지 파랑이면 가독성 저하 → 강조는 진한 회색, 파랑은 뱃지/지원금값만 */
     '#ai-card-root .gift-v strong{ color:#2a2a2a !important }',
+    /* v0.6.3: 지원금 등 .gift-tag 뱃지 배경을 소유권 chip과 동일한 노란색으로 통일 */
+    '#ai-card-root .gift-tag{ background:#ffd000 !important; color:#3a2a00 !important; font-weight:800 !important }',
 
     /* === v0.6.2: 글씨 크기 조절 컨트롤 — 우측 퀵버튼(.link) 묶음 위에 세로 스타일로 배치 === */
     '.new-qb .quick .link #bj-fs-ctrl{ display:flex; justify-content:center; margin:0 0 8px 0 }',
