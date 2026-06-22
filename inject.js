@@ -5831,9 +5831,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     return lb;
   }
 
+  // 미리보기 게이트 — 이 상품번호에만 후기 섹션 노출. 전체 적용 시 빈 배열([])로 변경.
+  var BJ_RV_ONLY = ['24578'];
   function fetchAndInjectReviews(){
     if (window.__bjReviewsFetched) return;
-    if (!/\/prod_view\/\d+/.test(location.pathname||'')) return;
+    var __m = (location.pathname||'').match(/\/prod_view\/(\d+)/);
+    if (!__m) return;
+    if (BJ_RV_ONLY.length && BJ_RV_ONLY.indexOf(__m[1]) < 0) return; // 미리보기 대상 아님
     var topEl = document.querySelector('.prod_view_top');
     if (!topEl) return; // 페이지 미렌더 — 다음 runAll 재시도
     // 브랜드 추출 (스펙표 '브랜드' 행 → 없으면 제품명 첫 토큰)
