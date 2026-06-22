@@ -6706,8 +6706,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if(document.getElementById('bj-rv-list-style')) return;
     var st=document.createElement('style'); st.id='bj-rv-list-style';
     st.textContent=[
-      ".bj-rv-listbadge{position:absolute;left:6px;bottom:6px;display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.96);border:1px solid #e6e8ee;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;color:#0838F8;box-shadow:0 1px 2px rgba(0,0,0,.08);z-index:2;font-family:'Pretendard',sans-serif}",
-      ".bj-rv-listbadge .st{color:#ffb400}",
+      ".bj-rv-listbadge{position:absolute;left:8px;bottom:8px;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.97);border:1px solid #e6e8ee;border-radius:999px;padding:4px 11px;font-size:14px;line-height:1.2;font-weight:800;color:#0838F8;box-shadow:0 2px 5px rgba(0,0,0,.12);z-index:2;font-family:'Pretendard',sans-serif}",
+      ".bj-rv-listbadge .st{color:#ffb400;font-size:15px}",
       "#bj-rv-sort{display:flex;justify-content:flex-end;gap:6px;padding:8px 4px;font-family:'Pretendard',sans-serif}",
       "#bj-rv-sort button{font:inherit;font-size:12px;padding:6px 13px;border:1px solid #e6e8ee;border-radius:999px;background:#fff;color:#555;cursor:pointer}",
       "#bj-rv-sort button.on{background:#0838F8;border-color:#0838F8;color:#fff;font-weight:700}"
