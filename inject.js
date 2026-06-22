@@ -4025,9 +4025,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '  }',
     '  #ai-card-root .gift-v{',
     '    text-align:left !important; width:100%; font-size:16px !important; line-height:1.6 !important;',
+    '    padding-left:10px !important;',  /* 뱃지 글자(좌측 padding 10px)와 좌측 정렬 */
     '  }',
+    '  #ai-card-root .gift-db{ padding-left:10px !important }',  /* 지원금 값도 뱃지 글자에 맞춰 정렬 */
     '  #ai-card-root .gift-tag{ font-size:16px !important }',
     '}',
+    /* 뱃지(파랑) 밑 본문의 강조 글씨까지 파랑이면 가독성 저하 → 강조는 진한 회색, 파랑은 뱃지/지원금값만 */
+    '#ai-card-root .gift-v strong{ color:#2a2a2a !important }',
 
     /* === v0.6.0: AI 자동생성카드 본문 글씨 전체 +1px 확대 (고객 가독성) + 지원금 섹션 크기 통일 ===
        폭/패딩은 건드리지 않고 font-size만 올려 모바일 가로 넘침 방지 (룰북 #32). */
@@ -4036,13 +4040,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     /* 14px 그룹 (기존 12.5~13.5 → +1) */
     '#ai-card-root .sec-t, #ai-card-root .a-head, #ai-card-root .a-body, #ai-card-root .sv, #ai-card-root .step-h, #ai-card-root .step-title, #ai-card-root .rv-photos-tit, #ai-card-root .rv-text{ font-size:14px !important }',
     /* 13px 그룹 (기존 11.5~12 → +1) */
-    '#ai-card-root .meta, #ai-card-root .field-l, #ai-card-root .ml, #ai-card-root .model-num, #ai-card-root .grade-badge, #ai-card-root .rt-l, #ai-card-root .rt-r, #ai-card-root .rt-v, #ai-card-root .strength-chip, #ai-card-root .step-sum, #ai-card-root .help, #ai-card-root .help summary, #ai-card-root .rec-p-title, #ai-card-root .rv-author, #ai-card-root .rv-meta, #ai-card-root .rv-persona, #ai-card-root .rv-fallback, #ai-card-root .bj-lpt-note{ font-size:13px !important }',
+    '#ai-card-root .meta, #ai-card-root .field-l, #ai-card-root .ml, #ai-card-root .model-num, #ai-card-root .grade-badge, #ai-card-root .rt-l, #ai-card-root .rt-r, #ai-card-root .rt-v, #ai-card-root .strength-chip, #ai-card-root .step-sum, #ai-card-root .help, #ai-card-root .help summary, #ai-card-root .rec-p-title, #ai-card-root .rv-meta, #ai-card-root .rv-persona, #ai-card-root .rv-fallback, #ai-card-root .bj-lpt-note{ font-size:13px !important }',
     /* 12px 그룹 (기존 10.5~11 → +1) */
     '#ai-card-root .lbl, #ai-card-root .sl, #ai-card-root .pill, #ai-card-root .p-d, #ai-card-root .feat-btn, #ai-card-root .step-n, #ai-card-root .rec-p-level-1, #ai-card-root .rec-p-level-2{ font-size:12px !important }',
     /* 15px 그룹 (기존 14 → +1): 별점 */
     '#ai-card-root .rv-stars, #ai-card-root .st{ font-size:15px !important }',
     /* 10.5px (기존 9 → +1.5): 후기 출처 푸터 */
-    '#ai-card-root .rv-foot{ font-size:10.5px !important }',
+    '#ai-card-root .rv-foot, #ai-card-root .rv-author{ font-size:10.5px !important }',
 
     /* === v0.5.0: .help-pop ⓘ 툴팁 — 전 페이지 어디서든 viewport 안에 들어오게 강제 ===
        (이전 v0.3.5는 #ai-card-root 스코프 한정 + max-width:600px만 sheet 전환 → 601~900px에서 새는 문제 해결) */
@@ -5844,7 +5848,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       "#bj-reviews-root .rv-persona{display:inline-block;font-size:11.5px;font-weight:700;color:#0838F8;background:#eef3ff;border:1px solid #d6e0ff;border-radius:999px;padding:3px 11px;margin:5px 0 2px}",
       "#bj-reviews-root .rv-text{font-size:13.5px;line-height:1.6;color:#333;margin:6px 0 8px;word-break:break-word}",
       "#bj-reviews-root .rv-meta{font-size:11.5px;color:#99a;display:flex;gap:7px;flex-wrap:wrap;align-items:center;min-width:0}",
-      "#bj-reviews-root .rv-author{color:#8a909a;font-weight:600}",
+      "#bj-reviews-root .rv-author{color:#c4c9d2;font-weight:400}",
       "#bj-reviews-root .rv-srcbtn{font:inherit;font-size:10.5px;color:#9aa0aa;background:none;border:0;border-bottom:1px dotted #c4c9d2;padding:0 0 1px;cursor:pointer}",
       "#bj-reviews-root .rv-srcbtn.shown{border-bottom:0;color:#aab0ba;cursor:default}",
       "#bj-reviews-root .rv-more{text-align:center;margin-top:16px}",
