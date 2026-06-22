@@ -5845,7 +5845,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
 
   // 미리보기 게이트 — 이 상품번호에만 후기 섹션 노출. 전체 적용 시 빈 배열([])로 변경.
-  var BJ_RV_ONLY = ['24578'];
+  var BJ_RV_ONLY = []; // 전체 상품 적용 (빈 배열=모든 prod_view)
   function fetchAndInjectReviews(){
     if (window.__bjReviewsFetched) return;
     var __m = (location.pathname||'').match(/\/prod_view\/(\d+)/);
@@ -6684,7 +6684,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 (function(){
   var path = location.pathname || '';
   if (!/\/prod_list\//.test(path)) return;
-  var BJ_LIST_ONLY = /\/prod_list\/1-/;        // 미리보기 게이트(카테고리 1). 전체는 /\/prod_list\//
+  var BJ_LIST_ONLY = /\/prod_list\//;          // 전체 리스트 페이지 적용
   if (!BJ_LIST_ONLY.test(path)) return;
   var API = 'https://admin2-api.billyjo.co.kr/v1/reviews';
   var BMAP = {'SK':'SK매직','웰스':'교원웰스','교원':'교원웰스','청호':'청호나이스','LG구독':'LG','현대렌탈케어':'현대큐밍'};
@@ -6693,7 +6693,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function catOf(name){ name=name||''; for(var i=0;i<CMAP.length;i++){ if(name.indexOf(CMAP[i][0])>=0) return CMAP[i][1]; } return ''; }
   function extractModel(title){ var s=String(title||'').toUpperCase(); var c=s.match(/[A-Z]{2,}[A-Z0-9-]*[0-9][A-Z0-9-]*/g); if(!c) return null; var STOP=/^(LED|USB|BLDC|HEPA|UVC?|KC|AI|TV|PC|3D|2D|[0-9]+[LWGKMH]|V[0-9]+|NEW|HD|FHD|UHD)$/; var m=c.filter(function(x){return x.length>=4&&x.length<=30&&!STOP.test(x)&&/[0-9]/.test(x)&&/[A-Z]/.test(x);}); if(!m.length) return null; m.sort(function(a,b){return b.length-a.length;}); return m[0].replace(/[_].*$/,'').replace(/-$/,''); }
   function lineKey(m){ if(!m) return ''; var x=String(m).toUpperCase().match(/^([A-Z]+-?[0-9])/); return x?x[1]:String(m).toUpperCase().slice(0,4); }
-  var counts=null;
+  var counts=null, brandList=[];
+  // 카드 텍스트(제품명·모델·이미지alt)에서 알려진 브랜드 키워드 탐색 (제품명이 브랜드로 시작 안 할 때 보강)
+  function findBrand(text){ text=text||''; for(var i=0;i<brandList.length;i++){ if(text.indexOf(brandList[i])>=0) return brandList[i]; } return ''; }
   function countFor(brand, model, category){
     if(!counts) return null;
     if(model && counts.by_model[model]) return counts.by_model[model];
@@ -6718,11 +6720,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var items=document.querySelectorAll('.prod_list .item');
     Array.prototype.forEach.call(items, function(it){
       if(it.getAttribute('data-bj-rv')) return;
-      var be=it.querySelector('p.brand'), ne=it.querySelector('p.name');
+      var be=it.querySelector('p.brand'), ne=it.querySelector('p.name'), im=it.querySelector('img');
       // ⚠️ 이 리스트 카드는 p.brand에 모델코드, p.name에 제품명("코웨이 아이콘 V2 ...")이 들어감
       var modelTxt=be?(be.textContent||'').trim():'', name=ne?(ne.textContent||'').trim():'';
-      var brand=normBrand((name.split(/\s+/)[0]||''));  // 제품명 첫 토큰 = 브랜드
-      var c=countFor(brand, extractModel(modelTxt+' '+name), catOf(name));
+      var alt=im?(im.getAttribute('alt')||''):'';
+      // 브랜드: 제품명/이미지alt에서 알려진 브랜드 키워드 우선, 없으면 제품명 첫 토큰
+      var brand=normBrand(findBrand(name+' '+alt) || (name.split(/\s+/)[0]||''));
+      var c=countFor(brand, extractModel(modelTxt+' '+name), catOf(name+' '+alt));
       it.setAttribute('data-bj-rv','1');
       it.setAttribute('data-bj-rvn', c?c.n:0);
       if(!c) return;
@@ -6755,7 +6759,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     badges(); sortBar();
   }
   fetch(API+'/counts').then(function(r){return r.json();}).then(function(j){
-    counts=j; run();
+    counts=j;
+    // 브랜드 키워드 목록 = 후기 보유 브랜드(긴 이름 우선 매칭)
+    brandList=Object.keys(j.by_cat||{}).map(function(k){return k.split('|')[0];}).filter(function(v,i,a){return a.indexOf(v)===i;}).sort(function(a,b){return b.length-a.length;});
+    run();
     var n=0, iv=setInterval(function(){ run(); if(++n>12) clearInterval(iv); }, 500); // 지연 렌더 대비
   }).catch(function(){});
 })();
