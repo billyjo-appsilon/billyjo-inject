@@ -5805,6 +5805,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       "#bj-reviews-root .rv-analysis{flex:1 1 280px;min-width:0;background:linear-gradient(135deg,#eef3ff,#f7f9ff);border:1px solid #d6e0ff;border-radius:12px;padding:11px 13px}",
       "#bj-reviews-root .rv-analysis .a-head{font-size:12.5px;font-weight:800;color:#0838F8;margin-bottom:3px}",
       "#bj-reviews-root .rv-analysis .a-body{font-size:13px;color:#33405c;line-height:1.5;word-break:keep-all}",
+      "#bj-reviews-root .rv-fallback{font-size:12px;color:#5a4b1a;background:#fff8e1;border:1px solid #f3e2a8;border-radius:10px;padding:8px 12px;margin-bottom:12px;line-height:1.45}",
+      "#bj-reviews-root .rv-fallback b{color:#7a5d00}",
       "#bj-reviews-root .rv-photos-tit{font-size:13px;font-weight:800;margin:2px 0 9px}",
       "#bj-reviews-root .rv-photos-tit span{color:#667;font-weight:600;font-size:12px}",
       "#bj-reviews-root .rv-photos{display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:8px;-webkit-overflow-scrolling:touch}",
@@ -5885,7 +5887,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     (parent||topEl.parentNode).insertBefore(root, anchor);
 
     var API='https://admin2-api.billyjo.co.kr/v1/reviews';
-    var shown=8, photoOnly=true, items=[];
+    var shown=8, photoOnly=true, items=[], fallbackLevel=''; // ''=정확모델, 'line'=동일라인, 'brand'=브랜드폴백
     function render(){
       var withP=items.filter(function(r){return bjRvPhoto(r);});
       var noP=items.filter(function(r){return !bjRvPhoto(r);});
@@ -5898,6 +5900,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       h+='<div class="rv-summary"><div class="rv-score"><div class="big">'+avg.toFixed(1)+'<small>/5</small></div><div class="st">'+bjRvStars(avg)+'</div><div class="lbl">구매 만족도</div></div>';
       if(an){ h+='<div class="rv-analysis"><div class="a-head">📊 빌리조 분석</div><div class="a-body">'+bjRvEsc(an.s)+'</div></div>'; }
       h+='</div>';
+      if(fallbackLevel==='line'){ h+='<div class="rv-fallback">이 제품은 아직 등록된 후기가 없어, <b>같은 모델라인('+bjRvEsc(brand)+')</b>의 실제 후기를 보여드려요.</div>'; }
+      else if(fallbackLevel==='brand'){ h+='<div class="rv-fallback">이 제품은 아직 등록된 후기가 없어, <b>동일 브랜드('+bjRvEsc(brand)+')</b>의 유사 제품 후기를 보여드려요.</div>'; }
       if(withP.length){ h+='<div class="rv-photos-tit">📸 포토리뷰 <span>'+withP.length+'장</span></div><div class="rv-photos">';
         withP.slice(0,20).forEach(function(r){ h+='<img loading="lazy" src="'+bjRvEsc(bjRvPhoto(r))+'" alt="포토리뷰" data-full="'+bjRvEsc(bjRvPhoto(r))+'">'; }); h+='</div>'; }
       h+='<div class="rv-filter"><button data-f="1" class="'+(photoOnly?'on':'')+'">📷 포토리뷰만 ('+withP.length+')</button><button data-f="0" class="'+(photoOnly?'':'on')+'">전체 ('+items.length+')</button></div>';
@@ -5924,17 +5928,25 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var mb=document.getElementById('bj-rv-more'); if(mb) mb.onclick=function(){ shown+=8; render(); };
     }
     function fetchJson(qs){ return fetch(API+'?'+qs+'&limit=80').then(function(r){return r.json();}).then(function(j){return (j&&j.items)||[];}).catch(function(){return [];}); }
-    function fallbackCat(){
-      fetchJson('brand='+encodeURIComponent(brand)+'&category='+encodeURIComponent(category)).then(function(it){
-        items=it; if(!items.length){ root.style.display='none'; } else render();
+    // 모델 라인 키: 알파벳 접두 + 첫 숫자. 예 CHPI-7400N → 'CHPI-7' (아이콘 V2/V3/미니 묶음)
+    function lineKey(m){ if(!m) return ''; var x=String(m).toUpperCase().match(/^([A-Z]+-?[0-9])/); return x?x[1]:String(m).toUpperCase().slice(0,4); }
+    // 폴백: 1) 정확 모델 → 2) 동일 브랜드·동일 모델라인 → 3) 동일 브랜드+카테고리
+    function fallbackChain(){
+      fetchJson('brand='+encodeURIComponent(brand)+'&category='+encodeURIComponent(category)).then(function(pool){
+        if(!pool.length){ root.style.display='none'; return; }
+        if(model){
+          var lk=lineKey(model);
+          var line=pool.filter(function(r){ return r.model && lineKey(r.model)===lk; });
+          if(line.length){ items=line; fallbackLevel='line'; render(); return; }
+        }
+        items=pool; fallbackLevel='brand'; render();
       });
     }
-    // 1) 제품 단위(모델코드) 우선 → 2) 없으면 동일 브랜드+카테고리 폴백
     if(model){
       fetchJson('model='+encodeURIComponent(model)).then(function(it){
-        if(it.length){ items=it; render(); } else fallbackCat();
+        if(it.length){ items=it; fallbackLevel=''; render(); } else fallbackChain();
       });
-    } else fallbackCat();
+    } else fallbackChain();
   }
 
   // ─────────────────────────────────────────────────────────────────────────
