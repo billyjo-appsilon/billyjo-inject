@@ -6674,3 +6674,86 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     setTimeout(function(){ obs.disconnect(); }, 8000);
   }
 })();
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * [모듈 C] 제품 리스트 후기 수 뱃지 + 후기많은순 정렬 (prod_list 전용)
+ *   카운트는 우리 서버(admin2 /v1/reviews/counts)에서 직접 — 외부 의존 없음.
+ *   카드별 model→모델라인→브랜드+카테고리 순으로 후기 수 매칭. 999+ 캡.
+ *   ⚠️ 미리보기: 카테고리 1(prod_list/1-)에만. 전체 적용은 BJ_LIST_ONLY 비우기.
+ * ─────────────────────────────────────────────────────────────────────────── */
+(function(){
+  var path = location.pathname || '';
+  if (!/\/prod_list\//.test(path)) return;
+  var BJ_LIST_ONLY = /\/prod_list\/1-/;        // 미리보기 게이트(카테고리 1). 전체는 /\/prod_list\//
+  if (!BJ_LIST_ONLY.test(path)) return;
+  var API = 'https://admin2-api.billyjo.co.kr/v1/reviews';
+  var BMAP = {'SK':'SK매직','웰스':'교원웰스','교원':'교원웰스','청호':'청호나이스','LG구독':'LG','현대렌탈케어':'현대큐밍'};
+  var CMAP = [['얼음정수기','정수기'],['정수기','정수기'],['연수기','연수기'],['비데','비데'],['공기청정기','공기청정기'],['청정기','공기청정기'],['제습기','제습기'],['가습기','가습기'],['음식물처리기','음식물처리기'],['제빙기','제빙기'],['의류관리기','의류관리기'],['스타일러','의류관리기'],['식기세척기','식기세척기'],['인덕션','인덕션'],['전기레인지','인덕션'],['세탁기','세탁기'],['건조기','건조기'],['에어컨','에어컨'],['김치냉장고','냉장고'],['냉장고','냉장고'],['로봇청소기','청소기'],['청소기','청소기'],['안마의자','안마의자'],['매트리스','매트리스'],['침대','매트리스'],['노트북','노트북'],['TV','TV']];
+  function normBrand(b){ b=(b||'').trim(); return BMAP[b]||b; }
+  function catOf(name){ name=name||''; for(var i=0;i<CMAP.length;i++){ if(name.indexOf(CMAP[i][0])>=0) return CMAP[i][1]; } return ''; }
+  function extractModel(title){ var s=String(title||'').toUpperCase(); var c=s.match(/[A-Z]{2,}[A-Z0-9-]*[0-9][A-Z0-9-]*/g); if(!c) return null; var STOP=/^(LED|USB|BLDC|HEPA|UVC?|KC|AI|TV|PC|3D|2D|[0-9]+[LWGKMH]|V[0-9]+|NEW|HD|FHD|UHD)$/; var m=c.filter(function(x){return x.length>=4&&x.length<=30&&!STOP.test(x)&&/[0-9]/.test(x)&&/[A-Z]/.test(x);}); if(!m.length) return null; m.sort(function(a,b){return b.length-a.length;}); return m[0].replace(/[_].*$/,'').replace(/-$/,''); }
+  function lineKey(m){ if(!m) return ''; var x=String(m).toUpperCase().match(/^([A-Z]+-?[0-9])/); return x?x[1]:String(m).toUpperCase().slice(0,4); }
+  var counts=null;
+  function countFor(brand, model, category){
+    if(!counts) return null;
+    if(model && counts.by_model[model]) return counts.by_model[model];
+    if(model){ var lk=lineKey(model), n=0, sa=0; for(var k in counts.by_model){ if(lineKey(k)===lk){ n+=counts.by_model[k].n; sa+=counts.by_model[k].avg*counts.by_model[k].n; } } if(n) return {n:n, avg:Math.round(sa/n*10)/10}; }
+    if(category && counts.by_cat[brand+'|'+category]) return counts.by_cat[brand+'|'+category];
+    return null;
+  }
+  function cap(n){ return n>999?'999+':String(n); }
+  function injectCss(){
+    if(document.getElementById('bj-rv-list-style')) return;
+    var st=document.createElement('style'); st.id='bj-rv-list-style';
+    st.textContent=[
+      ".bj-rv-listbadge{position:absolute;left:6px;bottom:6px;display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.96);border:1px solid #e6e8ee;border-radius:999px;padding:2px 8px;font-size:11px;font-weight:700;color:#0838F8;box-shadow:0 1px 2px rgba(0,0,0,.08);z-index:2;font-family:'Pretendard',sans-serif}",
+      ".bj-rv-listbadge .st{color:#ffb400}",
+      "#bj-rv-sort{display:flex;justify-content:flex-end;gap:6px;padding:8px 4px;font-family:'Pretendard',sans-serif}",
+      "#bj-rv-sort button{font:inherit;font-size:12px;padding:6px 13px;border:1px solid #e6e8ee;border-radius:999px;background:#fff;color:#555;cursor:pointer}",
+      "#bj-rv-sort button.on{background:#0838F8;border-color:#0838F8;color:#fff;font-weight:700}"
+    ].join('');
+    document.head.appendChild(st);
+  }
+  function badges(){
+    var items=document.querySelectorAll('.prod_list .item');
+    Array.prototype.forEach.call(items, function(it){
+      if(it.getAttribute('data-bj-rv')) return;
+      var be=it.querySelector('p.brand'), ne=it.querySelector('p.name');
+      var brand=normBrand(be?be.textContent:''), name=ne?(ne.textContent||'').trim():'';
+      var c=countFor(brand, extractModel(name), catOf(name));
+      it.setAttribute('data-bj-rv','1');
+      it.setAttribute('data-bj-rvn', c?c.n:0);
+      if(!c) return;
+      var thumb=it.querySelector('.thumb')||it.querySelector('a')||it;
+      var cs=window.getComputedStyle(thumb); if(cs.position==='static') thumb.style.position='relative';
+      var b=document.createElement('span'); b.className='bj-rv-listbadge';
+      b.innerHTML='<span class="st">★</span>'+c.avg.toFixed(1)+' 후기 '+cap(c.n);
+      thumb.appendChild(b);
+    });
+  }
+  function sortBar(){
+    var list=document.querySelector('.prod_list'); if(!list||document.getElementById('bj-rv-sort')) return;
+    var bar=document.createElement('div'); bar.id='bj-rv-sort';
+    bar.innerHTML='<button data-s="0" class="on">기본순</button><button data-s="1">후기많은순</button>';
+    list.parentNode.insertBefore(bar, list);
+    Array.prototype.forEach.call(bar.querySelectorAll('button'), function(btn){
+      btn.onclick=function(){
+        Array.prototype.forEach.call(bar.children,function(c){c.className='';}); btn.className='on';
+        var items=Array.prototype.slice.call(document.querySelectorAll('.prod_list .item'));
+        if(!items.length) return; var parent=items[0].parentNode;
+        if(btn.getAttribute('data-s')==='1'){ items.sort(function(a,b){ return (+b.getAttribute('data-bj-rvn')||0)-(+a.getAttribute('data-bj-rvn')||0); }); }
+        else { items.sort(function(a,b){ return (+a.getAttribute('data-bj-order')||0)-(+b.getAttribute('data-bj-order')||0); }); }
+        items.forEach(function(it){ parent.appendChild(it); });
+      };
+    });
+  }
+  function run(){ if(!counts) return; injectCss();
+    // 원래 순서 보존
+    Array.prototype.forEach.call(document.querySelectorAll('.prod_list .item'), function(it,i){ if(!it.getAttribute('data-bj-order')) it.setAttribute('data-bj-order', i); });
+    badges(); sortBar();
+  }
+  fetch(API+'/counts').then(function(r){return r.json();}).then(function(j){
+    counts=j; run();
+    var n=0, iv=setInterval(function(){ run(); if(++n>12) clearInterval(iv); }, 500); // 지연 렌더 대비
+  }).catch(function(){});
+})();
