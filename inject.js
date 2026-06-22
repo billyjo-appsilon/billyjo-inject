@@ -1990,9 +1990,15 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           if (hasGift) {
             dbEls[i].textContent = rangeText;
             dbEls[i].style.color = '#0838f8';
-            dbEls[i].style.fontWeight = '700';
+            dbEls[i].style.fontWeight = '800';
+            dbEls[i].style.fontSize = '20px';
+            dbEls[i].style.lineHeight = '1.25';
             dbEls[i].style.border = '0';
             dbEls[i].style.background = 'transparent';
+            // 라벨 표현 교체: "예상 최대 지원금" → "AI분석 최대지원금"
+            var giftRow = (dbEls[i].closest && dbEls[i].closest('.gift-r')) || dbEls[i].parentNode;
+            var tag = giftRow && giftRow.querySelector ? giftRow.querySelector('.gift-tag') : null;
+            if (tag) tag.textContent = 'AI분석 최대지원금';
           } else {
             var row = (dbEls[i].closest && dbEls[i].closest('.gift-r')) || dbEls[i].parentNode;
             if (row) row.style.display = 'none';  // A-(가): 미매칭 행 숨김
