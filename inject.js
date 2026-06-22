@@ -5815,7 +5815,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       "#bj-reviews-root .rv-srcbtn.shown{border-bottom:0;color:#aab0ba;cursor:default}",
       "#bj-reviews-root .rv-more{text-align:center;margin-top:16px}",
       "#bj-reviews-root .rv-more button{font:inherit;font-size:13px;padding:10px 22px;border-radius:9px;border:1px solid #e6e8ee;background:#fff;color:#444;cursor:pointer}",
-      "#bj-reviews-root .rv-foot{font-size:11px;color:#aab;margin-top:14px;line-height:1.5}",
+      "#bj-reviews-root .rv-foot{font-size:10px;color:#c4c9d2;margin-top:14px;line-height:1.5}",
       "#bj-rv-lb{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;z-index:100000;padding:20px}",
       "#bj-rv-lb.on{display:flex}",
       "#bj-rv-lb img{max-width:100%;max-height:90vh;border-radius:8px}",
