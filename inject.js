@@ -6874,16 +6874,35 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var sp = document.createElement('span'); sp.className = 'bj-sx-ic'; sp.innerHTML = svg(ic);
       t.insertBefore(sp, t.firstChild); t.classList.add('bj-sx-done'); t.setAttribute('data-bj-sx', '1');
     });
-    // 페르소나 아이콘 — 안 보이는 .ti <i>를 인라인 SVG 원형으로 교체
+    // 페르소나 아이콘 — 제목·설명 내용에 맞는 인라인 SVG로 교체(서로 구분되게)
     var UHEART = '<path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h2" /><path d="M18 22l3.35 -3.35a2.1 2.1 0 0 0 -2.97 -2.97l-.38 .39l-.39 -.39a2.1 2.1 0 0 0 -2.97 2.97l3.35 3.35z" />';
+    var USERS = '<path d="M9 7m-4 0a4 4 0 1 0 8 0a4 4 0 1 0 -8 0" /><path d="M3 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /><path d="M21 21v-2a4 4 0 0 0 -3 -3.85" />';
     var HOME = '<path d="M5 12l-2 0l9 -9l9 9l-2 0" /><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" /><path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />';
     var DROP = '<path d="M6.8 11a6 6 0 1 0 10.4 0l-5.2 -7l-5.2 7z" />';
+    var COIN = '<path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" /><path d="M14.8 9a2 2 0 0 0 -1.8 -1h-2a2 2 0 0 0 0 4h2a2 2 0 1 1 0 4h-2a2 2 0 0 1 -1.8 -1" /><path d="M12 7v1m0 8v1" />';
+    var SHIELD = '<path d="M12 3a12 12 0 0 0 8.5 3a12 12 0 0 1 -8.5 15a12 12 0 0 1 -8.5 -15a12 12 0 0 0 8.5 -3" /><path d="M9 12l2 2l4 -4" />';
+    var BRIEF = '<path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" /><path d="M3 13a20 20 0 0 0 18 0" /><path d="M12 12v.01" />';
+    var GEAR = '<path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />';
     var USER = '<path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />';
+    var PMAP = [
+      [/가족|3\s*-?\s*4\s*인|패밀리|식구|육아|아이|키즈|맘/, USERS],
+      [/신혼|커플/, UHEART],
+      [/오피스|사무|직장|회사|업무/, BRIEF],
+      [/시니어|노년|부모|어르신|실버/, UHEART],
+      [/가성비|합리|가격|절약|저렴|경제|부담/, COIN],
+      [/정수|물맛|음용|미네랄|직수/, DROP],
+      [/신뢰|브랜드|a\/?s|내구|품질|안심|검증/, SHIELD],
+      [/좁|컴팩트|소형|원룸|미니|공간|슬림/, HOME],
+      [/셀프|자가관리|위생|필터|청결|관리/, GEAR],
+      [/1인|자취|혼자/, UHEART]
+    ];
     root.querySelectorAll('.p .p-top i').forEach(function(el){
-      var cls = el.className || '', path = USER;
-      if (/user-heart/.test(cls)) path = UHEART;
-      else if (/home|building|cottage/.test(cls)) path = HOME;
-      else if (/droplet/.test(cls)) path = DROP;
+      var card = el.closest ? el.closest('.p') : null;
+      var tEl = card ? card.querySelector('.rec-p-title') : null;
+      var dEl = card ? card.querySelector('.p-d') : null;
+      var txt = ((tEl ? tEl.textContent : '') + ' ' + (dEl ? dEl.textContent : '')).toLowerCase();
+      var path = USER;
+      for (var k = 0; k < PMAP.length; k++){ if (PMAP[k][0].test(txt)){ path = PMAP[k][1]; break; } }
       var sp = document.createElement('span'); sp.className = 'bj-persona-ic'; sp.innerHTML = svg(path);
       el.parentNode.replaceChild(sp, el);
     });
