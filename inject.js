@@ -5901,7 +5901,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       h+='</div>';
       if(!listSrc.length) h+='<div class="rv-foot" style="text-align:center;padding:10px 0">사진 있는 후기가 아직 없어요. 전체를 눌러보세요.</div>';
       if(listSrc.length>shown) h+='<div class="rv-more"><button id="bj-rv-more">후기 더 보기 ('+(listSrc.length-shown)+'+)</button></div>';
-      h+='<div class="rv-foot">후기는 공식 판매처·오픈마켓 등 실제 구매처에서 수집한 고객 리뷰입니다.</div>';
+      var __allOff = items.every(function(r){ return /공식/.test(bjRvChannel(r.source, r.brand)); });
+      h+='<div class="rv-foot">'+(__allOff?'실제 브랜드 공식몰, 공식판매처 고객들이 작성한 리뷰입니다.':'후기는 공식 판매처·오픈마켓 등 실제 구매처에서 수집한 고객 리뷰입니다.')+'</div>';
       root.innerHTML=h;
       var lb=bjRvLightbox(), lbi=lb.querySelector('img');
       Array.prototype.forEach.call(root.querySelectorAll('.rv-srcbtn'),function(b){ b.onclick=function(){ if(b.classList.contains('shown')) return; b.textContent='출처: '+b.getAttribute('data-src'); b.classList.add('shown'); }; });
