@@ -4033,17 +4033,15 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     /* 뱃지(파랑) 밑 본문의 강조 글씨까지 파랑이면 가독성 저하 → 강조는 진한 회색, 파랑은 뱃지/지원금값만 */
     '#ai-card-root .gift-v strong{ color:#2a2a2a !important }',
 
-    /* === v0.6.1: 글씨 크기 조절 컨트롤 (돋보기 −/+, Tabler 아이콘 패밀리와 통일) === */
-    '#ai-card-root{ position:relative }',
-    '#bj-fs-ctrl{ position:sticky; top:8px; z-index:40; display:flex; justify-content:flex-end; margin:0 0 -34px 0; pointer-events:none }',
-    '#bj-fs-ctrl .bj-fs-inner{ pointer-events:auto; display:inline-flex; align-items:center; gap:2px; background:rgba(255,255,255,.96); border:1px solid #e6e8ee; border-radius:999px; padding:3px 5px; box-shadow:0 2px 7px rgba(0,0,0,.12); backdrop-filter:saturate(1.4) blur(2px) }',
-    '#bj-fs-ctrl .bj-fs-lab{ font-size:11px; font-weight:700; color:#8a909a; display:inline-flex; align-items:center; padding:0 3px; letter-spacing:-0.2px }',
-    '#bj-fs-ctrl .bj-fs-btn{ display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; padding:0; border:0; background:transparent; color:#0838f8; cursor:pointer; border-radius:50%; line-height:1; transition:background .12s }',
-    '#bj-fs-ctrl .bj-fs-btn svg{ width:20px; height:20px; display:block }',
-    '#bj-fs-ctrl .bj-fs-btn:hover{ background:#e8edff }',
-    '#bj-fs-ctrl .bj-fs-btn:active{ transform:scale(.92) }',
-    '#bj-fs-ctrl .bj-fs-btn[disabled]{ color:#cfd3db; cursor:default; background:transparent }',
-    '@media (max-width:600px){ #bj-fs-ctrl{ margin-bottom:-32px } #bj-fs-ctrl .bj-fs-btn{ width:30px; height:30px } #bj-fs-ctrl .bj-fs-btn svg{ width:21px; height:21px } }',
+    /* === v0.6.2: 글씨 크기 조절 컨트롤 — 우측 퀵버튼(.link) 묶음 위에 세로 스타일로 배치 === */
+    '.new-qb .quick .link #bj-fs-ctrl{ display:flex; justify-content:center; margin:0 0 8px 0 }',
+    '#bj-fs-ctrl .bj-fs-inner{ display:flex; flex-direction:column; align-items:center; gap:5px; background:#fff; border:1px solid #e6e8ee; border-radius:16px; padding:7px 5px; box-shadow:0 2px 8px rgba(0,0,0,.12) }',
+    '#bj-fs-ctrl .bj-fs-lab{ font-size:10px; font-weight:700; color:#8a909a; line-height:1; letter-spacing:-0.3px }',
+    '#bj-fs-ctrl .bj-fs-btn{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; padding:0; border:0; background:#f2f5ff; color:#0838f8; cursor:pointer; border-radius:50%; line-height:1; transition:background .12s, transform .1s }',
+    '#bj-fs-ctrl .bj-fs-btn svg{ width:21px; height:21px; display:block }',
+    '#bj-fs-ctrl .bj-fs-btn:hover{ background:#e0e8ff }',
+    '#bj-fs-ctrl .bj-fs-btn:active{ transform:scale(.9) }',
+    '#bj-fs-ctrl .bj-fs-btn[disabled]{ color:#cfd3db; background:#f5f6f8; cursor:default }',
 
     /* === v0.6.0: AI 자동생성카드 본문 글씨 전체 +1px 확대 (고객 가독성) + 지원금 섹션 크기 통일 ===
        폭/패딩은 건드리지 않고 font-size만 올려 모바일 가로 넘침 방지 (룰북 #32). */
@@ -6636,8 +6634,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     }
   }
   function mountFontSizer(){
-    var root = document.getElementById('ai-card-root'); if (!root) return;
-    if (!document.getElementById('bj-fs-ctrl')){
+    // 컨트롤은 우측 퀵버튼(.link) 묶음 맨 위에 세로로 배치. 글씨 스케일 대상은 #ai-card-root.
+    var link = document.querySelector('.new-qb .quick .link');
+    if (link && !document.getElementById('bj-fs-ctrl')){
       // Tabler 폰트 미로드 환경 대비 — 동일 라인 스타일의 인라인 SVG 돋보기(−/+)
       var svgHead = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
       var zoomBase = '<path d="M10 10m-7 0a7 7 0 1 0 14 0a7 7 0 1 0 -14 0" /><path d="M21 21l-6 -6" /><path d="M7 10l6 0" />';
@@ -6645,11 +6644,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var zoomIn  = svgHead + zoomBase + '<path d="M10 7l0 6" /></svg>';  // 돋보기 +
       var c = document.createElement('div'); c.id = 'bj-fs-ctrl';
       c.innerHTML = '<div class="bj-fs-inner">'
-        + '<button class="bj-fs-btn" data-d="-1" type="button" aria-label="글씨 작게">' + zoomOut + '</button>'
+        + '<button class="bj-fs-btn" data-d="1" type="button" aria-label="글씨 크게">' + zoomIn + '</button>'   // ＋ 위
         + '<span class="bj-fs-lab">글씨</span>'
-        + '<button class="bj-fs-btn" data-d="1" type="button" aria-label="글씨 크게">' + zoomIn + '</button>'
+        + '<button class="bj-fs-btn" data-d="-1" type="button" aria-label="글씨 작게">' + zoomOut + '</button>' // − 아래
         + '</div>';
-      root.insertBefore(c, root.firstChild);
+      link.insertBefore(c, link.firstChild);  // 상담 버튼들 위
       c.addEventListener('click', function(e){
         var b = e.target.closest ? e.target.closest('.bj-fs-btn') : null; if (!b) return;
         var step = Math.max(BJ_FS_MIN, Math.min(BJ_FS_MAX, bjFsGet() + parseInt(b.getAttribute('data-d'), 10)));
