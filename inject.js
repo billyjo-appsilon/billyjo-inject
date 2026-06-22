@@ -5988,6 +5988,32 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
   function bjRvAuthor(a){ a=(a==null?'':String(a)).trim(); if(!a) return '익명고객'; if(a.indexOf('*')>=0) return a; return a.slice(0, a.length<=2?1:2)+'***'; }
 
+  /* v0.7.0: 제품 페르소나('이런 분에게 추천해요')와 일치하는 후기를 앞으로 정렬 + 태그.
+     prodRe=카드 페르소나 제목 매칭, rvRe=후기 본문 매칭. 둘 다 충족 시 해당 후기를 '추천 대상'으로 본다. */
+  var BJ_RV_CONCEPTS = [
+    { key:'신혼·부부', prodRe:/신혼|부부|커플/, rvRe:/신혼|혼수|결혼|부부|남편|아내|와이프|예단/ },
+    { key:'1인가구', prodRe:/1인|자취|혼자|원룸/, rvRe:/혼자|자취|원룸|1인|혼자살/ },
+    { key:'가족', prodRe:/가족|패밀리|식구|3\s*-?\s*4\s*인|아이|키즈|육아/, rvRe:/아이|육아|아기|유아|가족|식구|애기|어린이|신생아|이유식|분유/ },
+    { key:'사업장', prodRe:/오피스|사무|매장|업소|사업|영업|직장|회사|업무/, rvRe:/사무실|매장|카페|업소|회사|사업장|가게|영업장|직원/ },
+    { key:'시니어·부모', prodRe:/시니어|노년|부모|어르신|실버/, rvRe:/부모님|어머니|아버지|효도|선물해|선물로|어르신/ },
+    { key:'반려가구', prodRe:/반려|펫|강아지|고양이/, rvRe:/강아지|고양이|반려|냥이|댕댕|반려견|반려묘/ }
+  ];
+  function bjRvProductConcepts(){
+    var out=[], titles=document.querySelectorAll('#ai-card-root .persona .rec-p-title');
+    if(!titles.length) return out;
+    var all=''; for(var i=0;i<titles.length;i++){ all += ' ' + (titles[i].textContent||''); }
+    BJ_RV_CONCEPTS.forEach(function(c){ if(c.prodRe.test(all)) out.push(c); });
+    return out;
+  }
+  function bjRvMatchPersona(text, cons){
+    text=text||''; for(var i=0;i<cons.length;i++){ if(cons[i].rvRe.test(text)) return cons[i].key; } return '';
+  }
+  function bjRvFloatMatched(arr, cons){
+    if(!cons.length) return arr;
+    var m=[], r=[]; arr.forEach(function(x){ (bjRvMatchPersona(x.text, cons)?m:r).push(x); });
+    return m.concat(r);
+  }
+
   function bjRvInjectCss(){
     if (document.getElementById('bj-rv-style')) return;
     var st=document.createElement('style'); st.id='bj-rv-style';
@@ -6019,6 +6045,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       "#bj-reviews-root .rv-body{flex:1 1 auto;min-width:0}",
       "#bj-reviews-root .rv-stars{color:#ffb400;font-size:14px;letter-spacing:1px}",
       "#bj-reviews-root .rv-persona{display:inline-block;font-size:11.5px;font-weight:700;color:#0838F8;background:#eef3ff;border:1px solid #d6e0ff;border-radius:999px;padding:3px 11px;margin:5px 0 2px}",
+      "#bj-reviews-root .rv-persona.rv-persona-match{color:#fff;background:#0838F8;border-color:#0838F8}",
       "#bj-reviews-root .rv-text{font-size:13.5px;line-height:1.6;color:#333;margin:6px 0 8px;word-break:break-word}",
       "#bj-reviews-root .rv-meta{font-size:11.5px;color:#99a;display:flex;gap:7px;flex-wrap:wrap;align-items:center;min-width:0}",
       "#bj-reviews-root .rv-author{color:#c4c9d2;font-weight:400}",
@@ -6089,7 +6116,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     function render(){
       var withP=items.filter(function(r){return bjRvPhoto(r);});
       var noP=items.filter(function(r){return !bjRvPhoto(r);});
-      var listSrc = photoOnly ? bjRvSpread(withP) : bjRvSpread(withP).concat(bjRvSpread(noP));
+      var prodCon=bjRvProductConcepts();  // 제품이 타깃하는 페르소나 개념
+      // 페르소나 일치 후기를 각 그룹 앞으로 (포토리뷰 우선 구조는 유지)
+      var listSrc = photoOnly ? bjRvFloatMatched(bjRvSpread(withP), prodCon)
+                              : bjRvFloatMatched(bjRvSpread(withP), prodCon).concat(bjRvFloatMatched(bjRvSpread(noP), prodCon));
+      var galleryP = bjRvFloatMatched(withP, prodCon);  // 갤러리 썸네일도 일치 페르소나 먼저
       if(!items.length){ root.style.display='none'; return; }
       root.style.display='';
       var an=BJ_RV_ANALYSIS[brand+'|'+category];
@@ -6101,15 +6132,17 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if(fallbackLevel==='line'){ h+='<div class="rv-fallback">이 제품은 아직 등록된 후기가 없어, <b>같은 모델라인('+bjRvEsc(brand)+')</b>의 실제 후기를 보여드려요.</div>'; }
       else if(fallbackLevel==='brand'){ h+='<div class="rv-fallback">이 제품은 아직 등록된 후기가 없어, <b>동일 브랜드('+bjRvEsc(brand)+')</b>의 유사 제품 후기를 보여드려요.</div>'; }
       if(withP.length){ h+='<div class="rv-photos-tit">📸 포토리뷰 <span>'+withP.length+'장</span></div><div class="rv-photos">';
-        withP.slice(0,20).forEach(function(r){ h+='<img loading="lazy" src="'+bjRvEsc(bjRvPhoto(r))+'" alt="포토리뷰" data-full="'+bjRvEsc(bjRvPhoto(r))+'">'; }); h+='</div>'; }
+        galleryP.slice(0,20).forEach(function(r){ h+='<img loading="lazy" src="'+bjRvEsc(bjRvPhoto(r))+'" alt="포토리뷰" data-full="'+bjRvEsc(bjRvPhoto(r))+'">'; }); h+='</div>'; }
       h+='<div class="rv-filter"><button data-f="1" class="'+(photoOnly?'on':'')+'">📷 포토리뷰만 ('+withP.length+')</button><button data-f="0" class="'+(photoOnly?'':'on')+'">전체 ('+items.length+')</button></div>';
       h+='<div class="rv-list">';
       listSrc.slice(0,shown).forEach(function(r){
-        var ph=bjRvPhoto(r), src=bjRvChannel(r.source,r.brand), persona=bjRvPersona(r.text);
+        var ph=bjRvPhoto(r), src=bjRvChannel(r.source,r.brand);
+        var mp=bjRvMatchPersona(r.text, prodCon);              // 제품 페르소나와 일치하면 그 라벨
+        var persona=mp||bjRvPersona(r.text);                   // 일치 우선, 아니면 일반 추론
         h+='<div class="rv-card">';
         if(ph) h+='<img class="rv-photo" loading="lazy" src="'+bjRvEsc(ph)+'" alt="후기사진" data-full="'+bjRvEsc(ph)+'">';
         h+='<div class="rv-body"><div class="rv-stars">'+bjRvStars(r.stars)+'</div>'
-          +(persona?'<div><span class="rv-persona">'+bjRvEsc(persona)+'</span></div>':'')
+          +(persona?'<div><span class="rv-persona'+(mp?' rv-persona-match':'')+'">'+(mp?'✓ ':'')+bjRvEsc(persona)+(mp?' 추천 대상':'')+'</span></div>':'')
           +'<div class="rv-text">'+bjRvEsc(r.text)+'</div>'
           +'<div class="rv-meta"><span class="rv-author">'+bjRvEsc(src)+' 구매자 후기(출처)</span>'+(r.reviewed_at?'<span>· '+bjRvEsc(r.reviewed_at)+'</span>':'')+'</div></div></div>';
       });
