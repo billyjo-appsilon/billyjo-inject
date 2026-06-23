@@ -5939,13 +5939,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   // 이상적 출처 표기 = 실제 채널을 구체적으로 (정확·다양·신뢰·준법)
   function bjRvChannel(s, brand){
     s=s||'';
-    if(/다나와|쿠팡|에누리/.test(s)){
-      var parts=s.split('·').map(function(x){return x.trim();});
-      var seller=parts[parts.length-1]||'';
-      if(parts.length>=3 && bjRvIsOfficialSeller(seller)) return (brand?brand+' ':'')+'공식스토어';
-      var mall=parts[1]||(s.indexOf('쿠팡')>=0?'쿠팡':s.indexOf('에누리')>=0?'에누리':'가격비교');
-      return mall; // 실제 몰명: 11번가 / G마켓 / 옥션 …
-    }
+    // v0.7.1: 출처 표기 통일 — 다나와/쿠팡/몰명 등 구분 없이 현재 후기 노출 방식(브랜드+공식 채널)으로 통일.
     if(/네이버/.test(s)) return (brand?brand+' ':'')+'네이버 공식스토어'; // 코웨이 네이버 공식스토어
     return (brand?brand+' ':'')+'공식몰';
   }
