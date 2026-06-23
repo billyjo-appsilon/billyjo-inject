@@ -11,7 +11,39 @@
  * cascade 순서 = A → B (라이브와 동일). 함수 충돌(tryInject, close 등)은 IIFE 스코프 분리로 무해.
  *
  * 이전: 빌리조 logscript에 inject.js 2개를 핀했음. 통합 후 1개로 단일화.
+ *
+ * [모듈 0] UTM 캡처 — 광고 attribution 전역 보존(아래 최상단 IIFE, 2026-06-23 추가).
  */
+
+/* =========================================================================
+ * [모듈 0] UTM 캡처 — billyjo.co.kr 전역 광고 attribution
+ *   모든 진입의 query(UTM/클릭ID)를 .billyjo.co.kr 쿠키(bj_utm)에 보존 → 전 서브도메인·
+ *   전 페이지·LP(live.)·리드까지 공유. LP(billyjo-lp)의 utm.js 와 동일 로직/동일 쿠키.
+ *   Last-touch: URL 에 UTM 있으면 갱신, 없으면(내부 이동) 저장값 유지. 실패해도 사이트 무영향(try/catch).
+ * ========================================================================= */
+(function () {
+  var KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term",
+              "fbclid", "gclid", "ttclid", "gad_source", "ch"];
+  var COOKIE = "bj_utm", DAYS = 30, DOMAIN = ".billyjo.co.kr";
+  function read() {
+    var m = (document.cookie || "").match(new RegExp("(?:^|; )" + COOKIE + "=([^;]*)"));
+    if (!m) return {};
+    try { return JSON.parse(decodeURIComponent(m[1])) || {}; } catch (e) { return {}; }
+  }
+  function write(o) {
+    var e = new Date(Date.now() + DAYS * 864e5).toUTCString();
+    var s = location.protocol === "https:" ? ";Secure" : "";
+    document.cookie = COOKIE + "=" + encodeURIComponent(JSON.stringify(o)) +
+      ";expires=" + e + ";path=/;domain=" + DOMAIN + ";SameSite=Lax" + s;
+  }
+  try {
+    var qp = new URLSearchParams(location.search || ""), inc = {};
+    KEYS.forEach(function (k) { var v = qp.get(k); if (v) inc[k] = String(v).slice(0, 200); });
+    var d;
+    if (Object.keys(inc).length) { d = inc; write(d); } else { d = read(); }
+    window.BILLYJO_UTM = d;
+  } catch (e) { /* attribution 실패는 사이트 동작에 영향 없음 */ }
+})();
 
 /* =========================================================================
  * [모듈 A] skin-css/inject.js — 빌리조 사이트 전역 패치
