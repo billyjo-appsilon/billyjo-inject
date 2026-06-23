@@ -5938,10 +5938,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function bjRvIsOfficialSeller(n){ n=n||''; if(/공식\s*파트너|공식\s*(영업)?\s*대리점/.test(n)) return false; return /공식/.test(n); }
   // 이상적 출처 표기 = 실제 채널을 구체적으로 (정확·다양·신뢰·준법)
   function bjRvChannel(s, brand){
-    s=s||'';
-    // v0.7.1: 출처 표기 통일 — 다나와/쿠팡/몰명 등 구분 없이 현재 후기 노출 방식(브랜드+공식 채널)으로 통일.
-    if(/네이버/.test(s)) return (brand?brand+' ':'')+'네이버 공식스토어'; // 코웨이 네이버 공식스토어
-    return (brand?brand+' ':'')+'공식몰';
+    // v0.7.2: 표시 라벨은 '브랜드 공식 판매처'로 통일하되, 실제 수집 채널은 '자세히'(rv-realsrc)로 공개.
+    return (brand?brand+' ':'')+'공식 판매처';
   }
   // 같은 출처 연속 3개 이상 방지(최대 2연속). 다른 출처 남아있을 때만 회피.
   function bjRvSpread(arr){
@@ -6048,6 +6046,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       "#bj-reviews-root .rv-more{text-align:center;margin-top:16px}",
       "#bj-reviews-root .rv-more button{font:inherit;font-size:13px;padding:10px 22px;border-radius:9px;border:1px solid #e6e8ee;background:#fff;color:#444;cursor:pointer}",
       "#bj-reviews-root .rv-foot{font-size:9px;color:#c4c9d2;margin-top:14px;line-height:1.5;text-align:center}",
+      "#bj-reviews-root .rv-srctoggle{background:none;border:0;padding:0 1px;margin:0;font-size:9px;color:#8a909a;text-decoration:underline;cursor:pointer;font-family:inherit;-webkit-appearance:none}",
+      "#bj-reviews-root .rv-realsrc{display:none;color:#aab;margin-left:4px}",
+      "#bj-reviews-root.bj-rv-showsrc .rv-realsrc{display:inline}",
       "#bj-rv-lb{position:fixed;inset:0;background:rgba(0,0,0,.82);display:none;align-items:center;justify-content:center;z-index:100000;padding:20px}",
       "#bj-rv-lb.on{display:flex}",
       "#bj-rv-lb img{max-width:100%;max-height:90vh;border-radius:8px}",
@@ -6138,19 +6139,19 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         h+='<div class="rv-body"><div class="rv-stars">'+bjRvStars(r.stars)+'</div>'
           +(persona?'<div><span class="rv-persona'+(mp?' rv-persona-match':'')+'">'+(mp?'✓ ':'')+bjRvEsc(persona)+(mp?' 추천 대상':'')+'</span></div>':'')
           +'<div class="rv-text">'+bjRvEsc(r.text)+'</div>'
-          +'<div class="rv-meta"><span class="rv-author">'+bjRvEsc(src)+' 구매자 후기(출처)</span>'+(r.reviewed_at?'<span>· '+bjRvEsc(r.reviewed_at)+'</span>':'')+'</div></div></div>';
+          +'<div class="rv-meta"><span class="rv-author">'+bjRvEsc(src)+' 구매자 후기(출처)</span>'+(r.reviewed_at?'<span>· '+bjRvEsc(r.reviewed_at)+'</span>':'')+'<span class="rv-realsrc">· 수집 출처: '+bjRvEsc(r.source||'-')+'</span></div></div></div>';
       });
       h+='</div>';
       if(!listSrc.length) h+='<div class="rv-foot" style="text-align:center;padding:10px 0">사진 있는 후기가 아직 없어요. 전체를 눌러보세요.</div>';
       if(listSrc.length>shown) h+='<div class="rv-more"><button id="bj-rv-more">후기 더 보기 ('+(listSrc.length-shown)+'+)</button></div>';
-      var __allOff = items.every(function(r){ return /공식/.test(bjRvChannel(r.source, r.brand)); });
-      h+='<div class="rv-foot">'+(__allOff?'실제 브랜드 공식몰, 공식판매처 고객들이 작성한 리뷰입니다.':'후기는 공식 판매처·오픈마켓 등 실제 구매처에서 수집한 고객 리뷰입니다.')+'</div>';
+      h+='<div class="rv-foot">공식 판매처 등 실제 구매처에서 수집한 고객 리뷰입니다. 각 후기의 실제 수집 출처는 <button type="button" id="bj-rv-srctoggle" class="rv-srctoggle">출처 자세히</button>에서 확인할 수 있습니다.</div>';
       root.innerHTML=h;
       var lb=bjRvLightbox(), lbi=lb.querySelector('img');
       Array.prototype.forEach.call(root.querySelectorAll('.rv-srcbtn'),function(b){ b.onclick=function(){ if(b.classList.contains('shown')) return; b.textContent='출처: '+b.getAttribute('data-src'); b.classList.add('shown'); }; });
       Array.prototype.forEach.call(root.querySelectorAll('[data-full]'),function(im){ im.onclick=function(){ lbi.src=im.getAttribute('data-full'); lb.classList.add('on'); }; });
       Array.prototype.forEach.call(root.querySelectorAll('.rv-filter button'),function(b){ b.onclick=function(){ photoOnly=b.getAttribute('data-f')==='1'; shown=8; render(); }; });
       var mb=document.getElementById('bj-rv-more'); if(mb) mb.onclick=function(){ shown+=8; render(); };
+      var stg=document.getElementById('bj-rv-srctoggle'); if(stg) stg.onclick=function(){ var on=root.classList.toggle('bj-rv-showsrc'); stg.textContent=on?'닫기':'자세히'; };
     }
     function fetchJson(qs){ return fetch(API+'?'+qs+'&limit=80').then(function(r){return r.json();}).then(function(j){return (j&&j.items)||[];}).catch(function(){return [];}); }
     // 모델 라인 키: 알파벳 접두 + 첫 숫자. 예 CHPI-7400N → 'CHPI-7' (아이콘 V2/V3/미니 묶음)
