@@ -1694,26 +1694,26 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 .bj-reco-strengths { display: flex; flex-wrap: wrap; gap: 4px; }\
 .bj-reco-chip { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; background: #F4F6FC; border-radius: 999px; font-size: 10px; color: #475569; font-weight: 600; }\
 .bj-reco-chip.is-grade { background: #EEF2FF; color: #0838F8; }\
-.bj-reco-persona { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: #FFF1EC; border-radius: 10px; font-size: 11px; color: #B43E22; font-weight: 600; line-height: 1.3; }\
+.bj-reco-persona { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: #F4F6FC; border-radius: 10px; font-size: 11px; color: #475569; font-weight: 600; line-height: 1.3; }\
 .bj-reco-cta { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 9px 10px; background: #F4F6FC; color: #0838F8; border: 1px solid #EEF2FF; border-radius: 10px; font-size: 12px; font-weight: 700; text-decoration: none; transition: all .15s; }\
 .bj-reco-card:hover .bj-reco-cta { background: #0838F8; color: #fff; border-color: #0838F8; }\
 .bj-reco-foot { font-size: 10px; color: #94A3B8; text-align: center; margin-top: 14px; }\
 /* 최고 인기 카드 (topPick) — 강조 큰 카드 */\
-.bj-reco-top-card { display: grid; grid-template-columns: 130px 1fr auto; gap: 16px; align-items: center; background: linear-gradient(135deg, #FFF7ED 0%, #FFFBF5 50%, #FFFFFF 100%); border: 2px solid #FB923C; border-radius: 18px; padding: 18px 18px 18px 18px; margin-bottom: 16px; text-decoration: none; color: inherit; position: relative; box-shadow: 0 4px 14px rgba(251, 146, 60, 0.18); transition: transform .15s, box-shadow .15s; }\
-.bj-reco-top-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(251, 146, 60, 0.28); }\
-.bj-reco-top-badge { position: absolute; top: -10px; left: 18px; background: linear-gradient(135deg, #F97316 0%, #DC2626 100%); color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; letter-spacing: .3px; box-shadow: 0 2px 6px rgba(220, 38, 38, .3); }\
-.bj-reco-top-img { width: 130px; height: 120px; border-radius: 14px; background: #FEF3E2; display: flex; align-items: center; justify-content: center; overflow: hidden; }\
+.bj-reco-top-card { display: grid; grid-template-columns: 130px 1fr auto; gap: 16px; align-items: center; background: linear-gradient(135deg, #F4F8FF 0%, #FAFCFF 50%, #FFFFFF 100%); border: 2px solid #0838F8; border-radius: 18px; padding: 18px 18px 18px 18px; margin-bottom: 16px; text-decoration: none; color: inherit; position: relative; box-shadow: 0 4px 14px rgba(8, 56, 248, 0.18); transition: transform .15s, box-shadow .15s; }\
+.bj-reco-top-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(8, 56, 248, 0.28); }\
+.bj-reco-top-badge { position: absolute; top: -10px; left: 18px; background: linear-gradient(135deg, #0838F8 0%, #1E40AF 100%); color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; letter-spacing: .3px; box-shadow: 0 2px 6px rgba(8, 56, 248, .3); }\
+.bj-reco-top-img { width: 130px; height: 120px; border-radius: 14px; background: #EEF3FF; display: flex; align-items: center; justify-content: center; overflow: hidden; }\
 .bj-reco-top-body { min-width: 0; display: flex; flex-direction: column; gap: 6px; }\
-.bj-reco-top-sub { font-size: 11px; font-weight: 700; color: #C2410C; letter-spacing: .2px; }\
-.bj-reco-top-brand { font-size: 11px; color: #9A3412; font-weight: 600; letter-spacing: .3px; }\
+.bj-reco-top-sub { font-size: 11px; font-weight: 700; color: #1D4ED8; letter-spacing: .2px; }\
+.bj-reco-top-brand { font-size: 11px; color: #94A3B8; font-weight: 600; letter-spacing: .3px; }\
 .bj-reco-top-name { font-size: 15px; font-weight: 800; color: #1A1F36; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }\
 .bj-reco-top-price-row { display: flex; align-items: baseline; gap: 6px; margin-top: 4px; }\
-.bj-reco-top-price { font-size: 22px; font-weight: 800; color: #DC2626; letter-spacing: -.5px; }\
+.bj-reco-top-price { font-size: 22px; font-weight: 800; color: #0838F8; letter-spacing: -.5px; }\
 .bj-reco-top-price-suffix { font-size: 11px; color: #94A3B8; }\
 .bj-reco-top-diff { font-size: 11px; font-weight: 700; color: #16A34A; margin-left: 4px; }\
 .bj-reco-top-strengths { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }\
-.bj-reco-top-chip { display: inline-flex; padding: 3px 8px; background: #FEF3E2; color: #9A3412; border-radius: 999px; font-size: 10px; font-weight: 600; }\
-.bj-reco-top-cta { background: #DC2626; color: #fff; font-size: 13px; font-weight: 700; padding: 10px 16px; border-radius: 10px; white-space: nowrap; }\
+.bj-reco-top-chip { display: inline-flex; padding: 3px 8px; background: #F4F6FC; color: #475569; border-radius: 999px; font-size: 10px; font-weight: 600; }\
+.bj-reco-top-cta { background: #0838F8; color: #fff; font-size: 13px; font-weight: 700; padding: 10px 16px; border-radius: 10px; white-space: nowrap; }\
 @media (max-width: 600px) { .bj-reco-top-card { grid-template-columns: 90px 1fr; padding: 14px 12px; } .bj-reco-top-img { width: 90px; height: 90px; } .bj-reco-top-cta { display: none; } .bj-reco-top-name { font-size: 13px; } .bj-reco-top-price { font-size: 18px; } .bj-reco-top-badge { left: 12px; top: -8px; } }\
 @media (max-width: 600px) { .bj-reco-grid { grid-template-columns: 1fr; } .bj-reco-card { flex-direction: row; align-items: stretch; gap: 12px; } .bj-reco-card .bj-reco-img { width: 110px; aspect-ratio: 1; flex-shrink: 0; } .bj-reco-card > .bj-reco-brand, .bj-reco-card > .bj-reco-name, .bj-reco-card > .bj-reco-price-row, .bj-reco-card > .bj-reco-strengths, .bj-reco-card > .bj-reco-persona, .bj-reco-card > .bj-reco-cta { } .bj-reco-card { display: grid; grid-template-columns: 110px 1fr; grid-template-areas: 'img body'; } .bj-reco-img { grid-area: img; } .bj-reco-card .bj-reco-body { grid-area: body; display: flex; flex-direction: column; gap: 6px; min-width: 0; } .bj-reco-card .bj-reco-cta { display: none; } .bj-reco-name { min-height: 0; } .bj-reco-badge { top: -6px; left: 8px; } }\
 ";
@@ -3627,8 +3627,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     /* v0.5.44: is-empty 색상 빨강(경고) → 빌리조 테마 금색.
        v0.5.45: #ffd000 glow 효과 — blur 변화로 빛이 새어나오는 발광 느낌. */
     '.bj-bar-handle-option.is-empty{',
-    '  background:#fff8e1 !important; color:#b45309 !important;',
-    '  border-color:#ffd000 !important;',
+    '  background:#FFF6DA !important; color:#8A5A00 !important;',
+    '  border-color:#F5CE3E !important;',
     '  animation:bjOptionGlow 1.8s ease-in-out infinite;',
     '}',
     '.bj-bar-handle-option.is-empty::before{ content:"✦ "; opacity:1 }',
