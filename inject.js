@@ -1695,6 +1695,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 .bj-reco-chip { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; background: #F4F6FC; border-radius: 999px; font-size: 10px; color: #475569; font-weight: 600; }\
 .bj-reco-chip.is-grade { background: #EEF2FF; color: #0838F8; }\
 .bj-reco-persona { display: flex; align-items: center; gap: 6px; padding: 8px 10px; background: #F4F6FC; border-radius: 10px; font-size: 11px; color: #475569; font-weight: 600; line-height: 1.3; }\
+.bj-reco-reviews { font-size: 11px; color: #475569; font-weight: 600; letter-spacing: -.2px; }\
+.bj-reco-top-reviews { font-size: 12.5px; color: #0838F8; font-weight: 700; letter-spacing: -.2px; margin-top: 2px; }\
 .bj-reco-cta { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 9px 10px; background: #F4F6FC; color: #0838F8; border: 1px solid #EEF2FF; border-radius: 10px; font-size: 12px; font-weight: 700; text-decoration: none; transition: all .15s; }\
 .bj-reco-card:hover .bj-reco-cta { background: #0838F8; color: #fff; border-color: #0838F8; }\
 .bj-reco-foot { font-size: 10px; color: #94A3B8; text-align: center; margin-top: 14px; }\
@@ -1823,6 +1825,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '<div class="bj-reco-name">' + escapeHtml(item.name) + '</div>' +
       (item.model ? '<div class="bj-reco-model">' + escapeHtml(item.model) + '</div>' : '') +
       '<div class="bj-reco-price-row">' + priceRow + '</div>' +
+      (item.reviewCount ? '<div class="bj-reco-reviews">⭐ 실사용 후기 ' + item.reviewCount.toLocaleString() + '개</div>' : '') +
       '<div class="bj-reco-strengths">' + strengths + '</div>' +
       '<div class="bj-reco-persona"><span>' + item.personaIcon + '</span><span>' + item.personaText + '</span></div>' +
       '<span class="bj-reco-cta">자세히 보기 →</span>' +
@@ -1859,6 +1862,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '<div class="bj-reco-top-name">' + escapeHtml(item.name || '') + '</div>' +
         (item.model ? '<div class="bj-reco-top-model">' + escapeHtml(item.model) + '</div>' : '') +
         '<div class="bj-reco-top-price-row">' + topPriceRow + '</div>' +
+        (item.reviewCount ? '<div class="bj-reco-top-reviews">⭐ 실사용 후기 ' + item.reviewCount.toLocaleString() + '개</div>' : '') +
         '<div class="bj-reco-top-strengths">' + strengths + '</div>' +
       '</div>' +
       '<span class="bj-reco-top-cta">자세히 보기 →</span>' +
@@ -2038,6 +2042,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         subBadge: apiTop.subBadge || '',
         grade: apiTop.grade || 'A+',
         strengths: apiTop.strengths || [],
+        reviewCount: apiTop.reviewCount || 0,
         image: '',  // placeholder — hydrateThumbnails가 prod_view og:image로 교체
         href: apiTop.productId ? (PV + apiTop.productId) : '#',
       };
@@ -2055,6 +2060,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         priceDiff: it.priceDiff || 0,
         grade: it.grade || 'A',
         strengths: it.strengths || [],
+        reviewCount: it.reviewCount || 0,
         personaIcon: it.personaIcon || '👨‍👩‍👧',
         personaText: it.personaText || '',
         image: '',  // placeholder — hydrateThumbnails가 prod_view og:image로 교체
