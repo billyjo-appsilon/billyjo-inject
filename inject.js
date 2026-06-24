@@ -5289,7 +5289,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
             '<div class="bj-ws-sup-label">렌탈사 선택</div>' +
             '<div class="bj-ws-sup-tabs">' +
               suppliers.map(function(s, i){
-                var bestMark = supHasBest(i) ? '<span class="bj-ws-best-dot" aria-label="BEST"></span>' : '';
+                var bestMark = supHasBest(i) ? '<span class="bj-ws-best-dot" aria-label="최저가"></span>' : '';
                 return '<button type="button" class="bj-ws-sup-tab' + (i === state.supIdx ? ' active' : '') + '" data-i="' + i + '">' +
                   escapeWidgetHtml(s.name) + bestMark +
                 '</button>';
@@ -5303,11 +5303,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '<div class="bj-ws-term-pills">' +
           sup.terms.map(function(t, i){
             /* v0.5.33: pill 2행 마크업 — "카드/정가" 라벨로 명확 구분.
-               1행: BEST 배지 + 약정 기간
+               1행: 최저가 배지 + 약정 기간
                2행: 카드할인 있으면 [카드 N · 정가 M(strike)], 없으면 [정가 N]
                기존 색상만으로 구분이 어려웠던 문제 해소. */
             var hasCardDc = t.effective > 0 && t.effective < t.priceNum;
-            var bestBadge = t.isBest ? '<span class="bj-ws-best-badge">BEST</span>' : '';
+            var bestBadge = t.isBest ? '<span class="bj-ws-best-badge">최저가</span>' : '';
             var priceRow;
             if (hasCardDc) {
               priceRow =
