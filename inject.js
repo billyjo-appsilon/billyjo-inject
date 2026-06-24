@@ -1870,7 +1870,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '<svg class="bj-reco-title-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 18a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2zm0 -12a2 2 0 0 1 2 2a2 2 0 0 1 2 -2a2 2 0 0 1 -2 -2a2 2 0 0 1 -2 2zm-7 12a6 6 0 0 1 6 -6a6 6 0 0 1 -6 -6a6 6 0 0 1 -6 6a6 6 0 0 1 6 6z"/></svg>' +
       '비슷한 분들이 함께 본 제품' +
       '</h3>' +
-      '<div class="bj-reco-sub">최고 인기 + 가격·성능·페르소나 비슷한 추천</div>' +
+      '<div class="bj-reco-sub">최고 인기+가격·성능·가구형태 비슷한 고객들 PICK</div>' +
       '</div>' +
       renderTopPick(TOP_PICK) +
       '<div class="bj-reco-grid">' + cards + '</div>' +
