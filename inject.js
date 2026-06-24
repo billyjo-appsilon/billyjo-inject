@@ -2504,7 +2504,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function escapeAttr(s) { return escapeHtml(s); }
 
   function requestConsult() {
-    if (bjPersonaNeedsGate()){ bjPersonaGate(function(){ requestConsult(); }); return; }
+    // 페르소나 헬퍼는 다른 IIFE 스코프 — 여기선 접근 불가일 수 있으므로 typeof 가드(ReferenceError 방지).
+    if (typeof bjPersonaNeedsGate === 'function' && bjPersonaNeedsGate()){ bjPersonaGate(function(){ requestConsult(); }); return; }
     injectStyle();
     showLoading();
     var ctx = detectProduct();
@@ -2516,7 +2517,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       productName: (oCtx && oCtx.productName) || ctx.productName
     };
     if (oCtx && oCtx.selection) payload.selection = oCtx.selection;
-    bjConsultExtras(payload);   // utm(광고 인구통계 코드) + 고객 페르소나 위저드 답변
+    if (typeof bjConsultExtras === 'function') bjConsultExtras(payload);   // utm(광고 인구통계 코드) + 고객 페르소나 위저드 답변
     fetch(API_BASE + '/v1/consult/quick-assign', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
@@ -2537,6 +2538,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function shouldIntercept(el) {
     if (!el || el.nodeType !== 1) return false;
     if (el.closest && el.closest('#bj-consult-modal')) return false;
+    // 인젝트 위젯 자체 상담 버튼(.bj-btn-consult / .bj-fb-consult)은 가로채지 않음 —
+    // 이미 자체 핸들러(openConsultModal: 풀 기능 모달+페르소나 위저드)가 바인딩돼 있고,
+    // 여기서 가로채면 스코프 밖 헬퍼를 참조하는 requestConsult가 ReferenceError로 떠
+    // 상담 대기 카드가 아예 안 나타남 (하단 위젯 버튼 무반응 버그의 원인).
+    if (el.closest && el.closest('.bj-btn-consult')) return false;
     // 텍스트 문의 버튼(구 헤드셋 → 💬 문의하기)은 가로채지 않음 — counsel 폼 직행
     if (el.closest && el.closest('[data-bj-text-inquiry]')) return false;
     // 명시적 opt-in은 모든 페이지에서 가로챔 (신혼부부 패키지 등)
@@ -3190,11 +3196,14 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '.bj-bar-handle:hover::before{ background:#0838F8; opacity:1; width:56px }',
     '.bj-bar-handle:active::before{ background:#0838F8; width:60px; opacity:1 }',
     /* visible grip bar — 기존 그대로 (pointer-events:none) */
+    /* v0.7.x: 평평한 바 → 위로 향한 얕은 ⌃ 셰브론 — "위로 당겨 펼치기" 직관 강화.
+       clip-path만 추가하므로 width/background 기반 hover·active·breathe 애니메이션은 그대로 동작. */
     '.bj-bar-handle::before{',
-    '  content:""; position:absolute; top:7px; left:50%;',
+    '  content:""; position:absolute; top:6px; left:50%;',
     '  transform:translateX(-50%);',
-    '  width:48px; height:5px; border-radius:3px;',
+    '  width:46px; height:11px;',
     '  background:#b8b8b8; pointer-events:none;',
+    '  clip-path:polygon(0% 50%, 50% 0%, 100% 50%, 100% 100%, 50% 50%, 0% 100%);',
     '  transition:background 0.15s, width 0.2s ease-out, opacity 0.15s;',
     '  opacity:0.9;',
     '}',
@@ -4252,7 +4261,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function warmupAdmin2(){
     if (window.__bjAdmin2Warmed) return;
     window.__bjAdmin2Warmed = true;
-    var base = window.__bjConsultApiUrl || 'https://billyjo-admin2.vercel.app';
+    var base = window.__bjConsultApiUrl || 'https://admin2-api.billyjo.co.kr';
     try { fetch(base + '/health', { method: 'GET', mode: 'cors' }).catch(function(){}); } catch(_){}
     try { bjFetchPersonaForm(); } catch(_){}   // 페르소나 폼 미리 받아두기(위저드 지연 제거)
   }
@@ -4263,7 +4272,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
      상담 연결 직전 1회 노출, 건너뛰기 가능(절대 막지 않음).
      비활성화: window.__bjPersonaWizardEnabled = false */
   var BJ_PERSONA_FORM_CACHE = null;
-  function bjPersonaBase(){ return window.__bjConsultApiUrl || 'https://billyjo-admin2.vercel.app'; }
+  function bjPersonaBase(){ return window.__bjConsultApiUrl || 'https://admin2-api.billyjo.co.kr'; }
 
   function bjReadUtm(){
     try {
@@ -4541,7 +4550,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     /* v0.5.72: admin2 실 endpoint 호출, mock fallback 폐기. timeout 18s + retry 1회.
        호스트 override: window.__bjConsultApiUrl
        v0.6.5: selection 스냅샷 첨부 — 백엔드 ConsultRequest.selection_snapshot에 저장 */
-    var base = window.__bjConsultApiUrl || 'https://billyjo-admin2.vercel.app';
+    var base = window.__bjConsultApiUrl || 'https://admin2-api.billyjo.co.kr';
     var prodId = (location.pathname.match(/prod_view\/(\d+)/) || [])[1] || null;
     var prodName = (document.querySelector('.prod_name b') || document.querySelector('.prod_name') || {}).textContent;
     var body = { productId: prodId, productName: prodName && prodName.trim() };
@@ -4597,7 +4606,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
 
   function _consultApiBase(){
-    return window.__bjConsultApiUrl || 'https://billyjo-admin2.vercel.app';
+    return window.__bjConsultApiUrl || 'https://admin2-api.billyjo.co.kr';
   }
 
   function _beaconConsult(path, payload){
@@ -6367,12 +6376,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var saved = '';
       if (e.monthly && e.finalPrice) {
         var d = digits(e.monthly) - digits(e.finalPrice);
-        if (d > 0) saved = '<span style="color:#e84a4a;font-size:11px;margin-left:4px">−' + d.toLocaleString() + '원</span>';
+        if (d > 0) saved = '<span style="color:#e84a4a;font-size:12px;margin-left:4px">−' + d.toLocaleString() + '원</span>';
       }
       return '<tr style="border-bottom:0.5px solid #eee">' +
-        '<td style="padding:10px 8px;text-align:center;font-weight:600;font-size:13px">' + escapeHtml(termText) + '</td>' +
-        '<td style="padding:10px 8px;text-align:center;color:#444;font-size:13px">' + escapeHtml(monthly) + '</td>' +
-        '<td style="padding:10px 8px;text-align:center;color:#0838f8;font-weight:700;font-size:14px">' + escapeHtml(final) + saved + '</td>' +
+        '<td style="padding:10px 8px;text-align:center;font-weight:600;font-size:14px">' + escapeHtml(termText) + '</td>' +
+        '<td style="padding:10px 8px;text-align:center;color:#444;font-size:14px">' + escapeHtml(monthly) + '</td>' +
+        '<td style="padding:10px 8px;text-align:center;color:#0838f8;font-weight:700;font-size:15px">' + escapeHtml(final) + saved + '</td>' +
         '</tr>';
     }).join('');
 
@@ -6390,8 +6399,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         var termText = needMgmtPrefix && e.mgmt ? '[' + e.mgmt + '] ' + e.term : e.term;
         var monthly = e.monthly || e.finalPrice || '—';
         return '<tr style="border-bottom:0.5px solid #eee">' +
-          '<td style="padding:10px 8px;text-align:center;font-weight:600;font-size:13px">' + escapeHtml(termText) + '</td>' +
-          '<td style="padding:10px 8px;text-align:center;color:#0838f8;font-weight:700;font-size:14px">' + escapeHtml(monthly) + '</td>' +
+          '<td style="padding:10px 8px;text-align:center;font-weight:600;font-size:14px">' + escapeHtml(termText) + '</td>' +
+          '<td style="padding:10px 8px;text-align:center;color:#0838f8;font-weight:700;font-size:15px">' + escapeHtml(monthly) + '</td>' +
           '</tr>';
       }).join('');
     }
@@ -6422,8 +6431,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '<div style="border:1px solid #e5e8ee;border-radius:8px;overflow:hidden;background:#fff">' +
         titleHtml +
         '<div style="overflow-x:auto;-webkit-overflow-scrolling:touch">' +
-          '<table style="width:100%;min-width:240px;border-collapse:collapse;font-family:Pretendard,sans-serif;background:#fff">' +
-            '<thead><tr style="background:#0838f8;color:#fff;font-size:12px">' + headerCols + '</tr></thead>' +
+          '<table style="width:100%;min-width:240px;border-collapse:collapse;font-family:Pretendard,sans-serif;font-size:14px;line-height:1.4;background:#fff">' +
+            '<thead><tr style="background:#0838f8;color:#fff;font-size:13px">' + headerCols + '</tr></thead>' +
             '<tbody>' + rows + '</tbody>' +
           '</table>' +
         '</div>' +
