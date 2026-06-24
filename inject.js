@@ -1699,8 +1699,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 .bj-reco-card:hover .bj-reco-cta { background: #0838F8; color: #fff; border-color: #0838F8; }\
 .bj-reco-foot { font-size: 10px; color: #94A3B8; text-align: center; margin-top: 14px; }\
 /* 최고 인기 카드 (topPick) — 강조 큰 카드 */\
-.bj-reco-top-card { display: grid; grid-template-columns: 130px 1fr auto; gap: 16px; align-items: center; background: linear-gradient(135deg, #F4F8FF 0%, #FAFCFF 50%, #FFFFFF 100%); border: 2px solid #0838F8; border-radius: 18px; padding: 18px 18px 18px 18px; margin-bottom: 16px; text-decoration: none; color: inherit; position: relative; box-shadow: 0 4px 14px rgba(8, 56, 248, 0.18); transition: transform .15s, box-shadow .15s; }\
+.bj-reco-top-card { display: grid; grid-template-columns: 130px 1fr auto; gap: 16px; align-items: center; background: linear-gradient(135deg, #F4F8FF 0%, #FAFCFF 50%, #FFFFFF 100%); border: none; border-radius: 18px; padding: 18px; margin-bottom: 16px; text-decoration: none; color: inherit; position: relative; box-shadow: 0 4px 14px rgba(8, 56, 248, 0.18); transition: transform .15s, box-shadow .15s; }\
+.bj-reco-top-card::before { content:''; position:absolute; inset:0; border-radius:18px; padding:3px; background:linear-gradient(120deg, #0838F8, #5b8bff, #1E40AF, #3b6bff, #0838F8); background-size:300% 300%; -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite:xor; mask-composite:exclude; animation:bjRecoBorderFlow 4s linear infinite; pointer-events:none; z-index:1; }\
+.bj-reco-top-card > * { position:relative; z-index:2; }\
+@keyframes bjRecoBorderFlow { 0%{ background-position:0% 50% } 100%{ background-position:300% 50% } }\
 .bj-reco-top-card:hover { transform: translateY(-2px); box-shadow: 0 8px 22px rgba(8, 56, 248, 0.28); }\
+.bj-reco-top-card:hover::before { animation-duration:1.8s; }\
 .bj-reco-top-badge { position: absolute; top: -10px; left: 18px; background: linear-gradient(135deg, #0838F8 0%, #1E40AF 100%); color: #fff; font-size: 11px; font-weight: 800; padding: 4px 10px; border-radius: 8px; letter-spacing: .3px; box-shadow: 0 2px 6px rgba(8, 56, 248, .3); }\
 .bj-reco-top-img { width: 130px; height: 120px; border-radius: 14px; background: #EEF3FF; display: flex; align-items: center; justify-content: center; overflow: hidden; }\
 .bj-reco-top-body { min-width: 0; display: flex; flex-direction: column; gap: 6px; }\
