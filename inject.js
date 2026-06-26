@@ -872,6 +872,29 @@ function bjHeaderMainInit() {
     setTimeout(function() { clearInterval(bjSortIv); }, 20000);
   }
 
+  // === 카테고리 탭(.prod_list__cate) 순서 재배치 ===
+  // 목표: 정수기·에어컨 유지 + 제습기/가습기·로봇청소기·비데를 공기청정기 뒤로 전진. 나머지는 원래 상대순서 유지.
+  if (location.pathname.indexOf('prod_list') !== -1) {
+    var BJ_CAT_ORDER = ['1-8', '1-87', '1-6', '1-203', '1-374', '1-9', '1-1232', '1-7', '1-532', '1-1296'];
+    var bjReorderCats = function() {
+      var ul = document.querySelector('.prod_list__cate');
+      if (!ul || ul.getAttribute('data-bj-catorder')) return;
+      var lis = Array.prototype.slice.call(ul.querySelectorAll('li'));
+      if (lis.length < 2) return;
+      var keyOf = function(li) { var m = (li.getAttribute('onclick') || '').match(/prod_list\/(\d+-\d+)/); return m ? m[1] : ''; };
+      lis.sort(function(a, b) {
+        var ia = BJ_CAT_ORDER.indexOf(keyOf(a)), ib = BJ_CAT_ORDER.indexOf(keyOf(b));
+        if (ia === -1) ia = 999; if (ib === -1) ib = 999;
+        return ia - ib;
+      });
+      lis.forEach(function(li) { ul.appendChild(li); });
+      ul.setAttribute('data-bj-catorder', '1');
+    };
+    bjReorderCats();
+    var bjCatIv = setInterval(bjReorderCats, 400);
+    setTimeout(function() { clearInterval(bjCatIv); }, 15000);
+  }
+
   // === Global: replace old 기타 국산차 yellow banner with black banner ===
   var gukBannerIds = ['f20a1005c32b110f132da6be0e8ad69e', '7cd7b51b4f8969361aa9b123640176e0', '252b9d5312002f1a50fe6532d4c17eba'];
   var newBanner = 'https://rentalshop.site/_data/file/goodsImages/17aeef731e84ade23d0c907788c9c426.png';
