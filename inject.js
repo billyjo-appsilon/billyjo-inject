@@ -715,10 +715,10 @@ function bjHeaderMainInit() {
         '.bj-pz .bj-cf-deal .bj-cf-chip{color:#fff;background:#0838f8}' +
         '.bj-pz .bj-cf-disc{font-size:11px;font-weight:800;color:#fff;background:#d6336c;border-radius:6px;padding:2px 6px;flex-shrink:0}' +
         '@media all and (max-width:640px){' +
-        '.bj-pz .bj-cf-line{justify-content:flex-start;gap:5px}' +   // 모바일: 좌측 패킹 + 줄바꿈(가로 넘침 0)
-        '.bj-pz .bj-cf-val{flex-wrap:wrap;white-space:normal;gap:3px}' +
+        '.bj-pz .bj-cf-line{gap:5px}' +   // 모바일도 우측 정렬(space-between 상속), gap만 축소
+        '.bj-pz .bj-cf-val{gap:3px}' +
         '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal{font-size:12.5px;letter-spacing:-.3px}' +
-        '.bj-pz .bj-cf-chip{font-size:8.5px;min-width:32px;padding:1px 3px}' +
+        '.bj-pz .bj-cf-chip{font-size:8.5px;min-width:30px;padding:1px 3px}' +
         '.bj-pz .bj-cf-disc{font-size:9px;padding:1px 4px}}';
       (document.head || document.documentElement).appendChild(bjcfStyle);
     }
@@ -743,13 +743,13 @@ function bjHeaderMainInit() {
       box.className = 'bj-pz';
       if (hasDisc) {
         box.innerHTML =
-          '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span><span class="bj-cf-val">월 <b>' + bjpFmt(reg) + '원</b>~</span></div>' +
-          '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span><span class="bj-cf-val"><span class="bj-cf-disc">-' + bjpPct + '%</span>월 <b>' + bjpFmt(card) + '원</b>~</span></div>';
+          '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">최저</span><span class="bj-cf-val">월 <b>' + bjpFmt(reg) + '원</b></span></div>' +
+          '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span><span class="bj-cf-val"><span class="bj-cf-disc">-' + bjpPct + '%</span>월 <b>' + bjpFmt(card) + '원</b></span></div>';
       } else {
-        // 할인 없음: 일반만 + 높이 맞춤용 숨김 placeholder 줄
+        // 할인 없음: 최저만 + 높이 맞춤용 숨김 placeholder 줄
         box.innerHTML =
-          '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span><span class="bj-cf-val">월 <b>' + bjpFmt(reg) + '원</b>~</span></div>' +
-          '<div class="bj-cf-line bj-cf-deal bj-cf-ph"><span class="bj-cf-chip">제휴💳</span><span class="bj-cf-val">월 <b>' + bjpFmt(reg) + '원</b>~</span></div>';
+          '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">최저</span><span class="bj-cf-val">월 <b>' + bjpFmt(reg) + '원</b></span></div>' +
+          '<div class="bj-cf-line bj-cf-deal bj-cf-ph"><span class="bj-cf-chip">제휴💳</span><span class="bj-cf-val">월 <b>' + bjpFmt(reg) + '원</b></span></div>';
       }
       var anc = fee2 || fee;
       anc.parentNode.insertBefore(box, anc.nextSibling);
