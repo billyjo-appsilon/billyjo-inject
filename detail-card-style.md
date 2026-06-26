@@ -8,7 +8,7 @@
 
 미리보기(외부 접속): https://bj-card-price-preview.vercel.app (※ 후기칩은 미리보기 전용 — 실제 storefront는 썸네일 배지)
 미리보기 소스: `billyjo-inject/preview-card-price-style.html`
-실제 적용 모듈: `billyjo-inject/inject.js` → 가격 `billyjoProdListCardRestyle` / 후기 배지 `bj-rv-listbadge`(IIFE 하단)
+실제 적용 모듈: `billyjo-inject/inject.js` → 가격 `bj-pz`(모듈 A 내 "제품 리스트 가격부분 재디자인") / 후기 배지 `bj-rv-listbadge`(IIFE 하단). 가격·후기 각 1개 모듈만 — 중복 금지.
 
 ---
 
@@ -77,29 +77,28 @@
 ## 4. 데이터 소스
 
 - **가격**: 카드 DOM에서 직접 산출(외부 의존 없음).
-  - 일반가 = `.fee .price strong` (월 렌탈료)
-  - 할인액 = `.fee2 .price strong` (제휴카드 할인)
-  - 제휴 최종가 = 일반가 − 할인액, 할인율 = round(할인액/일반가×100)
+  - 일반가(정가) = `.fee .price` (월 렌탈료)
+  - **제휴가 = `.fee2 .price`** — ⚠️ 이 값은 '카드할인가'(제휴카드 적용 **최종가**)다. **할인액 아님!** (prod_view 상세도 "월 렌탈료/카드할인가"로 표기, 신혼카드 삼성7평 fee2=500=제휴 500원과 일치)
+  - 할인율 = round((정가 − 제휴가)/정가 × 100). 제휴가 없거나(=0) 정가 이상이면 일반가만 표기.
 - **후기**(별도 `bj-rv-listbadge` 모듈이 사용): `GET https://admin2-api.billyjo.co.kr/v1/reviews/counts` → `by_model[모델]={n,avg}` + `by_cat[브랜드|카테고리]={n,avg}`
   - 매칭: 카드 `p.brand`(모델코드)·`p.name`·이미지 alt에서 모델/브랜드/카테고리 추출 → by_model 정확매칭 → 라인키(시리즈) 합산 → by_cat 폴백 순. (가격 restyle 모듈의 단순 정규화보다 매칭률 높음)
   - 공식 채널 후기만 집계. 후기 없으면 배지 미표시(2026-06 기준 정수기/공청기 위주 142개 모델).
 
 ### ⚠️ 알려진 데이터 주의점 — 제휴 할인 출처 차이
-같은 제품도 **신혼 메뉴**와 **일반 리스트**의 제휴 할인율이 다를 수 있다.
-- 일반 리스트: 네이티브 `제휴카드 할인`(상품별 어드민 입력값, 0~수만원, 들쭉날쭉 → -2%같이 약한 값도 존재)
-- 신혼 메뉴: 별도 산출 — `packages.py _card_discount(brand, fee)` = `min(CARD_MAX[brand], round(fee*0.6/100)*100)` (+ 일부 큐레이션 특가)
+- **일반 리스트(storefront)**: 네이티브 `.fee2`='카드할인가'(제휴카드 적용 최종가) **그대로** 사용 — 상품별 어드민 실값. (2026-06-26 결정: 신혼식 산출값/사은품값은 안 씀)
+- **신혼/LP/복수결합 등 특수 페이지**에서만 별도 산출 — `packages.py _card_discount(brand, fee)` = `min(CARD_MAX[brand], round(fee*0.6/100)*100)` (+ 큐레이션 특가).
 
-→ 일반 리스트 카드의 제휴 할인 소스를 (A) 네이티브 실값 / (B) `_card_discount` 산출값 / (C) 임계치 미만 배지 숨김 중 무엇으로 할지는 **상황별 결정 필요**. 현재 모듈 기본값 = **(A) 네이티브 실값**(정직·상품별 실데이터).
+⚠️ 과거 오류: 한때 `.fee2`를 '할인액'으로 오해해 제휴가=정가−fee2로 계산(할인율 과소). **fee2는 최종가**이므로 제휴가=fee2 그대로.
 
 ---
 
 ## 5. 구현 메모
 
-**가격 — `billyjoProdListCardRestyle`**
-- 적용 범위: `location.pathname`에 `prod_list` 포함, 단 차량 `prod_list/7-` 제외.
-- **멱등**: `.fee.bj-cf` 존재 여부로 재처리 방지.
-- **AJAX 대응**: 필터/정렬 시 `$('.prod_list').html(...)` 재렌더 → `MutationObserver`(디바운스 120ms) + 초기 1.2s 폴링으로 재적용.
-- 전부 `try/catch`로 감싸 단일 카드 오류가 전체를 막지 않음.
+**가격 — `bj-pz` 모듈(모듈 A 내 "제품 리스트 가격부분 재디자인")**
+- 적용 범위: `location.pathname`에 `prod_list` 포함.
+- 네이티브 `.fee`/`.fee2` 파싱 → `<div class="bj-pz">`에 칩 마크업 주입(`.fee` 뒤). `data-bjp` 멱등. 네이티브 `.fee/.fee2`는 `[data-bjp]` CSS로 숨김.
+- 칩 CSS는 `<style id="bj-cf-css">`로 1회 주입. `.name` 2줄 클램프도 이 모듈이 처리.
+- **AJAX 대응**: `setInterval(bjpRun, 600)` 폴링(20초)으로 필터/정렬 재렌더 재적용.
 
 **후기 — `bj-rv-listbadge` 모듈(inject.js 하단 IIFE)**
 - `.item`마다 썸네일 우상단에 `★평점 후기N` 배지. `data-bj-rv` 멱등. 리스트 페이지엔 정렬바(기본순/후기많은순)도.
