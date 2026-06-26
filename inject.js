@@ -2109,6 +2109,102 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 })();
 
 // =============================================================================
+// 상품 리스트 카드 리스타일 — 가격 블록을 신혼가전 스타일(일반/제휴 칩 + 할인배지)로
+//   재구성하고, 모델별 후기 태그(★평점 · 후기수)를 주입. AJAX 필터/정렬 재렌더 대응.
+//   가격은 카드 DOM(.fee/.fee2)에서 직접 산출(외부 의존 X), 후기칩만 admin2 counts API 사용.
+// =============================================================================
+(function billyjoProdListCardRestyle() {
+  if (location.pathname.indexOf('prod_list') === -1) return;
+  if (location.pathname.indexOf('prod_list/7-') !== -1) return;  // 차량 견적 페이지 제외
+
+  var COUNTS_URL = 'https://admin2-api.billyjo.co.kr/v1/reviews/counts';
+  var reviewMap = null;  // {정규화모델: {n, avg}} — counts 도착 전 null
+
+  var css = '\
+.prod_list .item .fee.bj-cf{height:auto !important;overflow:visible !important;padding:8px 14px 12px !important}\
+.prod_list .item .fee2.bj-cf-hide{display:none !important}\
+.bj-cf-line{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;line-height:1.3;float:none}\
+.bj-cf-normal{font-size:15px;color:#555}\
+.bj-cf-normal b{font-weight:700;color:#333}\
+.bj-cf-deal{font-size:15px;font-weight:800;color:#0838F8;margin-top:4px}\
+.bj-cf-chip{display:inline-flex;align-items:center;justify-content:center;min-width:44px;font-size:10px;font-weight:700;border-radius:4px;padding:2px 6px;flex-shrink:0}\
+.bj-cf-normal .bj-cf-chip{color:#6b7280;background:#eceff3}\
+.bj-cf-deal .bj-cf-chip{color:#fff;background:#0838F8}\
+.bj-cf-disc{font-size:11px;font-weight:800;color:#fff;background:#d6336c;border-radius:6px;padding:2px 6px;flex-shrink:0}\
+.bj-card-review{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;margin:8px 0 0;padding:3px 9px 3px 8px;border-radius:999px;background:#fff;border:1px solid #ffe2a8;box-shadow:0 1px 2px rgba(180,83,9,.08);max-width:100%;white-space:nowrap;overflow:hidden}\
+.bj-card-review .star{color:#f5a623;font-size:11.5px;line-height:1}\
+.bj-card-review .rt{color:#1f2937;font-weight:800}\
+.bj-card-review .ct{color:#9b8763;font-weight:600;position:relative;padding-left:7px}\
+.bj-card-review .ct::before{content:"";position:absolute;left:2px;top:50%;transform:translateY(-50%);width:3px;height:3px;border-radius:50%;background:#e2c89a}\
+@media all and (max-width:640px){\
+.prod_list .item .fee.bj-cf{padding:8px 10px 10px !important}\
+.bj-cf-normal,.bj-cf-deal{font-size:12.5px;white-space:normal;flex-wrap:wrap;gap:3px;row-gap:1px;letter-spacing:-.3px}\
+.bj-cf-chip{font-size:8.5px;min-width:32px;padding:1px 3px}\
+.bj-cf-disc{font-size:9px;padding:1px 4px}\
+.bj-card-review{font-size:9.5px;margin-top:6px;padding:2px 7px 2px 6px}\
+}';
+  var st = document.createElement('style'); st.id = 'bj-card-restyle-css'; st.textContent = css;
+  (document.head || document.documentElement).appendChild(st);
+
+  function won(n) { return (n || 0).toLocaleString('ko-KR'); }
+  function intOf(el) { if (!el) return 0; var m = (el.textContent || '').replace(/[^0-9]/g, ''); return m ? parseInt(m, 10) : 0; }
+  function normModel(s) { return (s || '').split('_')[0].split(' ')[0].trim().toUpperCase(); }  // _V2/_4개월/공백 접미사 제거
+
+  // 가격 블록 재구성 (월 렌탈료 + 제휴카드 할인액 → 일반/제휴 최종가 + 할인율)
+  function restylePrice(item) {
+    var fee = item.querySelector('.fee');
+    if (!fee || fee.classList.contains('bj-cf')) return;       // 이미 처리됨
+    var feeVal = intOf(fee.querySelector('.price strong') || fee.querySelector('strong'));
+    if (!feeVal) return;                                        // 파싱 실패 → 원본 유지
+    var fee2 = item.querySelector('.fee2');
+    var discVal = fee2 ? intOf(fee2.querySelector('.price strong') || fee2.querySelector('strong')) : 0;
+    var html;
+    if (discVal > 0) {
+      var net = Math.max(0, feeVal - discVal), pct = Math.round(discVal / feeVal * 100);
+      html = '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span>월 <b>' + won(feeVal) + '원</b>~</div>'
+           + '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span>월 ' + won(net) + '원~<span class="bj-cf-disc">-' + pct + '%</span></div>';
+    } else {
+      html = '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">일반</span>월 ' + won(feeVal) + '원~</div>';
+    }
+    fee.innerHTML = html; fee.classList.add('bj-cf');
+    if (fee2) fee2.classList.add('bj-cf-hide');
+  }
+
+  // 후기 태그 주입 (.brand = 모델코드, counts API로 평점·후기수 매칭)
+  function addReview(item) {
+    if (!reviewMap) return;
+    var txt = item.querySelector('.txt'); if (!txt || txt.querySelector('.bj-card-review')) return;
+    var brandEl = txt.querySelector('.brand'); if (!brandEl) return;
+    var rv = reviewMap[normModel(brandEl.textContent)]; if (!rv) return;
+    var p = document.createElement('p'); p.className = 'bj-card-review';
+    p.innerHTML = '<span class="star">★</span><span class="rt">' + (rv.avg || 5).toFixed(1) + '</span><span class="ct">후기 ' + won(rv.n) + '</span>';
+    txt.appendChild(p);
+  }
+
+  function run() {
+    var items = document.querySelectorAll('.prod_list .item');
+    for (var i = 0; i < items.length; i++) { try { restylePrice(items[i]); addReview(items[i]); } catch (e) {} }
+  }
+
+  var t = null;
+  function schedule() { if (t) return; t = setTimeout(function () { t = null; run(); }, 120); }  // AJAX 재렌더 디바운스
+  function boot() {
+    run();
+    try { new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+    var n = 0, iv = setInterval(function () { run(); if (++n >= 6) clearInterval(iv); }, 200);  // 초기 안전망(~1.2s)
+  }
+
+  fetch(COUNTS_URL).then(function (r) { return r.json(); }).then(function (d) {
+    var bm = (d && d.by_model) || {}; reviewMap = {};
+    for (var k in bm) { if (bm.hasOwnProperty(k)) reviewMap[normModel(k)] = bm[k]; }
+    run();
+  }).catch(function () { reviewMap = {}; });
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+
+// =============================================================================
 // 이벤트/기획전 버튼 텍스트 rewrite — "#이벤트/기획전 바로가기!!" → "이벤트 기획전 보기"
 // =============================================================================
 (function billyjoRewriteEventButton() {

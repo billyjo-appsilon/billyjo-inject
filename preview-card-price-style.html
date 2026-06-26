@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제품 카드 가격 스타일 적용 예시 (신혼가전 → 일반 PC/모바일)</title>
+<style>
+  *{box-sizing:border-box}
+  body{font-family:'NanumSquare','Malgun Gothic',-apple-system,sans-serif;margin:0;background:#f4f6f9;color:#222;-webkit-text-size-adjust:100%}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 18px 80px}
+  h1{font-size:20px;margin:0 0 4px}
+  .sub{color:#777;font-size:13px;margin:0 0 26px}
+  .legend{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:30px;font-size:12px}
+  .legend span{padding:6px 12px;border-radius:8px;background:#fff;border:1px solid #e6e8eb}
+  section{margin-bottom:46px}
+  .stitle{font-size:15px;font-weight:800;margin:0 0 4px;display:flex;align-items:center;gap:8px}
+  .stitle .tag{font-size:11px;font-weight:700;padding:3px 8px;border-radius:6px}
+  .tag.before{background:#f1f3f5;color:#777}
+  .tag.after{background:#e8edff;color:#1c47d6}
+  .stitle .vw{margin-left:auto;font-size:11px;color:#999;font-weight:600}
+  .note{font-size:12px;color:#777;margin:0 0 14px}
+
+  /* ===== 공통: 네이티브 카드 골격 (실제 .prod_list .item 재현) ===== */
+  .grid{display:grid;gap:0}
+  .grid.pc{grid-template-columns:repeat(4,1fr)}
+  .grid.mo{grid-template-columns:repeat(2,1fr);max-width:380px}
+  .item{padding:0}
+  .box{margin:0 10px 22px;background:#fff;border-radius:18px;border:1px solid #e6e8eb;overflow:hidden;transition:.2s}
+  .grid.mo .box{margin:0 6px 14px;border-radius:12px}
+  .box:hover{box-shadow:0 8px 24px rgba(8,56,248,.10);transform:translateY(-2px)}
+  .box a{display:block;text-decoration:none;color:inherit}
+  .thumb{text-align:center;background:#fff;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;border-bottom:1px solid #f0f0f0}
+  .thumb img{max-width:82%;max-height:82%;object-fit:contain}
+  .txt{margin:0 14px;padding:13px 0 10px}
+  .grid.mo .txt{margin:0 9px;padding:10px 0 8px}
+  .brand{font-size:11px;color:#284b90;font-weight:700;margin:0 0 3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .name{font-size:13px;font-weight:500;color:#333;line-height:1.45;margin:0;height:2.9em;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+  .grid.mo .name{font-size:12.5px}
+
+  /* ===== BEFORE: 네이티브 가격 블록 (월 렌탈료 / 제휴카드 할인) ===== */
+  .b-fee,.b-fee2{padding:8px 14px 0;overflow:hidden}
+  .b-fee2{padding-bottom:14px}
+  .grid.mo .b-fee,.grid.mo .b-fee2{padding-left:9px;padding-right:9px}
+  .b-label{font-size:12px;color:#2a2a2a;float:left}
+  .b-price{float:right;color:#2a2a2a}
+  .b-price strong{font-size:18px;font-weight:bold}
+  .grid.mo .b-price strong{font-size:15px}
+
+  /* ===== AFTER: 신혼가전 카드 가격 스타일 포팅 ===== */
+  .a-price{padding:8px 14px 14px}
+  .grid.mo .a-price{padding:8px 9px 12px}
+  /* 일반·제휴 줄 글씨 크기 동일 (15px) — 색/굵기로만 강약 */
+  .feeline,.pprice{font-size:15px;display:flex;align-items:center;gap:5px;min-height:20px;white-space:nowrap;overflow:hidden}
+  .feeline{color:#555}
+  .pprice{color:#0838F8;font-weight:800;margin-top:4px}
+  .feeline b,.pprice b{font-weight:700}
+  .feeline b{color:#333}
+  .feeline small,.pprice small{display:inline-flex;align-items:center;justify-content:center;min-width:44px;font-size:10px;font-weight:700;border-radius:4px;padding:2px 6px;margin-right:5px;flex-shrink:0}
+  .feeline small{color:#6b7280;background:#eceff3}
+  .pprice small{color:#fff;background:#0838F8}
+  .disc{font-size:11px;font-weight:800;color:#fff;background:#d6336c;border-radius:6px;padding:2px 6px;flex-shrink:0}
+  /* 모바일 축소 (일반·제휴 동일 크기 유지) */
+  .grid.mo .feeline,.grid.mo .pprice{font-size:12.5px;white-space:normal;flex-wrap:wrap;gap:3px;row-gap:1px;letter-spacing:-.3px}
+  .grid.mo .feeline small,.grid.mo .pprice small{font-size:8.5px;min-width:32px;padding:1px 3px;margin-right:3px}
+  .grid.mo .disc{font-size:9px;padding:1px 4px;margin-left:1px}
+
+  /* ===== 후기 태그 (실제 inject 추천카드와 동일 포맷) ===== */
+  /* 후기 태그 — 라운드 화이트 펄 + 금색 별점 + 굵은 평점 + 연한 후기수 */
+  .review{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;letter-spacing:-.2px;margin:7px 0 0;padding:3px 9px 3px 8px;border-radius:999px;background:#fff;border:1px solid #ffe2a8;box-shadow:0 1px 2px rgba(180,83,9,.08);max-width:100%;white-space:nowrap;overflow:hidden}
+  .review .star{color:#f5a623;font-size:11.5px;line-height:1}
+  .review .rt{color:#1f2937;font-weight:800}
+  .review .ct{color:#9b8763;font-weight:600;position:relative;padding-left:7px}
+  .review .ct::before{content:"";position:absolute;left:2px;top:50%;transform:translateY(-50%);width:3px;height:3px;border-radius:50%;background:#e2c89a}
+  .grid.mo .review{font-size:9.5px;margin-top:5px;padding:2px 7px 2px 6px;gap:3px}
+  .grid.mo .review .star{font-size:10px}
+
+  /* 후기 태그 후보 데모 */
+  .rv-demo{margin:0;display:inline-flex;align-items:center;font-size:12px;font-weight:700;line-height:1}
+  .rv1{gap:4px;padding:5px 11px 5px 10px;border-radius:999px;background:#fff;border:1px solid #ffe2a8;box-shadow:0 1px 2px rgba(180,83,9,.08)}
+  .rv1 .star{color:#f5a623;font-size:13px}
+  .rv1 .rt{color:#1f2937;font-weight:800}
+  .rv1 .ct{color:#9b8763;font-weight:600;position:relative;padding-left:9px}
+  .rv1 .ct::before{content:"";position:absolute;left:3px;top:50%;transform:translateY(-50%);width:3px;height:3px;border-radius:50%;background:#e2c89a}
+  .rv2{gap:5px;padding:5px 12px;border-radius:999px;color:#92400e;background:linear-gradient(135deg,#fff1cf,#ffe1a6);border:1px solid #f6cf7e}
+  .rv2 b{color:#7c3a00;font-weight:800}
+  .rv2 .rv2-ct{font-weight:600;opacity:.8}
+  .rv3{gap:6px;padding:5px 12px;border-radius:8px;background:#fff8ec;border:1px solid #f1e2c4}
+  .rv3 .stars{color:#f5a623;letter-spacing:1px;font-size:12px}
+  .rv3 .rv3-ct{color:#6b7280;font-weight:700}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>제품 카드 가격 스타일 적용 예시</h1>
+  <p class="sub">‘신혼 가전, 한 번에 시작하기’ 썸네일 카드의 <b>일반 / 제휴</b> 가격 스타일을 일반 PC·모바일 제품 카드(<code>/prod_list</code>)에 적용한 모습</p>
+
+  <div class="legend">
+    <span>🔹 <b>일반</b> = 회색 칩 + 월 렌탈료(연한 글씨)</span>
+    <span>🔷 <b>제휴💳</b> = 파란 칩 + 파란 최종가 (일반과 글씨 크기 동일)</span>
+    <span>🏷️ <b>-N%</b> = 핑크 할인 배지 (제휴카드 할인 반영)</span>
+    <span>⭐ <b>실사용 후기</b> = 평점 + 후기수 태그</span>
+  </div>
+
+  <!-- ===== 후기 태그 스타일 후보 ===== -->
+  <section style="background:#fff;border:1px solid #e6e8eb;border-radius:14px;padding:18px 20px;margin-bottom:40px">
+    <div class="stitle" style="margin-bottom:14px">후기 태그 스타일 후보 <span class="vw">아래 카드엔 ①번 적용</span></div>
+    <div style="display:flex;gap:30px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;color:#777">① 라운드 화이트 + 금색 별점 <b style="color:#0838F8">(현재 적용)</b></div>
+        <p class="rv-demo rv1"><span class="star">★</span><span class="rt">4.9</span><span class="ct">후기 2,156</span></p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;color:#777">② 앰버 그라데이션 필</div>
+        <p class="rv-demo rv2">⭐ <b>4.9</b><span class="rv2-ct">후기 2,156개</span></p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="font-size:12px;color:#777">③ 별 5개 + 후기수</div>
+        <p class="rv-demo rv3"><span class="stars">★★★★★</span><span class="rv3-ct">2,156</span></p>
+      </div>
+    </div>
+    <p class="note" style="margin:14px 0 0">원하는 번호 알려주시면 카드 전체에 그 스타일로 교체해 드립니다.</p>
+  </section>
+
+  <!-- ============ PC: BEFORE ============ -->
+  <section>
+    <div class="stitle"><span class="tag before">현재(AS-IS)</span> 일반 PC 버전 — 네이티브 가격 블록 <span class="vw">데스크탑 4열</span></div>
+    <p class="note">“월 렌탈료 / 제휴카드 <b>할인액</b>”을 우측 정렬로 따로 표기 — 최종 제휴가가 한눈에 안 들어옴</p>
+    <div class="grid pc" id="pc-before"></div>
+  </section>
+
+  <!-- ============ PC: AFTER ============ -->
+  <section>
+    <div class="stitle"><span class="tag after">제안(TO-BE)</span> 일반 PC 버전 — 신혼가전 가격 스타일 적용 <span class="vw">데스크탑 4열</span></div>
+    <p class="note">일반가는 작게(회색 칩), <b>제휴 최종가는 크게(파란 칩) + 할인율 배지</b>로 강조</p>
+    <div class="grid pc" id="pc-after"></div>
+  </section>
+
+  <!-- ============ MOBILE: BEFORE / AFTER ============ -->
+  <section>
+    <div class="stitle"><span class="tag before">현재(AS-IS)</span> 모바일 버전 <span class="vw">모바일 2열</span></div>
+    <div class="grid mo" id="mo-before"></div>
+  </section>
+  <section>
+    <div class="stitle"><span class="tag after">제안(TO-BE)</span> 모바일 버전 — 신혼가전 가격 스타일 적용 <span class="vw">모바일 2열</span></div>
+    <div class="grid mo" id="mo-after"></div>
+  </section>
+</div>
+
+<script>
+// 실제 /prod_list/1-87 (에어컨) 라이브 데이터 + 신혼카드 예시 1건
+var IMG='https://rentalshop.site/_data/file/goodsImages/';
+var DATA=[
+  {pid:26797, img:'341cf2cd4235b23878cad97b594b38da.png', brand:'AR60F07D12WS', name:'삼성 벽걸이 에어컨 7평 (침실)', fee:25500, disc:25000, rv:1284, rt:4.9},
+  {pid:7885,  img:'97bb60b5479857349d0b48d785e9e507.png', brand:'TQ0232U2S',   name:'LG전자 천장형 1way 에어컨 6평형(단상)', fee:49900, disc:24900, rv:312, rt:4.7},
+  {pid:26799, img:'ec07d94f328e022cd117647a1eb3cbf3.png', brand:'AR60F09D11WS', name:'삼성전자 벽걸이형 에어컨 9평', fee:31000, disc:6000, rv:873, rt:4.8},
+  {pid:19395, img:'3a13b2551d803767bb9f0a35117fc994.png', brand:'SQ06EZ1WBS',  name:'LG전자 휘센 벽걸이에어컨', fee:17900, disc:0, rv:2156, rt:4.9}
+];
+// 카드에 적용되는 기본 후기 태그 (= 후보 ① 라운드 화이트 + 금색 별점)
+function reviewTag(d){
+  return d.rv?'<p class="review"><span class="star">★</span><span class="rt">'+d.rt.toFixed(1)+'</span><span class="ct">후기 '+won(d.rv)+'</span></p>':'';
+}
+function won(n){return n.toLocaleString('ko-KR');}
+
+// BEFORE: 네이티브 가격 블록 (월 렌탈료 / 제휴카드 할인액)
+function cardBefore(d){
+  return '<div class="item"><div class="box"><a href="https://www.billyjo.co.kr/html/dh_prod/prod_view/'+d.pid+'" target="_blank">'
+    +'<div class="thumb"><img src="'+IMG+d.img+'" alt="'+d.name+'" loading="lazy"></div>'
+    +'<div class="txt"><p class="brand">'+d.brand+'</p><p class="name">'+d.name+'</p>'+reviewTag(d)+'</div>'
+    +'<div class="b-fee"><span class="b-label">월 렌탈료</span><p class="b-price"><strong>'+won(d.fee)+'</strong>원</p></div>'
+    +'<div class="b-fee2"><span class="b-label">제휴카드 할인</span><p class="b-price sale"><strong>'+won(d.disc)+'</strong>원</p></div>'
+    +'</a></div></div>';
+}
+
+// AFTER: 신혼가전 카드 가격 스타일 (일반 칩 + 제휴 최종가 칩 + 할인율 배지)
+function cardAfter(d){
+  var net=d.fee-d.disc;
+  var pct=d.fee>0?Math.round(d.disc/d.fee*100):0;
+  var price;
+  if(d.disc>0){
+    price='<div class="feeline"><small>일반</small>월 <b>'+won(d.fee)+'원</b>~</div>'
+      +'<div class="pprice"><small>제휴💳</small>월 '+won(net)+'원~<span class="disc">-'+pct+'%</span></div>';
+  }else{
+    // 할인 없는 상품: 제휴 줄에 동일가, 배지 생략
+    price='<div class="feeline">&nbsp;</div>'
+      +'<div class="pprice"><small>일반</small>월 '+won(d.fee)+'원~</div>';
+  }
+  return '<div class="item"><div class="box"><a href="https://www.billyjo.co.kr/html/dh_prod/prod_view/'+d.pid+'" target="_blank">'
+    +'<div class="thumb"><img src="'+IMG+d.img+'" alt="'+d.name+'" loading="lazy"></div>'
+    +'<div class="txt"><p class="brand">'+d.brand+'</p><p class="name">'+d.name+'</p>'+reviewTag(d)+'</div>'
+    +'<div class="a-price">'+price+'</div>'
+    +'</a></div></div>';
+}
+
+DATA.forEach(function(d){
+  document.getElementById('pc-before').innerHTML+=cardBefore(d);
+  document.getElementById('pc-after').innerHTML+=cardAfter(d);
+  document.getElementById('mo-before').innerHTML+=cardBefore(d);
+  document.getElementById('mo-after').innerHTML+=cardAfter(d);
+});
+</script>
+</body>
+</html>
