@@ -704,7 +704,8 @@ function bjHeaderMainInit() {
     if (!document.getElementById('bj-cf-css')) {
       var bjcfStyle = document.createElement('style'); bjcfStyle.id = 'bj-cf-css';
       bjcfStyle.textContent =
-        '.bj-pz .bj-cf-line{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;line-height:1.3}' +
+        '.bj-pz .bj-cf-line{display:flex;align-items:center;justify-content:space-between;gap:8px;white-space:nowrap;overflow:hidden;line-height:1.3}' +
+        '.bj-pz .bj-cf-val{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;min-width:0}' +  // 우측 가격 그룹(할인율+가격)
         '.bj-pz .bj-cf-normal{font-size:15px;color:#555}' +
         '.bj-pz .bj-cf-normal b{font-weight:700;color:#333}' +
         '.bj-pz .bj-cf-deal{font-size:15px;font-weight:800;color:#0838F8;margin-top:5px}' +
@@ -714,7 +715,9 @@ function bjHeaderMainInit() {
         '.bj-pz .bj-cf-deal .bj-cf-chip{color:#fff;background:#0838f8}' +
         '.bj-pz .bj-cf-disc{font-size:11px;font-weight:800;color:#fff;background:#d6336c;border-radius:6px;padding:2px 6px;flex-shrink:0}' +
         '@media all and (max-width:640px){' +
-        '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal{font-size:12.5px;white-space:normal;flex-wrap:wrap;gap:3px;row-gap:1px;letter-spacing:-.3px}' +
+        '.bj-pz .bj-cf-line{justify-content:flex-start;gap:5px}' +   // 모바일: 좌측 패킹 + 줄바꿈(가로 넘침 0)
+        '.bj-pz .bj-cf-val{flex-wrap:wrap;white-space:normal;gap:3px}' +
+        '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal{font-size:12.5px;letter-spacing:-.3px}' +
         '.bj-pz .bj-cf-chip{font-size:8.5px;min-width:32px;padding:1px 3px}' +
         '.bj-pz .bj-cf-disc{font-size:9px;padding:1px 4px}}';
       (document.head || document.documentElement).appendChild(bjcfStyle);
@@ -740,13 +743,13 @@ function bjHeaderMainInit() {
       box.className = 'bj-pz';
       if (hasDisc) {
         box.innerHTML =
-          '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span>월 <b>' + bjpFmt(reg) + '원</b>~</div>' +
-          '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span>월 ' + bjpFmt(card) + '원~<span class="bj-cf-disc">-' + bjpPct + '%</span></div>';
+          '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span><span class="bj-cf-val">월 <b>' + bjpFmt(reg) + '원</b>~</span></div>' +
+          '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span><span class="bj-cf-val"><span class="bj-cf-disc">-' + bjpPct + '%</span>월 <b>' + bjpFmt(card) + '원</b>~</span></div>';
       } else {
         // 할인 없음: 일반만 + 높이 맞춤용 숨김 placeholder 줄
         box.innerHTML =
-          '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span>월 <b>' + bjpFmt(reg) + '원</b>~</div>' +
-          '<div class="bj-cf-line bj-cf-deal bj-cf-ph"><span class="bj-cf-chip">제휴💳</span>월 ' + bjpFmt(reg) + '원~</div>';
+          '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span><span class="bj-cf-val">월 <b>' + bjpFmt(reg) + '원</b>~</span></div>' +
+          '<div class="bj-cf-line bj-cf-deal bj-cf-ph"><span class="bj-cf-chip">제휴💳</span><span class="bj-cf-val">월 <b>' + bjpFmt(reg) + '원</b>~</span></div>';
       }
       var anc = fee2 || fee;
       anc.parentNode.insertBefore(box, anc.nextSibling);
