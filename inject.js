@@ -7231,9 +7231,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if(document.getElementById('bj-rv-list-style')) return;
     var st=document.createElement('style'); st.id='bj-rv-list-style';
     st.textContent=[
-      // 우상단 배치: 하단은 hover '렌탈신청하기' 바(.thumb::after)와, 좌상단은 BEST 칩(.best-pill top/left)과 겹침 → 우상단으로 회피(brand_lb 미사용)
-      ".bj-rv-listbadge{position:absolute;right:8px;top:8px;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.97);border:1px solid #e6e8ee;border-radius:999px;padding:4px 11px;font-size:14px;line-height:1.2;font-weight:800;color:#0838F8;box-shadow:0 2px 5px rgba(0,0,0,.12);z-index:2;font-family:'Pretendard',sans-serif}",
-      ".bj-rv-listbadge .st{color:#ffb400;font-size:15px}",
+      // 우상단 배치 + BEST 칩(.best-pill: top:12px·height:22px·11px)과 높이·세로위치 정렬. 하단 '렌탈신청하기' 바와 비충돌.
+      ".bj-rv-listbadge{position:absolute;right:12px;top:12px;height:22px;box-sizing:border-box;display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.97);border:1px solid #e6e8ee;border-radius:999px;padding:0 10px;font-size:11px;line-height:1;font-weight:800;color:#0838F8;box-shadow:0 2px 5px rgba(0,0,0,.12);z-index:2;font-family:'Pretendard',sans-serif}",
+      ".bj-rv-listbadge .st{color:#ffb400;font-size:12px}",
       "#bj-rv-sort{display:flex;justify-content:flex-end;gap:6px;padding:8px 4px;font-family:'Pretendard',sans-serif}",
       "#bj-rv-sort button{font:inherit;font-size:12px;padding:6px 13px;border:1px solid #e6e8ee;border-radius:999px;background:#fff;color:#555;cursor:pointer}",
       "#bj-rv-sort button.on{background:#0838F8;border-color:#0838F8;color:#fff;font-weight:700}"
