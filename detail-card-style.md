@@ -1,12 +1,14 @@
-# 제품 카드 가격·후기 스타일 (신혼가전 스타일 통일 규격)
+# 제품 카드 가격 스타일 (신혼가전 스타일 통일 규격) — storefront `/prod_list`
 
-> billyjo 제품 카드의 **일반/제휴 가격 블록 + 후기 태그** 공통 디자인 규격.
+> billyjo storefront 제품 리스트 카드의 **일반/제휴 가격 블록** 디자인 규격(inject.js DOM 리스타일 한정).
+> 카드 전체 정본 규격은 `billyjo-lp/docs/product-card-style.md`. 이 문서는 그 하위 가격 블록 상세.
 > 처음 출처: `신혼 가전, 한 번에 시작하기`(billyjo_lp_detailcard_extract/landing/newlywed.js)의 썸네일 카드.
-> 이 스타일을 일반 제품 리스트 카드(`/prod_list`)에도 적용. 다른 세션에서 카드 변경 시 **이 문서를 단일 소스로 참조**.
+>
+> ⚠️ **후기는 이 모듈이 안 함**. storefront 후기 신호는 **별도 모듈 `bj-rv-listbadge`**(inject.js, 썸네일 **우상단** `★평점 후기N` 배지 + 정렬바)가 담당. 브랜드/카테고리 폴백 매칭이 더 정교해 그쪽이 정본. 중복 방지로 가격 restyle 모듈에서는 후기칩을 넣지 않는다. (이전 `bj-card-review` 본문 칩은 중복이라 제거됨, 2026-06-26)
 
-미리보기(외부 접속): https://bj-card-price-preview.vercel.app
+미리보기(외부 접속): https://bj-card-price-preview.vercel.app (※ 후기칩은 미리보기 전용 — 실제 storefront는 썸네일 배지)
 미리보기 소스: `billyjo-inject/preview-card-price-style.html`
-실제 적용 모듈: `billyjo-inject/inject.js` → IIFE `billyjoProdListCardRestyle`
+실제 적용 모듈: `billyjo-inject/inject.js` → 가격 `billyjoProdListCardRestyle` / 후기 배지 `bj-rv-listbadge`(IIFE 하단)
 
 ---
 
@@ -19,14 +21,10 @@
 | 일반 | `일반` | 회색 (글자 `#6b7280` / 배경 `#eceff3`) | 월 렌탈료(연한 글씨, `#555`, 숫자만 `#333` bold) |
 | 제휴 | `제휴💳` | **솔리드 파랑** (글자 `#fff` / 배경 `#0838F8`) | 제휴카드 적용 최종가(굵은 파랑 `#0838F8` 800) |
 | 할인율 | `-N%` 배지 | 흰 글자 / 핑크 `#d6336c` | 제휴 할인율 (할인 0이면 미표시) |
-| 후기 | 라운드 화이트 펄 | 금별 `★ #f5a623` + 평점 `#1f2937` + 후기수 `#9b8763` | `★ 4.9 · 후기 2,156` |
+| 후기(storefront) | 썸네일 **우상단** 배지 `bj-rv-listbadge` | 금별 `★ #ffb400` + 파랑 `#0838F8` | `★ 4.9 후기 429` (별도 모듈) |
 
-> 세 칩(회색/파랑/앰버)이 **색 계열이 모두 달라야** 혼동이 없다. 후기 태그는 `💰 가성비` 칩과 같은 앰버 톤.
-
-### 후기 태그 후보 (현재 ①번 채택)
-1. **라운드 화이트 + 금색 별점** `★ 4.9 · 후기 2,156` — 채택(가격칩과 안 부딪힘)
-2. 앰버 그라데이션 필 `⭐ 4.9 후기 2,156개`
-3. 별 5개 + 후기수 `★★★★★ 2,156`
+> 가격 두 칩(회색 일반 / 파랑 제휴)은 색·굵기로만 강약. 후기 배지는 썸네일 위 별도.
+> **썸네일 3코너 규약(겹침 금지)**: 좌상단=BEST(`.best-pill`) · 우상단=후기(`bj-rv-listbadge`) · 하단=hover '렌탈신청하기' 바(`.thumb::after`). 후기 배지를 하단/좌상단에 두면 겹침(2026-06-26 수정: bottom-left→top-right).
 
 ---
 
@@ -35,11 +33,11 @@
 네이티브 카드(`/prod_list`)의 `.fee`(월 렌탈료) / `.fee2`(제휴카드 할인액) 블록을 다음으로 교체:
 
 ```html
-<!-- .fee 안에 주입, .fee2 는 숨김 -->
+<!-- 가격: .fee 안에 주입, .fee2 는 숨김 (billyjoProdListCardRestyle) -->
 <div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span>월 <b>25,500원</b>~</div>
 <div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span>월 12,500원~<span class="bj-cf-disc">-49%</span></div>
-<!-- 후기 있는 모델만 .txt 끝에 추가 -->
-<p class="bj-card-review"><span class="star">★</span><span class="rt">4.9</span><span class="ct">후기 1,284</span></p>
+<!-- 후기: 썸네일 우상단 배지 (별도 bj-rv 모듈) -->
+<span class="bj-rv-listbadge"><span class="st">★</span>4.9 후기 429</span>
 ```
 
 할인 0원이면 제휴 줄만 `일반` 칩으로 단순 표기(배지 없음).
@@ -59,19 +57,19 @@
 .bj-cf-normal .bj-cf-chip{color:#6b7280;background:#eceff3}
 .bj-cf-deal .bj-cf-chip{color:#fff;background:#0838F8}
 .bj-cf-disc{font-size:11px;font-weight:800;color:#fff;background:#d6336c;border-radius:6px;padding:2px 6px;flex-shrink:0}
-.bj-card-review{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;margin:8px 0 0;padding:3px 9px 3px 8px;border-radius:999px;background:#fff;border:1px solid #ffe2a8;box-shadow:0 1px 2px rgba(180,83,9,.08);max-width:100%;white-space:nowrap;overflow:hidden}
-.bj-card-review .star{color:#f5a623;font-size:11.5px;line-height:1}
-.bj-card-review .rt{color:#1f2937;font-weight:800}
-.bj-card-review .ct{color:#9b8763;font-weight:600;position:relative;padding-left:7px}
-.bj-card-review .ct::before{content:"";position:absolute;left:2px;top:50%;transform:translateY(-50%);width:3px;height:3px;border-radius:50%;background:#e2c89a}
 /* 모바일 ≤640px: 일반/제휴 동일 축소 + 줄바꿈 허용(가로 넘침 0) */
 @media all and (max-width:640px){
   .prod_list .item .fee.bj-cf{padding:8px 10px 10px!important}
   .bj-cf-normal,.bj-cf-deal{font-size:12.5px;white-space:normal;flex-wrap:wrap;gap:3px;row-gap:1px;letter-spacing:-.3px}
   .bj-cf-chip{font-size:8.5px;min-width:32px;padding:1px 3px}
   .bj-cf-disc{font-size:9px;padding:1px 4px}
-  .bj-card-review{font-size:9.5px;margin-top:6px;padding:2px 7px 2px 6px}
 }
+```
+
+후기 배지 CSS(`bj-rv-listbadge`, 별도 모듈) — 썸네일 우상단:
+```css
+.bj-rv-listbadge{position:absolute;right:8px;top:8px;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.97);border:1px solid #e6e8ee;border-radius:999px;padding:4px 11px;font-size:14px;font-weight:800;color:#0838F8;box-shadow:0 2px 5px rgba(0,0,0,.12);z-index:2}
+.bj-rv-listbadge .st{color:#ffb400;font-size:15px}
 ```
 
 ---
@@ -82,10 +80,9 @@
   - 일반가 = `.fee .price strong` (월 렌탈료)
   - 할인액 = `.fee2 .price strong` (제휴카드 할인)
   - 제휴 최종가 = 일반가 − 할인액, 할인율 = round(할인액/일반가×100)
-- **후기**: `GET https://admin2-api.billyjo.co.kr/v1/reviews/counts` → `by_model[모델] = {n, avg}`
-  - 모델 매칭 키: `.brand` 텍스트(=모델코드)를 정규화. **정규화 규칙**: `model.split('_')[0].split(' ')[0].trim().toUpperCase()`
-    (예: `CHPI-7400N_V2 4개월관리` → `CHPI-7400N`, `EWBD351_4개월` → `EWBD351`)
-  - 공식 채널 후기만 집계됨. 후기 없는 모델은 칩 미표시(2026-06 기준 정수기/공청기 위주 142개 모델 보유).
+- **후기**(별도 `bj-rv-listbadge` 모듈이 사용): `GET https://admin2-api.billyjo.co.kr/v1/reviews/counts` → `by_model[모델]={n,avg}` + `by_cat[브랜드|카테고리]={n,avg}`
+  - 매칭: 카드 `p.brand`(모델코드)·`p.name`·이미지 alt에서 모델/브랜드/카테고리 추출 → by_model 정확매칭 → 라인키(시리즈) 합산 → by_cat 폴백 순. (가격 restyle 모듈의 단순 정규화보다 매칭률 높음)
+  - 공식 채널 후기만 집계. 후기 없으면 배지 미표시(2026-06 기준 정수기/공청기 위주 142개 모델).
 
 ### ⚠️ 알려진 데이터 주의점 — 제휴 할인 출처 차이
 같은 제품도 **신혼 메뉴**와 **일반 리스트**의 제휴 할인율이 다를 수 있다.
@@ -96,13 +93,17 @@
 
 ---
 
-## 5. 구현 메모 (inject.js `billyjoProdListCardRestyle`)
+## 5. 구현 메모
 
+**가격 — `billyjoProdListCardRestyle`**
 - 적용 범위: `location.pathname`에 `prod_list` 포함, 단 차량 `prod_list/7-` 제외.
-- **멱등**: `.fee.bj-cf` / `.bj-card-review` 존재 여부로 재처리 방지.
+- **멱등**: `.fee.bj-cf` 존재 여부로 재처리 방지.
 - **AJAX 대응**: 필터/정렬 시 `$('.prod_list').html(...)` 재렌더 → `MutationObserver`(디바운스 120ms) + 초기 1.2s 폴링으로 재적용.
-- 가격은 즉시 적용, 후기칩은 counts API 응답 후 추가(이미 처리된 카드에도 칩만 보강).
 - 전부 `try/catch`로 감싸 단일 카드 오류가 전체를 막지 않음.
+
+**후기 — `bj-rv-listbadge` 모듈(inject.js 하단 IIFE)**
+- `.item`마다 썸네일 우상단에 `★평점 후기N` 배지. `data-bj-rv` 멱등. 리스트 페이지엔 정렬바(기본순/후기많은순)도.
+- ⚠️ 위치는 **우상단 고정**(좌상단 BEST·하단 렌탈신청하기 바와 겹치지 않게). 변경 시 §1 3코너 규약 준수.
 
 ## 6. 배포 (WORKLOG.md 절차)
 1. `inject.js` 수정 → `git commit && git push` (billyjo-appsilon/billyjo-inject)

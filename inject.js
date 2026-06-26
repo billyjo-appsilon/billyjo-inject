@@ -2109,16 +2109,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 })();
 
 // =============================================================================
-// 상품 리스트 카드 리스타일 — 가격 블록을 신혼가전 스타일(일반/제휴 칩 + 할인배지)로
-//   재구성하고, 모델별 후기 태그(★평점 · 후기수)를 주입. AJAX 필터/정렬 재렌더 대응.
-//   가격은 카드 DOM(.fee/.fee2)에서 직접 산출(외부 의존 X), 후기칩만 admin2 counts API 사용.
+// 상품 리스트 카드 리스타일 — 가격 블록을 신혼가전 스타일(일반/제휴 칩 + 할인배지)로 재구성.
+//   가격은 카드 DOM(.fee/.fee2)에서 직접 산출(외부 의존 X). AJAX 필터/정렬 재렌더 대응.
+//   ※ 후기칩은 별도 모듈(bj-rv-listbadge, 썸네일 좌상단)이 담당 — 중복 방지로 여기선 가격만.
 // =============================================================================
 (function billyjoProdListCardRestyle() {
   if (location.pathname.indexOf('prod_list') === -1) return;
   if (location.pathname.indexOf('prod_list/7-') !== -1) return;  // 차량 견적 페이지 제외
-
-  var COUNTS_URL = 'https://admin2-api.billyjo.co.kr/v1/reviews/counts';
-  var reviewMap = null;  // {정규화모델: {n, avg}} — counts 도착 전 null
 
   var css = '\
 .prod_list .item .fee.bj-cf{height:auto !important;overflow:visible !important;padding:8px 14px 12px !important}\
@@ -2131,24 +2128,17 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 .bj-cf-normal .bj-cf-chip{color:#6b7280;background:#eceff3}\
 .bj-cf-deal .bj-cf-chip{color:#fff;background:#0838F8}\
 .bj-cf-disc{font-size:11px;font-weight:800;color:#fff;background:#d6336c;border-radius:6px;padding:2px 6px;flex-shrink:0}\
-.bj-card-review{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;margin:8px 0 0;padding:3px 9px 3px 8px;border-radius:999px;background:#fff;border:1px solid #ffe2a8;box-shadow:0 1px 2px rgba(180,83,9,.08);max-width:100%;white-space:nowrap;overflow:hidden}\
-.bj-card-review .star{color:#f5a623;font-size:11.5px;line-height:1}\
-.bj-card-review .rt{color:#1f2937;font-weight:800}\
-.bj-card-review .ct{color:#9b8763;font-weight:600;position:relative;padding-left:7px}\
-.bj-card-review .ct::before{content:"";position:absolute;left:2px;top:50%;transform:translateY(-50%);width:3px;height:3px;border-radius:50%;background:#e2c89a}\
 @media all and (max-width:640px){\
 .prod_list .item .fee.bj-cf{padding:8px 10px 10px !important}\
 .bj-cf-normal,.bj-cf-deal{font-size:12.5px;white-space:normal;flex-wrap:wrap;gap:3px;row-gap:1px;letter-spacing:-.3px}\
 .bj-cf-chip{font-size:8.5px;min-width:32px;padding:1px 3px}\
 .bj-cf-disc{font-size:9px;padding:1px 4px}\
-.bj-card-review{font-size:9.5px;margin-top:6px;padding:2px 7px 2px 6px}\
 }';
   var st = document.createElement('style'); st.id = 'bj-card-restyle-css'; st.textContent = css;
   (document.head || document.documentElement).appendChild(st);
 
   function won(n) { return (n || 0).toLocaleString('ko-KR'); }
   function intOf(el) { if (!el) return 0; var m = (el.textContent || '').replace(/[^0-9]/g, ''); return m ? parseInt(m, 10) : 0; }
-  function normModel(s) { return (s || '').split('_')[0].split(' ')[0].trim().toUpperCase(); }  // _V2/_4개월/공백 접미사 제거
 
   // 가격 블록 재구성 (월 렌탈료 + 제휴카드 할인액 → 일반/제휴 최종가 + 할인율)
   function restylePrice(item) {
@@ -2170,20 +2160,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (fee2) fee2.classList.add('bj-cf-hide');
   }
 
-  // 후기 태그 주입 (.brand = 모델코드, counts API로 평점·후기수 매칭)
-  function addReview(item) {
-    if (!reviewMap) return;
-    var txt = item.querySelector('.txt'); if (!txt || txt.querySelector('.bj-card-review')) return;
-    var brandEl = txt.querySelector('.brand'); if (!brandEl) return;
-    var rv = reviewMap[normModel(brandEl.textContent)]; if (!rv) return;
-    var p = document.createElement('p'); p.className = 'bj-card-review';
-    p.innerHTML = '<span class="star">★</span><span class="rt">' + (rv.avg || 5).toFixed(1) + '</span><span class="ct">후기 ' + won(rv.n) + '</span>';
-    txt.appendChild(p);
-  }
-
   function run() {
     var items = document.querySelectorAll('.prod_list .item');
-    for (var i = 0; i < items.length; i++) { try { restylePrice(items[i]); addReview(items[i]); } catch (e) {} }
+    for (var i = 0; i < items.length; i++) { try { restylePrice(items[i]); } catch (e) {} }
   }
 
   var t = null;
@@ -2193,12 +2172,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     try { new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
     var n = 0, iv = setInterval(function () { run(); if (++n >= 6) clearInterval(iv); }, 200);  // 초기 안전망(~1.2s)
   }
-
-  fetch(COUNTS_URL).then(function (r) { return r.json(); }).then(function (d) {
-    var bm = (d && d.by_model) || {}; reviewMap = {};
-    for (var k in bm) { if (bm.hasOwnProperty(k)) reviewMap[normModel(k)] = bm[k]; }
-    run();
-  }).catch(function () { reviewMap = {}; });
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
   else boot();
@@ -7218,7 +7191,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if(document.getElementById('bj-rv-list-style')) return;
     var st=document.createElement('style'); st.id='bj-rv-list-style';
     st.textContent=[
-      ".bj-rv-listbadge{position:absolute;left:8px;bottom:8px;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.97);border:1px solid #e6e8ee;border-radius:999px;padding:4px 11px;font-size:14px;line-height:1.2;font-weight:800;color:#0838F8;box-shadow:0 2px 5px rgba(0,0,0,.12);z-index:2;font-family:'Pretendard',sans-serif}",
+      // 우상단 배치: 하단은 hover '렌탈신청하기' 바(.thumb::after)와, 좌상단은 BEST 칩(.best-pill top/left)과 겹침 → 우상단으로 회피(brand_lb 미사용)
+      ".bj-rv-listbadge{position:absolute;right:8px;top:8px;display:inline-flex;align-items:center;gap:4px;background:rgba(255,255,255,.97);border:1px solid #e6e8ee;border-radius:999px;padding:4px 11px;font-size:14px;line-height:1.2;font-weight:800;color:#0838F8;box-shadow:0 2px 5px rgba(0,0,0,.12);z-index:2;font-family:'Pretendard',sans-serif}",
       ".bj-rv-listbadge .st{color:#ffb400;font-size:15px}",
       "#bj-rv-sort{display:flex;justify-content:flex-end;gap:6px;padding:8px 4px;font-family:'Pretendard',sans-serif}",
       "#bj-rv-sort button{font:inherit;font-size:12px;padding:6px 13px;border:1px solid #e6e8ee;border-radius:999px;background:#fff;color:#555;cursor:pointer}",
