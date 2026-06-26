@@ -781,36 +781,91 @@ function bjHeaderMainInit() {
     setTimeout(function() { clearInterval(bjpAttach); }, 20000);
   }
 
-  // === 모바일 정렬 드롭다운에 '후기순'·'할인높은순' 추가 (클라이언트 정렬) ===
-  // 네이티브 orderb_fs_m은 인기/최근/가격만 지원 → 후기수(data-bj-rvn: bj-rv 모듈)·
-  // 할인율(data-bj-disc: bj-pz 모듈)로 현재 렌더된 .prod_list .item을 클라이언트에서 재정렬.
+  // === 정렬 일원화: 후기순/할인높은순 + PC도 드롭다운 (모바일 네이티브 dropdown엔 옵션 추가, PC는 .odb 링크 → 드롭다운 교체) ===
+  // 네이티브 orderb_fs(_m)은 인기/최근/가격만 지원. 후기수(data-bj-rvn: bj-rv)·할인율(data-bj-disc: bj-pz)은 클라이언트 재정렬.
+  // 옵션 정의: [라벨, 네이티브코드|null, 클라이언트정렬 attr|null]
   if (location.pathname.indexOf('prod_list') !== -1) {
-    var bjSortBy = function(attr) {
+    var BJ_SORTS = [
+      ['인기순', '', null], ['최근등록순', 'new', null], ['가격높은순', 'hi', null], ['가격낮은순', 'lw', null],
+      ['후기순', null, 'data-bj-rvn'], ['할인높은순', null, 'data-bj-disc']
+    ];
+    var bjClientSort = function(attr) {
       var list = document.querySelector('.prod_list'); if (!list) return;
       var items = Array.prototype.slice.call(list.querySelectorAll('.item'));
-      items.sort(function(a, b) {
-        return (parseFloat(b.getAttribute(attr)) || 0) - (parseFloat(a.getAttribute(attr)) || 0);
-      });
+      items.sort(function(a, b) { return (parseFloat(b.getAttribute(attr)) || 0) - (parseFloat(a.getAttribute(attr)) || 0); });
       items.forEach(function(it) { list.appendChild(it); });
     };
-    var bjCloseSort = function(label) {
-      try { if (window.jQuery) window.jQuery('.sort__list').slideUp(200); } catch (e) {}
-      var ul = document.querySelector('.sort__list'); if (ul && !window.jQuery) ul.style.display = 'none';
-      var tit = document.querySelector('.sort__tit'); if (tit) tit.textContent = label;
+    var bjNativeSort = function(code) {  // 뷰포트에 맞는 폼으로 AJAX 정렬
+      try {
+        if (window.innerWidth > 767 && typeof window.orderb_fs === 'function') window.orderb_fs(code);
+        else if (typeof window.orderb_fs_m === 'function') window.orderb_fs_m(code);
+        else if (typeof window.orderb_fs === 'function') window.orderb_fs(code);
+      } catch (e) {}
     };
-    var bjAddSortOpts = function() {
+    var bjDoSort = function(opt) { if (opt[1] !== null) bjNativeSort(opt[1]); else bjClientSort(opt[2]); };
+
+    // (1) 모바일 네이티브 드롭다운(.sort__list)에 후기순/할인높은순 추가
+    var bjAddMobileOpts = function() {
       var ul = document.querySelector('.sort__list');
       if (!ul || ul.querySelector('.bj-sort-extra')) return;
       [['후기순', 'data-bj-rvn'], ['할인높은순', 'data-bj-disc']].forEach(function(o) {
         var li = document.createElement('li');
         li.className = 'bj-sort-extra';
         li.textContent = o[0];
-        li.addEventListener('click', function(e) { e.stopPropagation(); bjSortBy(o[1]); bjCloseSort(o[0]); });
+        li.addEventListener('click', function(e) {
+          e.stopPropagation();
+          bjClientSort(o[1]);
+          try { if (window.jQuery) window.jQuery('.sort__list').slideUp(200); } catch (e2) {}
+          var tit = document.querySelector('.sort__tit'); if (tit) tit.textContent = o[0];
+        });
         ul.appendChild(li);
       });
     };
-    bjAddSortOpts();
-    var bjSortIv = setInterval(bjAddSortOpts, 400);
+
+    // (2) PC: .odb 링크 → 커스텀 드롭다운(bj-sortdd) 교체
+    var bjBuildPcDropdown = function() {
+      var selbtn = document.querySelector('.selbtn');
+      if (!selbtn || document.querySelector('.bj-sortdd')) return;
+      selbtn.style.display = 'none';  // 기존 링크 행 숨김
+      var dd = document.createElement('div');
+      dd.className = 'bj-sortdd';
+      var tit = document.createElement('div'); tit.className = 'bj-sortdd__tit'; tit.textContent = '인기순';
+      var list = document.createElement('ul'); list.className = 'bj-sortdd__list';
+      BJ_SORTS.forEach(function(opt, idx) {
+        var li = document.createElement('li'); li.textContent = opt[0]; if (idx === 0) li.className = 'on';
+        li.addEventListener('click', function(e) {
+          e.stopPropagation();
+          bjDoSort(opt);
+          tit.textContent = opt[0];
+          Array.prototype.forEach.call(list.children, function(c) { c.className = ''; });
+          li.className = 'on';
+          dd.classList.remove('on');
+        });
+        list.appendChild(li);
+      });
+      tit.addEventListener('click', function(e) { e.stopPropagation(); dd.classList.toggle('on'); });
+      document.addEventListener('click', function() { dd.classList.remove('on'); });
+      dd.appendChild(tit); dd.appendChild(list);
+      selbtn.parentNode.insertBefore(dd, selbtn.nextSibling);
+    };
+
+    var bjSortStyle = document.createElement('style'); bjSortStyle.id = 'bj-sortdd-css';
+    bjSortStyle.textContent =
+      '#bj-rv-sort{display:none !important}' +  // 구 정렬 바 제거(일원화)
+      ".bj-sortdd{position:relative;display:inline-block;font-family:'Pretendard',sans-serif;z-index:6;vertical-align:middle}" +
+      '.bj-sortdd__tit{cursor:pointer;font-size:14px;font-weight:600;color:#333;padding:9px 30px 9px 15px;border:1px solid #e0e3e8;border-radius:8px;background:#fff;position:relative;white-space:nowrap;min-width:104px}' +
+      ".bj-sortdd__tit::after{content:'';position:absolute;right:13px;top:50%;width:7px;height:7px;border-right:1.5px solid #999;border-bottom:1.5px solid #999;transform:translateY(-70%) rotate(45deg)}" +
+      '.bj-sortdd__list{position:absolute;right:0;top:calc(100% + 5px);background:#fff;border:1px solid #e0e3e8;border-radius:8px;box-shadow:0 8px 24px rgba(0,0,0,.12);list-style:none;margin:0;padding:5px;min-width:150px;display:none}' +
+      '.bj-sortdd.on .bj-sortdd__list{display:block}' +
+      '.bj-sortdd__list li{padding:10px 13px;font-size:13.5px;color:#444;cursor:pointer;border-radius:6px;white-space:nowrap}' +
+      '.bj-sortdd__list li:hover{background:#eef2ff;color:#0838f8}' +
+      '.bj-sortdd__list li.on{color:#0838f8;font-weight:700}' +
+      '@media all and (max-width:767px){.bj-sortdd{display:none !important}}';  // 모바일은 네이티브 드롭다운 사용
+    (document.head || document.documentElement).appendChild(bjSortStyle);
+
+    var bjSortApply = function() { bjAddMobileOpts(); bjBuildPcDropdown(); };
+    bjSortApply();
+    var bjSortIv = setInterval(bjSortApply, 400);
     setTimeout(function() { clearInterval(bjSortIv); }, 20000);
   }
 
@@ -7222,7 +7277,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
   function run(){ if(!counts) return; injectCss();
     if(IS_LIST){ Array.prototype.forEach.call(document.querySelectorAll('.prod_list .item'), function(it,i){ if(!it.getAttribute('data-bj-order')) it.setAttribute('data-bj-order', i); }); }
-    badges(); if(IS_LIST) sortBar();
+    badges();  // 정렬은 정렬 드롭다운(후기순/할인높은순)으로 일원화 — 별도 sortBar 미사용
   }
   function fetchCounts(){
     fetch(API+'/counts').then(function(r){return r.json();}).then(function(j){
