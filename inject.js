@@ -696,10 +696,29 @@ function bjHeaderMainInit() {
     setTimeout(function() { clearInterval(bestInterval); }, 30000);
   }
 
-  // === 제품 리스트 가격부분 재디자인 (시안2: 절감액 배지) ===
-  // native .fee(정가) / .fee2(제휴카드 할인가)를 파싱 → bj-pz 블록 생성.
-  // 할인 있으면 정가 취소선 + 할인가 강조 + 절감액 배지, 없으면 단일가. native는 CSS로 숨김.
+  // === 제품 리스트 가격부분 재디자인 (신혼가전 칩 스타일) ===
+  // native .fee(정가) / .fee2(제휴카드 할인가=카드 적용 최종가)를 파싱 → bj-pz 블록 생성.
+  // 일반(회색 칩)/제휴💳(파란 칩) 2줄 + 할인율 배지. 할인 없으면 일반만. native는 CSS로 숨김.
+  // ⚠️ fee2 = '카드할인가'(제휴카드 적용 최종가), 할인액 아님. 제휴가=card, 할인율=(reg-card)/reg.
   if (location.pathname.indexOf('prod_list') !== -1) {
+    if (!document.getElementById('bj-cf-css')) {
+      var bjcfStyle = document.createElement('style'); bjcfStyle.id = 'bj-cf-css';
+      bjcfStyle.textContent =
+        '.bj-pz .bj-cf-line{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;line-height:1.3}' +
+        '.bj-pz .bj-cf-normal{font-size:15px;color:#555}' +
+        '.bj-pz .bj-cf-normal b{font-weight:700;color:#333}' +
+        '.bj-pz .bj-cf-deal{font-size:15px;font-weight:800;color:#0838F8;margin-top:5px}' +
+        '.bj-pz .bj-cf-ph{visibility:hidden}' +
+        '.bj-pz .bj-cf-chip{display:inline-flex;align-items:center;justify-content:center;min-width:44px;font-size:10px;font-weight:700;border-radius:4px;padding:2px 6px;flex-shrink:0}' +
+        '.bj-pz .bj-cf-normal .bj-cf-chip{color:#6b7280;background:#eceff3}' +
+        '.bj-pz .bj-cf-deal .bj-cf-chip{color:#fff;background:#0838f8}' +
+        '.bj-pz .bj-cf-disc{font-size:11px;font-weight:800;color:#fff;background:#d6336c;border-radius:6px;padding:2px 6px;flex-shrink:0}' +
+        '@media all and (max-width:640px){' +
+        '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal{font-size:12.5px;white-space:normal;flex-wrap:wrap;gap:3px;row-gap:1px;letter-spacing:-.3px}' +
+        '.bj-pz .bj-cf-chip{font-size:8.5px;min-width:32px;padding:1px 3px}' +
+        '.bj-pz .bj-cf-disc{font-size:9px;padding:1px 4px}}';
+      (document.head || document.documentElement).appendChild(bjcfStyle);
+    }
     var bjpParse = function(el) {
       if (!el) return null;
       var d = el.textContent.replace(/[^0-9]/g, '');
@@ -718,19 +737,15 @@ function bjHeaderMainInit() {
       var box = document.createElement('div');
       box.className = 'bj-pz';
       if (hasDisc) {
+        var bjpPct = Math.round((reg - card) / reg * 100);
         box.innerHTML =
-          '<div class="bj-pz-top"><span class="bj-pz-lbl">월 렌탈료</span></div>' +
-          '<div class="bj-pz-now">' + bjpFmt(reg) +
-          '<span class="bj-pz-won">원</span><span class="bj-pz-per">/월</span></div>' +
-          '<div class="bj-pz-card"><span class="bj-pz-card-lbl">제휴카드가</span>' +
-          '<span class="bj-pz-card-num">' + bjpFmt(card) + '<span class="bj-pz-card-per">원/월</span></span></div>';
+          '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span>월 <b>' + bjpFmt(reg) + '원</b>~</div>' +
+          '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span>월 ' + bjpFmt(card) + '원~<span class="bj-cf-disc">-' + bjpPct + '%</span></div>';
       } else {
+        // 할인 없음: 일반만 + 높이 맞춤용 숨김 placeholder 줄
         box.innerHTML =
-          '<div class="bj-pz-top"><span class="bj-pz-lbl">월 렌탈료</span></div>' +
-          '<div class="bj-pz-now">' + bjpFmt(reg) +
-          '<span class="bj-pz-won">원</span><span class="bj-pz-per">/월</span></div>' +
-          '<div class="bj-pz-card bj-pz-ph"><span class="bj-pz-card-lbl">제휴카드가</span>' +
-          '<span class="bj-pz-card-num">0<span class="bj-pz-card-per">원/월</span></span></div>';
+          '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span>월 <b>' + bjpFmt(reg) + '원</b>~</div>' +
+          '<div class="bj-cf-line bj-cf-deal bj-cf-ph"><span class="bj-cf-chip">제휴💳</span>월 ' + bjpFmt(reg) + '원~</div>';
       }
       var anc = fee2 || fee;
       anc.parentNode.insertBefore(box, anc.nextSibling);
@@ -2108,74 +2123,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
 })();
 
-// =============================================================================
-// 상품 리스트 카드 리스타일 — 가격 블록을 신혼가전 스타일(일반/제휴 칩 + 할인배지)로 재구성.
-//   가격은 카드 DOM(.fee/.fee2)에서 직접 산출(외부 의존 X). AJAX 필터/정렬 재렌더 대응.
-//   ※ 후기칩은 별도 모듈(bj-rv-listbadge, 썸네일 좌상단)이 담당 — 중복 방지로 여기선 가격만.
-// =============================================================================
-(function billyjoProdListCardRestyle() {
-  if (location.pathname.indexOf('prod_list') === -1) return;
-  if (location.pathname.indexOf('prod_list/7-') !== -1) return;  // 차량 견적 페이지 제외
-
-  var css = '\
-.prod_list .item .fee.bj-cf{height:auto !important;overflow:visible !important;padding:8px 14px 12px !important}\
-.prod_list .item .fee2.bj-cf-hide{display:none !important}\
-.bj-cf-line{display:flex;align-items:center;gap:5px;white-space:nowrap;overflow:hidden;line-height:1.3;float:none}\
-.bj-cf-normal{font-size:15px;color:#555}\
-.bj-cf-normal b{font-weight:700;color:#333}\
-.bj-cf-deal{font-size:15px;font-weight:800;color:#0838F8;margin-top:4px}\
-.bj-cf-chip{display:inline-flex;align-items:center;justify-content:center;min-width:44px;font-size:10px;font-weight:700;border-radius:4px;padding:2px 6px;flex-shrink:0}\
-.bj-cf-normal .bj-cf-chip{color:#6b7280;background:#eceff3}\
-.bj-cf-deal .bj-cf-chip{color:#fff;background:#0838F8}\
-.bj-cf-disc{font-size:11px;font-weight:800;color:#fff;background:#d6336c;border-radius:6px;padding:2px 6px;flex-shrink:0}\
-@media all and (max-width:640px){\
-.prod_list .item .fee.bj-cf{padding:8px 10px 10px !important}\
-.bj-cf-normal,.bj-cf-deal{font-size:12.5px;white-space:normal;flex-wrap:wrap;gap:3px;row-gap:1px;letter-spacing:-.3px}\
-.bj-cf-chip{font-size:8.5px;min-width:32px;padding:1px 3px}\
-.bj-cf-disc{font-size:9px;padding:1px 4px}\
-}';
-  var st = document.createElement('style'); st.id = 'bj-card-restyle-css'; st.textContent = css;
-  (document.head || document.documentElement).appendChild(st);
-
-  function won(n) { return (n || 0).toLocaleString('ko-KR'); }
-  function intOf(el) { if (!el) return 0; var m = (el.textContent || '').replace(/[^0-9]/g, ''); return m ? parseInt(m, 10) : 0; }
-
-  // 가격 블록 재구성 (월 렌탈료 + 제휴카드 할인액 → 일반/제휴 최종가 + 할인율)
-  function restylePrice(item) {
-    var fee = item.querySelector('.fee');
-    if (!fee || fee.classList.contains('bj-cf')) return;       // 이미 처리됨
-    var feeVal = intOf(fee.querySelector('.price strong') || fee.querySelector('strong'));
-    if (!feeVal) return;                                        // 파싱 실패 → 원본 유지
-    var fee2 = item.querySelector('.fee2');
-    var discVal = fee2 ? intOf(fee2.querySelector('.price strong') || fee2.querySelector('strong')) : 0;
-    var html;
-    if (discVal > 0) {
-      var net = Math.max(0, feeVal - discVal), pct = Math.round(discVal / feeVal * 100);
-      html = '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span>월 <b>' + won(feeVal) + '원</b>~</div>'
-           + '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span>월 ' + won(net) + '원~<span class="bj-cf-disc">-' + pct + '%</span></div>';
-    } else {
-      html = '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">일반</span>월 ' + won(feeVal) + '원~</div>';
-    }
-    fee.innerHTML = html; fee.classList.add('bj-cf');
-    if (fee2) fee2.classList.add('bj-cf-hide');
-  }
-
-  function run() {
-    var items = document.querySelectorAll('.prod_list .item');
-    for (var i = 0; i < items.length; i++) { try { restylePrice(items[i]); } catch (e) {} }
-  }
-
-  var t = null;
-  function schedule() { if (t) return; t = setTimeout(function () { t = null; run(); }, 120); }  // AJAX 재렌더 디바운스
-  function boot() {
-    run();
-    try { new MutationObserver(schedule).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
-    var n = 0, iv = setInterval(function () { run(); if (++n >= 6) clearInterval(iv); }, 200);  // 초기 안전망(~1.2s)
-  }
-
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
-  else boot();
-})();
+// (제품 리스트 카드 가격은 위 'bj-pz' 모듈이 신혼가전 칩 스타일로 단일 담당. 별도 restyle 모듈 없음.)
 
 // =============================================================================
 // 이벤트/기획전 버튼 텍스트 rewrite — "#이벤트/기획전 바로가기!!" → "이벤트 기획전 보기"
