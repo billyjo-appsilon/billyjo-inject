@@ -734,10 +734,11 @@ function bjHeaderMainInit() {
       if (reg === null) return;
       var card = fee2 ? bjpParse(fee2.querySelector('.price')) : null;
       var hasDisc = card !== null && card > 0 && card < reg;
+      var bjpPct = hasDisc ? Math.round((reg - card) / reg * 100) : 0;
+      item.setAttribute('data-bj-disc', String(bjpPct));   // 할인높은순 정렬용
       var box = document.createElement('div');
       box.className = 'bj-pz';
       if (hasDisc) {
-        var bjpPct = Math.round((reg - card) / reg * 100);
         box.innerHTML =
           '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">일반</span>월 <b>' + bjpFmt(reg) + '원</b>~</div>' +
           '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span>월 ' + bjpFmt(card) + '원~<span class="bj-cf-disc">-' + bjpPct + '%</span></div>';
@@ -778,6 +779,39 @@ function bjHeaderMainInit() {
       new MutationObserver(function() { clearTimeout(bjpT); bjpT = setTimeout(bjpRun, 80); }).observe(pl, { childList: true, subtree: true });
     }, 500);
     setTimeout(function() { clearInterval(bjpAttach); }, 20000);
+  }
+
+  // === 모바일 정렬 드롭다운에 '후기순'·'할인높은순' 추가 (클라이언트 정렬) ===
+  // 네이티브 orderb_fs_m은 인기/최근/가격만 지원 → 후기수(data-bj-rvn: bj-rv 모듈)·
+  // 할인율(data-bj-disc: bj-pz 모듈)로 현재 렌더된 .prod_list .item을 클라이언트에서 재정렬.
+  if (location.pathname.indexOf('prod_list') !== -1) {
+    var bjSortBy = function(attr) {
+      var list = document.querySelector('.prod_list'); if (!list) return;
+      var items = Array.prototype.slice.call(list.querySelectorAll('.item'));
+      items.sort(function(a, b) {
+        return (parseFloat(b.getAttribute(attr)) || 0) - (parseFloat(a.getAttribute(attr)) || 0);
+      });
+      items.forEach(function(it) { list.appendChild(it); });
+    };
+    var bjCloseSort = function(label) {
+      try { if (window.jQuery) window.jQuery('.sort__list').slideUp(200); } catch (e) {}
+      var ul = document.querySelector('.sort__list'); if (ul && !window.jQuery) ul.style.display = 'none';
+      var tit = document.querySelector('.sort__tit'); if (tit) tit.textContent = label;
+    };
+    var bjAddSortOpts = function() {
+      var ul = document.querySelector('.sort__list');
+      if (!ul || ul.querySelector('.bj-sort-extra')) return;
+      [['후기순', 'data-bj-rvn'], ['할인높은순', 'data-bj-disc']].forEach(function(o) {
+        var li = document.createElement('li');
+        li.className = 'bj-sort-extra';
+        li.textContent = o[0];
+        li.addEventListener('click', function(e) { e.stopPropagation(); bjSortBy(o[1]); bjCloseSort(o[0]); });
+        ul.appendChild(li);
+      });
+    };
+    bjAddSortOpts();
+    var bjSortIv = setInterval(bjAddSortOpts, 400);
+    setTimeout(function() { clearInterval(bjSortIv); }, 20000);
   }
 
   // === Global: replace old 기타 국산차 yellow banner with black banner ===
