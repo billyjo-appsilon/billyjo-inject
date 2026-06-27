@@ -2871,26 +2871,29 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var wrap = document.querySelector('.mobile__gnb .gnb__cateogry .category__wrap, .category__wrap');
       if (!wrap) return;
 
-      /* 신혼부부 패키지 항목 — 아직 없을 때만 삽입 */
+      /* 이번달 BEST 패키지 항목 — 아직 없을 때만 삽입.
+         (클래스명 bj-newlywed-cat 은 햄버거 위치/CSS 의존성 때문에 유지) */
       if (!document.querySelector('.bj-newlywed-cat')) {
         var commit = getCommit();
-        var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-cards@0309842/landing/newlywed.js';
+        /* 신혼부부 LP 모달 대신 페르소나 위젯(가구형태/신혼 등 페르소나 대응)을 연다 */
+        var widgetJsUrl = 'https://admin2.billyjo.co.kr/persona-wizard.js';
 
         var link = document.createElement('a');
         link.className = 'bj-newlywed-cat';
         link.href = '#';
-        link.innerHTML = '<span style="margin-right:3px">💍</span>신혼부부 패키지';
+        link.innerHTML = '<span style="margin-right:3px">💍</span>이번달 BEST 패키지';
         /* 다른 카테고리 항목과 동일 시각, 단 브랜드 파랑 강조 */
         link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:2px 0;font:700 13px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:transparent;border:0;white-space:nowrap;cursor:pointer;line-height:1.4';
         link.onclick = function(e){
           e.preventDefault();
-          if (typeof window.bjOpenNewlywedModal === 'function') {
-            window.bjOpenNewlywedModal();
-          } else if (!window.__bjNwLoading) {
-            window.__bjNwLoading = true;
+          function openWiz(){ if (window.bjPersona) window.bjPersona.open({ style: 'curation', origin: '이번달 BEST 패키지' }); }
+          if (window.bjPersona) {
+            openWiz();
+          } else if (!window.__bjWizLoading) {
+            window.__bjWizLoading = true;
             var s = document.createElement('script');
-            s.src = modalJsUrl;
-            s.onload = function(){ if (window.bjOpenNewlywedModal) window.bjOpenNewlywedModal(); };
+            s.src = widgetJsUrl;
+            s.onload = openWiz;
             document.head.appendChild(s);
           }
         };
