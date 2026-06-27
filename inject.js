@@ -2881,7 +2881,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         var link = document.createElement('a');
         link.className = 'bj-newlywed-cat';
         link.href = '#';
-        link.innerHTML = '<span style="margin-right:3px">💍</span>이번달 BEST 패키지';
+        link.innerHTML = '<span style="margin-right:3px">🏆</span>이번달 BEST 패키지';
         /* 다른 카테고리 항목과 동일 시각, 단 브랜드 파랑 강조 */
         link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:2px 0;font:700 13px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:transparent;border:0;white-space:nowrap;cursor:pointer;line-height:1.4';
         link.onclick = function(e){
@@ -6754,21 +6754,22 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var wrap = document.querySelector('.mobile__gnb .gnb__cateogry .category__wrap, .category__wrap');
     if (!wrap || wrap.querySelector('.bj-newlywed-cat')) return;
     var commit = getOwnCommitHash();
-    var modalJsUrl = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-cards@0309842/landing/newlywed.js';
+    var widgetJsUrl = 'https://admin2.billyjo.co.kr/persona-wizard.js';
     var link = document.createElement('a');
     link.className = 'bj-newlywed-cat';
     link.href = '#';
-    link.innerHTML = '<span style="margin-right:3px">💍</span>신혼부부 패키지';
+    link.innerHTML = '<span style="margin-right:3px">🏆</span>이번달 BEST 패키지';
     link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:2px 0;font:700 13px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:transparent;border:0;white-space:nowrap;cursor:pointer;line-height:1.4';
     link.onclick = function(e){
       e.preventDefault();
-      if (typeof window.bjOpenNewlywedModal === 'function') {
-        window.bjOpenNewlywedModal();
-      } else if (!window.__bjNwLoading) {
-        window.__bjNwLoading = true;
+      function openWiz(){ if (window.bjPersona) window.bjPersona.open({ style: 'curation', origin: '이번달 BEST 패키지' }); }
+      if (window.bjPersona) {
+        openWiz();
+      } else if (!window.__bjWizLoading) {
+        window.__bjWizLoading = true;
         var s = document.createElement('script');
-        s.src = modalJsUrl;
-        s.onload = function(){ if (window.bjOpenNewlywedModal) window.bjOpenNewlywedModal(); };
+        s.src = widgetJsUrl;
+        s.onload = openWiz;
         document.head.appendChild(s);
       }
     };
@@ -7321,4 +7322,25 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function start(){ if(window.__bjRvCStarted) return; if(!document.querySelector('.item p.name')) return; window.__bjRvCStarted=true; fetchCounts(); }
   var pn=0, piv=setInterval(function(){ start(); if(window.__bjRvCStarted || ++pn>20) clearInterval(piv); }, 400);
   start();
+})();
+
+/* 페이지 전환 로딩 오버레이 — billymag (로딩 길어지는 곳). beforeunload에 표시(실제 네비게이션에만 발생),
+   bfcache 복귀(pageshow)·탭 복귀·12s 세이프티로 멈춤 방지. 오버레이/gif는 init때 미리 생성·프리로드. */
+(function(){
+  var GIF='https://admin2.billyjo.co.kr/billymag-down.gif';
+  var ov, safeT;
+  function build(){
+    if(ov||!document.body) return;
+    try{ var pre=new Image(); pre.src=GIF; }catch(e){}
+    ov=document.createElement('div'); ov.id='bj-load-ov';
+    ov.style.cssText='position:fixed;inset:0;z-index:2147483646;display:none;align-items:center;justify-content:center;flex-direction:column;background:rgba(255,255,255,.86)';
+    ov.innerHTML='<img src="'+GIF+'" width="80" height="80" alt=""><div style="margin-top:10px;font:700 13px Pretendard,sans-serif;color:#5a6072">로딩중…</div>';
+    document.body.appendChild(ov);
+  }
+  function show(){ if(!ov) build(); if(ov){ ov.style.display='flex'; clearTimeout(safeT); safeT=setTimeout(hide,12000); } }
+  function hide(){ clearTimeout(safeT); if(ov) ov.style.display='none'; }
+  if(document.readyState!=='loading') build(); else document.addEventListener('DOMContentLoaded', build);
+  window.addEventListener('beforeunload', show);
+  window.addEventListener('pageshow', hide);
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) hide(); });
 })();
