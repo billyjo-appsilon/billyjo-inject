@@ -29,8 +29,8 @@
   // === 모바일 히어로 배너: 720x378 비율 고정 + 잔여 여백 제거 ===
   // 모바일 배너(.m.show-1024, ≤1024px)는 720x378로 통일. 일부 배너가 아직 720x880이라
   // 컨테이너가 길게 늘어나 아래 여백이 생김 → 비율 강제 + height:auto로 컨테이너를
-  // 배너 높이에 맞춰 줄여 하단 콘텐츠를 위로 당김. object-fit:cover(상단 기준)로
-  // 720x378은 정확히, 미변경 720x880은 상단을 보존하며 크롭.
+  // 배너 높이에 맞춰 줄여 하단 콘텐츠를 위로 당김. object-fit:contain(가운데)로
+  // 720x378은 박스를 꽉 채우고, 미변경 720x880은 잘리지 않게 축소+가운데 정렬(좌우 흰 여백).
   var heroFix = document.createElement("style");
   heroFix.id = "bj-mobile-hero-fix";
   heroFix.textContent =
@@ -41,7 +41,7 @@
     ".new-mv_wrap,.new-mv .slick-list{overflow:hidden !important;}" +
     ".new-mv .slick-slide img{" +
     "width:100% !important;height:auto !important;aspect-ratio:720/378 !important;" +
-    "object-fit:cover !important;object-position:center top !important;display:block !important;}" +
+    "object-fit:contain !important;object-position:center !important;background:#fff !important;display:block !important;}" +
     "}";
   document.head.appendChild(heroFix);
 
