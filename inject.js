@@ -81,8 +81,8 @@
   // 네이티브 PNG(search_icon/new-search_icon/cart_icon)가 테마와 안 어울려 깔끔한
   // Lucide 스타일 라인 SVG(#0838f8)로 교체. 모바일 헤더·데스크톱 검색버튼·스크롤헤더 모두 커버.
   (function bjHeaderIcons() {
-    var SEARCH = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0838f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
-    var BAG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0838f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>';
+    var SEARCH = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#aaaaaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+    var BAG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#aaaaaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>';
     function mk(svg) {
       var s = document.createElement('span');
       s.className = 'bj-hdr-svg';
@@ -3677,6 +3677,15 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '.prod_view_bot.card.mt40.bj-bar-collapsed .bj-bar-chevron{',
     '  transform:rotate(180deg);',
     '}',
+
+    /* v0.8: 하단 위젯 토글 UX 재설계 —
+       (1) 별도 ▲ 토글 박스 버튼(.bj-bar-handle-toggle) 제거: 핸들 전체 탭으로 토글되므로 중복.
+       (2) 중앙 grip 셰브론(::before)을 단일 토글 인디케이터로: 펼침 시 180° 회전해 아래(⌄) 표시.
+       (3) '옵션 선택' 칩 우측 정렬(margin-left:auto). */
+    '.bj-bar-handle-toggle{ display:none !important }',
+    '.bj-bar-handle-text .bj-bar-handle-option{ margin-left:auto !important }',
+    '.bj-bar-handle::before{ transition:background 0.15s, width 0.2s ease-out, opacity 0.15s, transform 0.25s ease !important }',
+    '.prod_view_bot.card.mt40:not(.bj-bar-collapsed) .bj-bar-handle::before{ transform:translateX(-50%) rotate(180deg) !important }',
 
     /* bb-inner padding 조정 */
     '.prod_view_bot.card.mt40 .bb-inner{ padding:14px 18px 16px !important }',
