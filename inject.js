@@ -77,6 +77,32 @@
     "}";
   document.head.appendChild(heroDeskFix);
 
+  // === 헤더 아이콘 SVG 교체: 검색 돋보기 + 장바구니 쇼핑백 (브랜드 블루 라인) ===
+  // 네이티브 PNG(search_icon/new-search_icon/cart_icon)가 테마와 안 어울려 깔끔한
+  // Lucide 스타일 라인 SVG(#0838f8)로 교체. 모바일 헤더·데스크톱 검색버튼·스크롤헤더 모두 커버.
+  (function bjHeaderIcons() {
+    var SEARCH = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0838f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
+    var BAG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#0838f8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>';
+    function mk(svg) {
+      var s = document.createElement('span');
+      s.className = 'bj-hdr-svg';
+      s.style.cssText = 'display:inline-flex;align-items:center;color:#0838f8';
+      s.innerHTML = svg;
+      return s.firstChild;
+    }
+    function swap() {
+      var sr = document.querySelectorAll('img[src*="search_icon"],img[src*="new-search_icon"]');
+      for (var i = 0; i < sr.length; i++) sr[i].replaceWith(mk(SEARCH));
+      var ct = document.querySelectorAll('img[src*="cart_icon"]');
+      for (var j = 0; j < ct.length; j++) ct[j].replaceWith(mk(BAG));
+    }
+    if (document.readyState !== 'loading') swap();
+    else document.addEventListener('DOMContentLoaded', swap);
+    var n = 0, t = setInterval(function () { swap(); if (++n >= 12) clearInterval(t); }, 300);
+    // 스크롤 시 생성되는 스크롤헤더의 PNG 아이콘도 교체
+    window.addEventListener('scroll', function () { setTimeout(swap, 50); }, { passive: true });
+  })();
+
   // === JavaScript ===
   // --- Script block 1 ---
 
