@@ -3470,6 +3470,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '  pointer-events:auto; cursor:pointer;',
     '  z-index:1;',
     '}',
+    /* 모바일: 좁은 폭(≤600px)에서 옵션 선택 버튼이 중앙 grip 셰브론(::before)과 겹침
+       → 핸들 상단 padding 확대로 콘텐츠행을 grip 아래로 분리(데스크톱은 바가 넓어 무영향) */
+    '@media (max-width:600px){',
+    '  .prod_view_bot.card.mt40 .bj-bar-handle{ padding-top:24px !important }',
+    '}',
     /* 접힘 상태: grip 살짝 펄스 (열기 유도) */
     '.prod_view_bot.card.mt40.bj-bar-collapsed .bj-bar-handle::before{',
     '  animation:bjGripBreathe 2.5s ease-in-out infinite;',
