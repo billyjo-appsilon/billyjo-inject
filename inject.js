@@ -3683,7 +3683,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
        (2) 중앙 grip 셰브론(::before)을 단일 토글 인디케이터로: 펼침 시 180° 회전해 아래(⌄) 표시.
        (3) '옵션 선택' 칩 우측 정렬(margin-left:auto). */
     '.bj-bar-handle-toggle{ display:none !important }',
-    '.bj-bar-handle-text .bj-bar-handle-option{ margin-left:auto !important }',
+    '.bj-bar-handle-text .bj-bar-handle-option{ margin-left:auto !important; margin-right:20px !important }',
     '.bj-bar-handle::before{ transition:background 0.15s, width 0.2s ease-out, opacity 0.15s, transform 0.25s ease !important }',
     '.prod_view_bot.card.mt40:not(.bj-bar-collapsed) .bj-bar-handle::before{ transform:translateX(-50%) rotate(180deg) !important }',
 
