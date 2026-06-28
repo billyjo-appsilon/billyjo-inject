@@ -63,6 +63,20 @@
     "}";
   document.head.appendChild(catAlign);
 
+  // === 데스크톱 히어로 배너: 원본 전체 노출(잘림 방지) ===
+  // 데스크톱 배너(.new-mv .pc, ≥약1240px)는 1920x560 배경이미지를 background-size:auto 100%로
+  // 높이에 맞춰 폭이 넘쳐 좌우(특히 우측 가전)가 잘림. contain으로 바꿔 원본 비율 전체를 표시.
+  // 모바일 배너(.m)와 무관(데스크톱 전용).
+  var heroDeskFix = document.createElement("style");
+  heroDeskFix.id = "bj-desktop-hero-fix";
+  heroDeskFix.textContent =
+    "@media (min-width:1025px){" +
+    ".new-mv .slick-slide .pc{" +
+    "background-size:contain !important;background-repeat:no-repeat !important;" +
+    "background-position:center !important;}" +
+    "}";
+  document.head.appendChild(heroDeskFix);
+
   // === JavaScript ===
   // --- Script block 1 ---
 
