@@ -827,6 +827,8 @@ function bjHeaderMainInit() {
         '.bj-pz .bj-cf-val{gap:2px}' +
         '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal{font-size:11.5px;letter-spacing:-.3px}' +
         '.bj-pz .bj-cf-chip{font-size:9px;min-width:0;padding:3px 5px}' +
+        // 최저 칩 폭을 제휴💳 칩과 맞춤(우측 가격 시작점 정렬) — 제휴 줄은 안 건드려 가격 잘림 무영향
+        '.bj-pz .bj-cf-normal .bj-cf-chip{min-width:26px}' +
         '.bj-pz .bj-cf-disc{font-size:9px;padding:3px 4px}}' +
         '@media all and (max-width:360px){' +
         '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal{font-size:10.5px}' +
