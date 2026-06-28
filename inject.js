@@ -820,12 +820,18 @@ function bjHeaderMainInit() {
         '.bj-pz .bj-cf-normal .bj-cf-chip{color:#6b7280;background:#eceff3}' +
         '.bj-pz .bj-cf-deal .bj-cf-chip{color:#fff;background:#0838f8}' +
         '.bj-pz .bj-cf-disc{font-size:11px;font-weight:800;color:#fff;background:#d6336c;border-radius:6px;padding:4px 7px;flex-shrink:0}' +
+        // 모바일: 칩(제휴💳)+할인태그(-NN%)+가격이 좁은 카드 폭을 넘쳐 가격이 잘림
+        // → 폰트·gap·칩 축소로 6자리 가격도 들어가게. ≤360px(iPhone SE)는 한 단계 더 축소.
         '@media all and (max-width:640px){' +
-        '.bj-pz .bj-cf-line{gap:5px}' +   // 모바일도 우측 정렬(space-between 상속), gap만 축소
-        '.bj-pz .bj-cf-val{gap:3px}' +
-        '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal{font-size:12.5px;letter-spacing:-.3px}' +
-        '.bj-pz .bj-cf-chip{font-size:10px;min-width:34px;padding:3px 6px}' +
-        '.bj-pz .bj-cf-disc{font-size:9.5px;padding:3px 5px}}';
+        '.bj-pz .bj-cf-line{gap:4px}' +   // 모바일도 우측 정렬(space-between 상속), gap만 축소
+        '.bj-pz .bj-cf-val{gap:2px}' +
+        '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal{font-size:11.5px;letter-spacing:-.3px}' +
+        '.bj-pz .bj-cf-chip{font-size:9px;min-width:0;padding:3px 5px}' +
+        '.bj-pz .bj-cf-disc{font-size:9px;padding:3px 4px}}' +
+        '@media all and (max-width:360px){' +
+        '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal{font-size:10.5px}' +
+        '.bj-pz .bj-cf-chip{font-size:8.5px}' +
+        '.bj-pz .bj-cf-disc{font-size:8.5px}}';
       (document.head || document.documentElement).appendChild(bjcfStyle);
     }
     var bjpParse = function(el) {
