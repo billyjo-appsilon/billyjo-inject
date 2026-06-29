@@ -434,18 +434,18 @@ function bjHeaderMainInit() {
       var dGnb = dGnbWrap.querySelector('ul.new-gnb');
       if (dGnb) dGnb.style.cssText += 'justify-content:flex-start !important;gap:8px !important;padding:0 !important;';
 
-      // 이번달 BEST 패키지 — 데스크톱 GNB에도 노출 (모바일 .category__wrap 항목과 동일 기능: 페르소나 위저드).
+      // 1:1 맞춤 패키지 — 데스크톱 GNB에도 노출 (모바일 .category__wrap 항목과 동일 기능: 페르소나 위저드).
       // 형제 gnb__menu a(15px / line-height:23.25px) 박스에 맞춰 수직 정렬, 브랜드 파랑(#0838F8)만 강조.
       if (dGnb && !dGnb.querySelector('.bj-best-gnb')) {
         var bestLi = document.createElement('li');
         bestLi.className = 'gnb__menu bj-best-gnb';
         var bestA = document.createElement('a');
         bestA.href = '#';
-        bestA.innerHTML = '<span style="margin-right:4px;line-height:1;display:inline-flex;align-items:center">🏆</span>이번달 BEST 패키지';
+        bestA.innerHTML = '<span style="margin-right:4px;line-height:1;display:inline-flex;align-items:center">🏆</span>1:1 맞춤 패키지';
         bestA.style.cssText = 'display:inline-flex;align-items:center;font:700 15px Pretendard,sans-serif;line-height:23.25px;color:#0838F8;text-decoration:none;white-space:nowrap;cursor:pointer';
         bestA.onclick = function(e){
           e.preventDefault();
-          function openWiz(){ if (window.bjPersona) window.bjPersona.open({ style: 'curation', origin: '이번달 BEST 패키지' }); }
+          function openWiz(){ if (window.bjPersona) window.bjPersona.open({ style: 'curation', origin: '1:1 맞춤 패키지' }); }
           if (window.bjPersona) {
             openWiz();
           } else if (!window.__bjWizLoading) {
@@ -2985,7 +2985,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var wrap = document.querySelector('.mobile__gnb .gnb__cateogry .category__wrap, .category__wrap');
       if (!wrap) return;
 
-      /* 이번달 BEST 패키지 항목 — 아직 없을 때만 삽입.
+      /* 1:1 맞춤 패키지 항목 — 아직 없을 때만 삽입.
          (클래스명 bj-newlywed-cat 은 햄버거 위치/CSS 의존성 때문에 유지) */
       if (!document.querySelector('.bj-newlywed-cat')) {
         var commit = getCommit();
@@ -2995,14 +2995,14 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         var link = document.createElement('a');
         link.className = 'bj-newlywed-cat';
         link.href = '#';
-        link.innerHTML = '<span style="margin-right:3px;line-height:1;display:inline-flex;align-items:center">🏆</span>이번달 BEST 패키지';
+        link.innerHTML = '<span style="margin-right:3px;line-height:1;display:inline-flex;align-items:center">🏆</span>1:1 맞춤 패키지';
         /* 다른 카테고리 항목(.category__wrap a = 14px / line-height:1.5 / padding:0)과
            동일한 박스 모델로 맞춰 수직 정렬. 기존 13px·padding:2px·line-height:1.4 차이로
            형제 항목보다 위로 떠 보이던 문제 해소. 브랜드 파랑(#0838F8)만 강조 유지. */
         link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:0;margin:0;font:700 14px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:transparent;border:0;white-space:nowrap;cursor:pointer;line-height:1.5';
         link.onclick = function(e){
           e.preventDefault();
-          function openWiz(){ if (window.bjPersona) window.bjPersona.open({ style: 'curation', origin: '이번달 BEST 패키지' }); }
+          function openWiz(){ if (window.bjPersona) window.bjPersona.open({ style: 'curation', origin: '1:1 맞춤 패키지' }); }
           if (window.bjPersona) {
             openWiz();
           } else if (!window.__bjWizLoading) {
@@ -6888,11 +6888,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var link = document.createElement('a');
     link.className = 'bj-newlywed-cat';
     link.href = '#';
-    link.innerHTML = '<span style="margin-right:3px">🏆</span>이번달 BEST 패키지';
+    link.innerHTML = '<span style="margin-right:3px">🏆</span>1:1 맞춤 패키지';
     link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:2px 0;font:700 13px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:transparent;border:0;white-space:nowrap;cursor:pointer;line-height:1.4';
     link.onclick = function(e){
       e.preventDefault();
-      function openWiz(){ if (window.bjPersona) window.bjPersona.open({ style: 'curation', origin: '이번달 BEST 패키지' }); }
+      function openWiz(){ if (window.bjPersona) window.bjPersona.open({ style: 'curation', origin: '1:1 맞춤 패키지' }); }
       if (window.bjPersona) {
         openWiz();
       } else if (!window.__bjWizLoading) {
