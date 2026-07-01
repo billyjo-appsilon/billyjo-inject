@@ -1807,6 +1807,40 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     }
   }
 
+  // === 메인 섹션 순서 재배치 + 시안(Figma 9:89)에 없는 섹션 숨김 (2026-07-01) ===
+  //   #bj-v5-injected 를 flex column 으로 만들고 zone 별 CSS order 지정 (DOM 이동 없음, 되돌리기 쉬움).
+  //   매칭은 섹션 제목 텍스트 기준(자식 인덱스 비의존). 롤백: 이 함수 + 호출 1줄 제거.
+  function reorderHome(pageEl) {
+    if (!pageEl || pageEl.getAttribute('data-bj-reordered')) return;
+    pageEl.setAttribute('data-bj-reordered', '1');
+    pageEl.style.display = 'flex';
+    pageEl.style.flexDirection = 'column';
+    // 시안 순서: 히어로 → 후기 → 신뢰도 → 서비스 → 큐레이션 → 신청방법 → 혜택 → 가격비교 → FAQ
+    var ORDER = [
+      ['실제 고객 후기', 2],
+      ['부담없이 시작하세요', 3],
+      ['본사보다 빌리조가 좋은', 4],
+      ['빌리조만의 컨설팅', 5],
+      ['렌탈 신청 방법', 6],
+      ['제휴카드 추가 혜택', 7],
+      ['같은 가격, 더 풍성한 혜택', 8],
+      ['자주 묻는 질문', 9]
+    ];
+    // 시안에 없는 섹션 = 숨김 (이사·신혼 / 광고전화없음(개인정보로 통합) / 위약금 중도해지 마이너스정보)
+    var HIDE = ['이사·신혼도 안심하세요', '광고 전화 없습니다', '위약금, 숨기지 않습니다'];
+    Array.prototype.slice.call(pageEl.children).forEach(function(z) {
+      var t = z.innerText || z.textContent || '';
+      var i;
+      for (i = 0; i < HIDE.length; i++) {
+        if (t.indexOf(HIDE[i]) !== -1) { z.style.display = 'none'; return; }
+      }
+      for (i = 0; i < ORDER.length; i++) {
+        if (t.indexOf(ORDER[i][0]) !== -1) { z.style.order = String(ORDER[i][1]); return; }
+      }
+      if (!z.style.order) z.style.order = '1'; // 히어로/기타 = 최상단 유지
+    });
+  }
+
   function injectContent(html) {
     if (isInjected()) return;
     var target = findTargetHeading();
@@ -1848,6 +1882,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       pageEl.id = INJECTED_ID;
       target.parentNode.insertBefore(pageEl, target);
       wrapZones(pageEl);
+      reorderHome(pageEl);
     } catch (e) { console.error('[bj-v5] inject failed:', e); }
   }
 
