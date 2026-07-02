@@ -84,6 +84,21 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
+  // === 중간 배너 화살표를 메인 배너 스타일로 통일 (흰 원형 → 히어로 쉐브론, 양끝·세로중앙) (2026-07-02) ===
+  (function matchMidBannerNav() {
+    if (document.getElementById('bj-mid-nav')) return;
+    var A = 'background-size:contain !important;background-repeat:no-repeat !important;background-position:center !important;width:32px !important;height:56px !important;top:50% !important;margin-top:-28px !important;bottom:auto !important;z-index:5 !important;';
+    var s = document.createElement('style');
+    s.id = 'bj-mid-nav';
+    s.textContent = '@media(min-width:769px){' +
+      '.new-mb{position:relative !important}' +
+      '.new-mb .arrows{position:static !important}' +
+      '.new-mb .arrow__prev{position:absolute !important;background-image:url("https://billyjo.kr/image/main/new-mv_left.png") !important;left:20px !important;right:auto !important;' + A + '}' +
+      '.new-mb .arrow__next{position:absolute !important;background-image:url("https://billyjo.kr/image/main/new-mv_right.png") !important;right:20px !important;left:auto !important;' + A + '}' +
+      '}';
+    (document.head || document.documentElement).appendChild(s);
+  })();
+
   // === 모바일 히어로 배너: 720x378 비율 고정 + 잔여 여백 제거 ===
   // 모바일 배너(.m.show-1024, ≤1024px)는 720x378로 통일. 일부 배너가 아직 720x880이라
   // 컨테이너가 길게 늘어나 아래 여백이 생김 → 비율 강제 + height:auto로 컨테이너를
