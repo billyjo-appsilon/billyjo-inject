@@ -1952,6 +1952,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       br.innerHTML = '<div class="bj-bq">❝</div><p>오래 사용할 가전인데,<br><b>신중하게 비교하고 골라야 하지 않을까요?</b></p><div class="bj-bq">❞</div>';
       pageEl.appendChild(br);
     }
+
+    // 배경 흰색/회색 통일 (하늘색 zone-sky 제거) — .hero(파란 트러스트 카드) 제외, 시각 순서대로 교차 (2026-07-02)
+    var bjSecs = Array.prototype.slice.call(pageEl.children).filter(function(z) {
+      return z.style.display !== 'none' && (z.classList.contains('zone') || z.classList.contains('bj-bridge'));
+    });
+    bjSecs.sort(function(a, b) { return (parseInt(getComputedStyle(a).order, 10) || 99) - (parseInt(getComputedStyle(b).order, 10) || 99); });
+    bjSecs.forEach(function(z, i) { z.style.setProperty('background-color', i % 2 === 0 ? '#f7f7f7' : '#ffffff', 'important'); });
   }
 
   function injectContent(html) {
