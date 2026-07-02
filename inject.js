@@ -1911,7 +1911,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         ".bj-brand-track{display:flex !important;width:max-content !important;gap:12px !important;align-items:center;animation:bjBrandScroll 26s linear infinite}" +
         ".bj-brand-track:hover{animation-play-state:paused}" +
         ".bj-brand-track .brand-cell{flex:0 0 auto !important;width:132px !important;height:60px !important;margin:0 !important}" +
-        "@keyframes bjBrandScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}";
+        "@keyframes bjBrandScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}" +
+        // 신뢰도 섹션: 마퀴↔보장바 사이 헤딩 + 2번째 보장 바 (시안 Image #14 맞춤) (2026-07-02)
+        "#bj-v5-injected .bj-trust-sub{text-align:center !important;font-size:20px !important;font-weight:800 !important;color:#111 !important;letter-spacing:-.02em !important;line-height:1.42 !important;word-break:keep-all !important;margin:24px 0 14px !important}" +
+        "#bj-v5-injected .bj-trust-sub strong{color:#0838f8 !important}" +
+        "#bj-v5-injected .highlight-bar[data-bj-bar2]{margin-top:10px !important}" +
+        "@media(min-width:768px){#bj-v5-injected .bj-trust-sub{font-size:24px !important;margin:30px 0 16px !important}}";
       (document.head || document.documentElement).appendChild(bjRf);
     }
     // 시안 순서: 히어로 → 브릿지캡션(order 2, 아래서 생성) → 후기 → 신뢰도 → 서비스 → 큐레이션 → 신청방법 → 가격비교 → FAQ
@@ -1986,6 +1991,29 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjCells.forEach(function(c) { bjTrack.appendChild(c); });
       bjCells.forEach(function(c) { bjTrack.appendChild(c.cloneNode(true)); });
       bjBrandGrid.appendChild(bjTrack);
+    }
+
+    // 신뢰도 섹션: 시안(Image #14)대로 "본사 동일 제품에" 헤딩 + 2번째 보장 바 추가 (2026-07-02)
+    var bjBar1 = pageEl.querySelector('.highlight-bar');
+    if (bjBar1 && !bjBar1.getAttribute('data-bj-bars')) {
+      bjBar1.setAttribute('data-bj-bars', '1');
+      // (1) 마퀴와 보장 바 사이 헤딩 삽입
+      var bjTh = document.createElement('p');
+      bjTh.className = 'bj-trust-sub';
+      bjTh.innerHTML = '본사 동일 제품에 <strong>설치비·등록비 0원</strong>으로 부담없이';
+      bjBar1.parentNode.insertBefore(bjTh, bjBar1);
+      // (2) 1번째 바 복제 → "설치비·등록비 0원 보장"으로 리텍스트 + 동전 아이콘
+      var bjBar2 = bjBar1.cloneNode(true);
+      bjBar2.setAttribute('data-bj-bar2', '1');
+      bjBar2.removeAttribute('data-bj-bars');
+      var bjUse = bjBar2.querySelector('use');
+      if (bjUse) bjUse.setAttribute('href', '#i-coins');
+      var bjT = bjBar2.querySelector('.t');
+      var bjD = bjBar2.querySelector('.d');
+      if (bjT) bjT.textContent = '설치비 · 등록비 0원 보장';
+      if (bjD) bjD.textContent = '설치·등록비 0원 + 최대 72개월 할부로 부담없는 시작';
+      if (bjBar1.nextSibling) bjBar1.parentNode.insertBefore(bjBar2, bjBar1.nextSibling);
+      else bjBar1.parentNode.appendChild(bjBar2);
     }
   }
 
