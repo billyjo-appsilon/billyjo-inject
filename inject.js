@@ -1903,7 +1903,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (!document.getElementById('bj-refine-css')) {
       var bjRf = document.createElement('style');
       bjRf.id = 'bj-refine-css';
-      bjRf.textContent = '#bj-v5-injected .pill{background:transparent !important;color:#0838f8 !important;box-shadow:none !important;padding:0 !important;font-size:15px !important;font-weight:800 !important;letter-spacing:-.01em !important;margin-bottom:6px !important}' +
+      bjRf.textContent = '#bj-v5-injected .pill-wrap{display:none !important}' +
+        // 각 섹션 상단 작은 파란 eyebrow(.pill) 전부 제거 (Jun 지시, 2026-07-02) — 큰 제목만 유지
+        '#bj-v5-injected .pill{display:none !important}' +
         // "빌리조" 텍스트(.bj-logo)를 한글 워드마크 로고 이미지로 치환 (2026-07-02)
         ".bj-logo{display:inline-block !important;vertical-align:middle !important;height:1.5em !important;width:2.97em !important;background:url('https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@25e1555/images/billyjo-wordmark.png') no-repeat left center/contain !important;color:transparent !important;text-indent:-9999px !important;overflow:hidden !important;white-space:nowrap !important}" +
         // 브랜드 로고 그리드 → 가로 마퀴 (시안 디자인 맞춤, 카피 16개 유지) (2026-07-02)
@@ -1913,7 +1915,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         ".bj-brand-track .brand-cell{flex:0 0 auto !important;width:132px !important;height:60px !important;margin:0 !important}" +
         "@keyframes bjBrandScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}" +
         // 신뢰도 섹션: 마퀴↔보장바 사이 헤딩 + 2번째 보장 바 (시안 Image #14 맞춤) (2026-07-02)
-        "#bj-v5-injected .bj-trust-sub{text-align:center !important;font-size:20px !important;font-weight:800 !important;color:#111 !important;letter-spacing:-.02em !important;line-height:1.42 !important;word-break:keep-all !important;margin:24px 0 14px !important}" +
+        "#bj-v5-injected .bj-trust-sub{display:block !important;text-align:center !important;font-size:20px !important;font-weight:800 !important;color:#111 !important;letter-spacing:-.02em !important;line-height:1.42 !important;word-break:keep-all !important;margin:24px 0 14px !important}" +
         "#bj-v5-injected .bj-trust-sub strong{color:#0838f8 !important}" +
         "#bj-v5-injected .highlight-bar[data-bj-bar2]{margin-top:10px !important}" +
         "@media(min-width:768px){#bj-v5-injected .bj-trust-sub{font-size:24px !important;margin:30px 0 16px !important}}";
@@ -1997,6 +1999,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var bjBar1 = pageEl.querySelector('.highlight-bar');
     if (bjBar1 && !bjBar1.getAttribute('data-bj-bars')) {
       bjBar1.setAttribute('data-bj-bars', '1');
+      // (0) 마퀴 위 헤딩(.lead)을 시안 카피로 교체 + 아래 헤딩과 동일 스타일 통일 (2026-07-02)
+      var bjLead = bjBar1.parentElement.querySelector('.lead');
+      if (bjLead) {
+        bjLead.classList.add('bj-trust-sub');
+        bjLead.innerHTML = '<strong>20+개 가전브랜드 본사·파트너사</strong>와 직계약하고 배송까지!';
+      }
       // (1) 마퀴와 보장 바 사이 헤딩 삽입
       var bjTh = document.createElement('p');
       bjTh.className = 'bj-trust-sub';
