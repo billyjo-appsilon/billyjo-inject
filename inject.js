@@ -1906,8 +1906,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjRf.textContent = '#bj-v5-injected .pill{background:transparent !important;color:#0838f8 !important;box-shadow:none !important;padding:0 !important;font-size:15px !important;font-weight:800 !important;letter-spacing:-.01em !important;margin-bottom:6px !important}' +
         // "빌리조" 텍스트(.bj-logo)를 한글 워드마크 로고 이미지로 치환 (2026-07-02)
         ".bj-logo{display:inline-block !important;vertical-align:middle !important;height:1.5em !important;width:2.97em !important;background:url('https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@25e1555/images/billyjo-wordmark.png') no-repeat left center/contain !important;color:transparent !important;text-indent:-9999px !important;overflow:hidden !important;white-space:nowrap !important}" +
-        // 모바일 품질 정돈: 브랜드 로고 그리드 콤팩트(521px→~360px, 로고 선명 유지) (2026-07-02)
-        "@media(max-width:768px){#bj-v5-injected .brand-cell{height:52px !important;padding:7px !important}#bj-v5-injected .brand-cell img{max-height:26px !important;max-width:82% !important;width:auto !important;object-fit:contain !important}}";
+        // 브랜드 로고 그리드 → 가로 마퀴 (시안 디자인 맞춤, 카피 16개 유지) (2026-07-02)
+        "#bj-v5-injected .brand-grid[data-bjmq]{display:block !important;overflow:hidden !important;grid-template-columns:none !important;height:auto !important;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}" +
+        ".bj-brand-track{display:flex !important;width:max-content !important;gap:12px !important;align-items:center;animation:bjBrandScroll 26s linear infinite}" +
+        ".bj-brand-track:hover{animation-play-state:paused}" +
+        ".bj-brand-track .brand-cell{flex:0 0 auto !important;width:132px !important;height:60px !important;margin:0 !important}" +
+        "@keyframes bjBrandScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}";
       (document.head || document.documentElement).appendChild(bjRf);
     }
     // 시안 순서: 히어로 → 브릿지캡션(order 2, 아래서 생성) → 후기 → 신뢰도 → 서비스 → 큐레이션 → 신청방법 → 가격비교 → FAQ
@@ -1971,6 +1975,18 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     });
     bjSecs.sort(function(a, b) { return (parseInt(getComputedStyle(a).order, 10) || 99) - (parseInt(getComputedStyle(b).order, 10) || 99); });
     bjSecs.forEach(function(z, i) { z.style.setProperty('background-color', i % 2 === 0 ? '#f7f7f7' : '#ffffff', 'important'); });
+
+    // 브랜드 로고 그리드 → 가로 마퀴 (시안 디자인 맞춤, 카피 유지) — 셀을 트랙으로 감싸고 복제해 무한 루프
+    var bjBrandGrid = pageEl.querySelector('.brand-grid');
+    if (bjBrandGrid && !bjBrandGrid.getAttribute('data-bjmq')) {
+      bjBrandGrid.setAttribute('data-bjmq', '1');
+      var bjCells = Array.prototype.slice.call(bjBrandGrid.children);
+      var bjTrack = document.createElement('div');
+      bjTrack.className = 'bj-brand-track';
+      bjCells.forEach(function(c) { bjTrack.appendChild(c); });
+      bjCells.forEach(function(c) { bjTrack.appendChild(c.cloneNode(true)); });
+      bjBrandGrid.appendChild(bjTrack);
+    }
   }
 
   function injectContent(html) {
