@@ -36,6 +36,27 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
+  // === 메인/중간 배너 폭을 콘텐츠(아이콘) 폭 1280에 맞춰 축소 (비율 유지, ≥1280 데스크톱만) (2026-07-02) ===
+  //   메인(.new-mv_wrap): slick이 resize로 슬라이드 폭 재계산 → img width:100%로 축소.
+  //   중간(.new-mb): 고정 1680 슬라이드라 img width 1280 강제 → 비율 유지(202).
+  (function fitBanners() {
+    if (document.getElementById('bj-banner-fit')) return;
+    var s = document.createElement('style');
+    s.id = 'bj-banner-fit';
+    s.textContent = '@media(min-width:1280px){' +
+      '.new-mv_wrap{max-width:1280px !important;margin-left:auto !important;margin-right:auto !important}' +
+      '.new-mv_wrap .slick-slide img{width:100% !important;height:auto !important}' +
+      '.new-mb{max-width:1280px !important;margin-left:auto !important;margin-right:auto !important;height:auto !important;overflow:hidden !important}' +
+      '.new-mb .slick-list,.new-mb .slick-track,.new-mb .slick-slide,.new-mb .slick-slide>a{height:auto !important}' +
+      '.new-mb .slick-slide img{width:1280px !important;max-width:1280px !important;height:auto !important;display:block !important}' +
+      '}';
+    (document.head || document.documentElement).appendChild(s);
+    // 히어로 slick이 슬라이드 폭을 재계산하도록 resize 발사 (init 타이밍 커버)
+    function kick() { try { window.dispatchEvent(new Event('resize')); } catch (e) {} }
+    [100, 600, 1500, 3000].forEach(function(t) { setTimeout(kick, t); });
+    if (document.readyState !== 'complete') window.addEventListener('load', kick);
+  })();
+
   // === 모바일 히어로 배너: 720x378 비율 고정 + 잔여 여백 제거 ===
   // 모바일 배너(.m.show-1024, ≤1024px)는 720x378로 통일. 일부 배너가 아직 720x880이라
   // 컨테이너가 길게 늘어나 아래 여백이 생김 → 비율 강제 + height:auto로 컨테이너를
