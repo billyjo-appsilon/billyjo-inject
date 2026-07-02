@@ -1905,7 +1905,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjRf.id = 'bj-refine-css';
       bjRf.textContent = '#bj-v5-injected .pill{background:transparent !important;color:#0838f8 !important;box-shadow:none !important;padding:0 !important;font-size:15px !important;font-weight:800 !important;letter-spacing:-.01em !important;margin-bottom:6px !important}' +
         // "빌리조" 텍스트(.bj-logo)를 한글 워드마크 로고 이미지로 치환 (2026-07-02)
-        ".bj-logo{display:inline-block !important;vertical-align:middle !important;height:1.5em !important;width:2.97em !important;background:url('https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@25e1555/images/billyjo-wordmark.png') no-repeat left center/contain !important;color:transparent !important;text-indent:-9999px !important;overflow:hidden !important;white-space:nowrap !important}";
+        ".bj-logo{display:inline-block !important;vertical-align:middle !important;height:1.5em !important;width:2.97em !important;background:url('https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@25e1555/images/billyjo-wordmark.png') no-repeat left center/contain !important;color:transparent !important;text-indent:-9999px !important;overflow:hidden !important;white-space:nowrap !important}" +
+        // 모바일 품질 정돈: 브랜드 로고 그리드 콤팩트(521px→~360px, 로고 선명 유지) (2026-07-02)
+        "@media(max-width:768px){#bj-v5-injected .brand-cell{height:52px !important;padding:7px !important}#bj-v5-injected .brand-cell img{max-height:26px !important;max-width:82% !important;width:auto !important;object-fit:contain !important}}";
       (document.head || document.documentElement).appendChild(bjRf);
     }
     // 시안 순서: 히어로 → 브릿지캡션(order 2, 아래서 생성) → 후기 → 신뢰도 → 서비스 → 큐레이션 → 신청방법 → 가격비교 → FAQ
