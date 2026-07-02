@@ -1898,6 +1898,14 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     pageEl.setAttribute('data-bj-reordered', '1');
     pageEl.style.display = 'flex';
     pageEl.style.flexDirection = 'column';
+    pageEl.style.rowGap = '28px'; // P1② 섹션 간 세로 여백 (2026-07-02)
+    // P1① 섹션 헤더 pill: 솔리드 블루 블록 → 절제된 블루 eyebrow 텍스트 (파랑 남용 완화, 아정당 레퍼런스)
+    if (!document.getElementById('bj-refine-css')) {
+      var bjRf = document.createElement('style');
+      bjRf.id = 'bj-refine-css';
+      bjRf.textContent = '#bj-v5-injected .pill{background:transparent !important;color:#0838f8 !important;box-shadow:none !important;padding:0 !important;font-size:15px !important;font-weight:800 !important;letter-spacing:-.01em !important;margin-bottom:6px !important}';
+      (document.head || document.documentElement).appendChild(bjRf);
+    }
     // 시안 순서: 히어로 → 브릿지캡션(order 2, 아래서 생성) → 후기 → 신뢰도 → 서비스 → 큐레이션 → 신청방법 → 가격비교 → FAQ
     var ORDER = [
       ['실제 고객 후기', 3],
