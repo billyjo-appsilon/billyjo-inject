@@ -71,6 +71,19 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
+  // === 히어로 배너 네비게이션(화살표·닷) 축소 (2026-07-02) ===
+  //   화살표 .arrow__prev/next 53x95(bg-image cover)→32x56, 닷 대시 95px→36px. ≥769 데스크톱.
+  (function shrinkHeroNav() {
+    if (document.getElementById('bj-hero-nav')) return;
+    var s = document.createElement('style');
+    s.id = 'bj-hero-nav';
+    s.textContent = '@media(min-width:769px){' +
+      '.new-mv_wrap .arrow__prev,.new-mv_wrap .arrow__next{width:32px !important;height:56px !important}' +
+      '.new-mv_wrap .slick-dots li,.new-mv_wrap .slick-dots li button{width:36px !important}' +
+      '}';
+    (document.head || document.documentElement).appendChild(s);
+  })();
+
   // === 모바일 히어로 배너: 720x378 비율 고정 + 잔여 여백 제거 ===
   // 모바일 배너(.m.show-1024, ≤1024px)는 720x378로 통일. 일부 배너가 아직 720x880이라
   // 컨테이너가 길게 늘어나 아래 여백이 생김 → 비율 강제 + height:auto로 컨테이너를
