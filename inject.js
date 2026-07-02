@@ -1901,12 +1901,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     // 시안 순서: 히어로 → 브릿지캡션(order 2, 아래서 생성) → 후기 → 신뢰도 → 서비스 → 큐레이션 → 신청방법 → 가격비교 → FAQ
     var ORDER = [
       ['실제 고객 후기', 3],
-      ['부담없이 시작하세요', 4],
-      ['본사보다 빌리조가 좋은', 5],
-      ['빌리조만의 컨설팅', 6],
-      ['렌탈 신청 방법', 7],
-      ['같은 가격, 더 풍성한 혜택', 8],
-      ['자주 묻는 질문', 9]
+      ['부담없이 시작하세요', 5],
+      ['본사보다 빌리조가 좋은', 6],
+      ['빌리조만의 컨설팅', 7],
+      ['렌탈 신청 방법', 8],
+      ['같은 가격, 더 풍성한 혜택', 9],
+      ['자주 묻는 질문', 10]
     ];
     // 시안에 없는 섹션 = 숨김 (이사·신혼 / 광고전화없음(개인정보로 통합) / 위약금 중도해지 / 제휴카드 추가혜택)
     var HIDE = ['이사·신혼도 안심하세요', '광고 전화 없습니다', '위약금, 숨기지 않습니다', '제휴카드 추가 혜택'];
@@ -1922,15 +1922,28 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (!z.style.order) z.style.order = '1'; // 히어로/기타 = 최상단 유지
     });
 
+    // 신뢰도 트러스트 카드(.hero "설치 케어는 본사에서") → 시안 "믿고 맡길 수 있는 빌리조"로 텍스트 교체 + 후기 다음(order 4) (2026-07-02)
+    var bjTrust = pageEl.querySelector('.hero');
+    if (bjTrust && !bjTrust.getAttribute('data-bj-trust')) {
+      bjTrust.setAttribute('data-bj-trust', '1');
+      bjTrust.style.order = '4';
+      var bjTh = bjTrust.querySelector('h1');
+      if (bjTh) bjTh.innerHTML = '믿고 맡길 수 있는 <span class="yellow">빌리조</span>';
+      var bjTp = bjTrust.querySelector('p');
+      if (bjTp) bjTp.innerHTML = '막막했던 설치부터 관리까지 부담 Zero!<br>빌리조는 전 상품 정품 보장하는 직계약 렌탈 플랫폼입니다.';
+      var bjEb = bjTrust.querySelector('.badge-hero');
+      if (bjEb) bjEb.style.display = 'none';
+    }
+
     // 브릿지 캡션 신규 추가 (시안 9:89, 2026-07-02) — 히어로 다음·후기 위(order 2). "오래 사용할 가전인데..."
     if (!document.getElementById('bj-bridge-css')) {
       var bs = document.createElement('style');
       bs.id = 'bj-bridge-css';
-      bs.textContent = '.bj-bridge{order:2;text-align:center;padding:42px 20px 34px;background:#fff}' +
-        '.bj-bridge .bj-bq{font-size:34px;color:#c2c6d2;font-weight:800;line-height:.7}' +
-        '.bj-bridge p{margin:12px 0;font-size:23px;font-weight:800;line-height:1.5;letter-spacing:-.02em;color:#1a1a1e}' +
+      bs.textContent = '.bj-bridge{order:2;text-align:center;padding:46px 20px 38px;background:#fff}' +
+        '.bj-bridge .bj-bq{font-size:42px;color:#c2c6d2;font-weight:800;line-height:.7}' +
+        '.bj-bridge p{margin:14px 0;font-size:28px;font-weight:800;line-height:1.5;letter-spacing:-.02em;color:#1a1a1e}' +
         '.bj-bridge p b{color:#0838f8}' +
-        '@media(max-width:768px){.bj-bridge{padding:32px 18px 26px}.bj-bridge p{font-size:18px}.bj-bridge .bj-bq{font-size:26px}}';
+        '@media(max-width:768px){.bj-bridge{padding:34px 18px 28px}.bj-bridge p{font-size:21px}.bj-bridge .bj-bq{font-size:30px}}';
       (document.head || document.documentElement).appendChild(bs);
     }
     if (!pageEl.querySelector('.bj-bridge')) {
