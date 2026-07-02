@@ -99,6 +99,16 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
+  // === 헤더 GNB 겹침 수정 (카테고리 10개가 넘쳐 우측 고객센터/장바구니와 겹침) (2026-07-02) ===
+  //   .gnb__menu margin-right 25px → 10px 로 GNB 폭 축소 → '모바일' 항목이 '고객센터' 아래 깔리던 겹침 해소.
+  (function fixGnbOverlap() {
+    if (document.getElementById('bj-gnb-fit')) return;
+    var s = document.createElement('style');
+    s.id = 'bj-gnb-fit';
+    s.textContent = '@media(min-width:1024px){.new-gnb .gnb__menu{margin-right:10px !important}}';
+    (document.head || document.documentElement).appendChild(s);
+  })();
+
   // === 모바일 히어로 배너: 720x378 비율 고정 + 잔여 여백 제거 ===
   // 모바일 배너(.m.show-1024, ≤1024px)는 720x378로 통일. 일부 배너가 아직 720x880이라
   // 컨테이너가 길게 늘어나 아래 여백이 생김 → 비율 강제 + height:auto로 컨테이너를
