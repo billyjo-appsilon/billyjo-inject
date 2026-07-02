@@ -26,6 +26,16 @@
   style.textContent = css;
   document.head.appendChild(style);
 
+  // === 메인 카테고리 섹션 제목 텍스트 숨김 (시안 반영, 2026-07-02) ===
+  //   아이콘은 유지, 제목만: PC ".new-mc__tit"(고객님들이 많이 찾는 주요 카테고리) / 모바일 ".m_tit"(인기 카테고리)
+  (function hideCategoryTitle() {
+    if (document.getElementById('bj-hide-cat-title')) return;
+    var s = document.createElement('style');
+    s.id = 'bj-hide-cat-title';
+    s.textContent = '.new-mc .new-mc__tit, .new-mc .m_tit{display:none !important}';
+    (document.head || document.documentElement).appendChild(s);
+  })();
+
   // === 모바일 히어로 배너: 720x378 비율 고정 + 잔여 여백 제거 ===
   // 모바일 배너(.m.show-1024, ≤1024px)는 720x378로 통일. 일부 배너가 아직 720x880이라
   // 컨테이너가 길게 늘어나 아래 여백이 생김 → 비율 강제 + height:auto로 컨테이너를
