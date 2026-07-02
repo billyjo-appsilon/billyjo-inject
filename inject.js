@@ -879,7 +879,7 @@ function bjHeaderMainInit() {
   // native .fee(정가) / .fee2(제휴카드 할인가=카드 적용 최종가)를 파싱 → bj-pz 블록 생성.
   // 일반(회색 칩)/제휴💳(파란 칩) 2줄 + 할인율 배지. 할인 없으면 일반만. native는 CSS로 숨김.
   // ⚠️ fee2 = '카드할인가'(제휴카드 적용 최종가), 할인액 아님. 제휴가=card, 할인율=(reg-card)/reg.
-  if (location.pathname.indexOf('prod_list') !== -1) {
+  if (true) {  // 전체 페이지 적용 (2026-07-02): 이전엔 /prod_list/ URL만 → 메인페이지 등 .prod_list .item 카드에도 적용. bjpRun은 .prod_list .item만 대상이라 카드 없는 페이지는 no-op.
     if (!document.getElementById('bj-cf-css')) {
       var bjcfStyle = document.createElement('style'); bjcfStyle.id = 'bj-cf-css';
       bjcfStyle.textContent =
