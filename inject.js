@@ -1898,13 +1898,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     pageEl.setAttribute('data-bj-reordered', '1');
     pageEl.style.display = 'flex';
     pageEl.style.flexDirection = 'column';
-    // 시안 순서: 히어로 → 후기 → 신뢰도 → 서비스 → 큐레이션 → 신청방법 → 혜택 → 가격비교 → FAQ
+    // 시안 순서: 히어로 → 브릿지캡션(order 2, 아래서 생성) → 후기 → 신뢰도 → 서비스 → 큐레이션 → 신청방법 → 가격비교 → FAQ
     var ORDER = [
-      ['실제 고객 후기', 2],
-      ['부담없이 시작하세요', 3],
-      ['본사보다 빌리조가 좋은', 4],
-      ['빌리조만의 컨설팅', 5],
-      ['렌탈 신청 방법', 6],
+      ['실제 고객 후기', 3],
+      ['부담없이 시작하세요', 4],
+      ['본사보다 빌리조가 좋은', 5],
+      ['빌리조만의 컨설팅', 6],
+      ['렌탈 신청 방법', 7],
       ['같은 가격, 더 풍성한 혜택', 8],
       ['자주 묻는 질문', 9]
     ];
@@ -1921,6 +1921,24 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       }
       if (!z.style.order) z.style.order = '1'; // 히어로/기타 = 최상단 유지
     });
+
+    // 브릿지 캡션 신규 추가 (시안 9:89, 2026-07-02) — 히어로 다음·후기 위(order 2). "오래 사용할 가전인데..."
+    if (!document.getElementById('bj-bridge-css')) {
+      var bs = document.createElement('style');
+      bs.id = 'bj-bridge-css';
+      bs.textContent = '.bj-bridge{order:2;text-align:center;padding:42px 20px 34px;background:#fff}' +
+        '.bj-bridge .bj-bq{font-size:34px;color:#c2c6d2;font-weight:800;line-height:.7}' +
+        '.bj-bridge p{margin:12px 0;font-size:23px;font-weight:800;line-height:1.5;letter-spacing:-.02em;color:#1a1a1e}' +
+        '.bj-bridge p b{color:#0838f8}' +
+        '@media(max-width:768px){.bj-bridge{padding:32px 18px 26px}.bj-bridge p{font-size:18px}.bj-bridge .bj-bq{font-size:26px}}';
+      (document.head || document.documentElement).appendChild(bs);
+    }
+    if (!pageEl.querySelector('.bj-bridge')) {
+      var br = document.createElement('div');
+      br.className = 'bj-bridge';
+      br.innerHTML = '<div class="bj-bq">❝</div><p>오래 사용할 가전인데,<br><b>신중하게 비교하고 골라야 하지 않을까요?</b></p><div class="bj-bq">❞</div>';
+      pageEl.appendChild(br);
+    }
   }
 
   function injectContent(html) {
