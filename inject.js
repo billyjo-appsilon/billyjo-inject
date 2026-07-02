@@ -57,6 +57,20 @@
     if (document.readyState !== 'complete') window.addEventListener('load', kick);
   })();
 
+  // === 메인 상단 세로 여백 정리 (배너 축소·카테고리 제목 숨김 후 빈 공간 축소, 2026-07-02) ===
+  //   히어로→아이콘, 아이콘→다음 섹션 사이 과한 마진을 디자인적으로 축소. ≥769 데스크톱만.
+  (function tightenMainSpacing() {
+    if (document.getElementById('bj-main-spacing')) return;
+    var s = document.createElement('style');
+    s.id = 'bj-main-spacing';
+    s.textContent = '@media(min-width:769px){' +
+      '.new-mc{padding-top:40px !important;padding-bottom:48px !important}' +
+      '.new-mc .new-mc__list{margin-top:12px !important}' +
+      '.m_outer{padding-top:24px !important}' +
+      '}';
+    (document.head || document.documentElement).appendChild(s);
+  })();
+
   // === 모바일 히어로 배너: 720x378 비율 고정 + 잔여 여백 제거 ===
   // 모바일 배너(.m.show-1024, ≤1024px)는 720x378로 통일. 일부 배너가 아직 720x880이라
   // 컨테이너가 길게 늘어나 아래 여백이 생김 → 비율 강제 + height:auto로 컨테이너를
