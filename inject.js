@@ -1935,6 +1935,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "#bj-v5-injected .bj-ben-em{font-size:32px !important;line-height:1 !important;flex:0 0 auto !important}" +
         "#bj-v5-injected .bj-ben-h{text-align:left !important;font-size:23px !important;font-weight:800 !important;line-height:1.34 !important;letter-spacing:-.02em !important;color:#1a1a1e !important}" +
         "#bj-v5-injected .bj-ben-h strong{color:#0838f8 !important}" +
+        // 혜택 섹션 위 디바이더 라인(.penalty-divider) 제거 (2026-07-03)
+        "#bj-v5-injected .penalty-divider{display:none !important}" +
+        // 혜택 헤딩 1줄 유지 — 모바일서 폰트·이모지 축소 + keep-all (2026-07-03)
+        "#bj-v5-injected .bj-ben-h{white-space:nowrap !important}" +
+        "@media(max-width:767px){#bj-v5-injected .bj-ben-h{font-size:16.5px !important}#bj-v5-injected .bj-ben-em{font-size:23px !important}#bj-v5-injected .bj-ben-hd{gap:8px !important}}" +
         "@media(min-width:768px){#bj-v5-injected .bj-trust-sub{font-size:24px !important;margin:30px auto 16px !important}}";
       (document.head || document.documentElement).appendChild(bjRf);
     }
@@ -2013,7 +2018,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       }).join('');
       bjBenZone.innerHTML = '<section>' +
         '<div class="bj-ben-hd"><span class="bj-ben-em">🧮💰</span>' +
-        '<div class="bj-ben-h">잠깐!<br><strong>혜택도 든든하게</strong> 챙겨야죠</div></div>' +
+        '<div class="bj-ben-h">잠깐! <strong>혜택도 든든하게</strong> 챙겨야죠</div></div>' +
         '<div class="diff-grid bj-ben-grid" data-bj-svc="1">' + bjBenCards + '</div>' +
         '</section>';
       pageEl.appendChild(bjBenZone);
