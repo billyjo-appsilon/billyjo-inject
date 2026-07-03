@@ -2065,6 +2065,19 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         bjSvcGrid.appendChild(card);
       });
     }
+
+    // 큐레이션 섹션(빌리조만의 컨설팅) 헤딩+설명을 시안(Image #18)대로 교체 (2026-07-03)
+    var bjCurZone = null;
+    Array.prototype.forEach.call(pageEl.querySelectorAll('.zone'), function (z) {
+      if ((z.textContent || '').indexOf('최저가 가전 라인업') !== -1) bjCurZone = z;
+    });
+    if (bjCurZone && !bjCurZone.getAttribute('data-bj-cur')) {
+      bjCurZone.setAttribute('data-bj-cur', '1');
+      var bjCurLead = bjCurZone.querySelector('.lead');
+      if (bjCurLead) bjCurLead.innerHTML = '나의 라이프스타일에 맞춘<br><strong>무료 큐레이션 서비스</strong>';
+      var bjCurDesc = bjCurZone.querySelector('.desc');
+      if (bjCurDesc) bjCurDesc.innerHTML = '가격, 크기, 관리 등등 개인별 조건을 넣기만 하면<br>매니저가 최적의 조합을 1:1 맞춤 설계해 드립니다.';
+    }
   }
 
   function injectContent(html) {
