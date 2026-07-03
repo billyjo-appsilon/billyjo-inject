@@ -2078,6 +2078,15 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var bjCurDesc = bjCurZone.querySelector('.desc');
       if (bjCurDesc) bjCurDesc.innerHTML = '가격, 크기, 관리 등등 개인별 조건을 넣기만 하면<br>매니저가 최적의 조합을 1:1 맞춤 설계해 드립니다.';
     }
+
+    // 신청방법 섹션 헤딩: "어렵지 않아요!" → "렌탈? 어렵지 않아요!" (서브는 유지) (2026-07-03)
+    Array.prototype.forEach.call(pageEl.querySelectorAll('.lead'), function (ld) {
+      if (!ld.getAttribute('data-bj-apply') && (ld.textContent || '').indexOf('어렵지 않아요') !== -1) {
+        ld.setAttribute('data-bj-apply', '1');
+        var bjSub = ld.querySelector('.sub-inline');
+        ld.innerHTML = '렌탈? 어렵지 않아요!<br>' + (bjSub ? bjSub.outerHTML : '');
+      }
+    });
   }
 
   function injectContent(html) {
