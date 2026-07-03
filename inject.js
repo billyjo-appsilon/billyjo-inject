@@ -1991,11 +1991,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (!document.getElementById('bj-bridge-css')) {
       var bs = document.createElement('style');
       bs.id = 'bj-bridge-css';
-      bs.textContent = '.bj-bridge{order:2;text-align:center;padding:46px 20px 38px;background:transparent}' +
+      bs.textContent = '.bj-bridge{order:2;text-align:center;padding:16px 20px;background:transparent}' +
         '.bj-bridge .bj-bq{font-size:48px;color:#c2c6d2;font-weight:800;line-height:.7}' +
-        '.bj-bridge p{margin:14px 0;font-size:34px;font-weight:800;line-height:1.5;letter-spacing:-.02em;color:#0838f8;word-break:keep-all}' +
+        '.bj-bridge p{margin:6px 0;font-size:34px;font-weight:800;line-height:1.45;letter-spacing:-.02em;color:#0838f8;word-break:keep-all}' +
         '.bj-bridge p b{color:#0838f8}' +
-        '@media(max-width:768px){.bj-bridge{padding:34px 18px 28px}.bj-bridge p{font-size:21px}.bj-bridge .bj-bq{font-size:30px}}';
+        '@media(max-width:768px){.bj-bridge{padding:12px 18px}.bj-bridge p{font-size:21px;margin:4px 0}.bj-bridge .bj-bq{font-size:30px}}';
       (document.head || document.documentElement).appendChild(bs);
     }
     if (!pageEl.querySelector('.bj-bridge')) {
