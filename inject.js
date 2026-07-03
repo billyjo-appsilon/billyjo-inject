@@ -1915,7 +1915,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         ".bj-brand-track .brand-cell{flex:0 0 auto !important;width:132px !important;height:60px !important;margin:0 !important}" +
         "@keyframes bjBrandScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}" +
         // 신뢰도 섹션: 마퀴↔보장바 사이 헤딩 + 2번째 보장 바 (시안 Image #14 맞춤) (2026-07-02)
-        "#bj-v5-injected .bj-trust-sub{display:block !important;text-align:center !important;font-size:20px !important;font-weight:800 !important;color:#111 !important;letter-spacing:-.02em !important;line-height:1.42 !important;word-break:keep-all !important;margin:24px 0 14px !important}" +
+        "#bj-v5-injected .bj-trust-sub{display:block !important;text-align:center !important;font-size:20px !important;font-weight:800 !important;color:#111 !important;letter-spacing:-.02em !important;line-height:1.42 !important;word-break:keep-all !important;margin:24px auto 14px !important;max-width:none !important;width:auto !important}" +
         "#bj-v5-injected .bj-trust-sub strong{color:#0838f8 !important}" +
         "#bj-v5-injected .highlight-bar[data-bj-bar2]{margin-top:10px !important}" +
         // 두 보장 바 1행 2열 (PC 나란히 / 모바일 세로 스택) (2026-07-03)
@@ -1923,8 +1923,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "#bj-v5-injected .bj-bars-row .highlight-bar{flex:1 1 0 !important;min-width:0 !important;margin:0 !important}" +
         "@media(max-width:767px){#bj-v5-injected .bj-bars-row{flex-direction:column !important;gap:10px !important}}" +
         // 서비스 섹션(본사보다 빌리조가 좋은 점)을 시안 2×2 4카드로 재구성 (2026-07-03)
-        "#bj-v5-injected .diff-grid[data-bj-svc]{grid-template-columns:1fr 1fr !important;gap:14px !important}" +
-        "#bj-v5-injected .bj-svc-card{justify-content:flex-start !important}" +
+        "#bj-v5-injected .diff-grid[data-bj-svc]{grid-template-columns:1fr 1fr !important;gap:14px !important;grid-auto-rows:1fr !important}" +
+        "#bj-v5-injected .diff-grid[data-bj-svc] .diff-card{padding:24px 18px !important;gap:10px !important}" +
+        "#bj-v5-injected .diff-grid[data-bj-svc] .diff-card .icon{margin:2px 0 !important}" +
+        "#bj-v5-injected .bj-svc-card{justify-content:center !important}" +
         "#bj-v5-injected .bj-svc-card .d{margin-top:6px !important}" +
         "#bj-v5-injected .bj-svc-blue{color:#0838f8 !important}" +
         "#bj-v5-injected .bj-svc-mini{display:inline-block !important;margin-top:12px !important;padding:5px 13px !important;background:#eaf0ff !important;color:#0838f8 !important;font-size:12px !important;font-weight:700 !important;border-radius:999px !important;letter-spacing:-.01em !important}" +
@@ -1933,7 +1935,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "#bj-v5-injected .bj-ben-em{font-size:32px !important;line-height:1 !important;flex:0 0 auto !important}" +
         "#bj-v5-injected .bj-ben-h{text-align:left !important;font-size:23px !important;font-weight:800 !important;line-height:1.34 !important;letter-spacing:-.02em !important;color:#1a1a1e !important}" +
         "#bj-v5-injected .bj-ben-h strong{color:#0838f8 !important}" +
-        "@media(min-width:768px){#bj-v5-injected .bj-trust-sub{font-size:24px !important;margin:30px 0 16px !important}}";
+        "@media(min-width:768px){#bj-v5-injected .bj-trust-sub{font-size:24px !important;margin:30px auto 16px !important}}";
       (document.head || document.documentElement).appendChild(bjRf);
     }
     // 시안 순서: 히어로 → 브릿지캡션(order 2, 아래서 생성) → 후기 → 신뢰도 → 서비스 → 큐레이션 → 신청방법 → 가격비교 → FAQ
@@ -2089,7 +2091,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         { no: '01', ic: '#i-search', t: '독자적인<br>최저가 비교 시스템' },
         { no: '02', ic: '#i-shield', t: '고객 개인정보<br>안전 보장' },
         { no: '03', ic: '#i-message', t: '1:1 맞춤<br>큐레이션 제공' },
-        { no: '04', ic: '#i-clipboard', t: '위약금 사전 계산', blue: true, d: '가입 전 계산서<br>모든 경우 시뮬레이션', mini: '투명 공개' }
+        { no: '04', ic: '#i-clipboard', t: '위약금 사전 계산<br>투명 공개' }
       ];
       bjSvcGrid.innerHTML = '';
       bjSvc.forEach(function (c) {
