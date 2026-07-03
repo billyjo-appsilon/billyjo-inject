@@ -2084,7 +2084,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (!ld.getAttribute('data-bj-apply') && (ld.textContent || '').indexOf('어렵지 않아요') !== -1) {
         ld.setAttribute('data-bj-apply', '1');
         var bjSub = ld.querySelector('.sub-inline');
-        ld.innerHTML = '렌탈? 어렵지 않아요!<br>' + (bjSub ? bjSub.outerHTML : '');
+        // 헤딩 텍스트 파란색 (Jun 요청) — .lead strong = v5 파란색 (2026-07-03)
+        ld.innerHTML = '<strong>렌탈? 어렵지 않아요!</strong><br>' + (bjSub ? bjSub.outerHTML : '');
       }
     });
   }
