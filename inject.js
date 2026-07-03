@@ -1929,7 +1929,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         // 서비스·혜택 카드를 신청방법(step4) 스타일로 — 아이콘 파랑 + 번호배지 연한파랑 알약 + 제목 슬레이트 (2026-07-03)
         "#bj-v5-injected .diff-grid[data-bj-svc] .num-circle{background:#eef2ff !important;color:#0838f8 !important;width:auto !important;height:auto !important;min-width:0 !important;padding:5px 13px !important;border-radius:8px !important;font-size:12.5px !important;line-height:1 !important;box-shadow:none !important}" +
         "#bj-v5-injected .diff-grid[data-bj-svc] .ico{color:#0838f8 !important;stroke:#0838f8 !important}" +
-        "#bj-v5-injected .diff-grid[data-bj-svc] .diff-card .t{color:#334155 !important;font-weight:700 !important}" +
+        "#bj-v5-injected .diff-grid[data-bj-svc] .diff-card .t{color:#475569 !important;font-weight:500 !important;font-size:14px !important}" +
+        "#bj-v5-injected .diff-grid[data-bj-svc] .num-circle{letter-spacing:-.01em !important}" +
         "#bj-v5-injected .bj-svc-card{justify-content:center !important}" +
         "#bj-v5-injected .bj-svc-card .d{margin-top:6px !important}" +
         "#bj-v5-injected .bj-svc-blue{color:#0838f8 !important}" +
@@ -2010,13 +2011,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjBenZone.className = 'zone bj-ben-zone';
       bjBenZone.style.order = '9';
       var bjBen = [
-        { no: '01', ic: '#i-gift', t: '최대 지원금<br>+ 사은품 제공' },
-        { no: '02', ic: '#i-ticket', t: '최대 15개월반값<br>or 최대 50% 할인' },
-        { no: '03', ic: '#i-coins', t: '타사 제품 이용 시<br>10% + 추가할인' },
-        { no: '04', ic: '#i-card', t: '제휴카드<br>할인혜택' }
+        { no: '01', lb: '지원금', ic: '#i-gift', t: '최대 지원금<br>+ 사은품 제공' },
+        { no: '02', lb: '할인', ic: '#i-ticket', t: '최대 15개월반값<br>or 최대 50% 할인' },
+        { no: '03', lb: '추가할인', ic: '#i-coins', t: '타사 제품 이용 시<br>10% + 추가할인' },
+        { no: '04', lb: '제휴카드', ic: '#i-card', t: '제휴카드<br>할인혜택' }
       ];
       var bjBenCards = bjBen.map(function (c) {
-        return '<div class="diff-card bj-svc-card"><div class="num-circle">' + c.no + '</div>' +
+        return '<div class="diff-card bj-svc-card"><div class="num-circle">' + c.no + ' ' + c.lb + '</div>' +
           '<div class="icon"><svg class="ico"><use href="' + c.ic + '"></use></svg></div>' +
           '<div class="t">' + c.t + '</div></div>';
       }).join('');
@@ -2097,21 +2098,18 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var bjSvcLead = bjSvcGrid.parentElement.querySelector('.lead');
       if (bjSvcLead) bjSvcLead.innerHTML = '<strong>고객 신뢰도 100%</strong><br>빌리조만의 제공 서비스';
       var bjSvc = [
-        { no: '01', ic: '#i-search', t: '독자적인<br>최저가 비교 시스템' },
-        { no: '02', ic: '#i-shield', t: '고객 개인정보<br>안전 보장' },
-        { no: '03', ic: '#i-message', t: '1:1 맞춤<br>큐레이션 제공' },
-        { no: '04', ic: '#i-clipboard', t: '위약금 사전 계산<br>투명 공개' }
+        { no: '01', lb: '비교', ic: '#i-search', t: '독자적인<br>최저가 비교 시스템' },
+        { no: '02', lb: '보안', ic: '#i-shield', t: '고객 개인정보<br>안전 보장' },
+        { no: '03', lb: '큐레이션', ic: '#i-message', t: '1:1 맞춤<br>큐레이션 제공' },
+        { no: '04', lb: '투명', ic: '#i-clipboard', t: '위약금 사전 계산<br>투명 공개' }
       ];
       bjSvcGrid.innerHTML = '';
       bjSvc.forEach(function (c) {
         var card = document.createElement('div');
         card.className = 'diff-card bj-svc-card';
-        var h = '<div class="num-circle">' + c.no + '</div>' +
+        card.innerHTML = '<div class="num-circle">' + c.no + ' ' + c.lb + '</div>' +
           '<div class="icon"><svg class="ico"><use href="' + c.ic + '"></use></svg></div>' +
-          '<div class="t' + (c.blue ? ' bj-svc-blue' : '') + '">' + c.t + '</div>';
-        if (c.d) h += '<div class="d">' + c.d + '</div>';
-        if (c.mini) h += '<span class="bj-svc-mini">' + c.mini + '</span>';
-        card.innerHTML = h;
+          '<div class="t">' + c.t + '</div>';
         bjSvcGrid.appendChild(card);
       });
     }
