@@ -1928,6 +1928,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "#bj-v5-injected .bj-svc-card .d{margin-top:6px !important}" +
         "#bj-v5-injected .bj-svc-blue{color:#0838f8 !important}" +
         "#bj-v5-injected .bj-svc-mini{display:inline-block !important;margin-top:12px !important;padding:5px 13px !important;background:#eaf0ff !important;color:#0838f8 !important;font-size:12px !important;font-weight:700 !important;border-radius:999px !important;letter-spacing:-.01em !important}" +
+        // 혜택 2×2 섹션 헤딩(이모지 + 텍스트) (2026-07-03)
+        "#bj-v5-injected .bj-ben-hd{display:flex !important;align-items:center !important;justify-content:center !important;gap:12px !important;margin-bottom:22px !important}" +
+        "#bj-v5-injected .bj-ben-em{font-size:32px !important;line-height:1 !important;flex:0 0 auto !important}" +
+        "#bj-v5-injected .bj-ben-h{text-align:left !important;font-size:23px !important;font-weight:800 !important;line-height:1.34 !important;letter-spacing:-.02em !important;color:#1a1a1e !important}" +
+        "#bj-v5-injected .bj-ben-h strong{color:#0838f8 !important}" +
         "@media(min-width:768px){#bj-v5-injected .bj-trust-sub{font-size:24px !important;margin:30px 0 16px !important}}";
       (document.head || document.documentElement).appendChild(bjRf);
     }
@@ -1938,8 +1943,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       ['본사보다 빌리조가 좋은', 6],
       ['빌리조만의 컨설팅', 7],
       ['렌탈 신청 방법', 8],
-      ['같은 가격, 더 풍성한 혜택', 9],
-      ['자주 묻는 질문', 10]
+      ['같은 가격, 더 풍성한 혜택', 10],
+      ['자주 묻는 질문', 11]
     ];
     // 시안에 없는 섹션 = 숨김 (이사·신혼 / 광고전화없음(개인정보로 통합) / 위약금 중도해지 / 제휴카드 추가혜택)
     var HIDE = ['이사·신혼도 안심하세요', '광고 전화 없습니다', '위약금, 숨기지 않습니다', '제휴카드 추가 혜택'];
@@ -1986,6 +1991,30 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       br.className = 'bj-bridge';
       br.innerHTML = '<div class="bj-bq">❝</div><p>오래 사용할 가전인데,<br><b>신중하게 비교하고 골라야 하지 않을까요?</b></p><div class="bj-bq">❞</div>';
       pageEl.appendChild(br);
+    }
+
+    // 혜택 2×2 섹션(시안 Image #19) 신규 삽입 — 신청방법(8) 뒤 order 9 (bg-unify 전에 생성해 배경 자동 교차) (2026-07-03)
+    if (!pageEl.querySelector('.bj-ben-zone')) {
+      var bjBenZone = document.createElement('div');
+      bjBenZone.className = 'zone bj-ben-zone';
+      bjBenZone.style.order = '9';
+      var bjBen = [
+        { no: '01', ic: '#i-gift', t: '최대 지원금<br>+ 사은품 제공' },
+        { no: '02', ic: '#i-ticket', t: '최대 15개월반값<br>or 최대 50% 할인' },
+        { no: '03', ic: '#i-coins', t: '타사 제품 이용 시<br>10% + 추가할인' },
+        { no: '04', ic: '#i-card', t: '제휴카드<br>할인혜택' }
+      ];
+      var bjBenCards = bjBen.map(function (c) {
+        return '<div class="diff-card bj-svc-card"><div class="num-circle">' + c.no + '</div>' +
+          '<div class="icon"><svg class="ico"><use href="' + c.ic + '"></use></svg></div>' +
+          '<div class="t">' + c.t + '</div></div>';
+      }).join('');
+      bjBenZone.innerHTML = '<section>' +
+        '<div class="bj-ben-hd"><span class="bj-ben-em">🧮💰</span>' +
+        '<div class="bj-ben-h">잠깐!<br><strong>혜택도 든든하게</strong> 챙겨야죠</div></div>' +
+        '<div class="diff-grid bj-ben-grid" data-bj-svc="1">' + bjBenCards + '</div>' +
+        '</section>';
+      pageEl.appendChild(bjBenZone);
     }
 
     // 배경 흰색/회색 통일 (하늘색 zone-sky 제거) — .hero(파란 트러스트 카드) 제외, 시각 순서대로 교차 (2026-07-02)
