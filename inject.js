@@ -1922,6 +1922,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "#bj-v5-injected .bj-bars-row{display:flex !important;gap:14px !important;align-items:stretch !important}" +
         "#bj-v5-injected .bj-bars-row .highlight-bar{flex:1 1 0 !important;min-width:0 !important;margin:0 !important}" +
         "@media(max-width:767px){#bj-v5-injected .bj-bars-row{flex-direction:column !important;gap:10px !important}}" +
+        // 서비스 섹션(본사보다 빌리조가 좋은 점)을 시안 2×2 4카드로 재구성 (2026-07-03)
+        "#bj-v5-injected .diff-grid[data-bj-svc]{grid-template-columns:1fr 1fr !important;gap:14px !important}" +
+        "#bj-v5-injected .bj-svc-card{justify-content:flex-start !important}" +
+        "#bj-v5-injected .bj-svc-card .d{margin-top:6px !important}" +
+        "#bj-v5-injected .bj-svc-blue{color:#0838f8 !important}" +
+        "#bj-v5-injected .bj-svc-mini{display:inline-block !important;margin-top:12px !important;padding:5px 13px !important;background:#eaf0ff !important;color:#0838f8 !important;font-size:12px !important;font-weight:700 !important;border-radius:999px !important;letter-spacing:-.01em !important}" +
         "@media(min-width:768px){#bj-v5-injected .bj-trust-sub{font-size:24px !important;margin:30px 0 16px !important}}";
       (document.head || document.documentElement).appendChild(bjRf);
     }
@@ -2032,6 +2038,32 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjBar1.parentNode.insertBefore(bjBarsRow, bjBar1);
       bjBarsRow.appendChild(bjBar1);
       bjBarsRow.appendChild(bjBar2);
+    }
+
+    // 서비스 섹션(본사보다 빌리조가 좋은 점)을 시안(Image #16)대로 2×2 4카드로 재구성 (2026-07-03)
+    var bjSvcGrid = pageEl.querySelector('.diff-grid');
+    if (bjSvcGrid && !bjSvcGrid.getAttribute('data-bj-svc')) {
+      bjSvcGrid.setAttribute('data-bj-svc', '1');
+      var bjSvcLead = bjSvcGrid.parentElement.querySelector('.lead');
+      if (bjSvcLead) bjSvcLead.innerHTML = '<strong>고객 신뢰도 100%</strong><br>빌리조만의 제공 서비스';
+      var bjSvc = [
+        { no: '01', ic: '#i-search', t: '독자적인<br>최저가 비교 시스템' },
+        { no: '02', ic: '#i-shield', t: '고객 개인정보<br>안전 보장' },
+        { no: '03', ic: '#i-message', t: '1:1 맞춤<br>큐레이션 제공' },
+        { no: '04', ic: '#i-clipboard', t: '위약금 사전 계산', blue: true, d: '가입 전 계산서<br>모든 경우 시뮬레이션', mini: '투명 공개' }
+      ];
+      bjSvcGrid.innerHTML = '';
+      bjSvc.forEach(function (c) {
+        var card = document.createElement('div');
+        card.className = 'diff-card bj-svc-card';
+        var h = '<div class="num-circle">' + c.no + '</div>' +
+          '<div class="icon"><svg class="ico"><use href="' + c.ic + '"></use></svg></div>' +
+          '<div class="t' + (c.blue ? ' bj-svc-blue' : '') + '">' + c.t + '</div>';
+        if (c.d) h += '<div class="d">' + c.d + '</div>';
+        if (c.mini) h += '<span class="bj-svc-mini">' + c.mini + '</span>';
+        card.innerHTML = h;
+        bjSvcGrid.appendChild(card);
+      });
     }
   }
 
