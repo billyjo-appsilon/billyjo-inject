@@ -1938,7 +1938,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     // 시안에 없는 섹션 = 숨김 (이사·신혼 / 광고전화없음(개인정보로 통합) / 위약금 중도해지 / 제휴카드 추가혜택)
     var HIDE = ['이사·신혼도 안심하세요', '광고 전화 없습니다', '위약금, 숨기지 않습니다', '제휴카드 추가 혜택'];
     Array.prototype.slice.call(pageEl.children).forEach(function(z) {
-      var t = z.innerText || z.textContent || '';
+      // textContent 사용(innerText 아님): eyebrow(.pill)를 display:none 처리해도
+      // ORDER/HIDE 매칭 문자열(=eyebrow 텍스트)이 유지되도록. innerText는 숨긴 텍스트 제외 → 매칭 전멸. (2026-07-03)
+      var t = z.textContent || '';
       var i;
       for (i = 0; i < HIDE.length; i++) {
         if (t.indexOf(HIDE[i]) !== -1) { z.style.display = 'none'; return; }
