@@ -2136,6 +2136,61 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         ld.innerHTML = '<strong>렌탈? 어렵지 않아요!</strong><br>' + (bjSub ? bjSub.outerHTML : '');
       }
     });
+
+    // FAQ 섹션 → 다크 푸터 블록 (시안 Image #25): 상담 헤더 + FAQ + 푸터 nav/저작권, 원본 푸터 숨김 (2026-07-03)
+    if (!document.getElementById('bj-footer-css')) {
+      var bjFC = document.createElement('style');
+      bjFC.id = 'bj-footer-css';
+      bjFC.textContent =
+        '#bj-v5-injected .bj-footer{border-radius:22px 22px 0 0 !important;overflow:hidden;padding:0 !important;margin-top:10px}' +
+        '#bj-v5-injected .bj-footer > section{padding:0 !important;max-width:none !important;margin:0 !important;width:auto !important}' +
+        '#bj-v5-injected .bj-fsupport{text-align:center;padding:38px 20px 30px;border-bottom:1px solid rgba(255,255,255,.09)}' +
+        '#bj-v5-injected .bj-fs-ic{width:52px;height:52px;margin:0 auto 16px;border-radius:50%;background:rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center}' +
+        '#bj-v5-injected .bj-fs-ic .ico{width:26px;height:26px;color:#fff;stroke:#fff}' +
+        '#bj-v5-injected .bj-fs-lb{color:#aab2c5;font-size:13px;font-weight:600;letter-spacing:-.01em}' +
+        '#bj-v5-injected .bj-fs-tel{color:#fff;font-size:32px;font-weight:800;letter-spacing:.01em;margin:10px 0 8px}' +
+        '#bj-v5-injected .bj-fs-hr{color:#7e879c;font-size:12.5px}' +
+        '#bj-v5-injected .bj-footer .faq-wrap{padding:6px 22px !important;background:transparent !important}' +
+        '#bj-v5-injected .bj-footer .faq{background:transparent !important;box-shadow:none !important;border-radius:0 !important;padding:0 !important;border:0 !important}' +
+        '#bj-v5-injected .bj-footer .faq details{border-bottom:1px solid rgba(255,255,255,.09) !important;background:transparent !important}' +
+        '#bj-v5-injected .bj-footer .faq summary{color:#fff !important;font-size:15px !important;font-weight:700 !important;padding:18px 2px !important;justify-content:space-between !important;align-items:center !important;gap:12px}' +
+        '#bj-v5-injected .bj-footer .faq summary::before{display:none !important}' +
+        '#bj-v5-injected .bj-footer .faq summary::after{content:"" !important;display:block !important;flex:0 0 auto !important;width:8px;height:8px;border:2px solid #8b93a7 !important;border-left:0 !important;border-top:0 !important;border-radius:0 !important;background:none !important;transform:rotate(45deg);margin-right:2px;transition:transform .2s}' +
+        '#bj-v5-injected .bj-footer .faq details[open] summary::after{transform:rotate(-135deg)}' +
+        '#bj-v5-injected .bj-footer .answer{color:#aab2c5 !important;font-size:13.5px !important;line-height:1.7 !important;padding:0 2px 18px !important;background:transparent !important}' +
+        '#bj-v5-injected .bj-footer .answer b{color:#dbe0ea !important}' +
+        '#bj-v5-injected .bj-fnav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;padding:24px 20px 14px;border-top:1px solid rgba(255,255,255,.09)}' +
+        '#bj-v5-injected .bj-fnav a{color:#c4cbdb;font-size:13px;text-decoration:none;font-weight:500}' +
+        '#bj-v5-injected .bj-finfo{text-align:center;color:#6b7488;font-size:11.5px;line-height:1.75;padding:6px 20px 36px}';
+      (document.head || document.documentElement).appendChild(bjFC);
+    }
+    var bjFaqZone = null;
+    Array.prototype.forEach.call(pageEl.querySelectorAll('.zone'), function (z) {
+      if ((z.textContent || '').indexOf('본사와 가격 차이') !== -1) bjFaqZone = z;
+    });
+    if (bjFaqZone && !bjFaqZone.getAttribute('data-bj-footer')) {
+      bjFaqZone.setAttribute('data-bj-footer', '1');
+      bjFaqZone.classList.add('bj-footer');
+      bjFaqZone.style.setProperty('background-color', '#1c2033', 'important');
+      var bjFaqSec = bjFaqZone.querySelector('section') || bjFaqZone;
+      var bjSup = document.createElement('div');
+      bjSup.className = 'bj-fsupport';
+      bjSup.innerHTML = '<div class="bj-fs-ic"><svg class="ico"><use href="#i-headphones"></use></svg></div>' +
+        '<div class="bj-fs-lb">고객 상담 운영 · 평일 09:00~18:00 (주말·공휴일 휴무)</div>' +
+        '<div class="bj-fs-tel">1600-0000</div>' +
+        '<div class="bj-fs-hr">궁금한 점은 언제든 편하게 문의해 주세요</div>';
+      bjFaqSec.insertBefore(bjSup, bjFaqSec.firstChild);
+      var bjFnav = document.createElement('div');
+      bjFnav.className = 'bj-fnav';
+      bjFnav.innerHTML = '<a href="#">회사소개</a><a href="#">이용약관</a><a href="/html/dh/privacy_policy">개인정보처리방침</a><a href="#">제휴문의</a><a href="#">1:1 문의</a>';
+      bjFaqSec.appendChild(bjFnav);
+      var bjFinfo = document.createElement('div');
+      bjFinfo.className = 'bj-finfo';
+      bjFinfo.innerHTML = '(주)빌리조 · 사업자등록번호 578-88-03319 · 통신판매업신고 별도 표기<br>서울 강남구 영동대로128 · © BillyJo. All rights reserved.';
+      bjFaqSec.appendChild(bjFinfo);
+      var bjOrigFoot = document.querySelector('.new-footer');
+      if (bjOrigFoot) bjOrigFoot.style.setProperty('display', 'none', 'important');
+    }
   }
 
   function injectContent(html) {
