@@ -1918,6 +1918,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "#bj-v5-injected .bj-trust-sub{display:block !important;text-align:center !important;font-size:20px !important;font-weight:800 !important;color:#111 !important;letter-spacing:-.02em !important;line-height:1.42 !important;word-break:keep-all !important;margin:24px 0 14px !important}" +
         "#bj-v5-injected .bj-trust-sub strong{color:#0838f8 !important}" +
         "#bj-v5-injected .highlight-bar[data-bj-bar2]{margin-top:10px !important}" +
+        // 두 보장 바 1행 2열 (PC 나란히 / 모바일 세로 스택) (2026-07-03)
+        "#bj-v5-injected .bj-bars-row{display:flex !important;gap:14px !important;align-items:stretch !important}" +
+        "#bj-v5-injected .bj-bars-row .highlight-bar{flex:1 1 0 !important;min-width:0 !important;margin:0 !important}" +
+        "@media(max-width:767px){#bj-v5-injected .bj-bars-row{flex-direction:column !important;gap:10px !important}}" +
         "@media(min-width:768px){#bj-v5-injected .bj-trust-sub{font-size:24px !important;margin:30px 0 16px !important}}";
       (document.head || document.documentElement).appendChild(bjRf);
     }
@@ -2020,8 +2024,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var bjD = bjBar2.querySelector('.d');
       if (bjT) bjT.textContent = '설치비 · 등록비 0원 보장';
       if (bjD) bjD.textContent = '설치·등록비 0원 + 최대 72개월 할부로 부담없는 시작';
-      if (bjBar1.nextSibling) bjBar1.parentNode.insertBefore(bjBar2, bjBar1.nextSibling);
-      else bjBar1.parentNode.appendChild(bjBar2);
+      // (3) 두 보장 바를 1행 2열 래퍼로 감쌈 — PC 2열 나란히, 모바일 세로 스택 (2026-07-03)
+      var bjBarsRow = document.createElement('div');
+      bjBarsRow.className = 'bj-bars-row';
+      bjBar1.parentNode.insertBefore(bjBarsRow, bjBar1);
+      bjBarsRow.appendChild(bjBar1);
+      bjBarsRow.appendChild(bjBar2);
     }
   }
 
