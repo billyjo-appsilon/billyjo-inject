@@ -1981,7 +1981,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bs.id = 'bj-bridge-css';
       bs.textContent = '.bj-bridge{order:2;text-align:center;padding:46px 20px 38px;background:transparent}' +
         '.bj-bridge .bj-bq{font-size:48px;color:#c2c6d2;font-weight:800;line-height:.7}' +
-        '.bj-bridge p{margin:14px 0;font-size:34px;font-weight:800;line-height:1.5;letter-spacing:-.02em;color:#1a1a1e;word-break:keep-all}' +
+        '.bj-bridge p{margin:14px 0;font-size:34px;font-weight:800;line-height:1.5;letter-spacing:-.02em;color:#0838f8;word-break:keep-all}' +
         '.bj-bridge p b{color:#0838f8}' +
         '@media(max-width:768px){.bj-bridge{padding:34px 18px 28px}.bj-bridge p{font-size:21px}.bj-bridge .bj-bq{font-size:30px}}';
       (document.head || document.documentElement).appendChild(bs);
@@ -2024,6 +2024,15 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     bjSecs.forEach(function(z) { z.style.setProperty('background-color', '#ffffff', 'important'); });
     // 컨테이너·섹션 간격도 흰색 (회색 gap/부모 배경 비침 방지) (2026-07-03)
     pageEl.style.setProperty('background-color', '#ffffff', 'important');
+    // 조상 중 회색(.m_outer 등) 배경 → 흰색 (컨테이너보다 넓어 좌우·상단 회색 비침 방지) (2026-07-03)
+    var bjAnc = pageEl.parentElement;
+    while (bjAnc && bjAnc !== document.body) {
+      var bjAncBg = getComputedStyle(bjAnc).backgroundColor;
+      if (bjAncBg && bjAncBg !== 'rgba(0, 0, 0, 0)' && bjAncBg !== 'transparent' && bjAncBg !== 'rgb(255, 255, 255)') {
+        bjAnc.style.setProperty('background-color', '#ffffff', 'important');
+      }
+      bjAnc = bjAnc.parentElement;
+    }
 
     // 브랜드 로고 그리드 → 가로 마퀴 (시안 디자인 맞춤, 카피 유지) — 셀을 트랙으로 감싸고 복제해 무한 루프
     var bjBrandGrid = pageEl.querySelector('.brand-grid');
