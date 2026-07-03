@@ -1926,6 +1926,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "#bj-v5-injected .diff-grid[data-bj-svc]{grid-template-columns:1fr 1fr !important;gap:14px !important;grid-auto-rows:1fr !important}" +
         "#bj-v5-injected .diff-grid[data-bj-svc] .diff-card{padding:24px 18px !important;gap:10px !important}" +
         "#bj-v5-injected .diff-grid[data-bj-svc] .diff-card .icon{margin:2px 0 !important}" +
+        // 서비스·혜택 카드를 신청방법(step4) 스타일로 — 아이콘 파랑 + 번호배지 연한파랑 알약 + 제목 슬레이트 (2026-07-03)
+        "#bj-v5-injected .diff-grid[data-bj-svc] .num-circle{background:#eef2ff !important;color:#0838f8 !important;width:auto !important;height:auto !important;min-width:0 !important;padding:5px 13px !important;border-radius:8px !important;font-size:12.5px !important;line-height:1 !important;box-shadow:none !important}" +
+        "#bj-v5-injected .diff-grid[data-bj-svc] .ico{color:#0838f8 !important;stroke:#0838f8 !important}" +
+        "#bj-v5-injected .diff-grid[data-bj-svc] .diff-card .t{color:#334155 !important;font-weight:700 !important}" +
         "#bj-v5-injected .bj-svc-card{justify-content:center !important}" +
         "#bj-v5-injected .bj-svc-card .d{margin-top:6px !important}" +
         "#bj-v5-injected .bj-svc-blue{color:#0838f8 !important}" +
