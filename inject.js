@@ -2144,6 +2144,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjFC.textContent =
         '.bj-footer{border-radius:22px 22px 0 0 !important;overflow:hidden;padding:0 !important;margin-top:10px}' +
         '.bj-footer > section{padding:0 !important;max-width:none !important;margin:0 !important;width:auto !important}' +
+        // 상단 "자주 묻는 질문" pill 숨김(푸터 이동으로 eyebrow 숨김 스코프 벗어남) + 마지막 FAQ 하단 보더 제거(foot-nav 보더와 겹침) (2026-07-03)
+        '.bj-footer .pill-wrap,.bj-footer .pill{display:none !important}' +
+        '.bj-footer .faq details:last-of-type{border-bottom:0 !important}' +
         '.bj-fsupport{text-align:center;padding:38px 20px 30px;border-bottom:1px solid rgba(255,255,255,.09)}' +
         '.bj-fs-ic{width:52px;height:52px;margin:0 auto 16px;border-radius:50%;background:rgba(255,255,255,.09);display:flex;align-items:center;justify-content:center}' +
         '.bj-fs-ic .ico{width:26px;height:26px;color:#fff;stroke:#fff}' +
