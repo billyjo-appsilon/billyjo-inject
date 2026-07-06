@@ -2144,8 +2144,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjFC.textContent =
         '.bj-footer{border-radius:22px 22px 0 0 !important;overflow:hidden;padding:0 !important;margin-top:10px}' +
         '.bj-footer > section{padding:0 !important;max-width:none !important;margin:0 !important;width:auto !important}' +
-        // 원본 고객센터 블록 숨김(다크 푸터 상담 헤더와 중복) — .cs__top(PC), .m_customer(모바일). 렌탈 주문혜택(.cs__benefit)은 유지 (2026-07-03)
-        '.new-cs .cs__top,.new-cs .m_customer{display:none !important}' +
+        // 원본 고객센터 zone 전체 숨김(다크 푸터로 일원화) — CS 헤더(.cs__top/.m_customer) + 렌탈 주문혜택 슬라이더(.cs__benefit) 모두 제거. .new-cs 통째 숨겨 잔여 패딩(PC 75+90px, 모바일 35px)까지 제거 (2026-07-06)
+        '.new-cs{display:none !important}' +
         // 상단 "자주 묻는 질문" pill 숨김(푸터 이동으로 eyebrow 숨김 스코프 벗어남) + 마지막 FAQ 하단 보더 제거(foot-nav 보더와 겹침) (2026-07-03)
         '.bj-footer .pill-wrap,.bj-footer .pill{display:none !important}' +
         '.bj-footer .faq details:last-of-type{border-bottom:0 !important}' +
