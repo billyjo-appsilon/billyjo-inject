@@ -33,7 +33,7 @@
 
   var CSS = [
     '#bjct-sec{display:none;background:#fff;font-family:inherit;-webkit-tap-highlight-color:transparent}',
-    '@media(max-width:767px){#bjct-sec{display:block}.new-mc:not(.show-767){display:none !important}.wide-inner.pad>#bj-v5-injected~*:not(#bjct-sec){display:none !important}.prodList_wrap{display:none !important}}',
+    '@media(max-width:767px){#bjct-sec{display:block}#bjct-banners{display:block !important}.new-mc:not(.show-767){display:none !important}.new-mb_m{display:none !important}.wide-inner.pad>#bj-v5-injected~*:not(#bjct-sec):not(#bjct-banners){display:none !important}.prodList_wrap{display:none !important}}',
     '#bjct-sec *{box-sizing:border-box}',
     '#bjct-sec .bjct-head{padding:18px 18px 4px}',
     '#bjct-sec .bjct-kick{font-size:12px;font-weight:800;color:#0838f8;letter-spacing:.02em}',
@@ -71,7 +71,16 @@
     '#bjct-sec .bjct-final{font-size:14px;font-weight:900;color:#16181d}',
     '#bjct-sec .bjct-final .bjct-mo{font-size:10px;font-weight:700;color:#6b7280;margin-right:1px}',
     '#bjct-sec .bjct-note{display:flex;align-items:center;gap:4px;margin-top:7px;font-size:10.5px;color:#0838f8;font-weight:700}',
-    '#bjct-sec .bjct-note b{background:#eaf0ff;border-radius:5px;padding:2px 6px;font-weight:700}'
+    '#bjct-sec .bjct-note b{background:#eaf0ff;border-radius:5px;padding:2px 6px;font-weight:700}',
+    '#bjct-banners{display:none;background:#fff;padding:4px 12px 16px}',
+    '#bjct-banners .bjct-ban-vp{position:relative;overflow:hidden;border-radius:14px;aspect-ratio:768/430;touch-action:pan-y;user-select:none;-webkit-user-select:none;background:#f2f3f6}',
+    '#bjct-banners .bjct-ban-track{display:flex;height:100%;transition:transform .4s cubic-bezier(.4,0,.2,1)}',
+    '#bjct-banners.bjct-ban-noanim .bjct-ban-track{transition:none}',
+    '#bjct-banners .bjct-ban-slide{flex:0 0 100%;height:100%}',
+    '#bjct-banners .bjct-ban-slide img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}',
+    '#bjct-banners .bjct-ban-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}',
+    '#bjct-banners .bjct-ban-dot{width:6px;height:6px;border-radius:50%;background:#d5d8df;transition:width .2s,background .2s;cursor:pointer}',
+    '#bjct-banners .bjct-ban-dot.on{width:18px;border-radius:3px;background:#0838f8}'
   ].join('');
 
   function cardHTML(p) {
@@ -89,6 +98,53 @@
       + '<div class="bjct-body"><div class="bjct-brand">' + p.brand + '</div><div class="bjct-name">' + p.name + '</div>' + price + '</div></a>';
   }
 
+  function buildBanners() {
+    var mb = document.querySelector('.new-mb_m');
+    if (!mb) return null;
+    var imgs = [].slice.call(mb.querySelectorAll('.item img, img')).map(function (im) { return im.getAttribute('src') || im.getAttribute('ec-data-src'); }).filter(Boolean);
+    imgs = imgs.filter(function (s, i) { return imgs.indexOf(s) === i; });
+    if (imgs.length < 2) return null;
+    var el = document.createElement('div');
+    el.id = 'bjct-banners';
+    el.innerHTML = '<div class="bjct-ban-vp"><div class="bjct-ban-track">'
+      + imgs.map(function (s) { return '<div class="bjct-ban-slide"><img src="' + s + '" alt=""></div>'; }).join('')
+      + '</div></div><div class="bjct-ban-dots">'
+      + imgs.map(function (_, i) { return '<span class="bjct-ban-dot' + (i === 0 ? ' on' : '') + '" data-i="' + i + '"></span>'; }).join('')
+      + '</div>';
+    return el;
+  }
+
+  function wireBanners(el) {
+    var track = el.querySelector('.bjct-ban-track'), vp = el.querySelector('.bjct-ban-vp');
+    var dots = [].slice.call(el.querySelectorAll('.bjct-ban-dot')), n = dots.length;
+    var i = 0, W = 0, timer = null;
+    function measure() { W = vp.clientWidth || 360; }
+    function render(dx, anim) {
+      measure();
+      if (!anim) el.classList.add('bjct-ban-noanim');
+      track.style.transform = 'translate3d(' + (-i * W + (dx || 0)) + 'px,0,0)';
+      if (!anim) requestAnimationFrame(function () { el.classList.remove('bjct-ban-noanim'); });
+      dots.forEach(function (d, j) { d.classList.toggle('on', j === i); });
+    }
+    function goTo(k) { i = (k % n + n) % n; render(0, true); }
+    function next() { goTo(i + 1); }
+    function play() { stop(); timer = setInterval(next, 4000); }
+    function stop() { if (timer) { clearInterval(timer); timer = null; } }
+    dots.forEach(function (d) { d.addEventListener('click', function () { goTo(+d.getAttribute('data-i')); play(); }); });
+    var x0 = 0, y0 = 0, drag = false, decided = false, horiz = false, lastDx = 0;
+    vp.addEventListener('pointerdown', function (e) { measure(); x0 = e.clientX; y0 = e.clientY; drag = true; decided = false; horiz = false; lastDx = 0; stop(); });
+    vp.addEventListener('pointermove', function (e) {
+      if (!drag) return; var dx = e.clientX - x0, dy = e.clientY - y0;
+      if (!decided) { if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 6) { decided = true; horiz = true; el.classList.add('bjct-ban-noanim'); try { vp.setPointerCapture(e.pointerId); } catch (_) { } } else if (Math.abs(dy) > 6) { decided = true; horiz = false; } else return; }
+      if (!horiz) return; e.preventDefault(); lastDx = dx;
+      track.style.transform = 'translate3d(' + (-i * W + dx) + 'px,0,0)';
+    });
+    function end() { if (!drag) return; drag = false; if (!horiz) { play(); return; } el.classList.remove('bjct-ban-noanim'); if (Math.abs(lastDx) > W * 0.2) i = ((lastDx < 0 ? i + 1 : i - 1) % n + n) % n; render(0, true); play(); horiz = false; decided = false; }
+    vp.addEventListener('pointerup', end); vp.addEventListener('pointercancel', end);
+    render(0, false); play();
+    window.addEventListener('resize', function () { render(0, false); });
+  }
+
   function build(anchor) {
     var sec = document.createElement('section');
     sec.id = 'bjct-sec';
@@ -97,7 +153,11 @@
       + '<div class="bjct-tabwrap"><nav class="bjct-tabs" id="bjct-tabs"><span class="bjct-ind" id="bjct-ind"></span></nav></div>'
       + '<div class="bjct-count"><div class="bjct-n"><b id="bjct-cnt">0</b>개의 상품</div><div class="bjct-sort">인기순 ▾</div></div>'
       + '<div class="bjct-pager" id="bjct-pager"></div>';
-    anchor.parentNode.insertBefore(sec, anchor.nextSibling);
+    var banners = buildBanners();
+    var ref = anchor.nextSibling;
+    if (banners) { anchor.parentNode.insertBefore(banners, ref); ref = banners.nextSibling; }
+    anchor.parentNode.insertBefore(sec, ref);
+    if (banners) wireBanners(banners);
 
     var tabbar = sec.querySelector('#bjct-tabs');
     var ind = sec.querySelector('#bjct-ind');
