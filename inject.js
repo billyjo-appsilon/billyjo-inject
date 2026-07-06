@@ -46,6 +46,962 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
+  // === 모바일 카테고리 탭 + 상품 그리드 (스와이프 페이저 · 실상품 데이터) (2026-07-06) ===
+  //   모바일에서 상단 .new-mc 아이콘 그리드를 탭+상품그리드 섹션(#bjct-sec)으로 교체. 전 클래스 bjct- 네임스페이스로 사이트 클래스와 충돌 회피.
+/* ===== 빌리조 모바일 카테고리 탭 + 상품 그리드(스와이프) — bjct- 네임스페이스 ===== */
+(function () {
+  if (window.__bjctInit) return;
+  window.__bjctInit = true;
+
+  var RAW = {
+  "water": {
+    "name": "정수기",
+    "url": "/html/dh_prod/prod_list/1-8",
+    "items": [
+      {
+        "pid": "24578",
+        "name": "코웨이 아이콘 V2 얼음냉온정수기",
+        "brand": "CHPI-7400N_V2 4개월관리 반값할인",
+        "img": "https://rentalshop.site/_data/file/goodsImages/99ea4428f69f5e1f48b893e7f9a9e30c.png",
+        "orig": 45400,
+        "final": 15400,
+        "disc": 66,
+        "best": true,
+        "rvn": 429
+      },
+      {
+        "pid": "18639",
+        "name": "쿠쿠 냉온정수기",
+        "brand": "CP-F603",
+        "img": "https://rentalshop.site/_data/file/goodsImages/748a3f1b124708ebb348d7be86f7541e.png",
+        "orig": 15900,
+        "final": 0,
+        "disc": 0,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "10914",
+        "name": "세스코 스마트핏 데스크형 THE슬림 냉온정수기",
+        "brand": "EWBD351_4개월",
+        "img": "https://rentalshop.site/_data/file/goodsImages/8ec4c558dee2a71c8c22bda7ada8bdde.png",
+        "orig": 17900,
+        "final": 0,
+        "disc": 0,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "10913",
+        "name": "스마트핏 스탠드형 THE슬림 냉온정수기",
+        "brand": "EWBS351_4개월",
+        "img": "https://rentalshop.site/_data/file/goodsImages/20d37208b22c9e0a249ae9e1baf07c5f.png",
+        "orig": 17900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "12955",
+        "name": "코웨이 나노직수 정수기 미니 정수전용",
+        "brand": "P-350N_자가관리",
+        "img": "https://rentalshop.site/_data/file/goodsImages/2d52a5d077ffc3cc6df8a3c0df030eec.png",
+        "orig": 15900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 1981
+      },
+      {
+        "pid": "18931",
+        "name": "쿠쿠 인스퓨어 냉온정수기 데스크",
+        "brand": "CP-WS601HW",
+        "img": "https://rentalshop.site/_data/file/goodsImages/394d60c2d3888a595a2759ee5f1f98e2.png",
+        "orig": 20900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "20276",
+        "name": "쿠쿠 제로백 슬림 직수 초고온수 얼음냉온정수기",
+        "brand": "CP-AHS100HEW",
+        "img": "https://rentalshop.site/_data/file/goodsImages/f2893878cae90b01372b29db1b907a66.png",
+        "orig": 42900,
+        "final": 12900,
+        "disc": 70,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "24579",
+        "name": "코웨이 아이콘 V2 얼음냉온정수기",
+        "brand": "CHPI-7400N_V2 2개월관리 반값할인",
+        "img": "https://rentalshop.site/_data/file/goodsImages/3f2bd3ca3d4473719e559881d6dfcff1.png",
+        "orig": 48400,
+        "final": 18400,
+        "disc": 62,
+        "best": false,
+        "rvn": 429
+      }
+    ]
+  },
+  "air": {
+    "name": "공기청정기",
+    "url": "/html/dh_prod/prod_list/1-6",
+    "items": [
+      {
+        "pid": "14868",
+        "name": "코웨이 싱글파워 공기청정기 10평 소형 가정용 사무용",
+        "brand": "AP-1023F 셀프",
+        "img": "https://rentalshop.site/_data/file/goodsImages/601be94927663cf64fe6821e1cb025a0.png",
+        "orig": 18400,
+        "final": 0,
+        "disc": 0,
+        "best": true,
+        "rvn": 262
+      },
+      {
+        "pid": "16587",
+        "name": "코웨이 노블청정기2 16평형",
+        "brand": "AP-1623M_4개월",
+        "img": "https://rentalshop.site/_data/file/goodsImages/29166ebb47b0b22e8d9a0fc13edb1259.png",
+        "orig": 35400,
+        "final": 5400,
+        "disc": 85,
+        "best": true,
+        "rvn": 262
+      },
+      {
+        "pid": "16582",
+        "name": "코웨이 노블청정기2 16평형",
+        "brand": "AP-1623M_셀프",
+        "img": "https://rentalshop.site/_data/file/goodsImages/317234c82bbfabc896b740a804759dcd.png",
+        "orig": 30900,
+        "final": 900,
+        "disc": 97,
+        "best": true,
+        "rvn": 262
+      },
+      {
+        "pid": "1832",
+        "name": "쿠쿠 인스퓨어 공기청정기 35평",
+        "brand": "AC-35U10FWS(S)(10프로할인)",
+        "img": "https://rentalshop.site/_data/file/goodsImages/cbb2f761aba2fa67301c2b22045f142d.png",
+        "orig": 29610,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 120
+      },
+      {
+        "pid": "10428",
+        "name": "LG전자 퓨리케어 360˚ 알파 19평형 공기청정기",
+        "brand": "AS192DSFAM 6개월_LG케어",
+        "img": "https://rentalshop.site/_data/file/goodsImages/63acba13caeb5ed239bd508ce94b2fb6.png",
+        "orig": 33900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 111
+      },
+      {
+        "pid": "25252",
+        "name": "세스코 트루에어 공기청정기 판테온 (20평형)",
+        "brand": "EADS511_4개월",
+        "img": "https://rentalshop.site/_data/file/goodsImages/adde24da579ffd2d9fa50ee236506e43.png",
+        "orig": 21900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "16583",
+        "name": "코웨이 노블청정기2 20평형",
+        "brand": "AP-2023K_셀프",
+        "img": "https://rentalshop.site/_data/file/goodsImages/72580d95bcf49968c40c305d4dc7f543.png",
+        "orig": 33900,
+        "final": 3900,
+        "disc": 88,
+        "best": false,
+        "rvn": 262
+      },
+      {
+        "pid": "25120",
+        "name": "코웨이 노블청정기2 30평형",
+        "brand": "AP-3024H 4개월방문형",
+        "img": "https://rentalshop.site/_data/file/goodsImages/115e206594aba18f0c7dc854bdedd090.png",
+        "orig": 52400,
+        "final": 22400,
+        "disc": 57,
+        "best": false,
+        "rvn": 262
+      }
+    ]
+  },
+  "aircon": {
+    "name": "에어컨",
+    "url": "/html/dh_prod/prod_list/1-87",
+    "items": [
+      {
+        "pid": "19395",
+        "name": "LG전자 휘센 벽걸이에어컨",
+        "brand": "SQ06EZ1WBS",
+        "img": "https://rentalshop.site/_data/file/goodsImages/3a13b2551d803767bb9f0a35117fc994.png",
+        "orig": 17900,
+        "final": 0,
+        "disc": 0,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "7885",
+        "name": "LG전자 천장형 1way 에어컨 6평형(단상)",
+        "brand": "TQ0232U2S",
+        "img": "https://rentalshop.site/_data/file/goodsImages/97bb60b5479857349d0b48d785e9e507.png",
+        "orig": 49900,
+        "final": 24900,
+        "disc": 50,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "26799",
+        "name": "삼성전자 벽걸이형 에어컨 9평",
+        "brand": "AR60F09D11WS",
+        "img": "https://rentalshop.site/_data/file/goodsImages/ec07d94f328e022cd117647a1eb3cbf3.png",
+        "orig": 28500,
+        "final": 0,
+        "disc": 0,
+        "best": true,
+        "rvn": 40
+      },
+      {
+        "pid": "20188",
+        "name": "LG전자 에어컨 벽걸이 에어컨 인버터 16평",
+        "brand": "SQ16EK1WAS",
+        "img": "https://rentalshop.site/_data/file/goodsImages/c7e189fe343b5e79011da30930407889.png",
+        "orig": 47500,
+        "final": 22500,
+        "disc": 53,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "26379",
+        "name": "삼성전자 무풍 벽걸이 콤보에어컨 15평형",
+        "brand": "AR60F15D12WS",
+        "img": "https://rentalshop.site/_data/file/goodsImages/f6db65c53850c055f0d4b4014b7ada88.png",
+        "orig": 39800,
+        "final": 14800,
+        "disc": 63,
+        "best": false,
+        "rvn": 40
+      },
+      {
+        "pid": "25998",
+        "name": "삼성전자 에어컨 Q9000",
+        "brand": "AF60F17D11WS",
+        "img": "https://rentalshop.site/_data/file/goodsImages/f7810b8881a8065e4a4290b8352916f7.png",
+        "orig": 40300,
+        "final": 300,
+        "disc": 99,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "3347",
+        "name": "LG전자 천장형 1way 에어컨 12평형 (냉방전용)",
+        "brand": "TQ0521T2S",
+        "img": "https://rentalshop.site/_data/file/goodsImages/35253e3ef90693ae79c2ba0da4fd5523.png",
+        "orig": 62500,
+        "final": 37500,
+        "disc": 40,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "5094",
+        "name": "LG전자 천장형 냉방기 10평형 1WAY",
+        "brand": "TQ0401U2S",
+        "img": "https://rentalshop.site/_data/file/goodsImages/d6ec6bd58381007192c83ca8c555dc01.png",
+        "orig": 59900,
+        "final": 34900,
+        "disc": 42,
+        "best": false,
+        "rvn": 0
+      }
+    ]
+  },
+  "fridge": {
+    "name": "냉장고",
+    "url": "/html/dh_prod/prod_list/8-658",
+    "items": [
+      {
+        "pid": "20058",
+        "name": "하이얼 4도어 글램글라스 냉장고 433L 글램화이트 피치핑크",
+        "brand": "HRS445MNWP",
+        "img": "https://rentalshop.site/_data/file/goodsImages/5c825b3689ee8179c2b9090983f6c931.png",
+        "orig": 30900,
+        "final": 5900,
+        "disc": 81,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "8009",
+        "name": "LG전자 일반 냉장고 189L",
+        "brand": "B182W13",
+        "img": "https://rentalshop.site/_data/file/goodsImages/9e9b627bd8693c3a4291acec1b6ecea6.png",
+        "orig": 13500,
+        "final": 0,
+        "disc": 0,
+        "best": true,
+        "rvn": 37
+      },
+      {
+        "pid": "26399",
+        "name": "삼성전자 냉장고 4도어 Bespoke (fixed) 프리스탠딩 벤딩 일반 905L 에센셜화이트",
+        "brand": "RM70F90R2ZD",
+        "img": "https://rentalshop.site/_data/file/goodsImages/e63dfb64f55ba0829477be8149575c5e.png",
+        "orig": 49000,
+        "final": 24000,
+        "disc": 51,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "22764",
+        "name": "삼성전자 양문형 냉장고 852L",
+        "brand": "RS84DB5002CW",
+        "img": "https://rentalshop.site/_data/file/goodsImages/53662897d2b585b1bc4c430787a9e7e1.png",
+        "orig": 32700,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "20500",
+        "name": "LG전자 냉장고 하냉장 317L (메탈)",
+        "brand": "D312MBE31_LG케어",
+        "img": "https://rentalshop.site/_data/file/goodsImages/eac1f9caf348c6a10e1ac69851af5ebe.png",
+        "orig": 19900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 37
+      },
+      {
+        "pid": "27223",
+        "name": "LG전자 냉장고 하냉장 507L 베이지(메탈)",
+        "brand": "D502MEE53_LG케어",
+        "img": "https://rentalshop.site/_data/file/goodsImages/ce34cfe8237c02b6c02b710f03d63309.png",
+        "orig": 22900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 37
+      },
+      {
+        "pid": "23052",
+        "name": "삼성전자 냉장고 일반냉장고",
+        "brand": "RT25DARAHS9",
+        "img": "https://rentalshop.site/_data/file/goodsImages/08aa3a4ae1f6e02102dc1a6e701099d9.png",
+        "orig": 16900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "12572",
+        "name": "LG전자 오브제 일반냉장고 332L",
+        "brand": "D332MBE34",
+        "img": "https://rentalshop.site/_data/file/goodsImages/7e21f9098ffd922dff04d932f04d7a91.png",
+        "orig": 21900,
+        "final": 1900,
+        "disc": 91,
+        "best": false,
+        "rvn": 37
+      }
+    ]
+  },
+  "wash": {
+    "name": "세탁기",
+    "url": "/html/dh_prod/prod_list/3-99",
+    "items": [
+      {
+        "pid": "6784",
+        "name": "삼성전자 그랑데 세탁기 블랙케비어 21kg",
+        "brand": "WF21T6000KV",
+        "img": "https://rentalshop.site/_data/file/goodsImages/9f43fa93b1b6bff218b9f5489ec46ad7.png",
+        "orig": 27500,
+        "final": 2500,
+        "disc": 91,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "265",
+        "name": "삼성전자 그랑데 통버블 세탁기 21kg",
+        "brand": "WA21A8376KV",
+        "img": "https://rentalshop.site/_data/file/goodsImages/c8d121a2274d1365179646ab03434a3d.png",
+        "orig": 22300,
+        "final": 0,
+        "disc": 0,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "27503",
+        "name": "LG전자 통돌이 세탁기 25KG",
+        "brand": "T25PX9",
+        "img": "https://rentalshop.site/_data/file/goodsImages/13cd7ac8e74a5ce3977043483f881458.png",
+        "orig": 40900,
+        "final": 20900,
+        "disc": 49,
+        "best": true,
+        "rvn": 34
+      },
+      {
+        "pid": "26339",
+        "name": "LG전자 트롬 세탁기 9kg",
+        "brand": "F9WTQ",
+        "img": "https://rentalshop.site/_data/file/goodsImages/04d247e4be2c46b015a2e78ae3050622.png",
+        "orig": 15900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 34
+      },
+      {
+        "pid": "18554",
+        "name": "삼성전자 BESPOKE 그랑데 세탁기 AI 21kg",
+        "brand": "WF21CB6650BW",
+        "img": "https://rentalshop.site/_data/file/goodsImages/ce062b2904791ff0467656ce0db139f3.png",
+        "orig": 28600,
+        "final": 3600,
+        "disc": 87,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "19958",
+        "name": "LG전자 트롬 오브제컬렉션 워시콤보 25kg세탁 15kg건조 릴리화이트",
+        "brand": "FH25WA",
+        "img": "https://rentalshop.site/_data/file/goodsImages/2b1ba295e97fc5eeb878106208c3353b.png",
+        "orig": 108400,
+        "final": 68400,
+        "disc": 37,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "20122",
+        "name": "LG전자 트롬 오브제컬렉션 워시콤보 미니워시",
+        "brand": "FH25EAEX",
+        "img": "https://rentalshop.site/_data/file/goodsImages/e0a423c0f74bcd2aa1de34665b717d9b.png",
+        "orig": 137200,
+        "final": 112200,
+        "disc": 18,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "19987",
+        "name": "LG전자 트롬 오브제컬렉션 워시콤보 세탁건조 미니워시 모던스테인리스",
+        "brand": "FH25VAX",
+        "img": "https://rentalshop.site/_data/file/goodsImages/72da4e636e813ed5a0f279ae26bcfb7a.png",
+        "orig": 132000,
+        "final": 107000,
+        "disc": 19,
+        "best": false,
+        "rvn": 0
+      }
+    ]
+  },
+  "tv": {
+    "name": "TV",
+    "url": "/html/dh_prod/prod_list/6-678",
+    "items": [
+      {
+        "pid": "27207",
+        "name": "LG전자 올레드 OLED TV 77인치",
+        "brand": "OLED77B4SW_LG케어",
+        "img": "https://rentalshop.site/_data/file/goodsImages/44581dfd5368bce0bb78efd694f9a64e.png",
+        "orig": 101600,
+        "final": 61600,
+        "disc": 39,
+        "best": true,
+        "rvn": 42
+      },
+      {
+        "pid": "27216",
+        "name": "LG전자 QNED TV 75인치 (벽걸이형)",
+        "brand": "75QNED9MAKW_LG케어",
+        "img": "https://rentalshop.site/_data/file/goodsImages/1b1011ff9edcc5662ac02656a2fd72dd.png",
+        "orig": 81600,
+        "final": 41600,
+        "disc": 49,
+        "best": true,
+        "rvn": 42
+      },
+      {
+        "pid": "26894",
+        "name": "LG전자 나노셀 TV 86인치",
+        "brand": "86NANO90AKW_LG케어",
+        "img": "https://rentalshop.site/_data/file/goodsImages/edde53b0a2741cef7acf5c1ab36f5ebc.png",
+        "orig": 66800,
+        "final": 26800,
+        "disc": 60,
+        "best": true,
+        "rvn": 42
+      },
+      {
+        "pid": "26603",
+        "name": "LG전자 올레드 OLED TV 77인치",
+        "brand": "OLED77B5SW_LG케어",
+        "img": "https://rentalshop.site/_data/file/goodsImages/731719efdcf1e42cb92cf37bcf61fe12.png",
+        "orig": 104900,
+        "final": 64900,
+        "disc": 38,
+        "best": false,
+        "rvn": 42
+      },
+      {
+        "pid": "22078",
+        "name": "삼성전자 The Serif 디자인 UHD TV 55인치",
+        "brand": "KQ55LSD01AFXKR",
+        "img": "https://rentalshop.site/_data/file/goodsImages/1da696c517e3cb07c8c4b89c58caeebc.png",
+        "orig": 54600,
+        "final": 29600,
+        "disc": 46,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "22079",
+        "name": "삼성전자 The Serif 디자인 UHD TV 65인치",
+        "brand": "KQ65LSD01AFXKR",
+        "img": "https://rentalshop.site/_data/file/goodsImages/351d22b8b5e1bb47b76c44b5ee7a0d21.png",
+        "orig": 76900,
+        "final": 51900,
+        "disc": 33,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "24720",
+        "name": "인켈 UHD TV 55인치",
+        "brand": "SU55CKD",
+        "img": "https://rentalshop.site/_data/file/goodsImages/95837a62a084af3222993bc21e16a83b.png",
+        "orig": 18900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "24218",
+        "name": "인켈 UHD TV 65인치",
+        "brand": "SQG650SW",
+        "img": "https://rentalshop.site/_data/file/goodsImages/dd1208a2a63a15126590b366583362db.png",
+        "orig": 33900,
+        "final": 13900,
+        "disc": 59,
+        "best": false,
+        "rvn": 0
+      }
+    ]
+  },
+  "heat": {
+    "name": "냉난방기",
+    "url": "/html/dh_prod/prod_list/10-1153",
+    "items": [
+      {
+        "pid": "1791",
+        "name": "LG전자 냉난방기 80평형 스탠드",
+        "brand": "PW2900F9SF",
+        "img": "https://rentalshop.site/_data/file/goodsImages/ddb2bdcfd2b042830d9cd5703c399f1c.png",
+        "orig": 166600,
+        "final": 141600,
+        "disc": 15,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "24448",
+        "name": "삼성전자 냉난방기 천장형 4WAY 40평",
+        "brand": "AC145BS4PHH7SY",
+        "img": "https://rentalshop.site/_data/file/goodsImages/766dfff00cbe85067a9e29ed4c8a8846.png",
+        "orig": 96000,
+        "final": 71000,
+        "disc": 26,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "12342",
+        "name": "삼성전자 냉난방기 23평형",
+        "brand": "AP083BSPPBH6SY",
+        "img": "https://rentalshop.site/_data/file/goodsImages/de6068f1ba39bd71c1e73f7b52266bc4.png",
+        "orig": 83900,
+        "final": 63900,
+        "disc": 24,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "12312",
+        "name": "삼성전자 냉난방기 30평형",
+        "brand": "AP110BSPPBH6SY",
+        "img": "https://rentalshop.site/_data/file/goodsImages/e2f57f6c09b611b5e5ba40596622a846.png",
+        "orig": 107900,
+        "final": 87900,
+        "disc": 19,
+        "best": false,
+        "rvn": 54
+      },
+      {
+        "pid": "1120",
+        "name": "LG전자 냉난방기 1WAY 8평 사업자전용",
+        "brand": "TW0320U2S",
+        "img": "https://rentalshop.site/_data/file/goodsImages/9cace60b1e20df968fc0133c5933ccba.png",
+        "orig": 59500,
+        "final": 34500,
+        "disc": 42,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "1268",
+        "name": "LG전자 상업용 스탠드 냉난방기 63평형",
+        "brand": "PW2300F9SF",
+        "img": "https://rentalshop.site/_data/file/goodsImages/5b9a8e61b199e6e44d1d31387cac824c.png",
+        "orig": 155000,
+        "final": 130000,
+        "disc": 16,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "1765",
+        "name": "LG전자 천장형 냉난방기 4WAY 25평",
+        "brand": "TW0900Y2SR",
+        "img": "https://rentalshop.site/_data/file/goodsImages/0a80f0a3cd0dcf5554d4ab8bfa93edc8.png",
+        "orig": 84500,
+        "final": 59500,
+        "disc": 30,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "24447",
+        "name": "삼성전자 냉난방기 천장형 4WAY 30평",
+        "brand": "AC110BS4PHH7SY",
+        "img": "https://rentalshop.site/_data/file/goodsImages/f63bef56467f1a46b11d4111521b5483.png",
+        "orig": 87000,
+        "final": 62000,
+        "disc": 29,
+        "best": false,
+        "rvn": 0
+      }
+    ]
+  },
+  "dry": {
+    "name": "건조기",
+    "url": "/html/dh_prod/prod_list/3-25",
+    "items": [
+      {
+        "pid": "19490",
+        "name": "LG전자 트롬 건조기 10KG",
+        "brand": "RH10WTA 12개월_LG케어",
+        "img": "https://rentalshop.site/_data/file/goodsImages/1bf74b1af9fb66921b1a5e0487a251c1.png",
+        "orig": 25900,
+        "final": 0,
+        "disc": 0,
+        "best": true,
+        "rvn": 6
+      },
+      {
+        "pid": "22677",
+        "name": "미닉스 미니 건조기 PRO 플러스 3.5kg",
+        "brand": "MNMD-120G",
+        "img": "https://rentalshop.site/_data/file/goodsImages/ae6c03dbbca3e9b5397b7314bdf801bf.png",
+        "orig": 11500,
+        "final": 0,
+        "disc": 0,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "3139",
+        "name": "삼성전자 건조기 9Kg",
+        "brand": "DV90TA040KE",
+        "img": "https://rentalshop.site/_data/file/goodsImages/00ad4ac3dd40ba3e051278411dc5a278.png",
+        "orig": 22200,
+        "final": 0,
+        "disc": 0,
+        "best": true,
+        "rvn": 0
+      },
+      {
+        "pid": "18550",
+        "name": "삼성전자 그랑데 AI 건조기 17Kg",
+        "brand": "DV17CB6600BW",
+        "img": "https://rentalshop.site/_data/file/goodsImages/34840886d0449ff3fdc04dd8dad7e56a.png",
+        "orig": 32000,
+        "final": 7000,
+        "disc": 78,
+        "best": false,
+        "rvn": 0
+      },
+      {
+        "pid": "22865",
+        "name": "LG전자 건조기 18kg",
+        "brand": "RG18WNT 12개월_LG케어",
+        "img": "https://rentalshop.site/_data/file/goodsImages/f37363f33628d3e71a8567441607f581.png",
+        "orig": 29900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 38
+      },
+      {
+        "pid": "22866",
+        "name": "LG전자 건조기 20kg",
+        "brand": "RG20KN 12개월_LG케어",
+        "img": "https://rentalshop.site/_data/file/goodsImages/abf540afbb766e2db58bf05e7b9974eb.png",
+        "orig": 34900,
+        "final": 0,
+        "disc": 0,
+        "best": false,
+        "rvn": 38
+      },
+      {
+        "pid": "19483",
+        "name": "LG전자 트롬 건조기 10KG",
+        "brand": "RH10WTW",
+        "img": "https://rentalshop.site/_data/file/goodsImages/cecf6603e665bb4c444b6cec28735c3a.png",
+        "orig": 28800,
+        "final": 8800,
+        "disc": 69,
+        "best": false,
+        "rvn": 6
+      },
+      {
+        "pid": "22186",
+        "name": "LG전자 트롬 오브제컬렉션 건조기 21kg",
+        "brand": "RD21GN 6개월_LG케어",
+        "img": "https://rentalshop.site/_data/file/goodsImages/7f9f9447ee3e2cb10d0890659e65292b.png",
+        "orig": 41900,
+        "final": 1900,
+        "disc": 95,
+        "best": false,
+        "rvn": 38
+      }
+    ]
+  }
+};
+  var CAT_META = [
+    { key: 'all', name: '전체' },
+    { key: 'water', name: '정수기' }, { key: 'air', name: '공기청정기' },
+    { key: 'aircon', name: '에어컨' }, { key: 'fridge', name: '냉장고' },
+    { key: 'wash', name: '세탁기' }, { key: 'tv', name: 'TV' },
+    { key: 'heat', name: '냉난방기' }, { key: 'dry', name: '건조기' }
+  ];
+  var ICON = { water: '💧', air: '🍃', aircon: '❄️', fridge: '🧊', wash: '🫧', tv: '📺', heat: '♨️', dry: '💨' };
+  var won = function (n) { return (n || 0).toLocaleString('ko-KR'); };
+
+  function proc(p, i) {
+    var parts = (p.name || '').split(' ');
+    var brand = parts[0] || '';
+    var name = parts.slice(1).join(' ') || p.name;
+    var hasDisc = p.disc > 0 && p.final > 0 && p.final < p.orig;
+    return { img: p.img, brand: brand, name: name, orig: p.orig, final: hasDisc ? p.final : p.orig, disc: p.disc, hasDisc: hasDisc, best: i === 0, link: '/html/dh_prod/prod_view/' + p.pid };
+  }
+  var BY = {}, TOP = [];
+  CAT_META.forEach(function (c) {
+    if (c.key === 'all') return;
+    var raw = (RAW[c.key] && RAW[c.key].items) || [];
+    BY[c.key] = raw.map(proc);
+    TOP.push.apply(TOP, BY[c.key].slice(0, 2)); // 전체 = 카테고리별 상위 2개
+  });
+  BY.all = TOP;
+  function listFor(k) { return BY[k] || []; }
+
+  var CSS = [
+    '#bjct-sec{display:none;background:#fff;font-family:inherit;-webkit-tap-highlight-color:transparent}',
+    '@media(max-width:767px){#bjct-sec{display:block}.new-mc:not(.show-767){display:none !important}}',
+    '#bjct-sec *{box-sizing:border-box}',
+    '#bjct-sec .bjct-head{padding:18px 18px 4px}',
+    '#bjct-sec .bjct-kick{font-size:12px;font-weight:800;color:#0838f8;letter-spacing:.02em}',
+    '#bjct-sec .bjct-h2{font-size:20px;font-weight:900;letter-spacing:-.03em;margin:3px 0 0;color:#16181d}',
+    '#bjct-sec .bjct-sub{font-size:12.5px;color:#8a8f9c;margin-top:4px}',
+    '#bjct-sec .bjct-tabwrap{position:sticky;top:0;z-index:20;background:#fff;border-bottom:1px solid #eceef2}',
+    '#bjct-sec .bjct-tabs{display:flex;gap:4px;overflow-x:auto;padding:10px 12px 0;position:relative;scrollbar-width:none}',
+    '#bjct-sec .bjct-tabs::-webkit-scrollbar{display:none}',
+    '#bjct-sec .bjct-tab{flex:0 0 auto;position:relative;border:0;background:none;cursor:pointer;padding:6px 12px 14px;font-size:14.5px;font-weight:700;color:#9298a4;letter-spacing:-.02em;white-space:nowrap;font-family:inherit}',
+    '#bjct-sec .bjct-tab.on{color:#16181d;font-weight:800}',
+    '#bjct-sec .bjct-ic{margin-right:4px}',
+    '#bjct-sec .bjct-ind{position:absolute;bottom:0;left:0;height:2.5px;background:#0838f8;border-radius:2px;transition:transform .28s cubic-bezier(.4,0,.2,1),width .28s cubic-bezier(.4,0,.2,1)}',
+    '#bjct-sec .bjct-count{display:flex;align-items:center;justify-content:space-between;padding:14px 16px 8px}',
+    '#bjct-sec .bjct-count .bjct-n{font-size:13px;color:#4a4e58;font-weight:600}',
+    '#bjct-sec .bjct-count .bjct-n b{color:#0838f8;font-weight:800}',
+    '#bjct-sec .bjct-sort{font-size:12px;color:#6b7280;font-weight:600;background:#fff;border:1px solid #eceef2;padding:5px 10px;border-radius:8px}',
+    '#bjct-sec .bjct-pager{position:relative;overflow:hidden;touch-action:pan-y;user-select:none;-webkit-user-select:none;transition:height .3s cubic-bezier(.4,0,.2,1)}',
+    '#bjct-sec .bjct-panel{position:absolute;top:0;left:0;width:100%;transition:transform .3s cubic-bezier(.4,0,.2,1)}',
+    '#bjct-sec.bjct-noanim .bjct-pager,#bjct-sec.bjct-noanim .bjct-panel{transition:none}',
+    '#bjct-sec .bjct-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:2px 12px 22px}',
+    '#bjct-sec .bjct-card{background:#fff;border-radius:14px;overflow:hidden;border:1px solid #f0f1f4;display:flex;flex-direction:column;text-decoration:none;color:inherit}',
+    '#bjct-sec .bjct-thumb{aspect-ratio:1/.88;background:#f6f7f9;display:flex;align-items:center;justify-content:center;position:relative;padding:12px}',
+    '#bjct-sec .bjct-thumb img{max-width:100%;max-height:100%;object-fit:contain;mix-blend-mode:multiply;pointer-events:none}',
+    '#bjct-sec .bjct-tag{position:absolute;top:8px;left:8px;background:#0838f8;color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:6px}',
+    '#bjct-sec .bjct-heart{position:absolute;top:7px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center}',
+    '#bjct-sec .bjct-heart svg{width:13px;height:13px;stroke:#b6bcc7;fill:none;stroke-width:2}',
+    '#bjct-sec .bjct-body{padding:10px 10px 12px;display:flex;flex-direction:column;gap:2px}',
+    '#bjct-sec .bjct-brand{font-size:11px;color:#8a8f9c;font-weight:700}',
+    '#bjct-sec .bjct-name{font-size:12.5px;font-weight:600;line-height:1.34;color:#23262d;letter-spacing:-.02em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:34px;margin-bottom:5px}',
+    '#bjct-sec .bjct-orow{display:flex;align-items:center;gap:5px;white-space:nowrap}',
+    '#bjct-sec .bjct-chip{font-size:9px;font-weight:800;color:#7a808c;background:#f0f1f4;padding:2px 4px;border-radius:4px;flex:0 0 auto}',
+    '#bjct-sec .bjct-orig{font-size:10.5px;color:#b0b4be;text-decoration:line-through}',
+    '#bjct-sec .bjct-frow{display:flex;align-items:baseline;gap:5px;margin-top:3px;white-space:nowrap}',
+    '#bjct-sec .bjct-off{color:#ff2d55;font-size:13px;font-weight:900}',
+    '#bjct-sec .bjct-final{font-size:14px;font-weight:900;color:#16181d}',
+    '#bjct-sec .bjct-final .bjct-mo{font-size:10px;font-weight:700;color:#6b7280;margin-right:1px}',
+    '#bjct-sec .bjct-note{display:flex;align-items:center;gap:4px;margin-top:7px;font-size:10.5px;color:#0838f8;font-weight:700}',
+    '#bjct-sec .bjct-note b{background:#eaf0ff;border-radius:5px;padding:2px 6px;font-weight:700}'
+  ].join('');
+
+  function cardHTML(p) {
+    var price = p.hasDisc
+      ? '<div class="bjct-orow"><span class="bjct-chip">최저</span><span class="bjct-orig">월 ' + won(p.orig) + '원</span></div>'
+        + '<div class="bjct-frow"><span class="bjct-off">' + p.disc + '%</span><span class="bjct-final"><span class="bjct-mo">월</span>' + won(p.final) + '원</span></div>'
+        + '<div class="bjct-note"><b>제휴카드</b> 추가 할인</div>'
+      : '<div class="bjct-orow" style="visibility:hidden"><span class="bjct-chip">최저</span><span class="bjct-orig">월 ' + won(p.orig) + '원</span></div>'
+        + '<div class="bjct-frow"><span class="bjct-final"><span class="bjct-mo">월</span>' + won(p.orig) + '원</span></div>'
+        + '<div class="bjct-note" style="visibility:hidden"><b>제휴카드</b> 추가 할인</div>';
+    return '<a class="bjct-card" href="' + p.link + '">'
+      + '<div class="bjct-thumb">' + (p.best ? '<span class="bjct-tag">BEST</span>' : '')
+      + '<img src="' + p.img + '" loading="lazy" alt="">'
+      + '<span class="bjct-heart"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.3-7-9a3.7 3.7 0 017-1.5A3.7 3.7 0 0119 11c0 4.7-7 9-7 9z"/></svg></span></div>'
+      + '<div class="bjct-body"><div class="bjct-brand">' + p.brand + '</div><div class="bjct-name">' + p.name + '</div>' + price + '</div></a>';
+  }
+
+  function build(anchor) {
+    var sec = document.createElement('section');
+    sec.id = 'bjct-sec';
+    sec.innerHTML =
+      '<div class="bjct-head"><div class="bjct-kick">CATEGORY</div><div class="bjct-h2">카테고리별 인기 렌탈</div><div class="bjct-sub">원하는 가전을 골라 최저가로 비교하세요</div></div>'
+      + '<div class="bjct-tabwrap"><nav class="bjct-tabs" id="bjct-tabs"><span class="bjct-ind" id="bjct-ind"></span></nav></div>'
+      + '<div class="bjct-count"><div class="bjct-n"><b id="bjct-cnt">0</b>개의 상품</div><div class="bjct-sort">인기순 ▾</div></div>'
+      + '<div class="bjct-pager" id="bjct-pager"></div>';
+    anchor.parentNode.insertBefore(sec, anchor);
+
+    var tabbar = sec.querySelector('#bjct-tabs');
+    var ind = sec.querySelector('#bjct-ind');
+    var pager = sec.querySelector('#bjct-pager');
+    var cntEl = sec.querySelector('#bjct-cnt');
+
+    CAT_META.forEach(function (c, i) {
+      var b = document.createElement('button');
+      b.className = 'bjct-tab'; b.setAttribute('data-i', i);
+      b.innerHTML = (c.key !== 'all' ? '<span class="bjct-ic">' + ICON[c.key] + '</span>' : '') + c.name;
+      b.addEventListener('click', function () { go(i, true); });
+      tabbar.appendChild(b);
+    });
+    var tabs = [].slice.call(tabbar.querySelectorAll('.bjct-tab'));
+    var panels = CAT_META.map(function (c) {
+      var el = document.createElement('div');
+      el.className = 'bjct-panel';
+      el.innerHTML = '<div class="bjct-grid">' + listFor(c.key).map(cardHTML).join('') + '</div>';
+      pager.appendChild(el);
+      return el;
+    });
+
+    var idx = 0, W = 360;
+    function measureW() { W = pager.clientWidth || 360; }
+    function panelH(i) { return panels[i].firstChild.scrollHeight; }
+    function moveInd(t) { ind.style.width = (t.offsetWidth - 24) + 'px'; ind.style.transform = 'translateX(' + (t.offsetLeft + 12) + 'px)'; }
+    function place(dx, dir) {
+      panels.forEach(function (p, i) {
+        var x;
+        if (i === idx) x = dx;
+        else if (dir && i === idx + dir) x = dir * W + dx;
+        else x = (i < idx ? -1 : 1) * W;
+        p.style.transform = 'translate3d(' + x + 'px,0,0)';
+      });
+    }
+    function go(i, animate) {
+      i = Math.max(0, Math.min(CAT_META.length - 1, i)); idx = i;
+      tabs.forEach(function (t, j) { t.classList.toggle('on', j === i); });
+      moveInd(tabs[i]);
+      tabs[i].scrollIntoView({ behavior: animate ? 'smooth' : 'auto', inline: 'center', block: 'nearest' });
+      cntEl.textContent = listFor(CAT_META[i].key).length;
+      measureW();
+      if (!animate) sec.classList.add('bjct-noanim');
+      place(0, 0);
+      pager.style.height = panelH(i) + 'px';
+      if (!animate) requestAnimationFrame(function () { sec.classList.remove('bjct-noanim'); });
+    }
+
+    var x0 = 0, y0 = 0, drag = false, decided = false, horiz = false, dir = 0, lastDx = 0;
+    pager.addEventListener('pointerdown', function (e) { measureW(); x0 = e.clientX; y0 = e.clientY; drag = true; decided = false; horiz = false; dir = 0; lastDx = 0; });
+    pager.addEventListener('pointermove', function (e) {
+      if (!drag) return;
+      var dx = e.clientX - x0, dy = e.clientY - y0;
+      if (!decided) {
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 6) { decided = true; horiz = true; sec.classList.add('bjct-noanim'); try { pager.setPointerCapture(e.pointerId); } catch (_) { } }
+        else if (Math.abs(dy) > 6) { decided = true; horiz = false; } else return;
+      }
+      if (!horiz) return;
+      e.preventDefault();
+      lastDx = dx;
+      dir = dx < 0 ? 1 : -1;
+      var nb = idx + dir, edge = (nb < 0 || nb >= CAT_META.length);
+      place(edge ? dx * 0.28 : dx, edge ? 0 : dir);
+      if (!edge) pager.style.height = Math.max(panelH(idx), panelH(nb)) + 'px';
+    });
+    function endDrag(e) {
+      if (!drag) return; drag = false;
+      if (!horiz) { decided = false; return; }
+      sec.classList.remove('bjct-noanim');
+      var dx = lastDx, nb = idx + dir;
+      if (Math.abs(dx) > W * 0.22 && nb >= 0 && nb < CAT_META.length) go(nb, true);
+      else { place(0, dir); pager.style.height = panelH(idx) + 'px'; }
+      horiz = false; decided = false;
+    }
+    pager.addEventListener('pointerup', endDrag);
+    pager.addEventListener('pointercancel', endDrag);
+
+    go(0, false);
+    window.addEventListener('resize', function () { measureW(); place(0, 0); pager.style.height = panelH(idx) + 'px'; moveInd(tabs[idx]); });
+    // 이미지 로드 후 높이 재보정
+    setTimeout(function () { pager.style.height = panelH(idx) + 'px'; }, 1200);
+  }
+
+  function injectCSS() {
+    if (document.getElementById('bjct-css')) return;
+    var s = document.createElement('style'); s.id = 'bjct-css'; s.textContent = CSS;
+    (document.head || document.documentElement).appendChild(s);
+  }
+
+  var tries = 0;
+  function init() {
+    if (document.getElementById('bjct-sec')) return;
+    var anchor = document.querySelector('.new-mc:not(.show-767)');
+    if (!anchor) { if (tries++ < 25) setTimeout(init, 300); return; }
+    injectCSS();
+    build(anchor);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+
   // === 메인/중간 배너 폭을 콘텐츠(아이콘) 폭 1280에 맞춰 축소 (비율 유지, ≥1280 데스크톱만) (2026-07-02) ===
   //   메인(.new-mv_wrap): slick이 resize로 슬라이드 폭 재계산 → img width:100%로 축소.
   //   중간(.new-mb): 고정 1680 슬라이드라 img width 1280 강제 → 비율 유지(202).
