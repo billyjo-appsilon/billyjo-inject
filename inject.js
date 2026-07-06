@@ -2080,7 +2080,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       // (1) 마퀴와 보장 바 사이 헤딩 삽입
       var bjTh = document.createElement('p');
       bjTh.className = 'bj-trust-sub';
-      bjTh.innerHTML = '본사 동일 제품에 <strong>설치비·등록비 0원</strong>으로 부담없이';
+      bjTh.innerHTML = '본사 동일 제품에<br><strong>설치비·등록비 0원</strong>으로 부담없이';
       bjBar1.parentNode.insertBefore(bjTh, bjBar1);
       // (2) 1번째 바 복제 → "설치비·등록비 0원 보장"으로 리텍스트 + 동전 아이콘
       var bjBar2 = bjBar1.cloneNode(true);
