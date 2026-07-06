@@ -36,6 +36,16 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
+  // === 모바일 하단 중복 카테고리 그리드 숨김 (푸터 위 .new-mc.show-767.hide-default = 상단 .new-mc 복제본) (2026-07-06) ===
+  //   상단 순수 .new-mc(정수기·공기청정기…)는 유지, 모바일 전용 복제본만 제거. 데스크톱은 이미 hide-default로 숨김.
+  (function hideDupMobileCategory() {
+    if (document.getElementById('bj-hide-dup-cat')) return;
+    var s = document.createElement('style');
+    s.id = 'bj-hide-dup-cat';
+    s.textContent = '.new-mc.show-767.hide-default{display:none !important}';
+    (document.head || document.documentElement).appendChild(s);
+  })();
+
   // === 메인/중간 배너 폭을 콘텐츠(아이콘) 폭 1280에 맞춰 축소 (비율 유지, ≥1280 데스크톱만) (2026-07-02) ===
   //   메인(.new-mv_wrap): slick이 resize로 슬라이드 폭 재계산 → img width:100%로 축소.
   //   중간(.new-mb): 고정 1680 슬라이드라 img width 1280 강제 → 비율 유지(202).
