@@ -836,7 +836,7 @@
 
   var CSS = [
     '#bjct-sec{display:none;background:#fff;font-family:inherit;-webkit-tap-highlight-color:transparent}',
-    '@media(max-width:767px){#bjct-sec{display:block}.new-mc:not(.show-767){display:none !important}}',
+    '@media(max-width:767px){#bjct-sec{display:block}.new-mc:not(.show-767){display:none !important}.wide-inner.pad>#bj-v5-injected~*:not(#bjct-sec){display:none !important}.prodList_wrap{display:none !important}}',
     '#bjct-sec *{box-sizing:border-box}',
     '#bjct-sec .bjct-head{padding:18px 18px 4px}',
     '#bjct-sec .bjct-kick{font-size:12px;font-weight:800;color:#0838f8;letter-spacing:.02em}',
@@ -900,7 +900,7 @@
       + '<div class="bjct-tabwrap"><nav class="bjct-tabs" id="bjct-tabs"><span class="bjct-ind" id="bjct-ind"></span></nav></div>'
       + '<div class="bjct-count"><div class="bjct-n"><b id="bjct-cnt">0</b>개의 상품</div><div class="bjct-sort">인기순 ▾</div></div>'
       + '<div class="bjct-pager" id="bjct-pager"></div>';
-    anchor.parentNode.insertBefore(sec, anchor);
+    anchor.parentNode.insertBefore(sec, anchor.nextSibling);
 
     var tabbar = sec.querySelector('#bjct-tabs');
     var ind = sec.querySelector('#bjct-ind');
@@ -993,7 +993,7 @@
   var tries = 0;
   function init() {
     if (document.getElementById('bjct-sec')) return;
-    var anchor = document.querySelector('.new-mc:not(.show-767)');
+    var anchor = document.getElementById('bj-v5-injected');
     if (!anchor) { if (tries++ < 25) setTimeout(init, 300); return; }
     injectCSS();
     build(anchor);
