@@ -4548,6 +4548,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '  .category__wrap::-webkit-scrollbar{display:none}',
       '  .category__wrap > a, .category__wrap > *{',
       '    flex:0 0 auto !important; white-space:nowrap !important;',
+      // 네이티브 카테고리 항목의 margin-right(20px) 제거 → 항목 간격을 flex gap(18px)으로 통일 (2026-07-07)
+      // (햄버거는 .category__wrap .gnb__hamburger 규칙이 더 specific해 자체 margin 유지)
+      '    margin:0 !important;',
       '  }',
       // (2) 헤더 햄버거 + 로고 정렬 (룰북 #21) — specificity 강화
       '  header.new-header .header__top, header .header__top.header__top, body .header__top{',
