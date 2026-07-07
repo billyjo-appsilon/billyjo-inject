@@ -1112,7 +1112,9 @@
     s.textContent =
       '#bj-v5-injected .zone{padding-top:0 !important;padding-bottom:0 !important}' +
       '#bj-v5-injected .hero{margin-bottom:0 !important}' +
-      '@media(max-width:767px){#bj-v5-injected{row-gap:18px !important}}' +
+      // 히어로 배너↔"오래 사용할 가전인데"(bj-bridge) 사이 축소: 서버 템플릿 상단 스페이서(40px)+모바일 m_outer 상단여백 축소 (2026-07-07)
+      '#bj-v5-injected>div[style*="height: 40px"]{height:10px !important}' +
+      '@media(max-width:767px){#bj-v5-injected{row-gap:18px !important}.m_outer{padding-top:22px !important}}' +
       '@media(min-width:769px){.m_outer{padding-bottom:48px !important}}';
     (document.head || document.documentElement).appendChild(s);
   })();
@@ -3111,7 +3113,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var bjLead = bjBar1.parentElement.querySelector('.lead');
       if (bjLead) {
         bjLead.classList.add('bj-trust-sub');
-        bjLead.innerHTML = '<strong>20+개 가전브랜드 본사·파트너사</strong>와 직계약하고 배송까지!';
+        bjLead.innerHTML = '<strong>20+개 가전브랜드 본사·파트너사</strong>와<br>직계약하고 배송까지';
       }
       // (1) 마퀴와 보장 바 사이 헤딩 삽입
       var bjTh = document.createElement('p');
