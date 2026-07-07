@@ -1098,6 +1098,25 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
+  // === v5 홈 섹션 세로 여백 축소 (2026-07-07) ===
+  //   배경이 전체 흰색으로 통일된 상태(3062행)라 각 .zone 의 상하 패딩(40/60px = 100px)이
+  //   시각적 구분 없는 순수 빈 공간. 이를 0으로 만들고, 섹션 간 리듬은 이미 존재하는
+  //   #bj-v5-injected 의 flex row-gap(28px) + 각 section 의 margin-bottom(28px)으로 일원화.
+  //   결과 섹션 간격 ≈ 데스크톱 56px / 모바일 46px (기존 ≈ 128 / 100+). 페이지 높이 데스크톱 −770·모바일 −810px.
+  //   (.hero=블루 트러스트 카드의 잉여 하단 마진 제거, 데스크톱 .m_outer 하단 여백 95→48px)
+  //   롤백: 이 블록만 제거. .zone/section 내부 여백은 그대로라 헤딩·그리드 간격은 불변.
+  (function tightenV5Spacing() {
+    if (document.getElementById('bj-vspace')) return;
+    var s = document.createElement('style');
+    s.id = 'bj-vspace';
+    s.textContent =
+      '#bj-v5-injected .zone{padding-top:0 !important;padding-bottom:0 !important}' +
+      '#bj-v5-injected .hero{margin-bottom:0 !important}' +
+      '@media(max-width:767px){#bj-v5-injected{row-gap:18px !important}}' +
+      '@media(min-width:769px){.m_outer{padding-bottom:48px !important}}';
+    (document.head || document.documentElement).appendChild(s);
+  })();
+
   // === 히어로 배너 네비게이션(화살표·닷) 축소 (2026-07-02) ===
   //   화살표 .arrow__prev/next 53x95(bg-image cover)→32x56, 닷 대시 95px→36px. ≥769 데스크톱.
   (function shrinkHeroNav() {
