@@ -3265,7 +3265,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjFaqSec.insertBefore(bjSup, bjFaqSec.firstChild);
       var bjFnav = document.createElement('div');
       bjFnav.className = 'bj-fnav';
-      bjFnav.innerHTML = '<a href="#">회사소개</a><a href="#">이용약관</a><a href="/html/dh/privacy_policy">개인정보처리방침</a><a href="#">제휴문의</a><a href="#">1:1 문의</a>';
+      // 푸터 링크 = 개인정보처리방침(법정 필수)만 유지. 회사소개·이용약관·제휴문의·1:1문의는 실제 페이지 없어 제거(빈 # 링크 정리) (2026-07-07)
+      bjFnav.innerHTML = '<a href="/html/dh/privacy_policy">개인정보처리방침</a>';
       bjFaqSec.appendChild(bjFnav);
       var bjFinfo = document.createElement('div');
       bjFinfo.className = 'bj-finfo';
