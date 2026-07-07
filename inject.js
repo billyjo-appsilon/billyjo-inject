@@ -3270,8 +3270,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjFaqSec.appendChild(bjFnav);
       var bjFinfo = document.createElement('div');
       bjFinfo.className = 'bj-finfo';
-      // 공정위 통신판매 사업자정보 확인 링크(전자상거래법 표시 대상) — 통신판매업신고 옆에 배치, 팝업 오픈 (2026-07-07)
-      bjFinfo.innerHTML = '(주)빌리조 · 사업자등록번호 578-88-03319 · 통신판매업신고 별도 표기 · <a href="https://www.ftc.go.kr/info/bizinfo/communicationViewPopup.jsp?wrkr_no=5788803319" target="_blank" rel="noopener" onclick="window.open(this.href,\'ftcComm\',\'width=750,height=700,scrollbars=yes\');return false;" style="color:#aab2c5;text-decoration:underline">사업자정보 확인</a><br>서울 강남구 영동대로128 · © BillyJo. All rights reserved.';
+      // 공정위 통신판매 사업자정보 확인 링크(전자상거래법 표시 대상) — 푸터 맨 아래(저작권 다음)에 배치, 팝업 오픈 (2026-07-07)
+      bjFinfo.innerHTML = '(주)빌리조 · 사업자등록번호 578-88-03319 · 통신판매업신고 별도 표기<br>서울 강남구 영동대로128 · © BillyJo. All rights reserved.<br><a href="https://www.ftc.go.kr/info/bizinfo/communicationViewPopup.jsp?wrkr_no=5788803319" target="_blank" rel="noopener" onclick="window.open(this.href,\'ftcComm\',\'width=750,height=700,scrollbars=yes\');return false;" style="color:#aab2c5;text-decoration:underline">사업자정보 확인</a>';
       bjFaqSec.appendChild(bjFinfo);
       // 다크 푸터를 페이지 맨 하단으로 이동 — 원본 푸터(.new-footer, 진짜 맨끝) 바로 앞에 삽입 (2026-07-03)
       var bjOrigFoot = document.querySelector('.new-footer');
