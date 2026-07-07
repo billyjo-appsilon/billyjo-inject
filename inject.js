@@ -1119,6 +1119,21 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
+  // === 사은품 혜택 총합 금액 채우기 (2026-07-07) ===
+  //   서버 v5 가격비교 섹션의 총합(.pc-savings .big)이 "약 OO만원 상당" 플레이스홀더로 남아있음 → "약 137만원 상당".
+  //   (개별 3중택1 항목 .amt "OO만원 상당" 3개는 값 미확정이라 이번엔 미변경.) 멱등: OO 있을 때만 치환.
+  (function fillGiftTotal() {
+    function apply() {
+      var el = document.querySelector('.pc-savings .big');
+      if (el && el.textContent.indexOf('OO') !== -1) {
+        el.innerHTML = el.innerHTML.replace(/OO/g, '137');
+      }
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
+    else apply();
+    setTimeout(apply, 1500);
+  })();
+
   // === 히어로 배너 네비게이션(화살표·닷) 축소 (2026-07-02) ===
   //   화살표 .arrow__prev/next 53x95(bg-image cover)→32x56, 닷 대시 95px→36px. ≥769 데스크톱.
   (function shrinkHeroNav() {
