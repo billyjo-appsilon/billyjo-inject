@@ -1119,15 +1119,31 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
-  // === 사은품 혜택 총합 금액 채우기 (2026-07-07) ===
-  //   서버 v5 가격비교 섹션의 총합(.pc-savings .big)이 "약 OO만원 상당" 플레이스홀더로 남아있음 → "약 137만원 상당".
-  //   (개별 3중택1 항목 .amt "OO만원 상당" 3개는 값 미확정이라 이번엔 미변경.) 멱등: OO 있을 때만 치환.
+  // === 사은품 혜택 금액 채우기 (2026-07-07) ===
+  //   서버 v5 가격비교 섹션의 "OO만원 상당" 플레이스홀더를 실제 금액으로 치환.
+  //   총합(.pc-savings .big)=137만원, 3중택1 개별 항목(.amt)=58/49/30(합 137). 멱등: OO 있을 때만.
   (function fillGiftTotal() {
+    var ITEMS = [['이벤트 상품 1', '58'], ['이벤트 상품 2', '49'], ['상품권', '30']];
+    var LABELS = ITEMS.map(function (x) { return x[0]; });
     function apply() {
-      var el = document.querySelector('.pc-savings .big');
-      if (el && el.textContent.indexOf('OO') !== -1) {
-        el.innerHTML = el.innerHTML.replace(/OO/g, '137');
-      }
+      // 총합
+      var big = document.querySelector('.pc-savings .big');
+      if (big && big.textContent.indexOf('OO') !== -1) big.innerHTML = big.innerHTML.replace(/OO/g, '137');
+      // 개별 3중택1 항목 — 각 .amt를 같은 행의 라벨로 매칭
+      Array.prototype.forEach.call(document.querySelectorAll('.price-compare .amt'), function (a) {
+        if (a.textContent.indexOf('OO') === -1) return;
+        var node = a.parentElement, label = null;
+        while (node && node !== document.body) {
+          var found = LABELS.filter(function (l) { return node.textContent.indexOf(l) !== -1; });
+          if (found.length === 1) { label = found[0]; break; }
+          if (found.length > 1) break; // 공통 컨테이너까지 올라감 = 매칭 애매 → 중단
+          node = node.parentElement;
+        }
+        if (!label) return;
+        for (var i = 0; i < ITEMS.length; i++) {
+          if (ITEMS[i][0] === label) { a.innerHTML = a.innerHTML.replace(/OO/g, ITEMS[i][1]); break; }
+        }
+      });
     }
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
     else apply();
