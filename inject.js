@@ -3265,12 +3265,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjFaqSec.insertBefore(bjSup, bjFaqSec.firstChild);
       var bjFnav = document.createElement('div');
       bjFnav.className = 'bj-fnav';
-      // 푸터 링크 = 개인정보처리방침(법정 필수)만 유지. 회사소개·이용약관·제휴문의·1:1문의는 실제 페이지 없어 제거(빈 # 링크 정리) (2026-07-07)
-      bjFnav.innerHTML = '<a href="/html/dh/privacy_policy">개인정보처리방침</a>';
+      // 푸터 링크 = 개인정보처리방침(법정 필수) + 1:1 문의(→간편문의 페이지). 회사소개·이용약관·제휴문의는 실제 페이지 없어 제외 (2026-07-07)
+      bjFnav.innerHTML = '<a href="/html/dh/privacy_policy">개인정보처리방침</a><a href="/html/dh/counsel">1:1 문의</a>';
       bjFaqSec.appendChild(bjFnav);
       var bjFinfo = document.createElement('div');
       bjFinfo.className = 'bj-finfo';
-      bjFinfo.innerHTML = '(주)빌리조 · 사업자등록번호 578-88-03319 · 통신판매업신고 별도 표기<br>서울 강남구 영동대로128 · © BillyJo. All rights reserved.';
+      // 공정위 통신판매 사업자정보 확인 링크(전자상거래법 표시 대상) — 통신판매업신고 옆에 배치, 팝업 오픈 (2026-07-07)
+      bjFinfo.innerHTML = '(주)빌리조 · 사업자등록번호 578-88-03319 · 통신판매업신고 별도 표기 · <a href="https://www.ftc.go.kr/info/bizinfo/communicationViewPopup.jsp?wrkr_no=5788803319" target="_blank" rel="noopener" onclick="window.open(this.href,\'ftcComm\',\'width=750,height=700,scrollbars=yes\');return false;" style="color:#aab2c5;text-decoration:underline">사업자정보 확인</a><br>서울 강남구 영동대로128 · © BillyJo. All rights reserved.';
       bjFaqSec.appendChild(bjFinfo);
       // 다크 푸터를 페이지 맨 하단으로 이동 — 원본 푸터(.new-footer, 진짜 맨끝) 바로 앞에 삽입 (2026-07-03)
       var bjOrigFoot = document.querySelector('.new-footer');
