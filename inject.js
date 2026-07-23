@@ -8955,3 +8955,127 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   window.addEventListener('pageshow', hide);
   document.addEventListener('visibilitychange', function(){ if(!document.hidden) hide(); });
 })();
+
+/* ==========================================================================
+ * [모듈 SEO] 검색엔진·AEO 최적화 (v1.0) — 전 페이지
+ *  해결 대상:
+ *   1) canonical 이 전 페이지 홈(billyjo.kr) 을 지목 → 상품/목록 색인 차단 버그.
+ *      → 자기참조 canonical + 대표도메인 billyjo.co.kr 통일.
+ *   2) meta description / og:description 이 전 페이지 "빌리조" 한 단어 → 페이지별 동적 생성.
+ *   3) 구조화 데이터 부재 → 홈=WebSite(SearchAction), 상세=Product+BreadcrumbList, 목록=BreadcrumbList.
+ *  주의: 네이버 Yeti 는 JS 실행이 제한적. Organization/인증 정적 태그는 logscript(서버렌더 head)에
+ *        별도 배치했고, 이 IIFE 는 구글/빙/AEO 및 동적 per-page 태그를 담당한다.
+ * ========================================================================== */
+(function billyjoSEO(){
+  'use strict';
+  var PRIMARY = 'https://billyjo.co.kr';
+  function C(s){ return (s||'').replace(/\s+/g,' ').trim(); }
+  function setMeta(attr,key,val){ if(!val) return;
+    var el=document.head.querySelector('meta['+attr+'="'+key+'"]');
+    if(!el){ el=document.createElement('meta'); el.setAttribute(attr,key); document.head.appendChild(el); }
+    el.setAttribute('content',val);
+  }
+  function setLink(rel,href){ if(!href) return;
+    var el=document.head.querySelector('link[rel="'+rel+'"]');
+    if(!el){ el=document.createElement('link'); el.setAttribute('rel',rel); document.head.appendChild(el); }
+    el.setAttribute('href',href);
+  }
+  function ld(id,obj){ if(document.getElementById(id)) return;
+    var s=document.createElement('script'); s.type='application/ld+json'; s.id=id;
+    s.text=JSON.stringify(obj); document.head.appendChild(s);
+  }
+  function crumb(items){ return {"@context":"https://schema.org","@type":"BreadcrumbList",
+    "itemListElement":items.map(function(it,i){ var o={"@type":"ListItem","position":i+1,"name":it[0]}; if(it[1]) o.item=it[1]; return o; })}; }
+
+  function apply(){
+    var path=location.pathname;
+    var canonical=PRIMARY+path;
+    if(!document.documentElement.getAttribute('lang')) document.documentElement.setAttribute('lang','ko');
+    setMeta('name','robots','index,follow,max-image-preview:large,max-snippet:-1');
+
+    // ── 상품 상세 (prod_view) ──
+    var mView=path.match(/prod_view\/(\d+)/);
+    if(mView){
+      var ni=document.querySelector('input[name="prod_name"]');
+      var name=C(ni&&ni.value) || C((document.querySelector('.prod_name b')||{}).textContent)
+             || C(document.title.replace(/\s*[-|]\s*빌리조.*$/,''));
+      var brand='';
+      var ths=document.querySelectorAll('th');
+      for(var i=0;i<ths.length;i++){
+        if(/브랜드|제조사/.test(ths[i].textContent||'') && ths[i].nextElementSibling){ brand=C(ths[i].nextElementSibling.textContent); break; }
+      }
+      if(!brand) brand=C((name.split(' ')[0]||''));
+      var ogi=document.head.querySelector('meta[property="og:image"]');
+      var image=ogi?ogi.getAttribute('content'):'';
+      var prices=[];
+      Array.prototype.forEach.call(document.querySelectorAll('[data-price]'),function(el){
+        var v=parseInt(String(el.getAttribute('data-price')).replace(/[^0-9]/g,''),10); if(v>0)prices.push(v);
+      });
+      var minP=prices.length?Math.min.apply(null,prices):0;
+      var desc=name+' 렌탈'+(minP?' 월 '+minP.toLocaleString('en-US')+'원부터':'')
+             +' — 카드 제휴할인·현금 사은품까지 빌리조에서 최저가로 비교하고 신청하세요. 가전 렌탈 전문 빌리조.';
+      desc=C(desc).slice(0,158);
+      setLink('canonical',canonical);
+      setMeta('property','og:url',canonical);
+      setMeta('name','description',desc);
+      setMeta('property','og:description',desc);
+      setMeta('property','og:type','product');
+      setMeta('name','twitter:card','summary_large_image');
+      setMeta('name','keywords',[name, (brand?brand+' 렌탈':''), name+' 렌탈', '가전렌탈', '렌탈 최저가'].filter(Boolean).join(', '));
+      var prod={"@context":"https://schema.org","@type":"Product","name":name,"url":canonical,"description":desc};
+      if(image) prod.image=[image];
+      if(brand) prod.brand={"@type":"Brand","name":brand};
+      if(minP>0) prod.offers={
+        "@type":"Offer","priceCurrency":"KRW","price":String(minP),
+        "availability":"https://schema.org/InStock","url":canonical,
+        "priceSpecification":{"@type":"UnitPriceSpecification","price":String(minP),"priceCurrency":"KRW","unitText":"월","referenceQuantity":{"@type":"QuantitativeValue","value":1,"unitCode":"MON"}}
+      };
+      ld('bj-ld-product',prod);
+      ld('bj-ld-crumb',crumb([['홈',PRIMARY+'/'],[name,canonical]]));
+    }
+    // ── 카테고리 목록 (prod_list) ──
+    else if(path.indexOf('prod_list')!==-1){
+      var t=C(document.title.replace(/\s*[-|]\s*빌리조.*$/,''));
+      var parts=t.split('>').map(C).filter(Boolean);
+      var cat=parts[parts.length-1]||t;
+      var d=cat+' 렌탈 가격비교 — '+cat+' 월 렌탈료·카드 제휴할인·현금 사은품을 한눈에. '
+           +'코웨이·LG·SK매직·청호나이스 등 인기 브랜드 '+cat+' 렌탈을 빌리조에서 최저가로 신청하세요.';
+      d=C(d).slice(0,158);
+      setLink('canonical',canonical);
+      setMeta('property','og:url',canonical);
+      setMeta('name','description',d);
+      setMeta('property','og:description',d);
+      setMeta('property','og:title',cat+' 렌탈 최저가 | 빌리조');
+      setMeta('name','keywords',[cat, cat+' 렌탈', cat+' 렌탈 가격', cat+' 렌탈 비교', '가전렌탈'].join(', '));
+      var cr=[['홈',PRIMARY+'/']];
+      parts.forEach(function(p,i){ cr.push([p, i===parts.length-1?canonical:null]); });
+      ld('bj-ld-crumb',crumb(cr));
+    }
+    // ── 홈 ──
+    else if(path==='/'||path===''||path==='/index.php'||path==='/index.html'){
+      var hd='가전렌탈 최저가 비교 빌리조 — 정수기·공기청정기·안마의자·비데·매트리스 렌탈을 코웨이·LG·SK매직 등 '
+           +'브랜드별로 비교하고 카드 제휴할인과 현금 사은품까지 한 번에. 지금 최저가로 신청하세요.';
+      hd=C(hd).slice(0,158);
+      if(/^\s*빌리조/.test(document.title) && document.title.length<20) document.title='가전렌탈 최저가 비교 | 빌리조(Billy Jo)';
+      setLink('canonical',PRIMARY+'/');
+      setMeta('property','og:url',PRIMARY+'/');
+      setMeta('name','description',hd);
+      setMeta('property','og:description',hd);
+      setMeta('property','og:title','가전렌탈 최저가 비교 | 빌리조(Billy Jo)');
+      setMeta('name','keywords','가전렌탈, 정수기렌탈, 공기청정기렌탈, 안마의자렌탈, 비데렌탈, 매트리스렌탈, 렌탈 최저가 비교, 코웨이 LG SK매직 렌탈');
+      ld('bj-ld-website',{
+        "@context":"https://schema.org","@type":"WebSite","name":"빌리조","alternateName":"Billy Jo","url":PRIMARY,
+        "potentialAction":{"@type":"SearchAction",
+          "target":{"@type":"EntryPoint","urlTemplate":PRIMARY+"/html/dh/search_result?search_value={search_term_string}"},
+          "query-input":"required name=search_term_string"}
+      });
+    }
+    // ── 기타(주문/게시판 등): canonical 자기참조로 홈 지목 버그만 해소 ──
+    else {
+      setLink('canonical',canonical);
+      setMeta('property','og:url',canonical);
+    }
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply);
+  else apply();
+})();
