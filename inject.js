@@ -1114,7 +1114,7 @@
       '#bj-v5-injected .hero{margin-bottom:0 !important}' +
       // 히어로 배너↔"오래 사용할 가전인데"(bj-bridge) 사이 축소: 서버 템플릿 상단 스페이서(40px)+모바일 m_outer 상단여백 축소 (2026-07-07)
       '#bj-v5-injected>div[style*="height: 40px"]{height:10px !important}' +
-      '@media(max-width:767px){#bj-v5-injected{row-gap:18px !important}.m_outer{padding-top:22px !important}}' +
+      '@media(max-width:767px){#bj-v5-injected{row-gap:32px !important}.m_outer{padding-top:22px !important}}' + /* 섹션 간격 18→32 확대 2026-07-23 */
       '@media(min-width:769px){.m_outer{padding-bottom:48px !important}}';
     (document.head || document.documentElement).appendChild(s);
   })();
@@ -2977,7 +2977,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     pageEl.setAttribute('data-bj-reordered', '1');
     pageEl.style.display = 'flex';
     pageEl.style.flexDirection = 'column';
-    pageEl.style.rowGap = '28px'; // P1② 섹션 간 세로 여백 (2026-07-02)
+    pageEl.style.rowGap = '48px'; // P1② 섹션 간 세로 여백 (2026-07-02; 헤딩 위 간격 좁다는 Jun 지시로 28→48 확대 2026-07-23)
     // P1① 섹션 헤더 pill: 솔리드 블루 블록 → 절제된 블루 eyebrow 텍스트 (파랑 남용 완화, 아정당 레퍼런스)
     if (!document.getElementById('bj-refine-css')) {
       var bjRf = document.createElement('style');
