@@ -3268,7 +3268,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var bjFnav = document.createElement('div');
       bjFnav.className = 'bj-fnav';
       // 푸터 링크 = 개인정보처리방침(법정 필수) + 1:1 문의(→간편문의 페이지). 회사소개·이용약관·제휴문의는 실제 페이지 없어 제외 (2026-07-07)
-      bjFnav.innerHTML = '<a href="/html/dh/privacy_policy">개인정보처리방침</a><a href="/html/dh/counsel">1:1 문의</a>';
+      bjFnav.innerHTML = '<a href="/html/dh/privacy_policy">개인정보처리방침</a><a href="/html/dh/counsel">1:1 문의</a><a href="https://admin2.billyjo.co.kr/guide" target="_blank" rel="noopener">렌탈 가이드</a>';
       bjFaqSec.appendChild(bjFnav);
       var bjFinfo = document.createElement('div');
       bjFinfo.className = 'bj-finfo';
