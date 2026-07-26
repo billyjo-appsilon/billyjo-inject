@@ -14,6 +14,40 @@
  */
 
 /* =========================================================================
+ * [가드] 랜딩 최상단 보장 (2026-07-26)
+ *   규칙: 모바일/PC 어느 페이지든 "새로 진입(랜딩)"하면 화면 최상단에서 시작해야 한다.
+ *   배경: 홈 카테고리 탭의 scrollIntoView가 랜딩 직후 페이지를 중간(≈5200px)으로 점프시킨 사고.
+ *         개별 호출부는 고쳤지만, 이후 어떤 모듈이 같은 실수를 해도 사용자 화면이 튀지 않도록 방어.
+ *   범위: 진입 후 2.5초 + 사용자가 아직 아무 입력도 안 한 동안에만 0으로 되돌림.
+ *   제외: 뒤로가기/새로고침(브라우저 스크롤 복원 존중), #앵커 URL(이동 의도 존중),
+ *         사용자 입력(wheel/touch/key/pointer) 발생 이후(직접 스크롤·클릭 이동 존중).
+ * ========================================================================= */
+(function bjLandingTopGuard() {
+  try {
+    var navEntry = (window.performance && performance.getEntriesByType && performance.getEntriesByType('navigation')[0]) || null;
+    var navType = navEntry ? navEntry.type
+      : (window.performance && performance.navigation && performance.navigation.type === 2 ? 'back_forward' : 'navigate');
+    if (navType !== 'navigate') return;                       // 복원 내비게이션은 건드리지 않음
+    if (location.hash && location.hash.length > 1) return;    // #앵커로 들어온 경우 존중
+
+    var userActed = false;
+    var EVENTS = ['wheel', 'touchstart', 'keydown', 'pointerdown', 'mousedown'];
+    function markUser() {
+      userActed = true;
+      EVENTS.forEach(function (ev) { window.removeEventListener(ev, markUser, true); });
+    }
+    EVENTS.forEach(function (ev) { window.addEventListener(ev, markUser, { passive: true, capture: true }); });
+
+    var until = Date.now() + 2500;
+    (function tick() {
+      if (userActed || Date.now() > until) { markUser(); return; }
+      if (window.scrollY > 0 || window.pageYOffset > 0) window.scrollTo(0, 0);
+      requestAnimationFrame(tick);
+    })();
+  } catch (_) { }
+})();
+
+/* =========================================================================
  * [모듈 A] skin-css/inject.js — 빌리조 사이트 전역 패치
  * ========================================================================= */
 // BillyJo Inject - Auto-generated from logscript
@@ -4438,7 +4472,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
                     document.querySelector('#container') ||
                     document.body;
       content.insertBefore(wrap, content.firstChild);
-      setTimeout(function(){ try { wrap.scrollIntoView({ behavior:'smooth', block:'start' }); } catch(_){} }, 300);
+      // 하이라이트는 content 최상단에 삽입되므로 별도 스크롤 불필요.
+      // (기존 scrollIntoView는 현재 레이아웃에선 no-op이었지만, 헤더/컨테이너가 바뀌면
+      //  랜딩 직후 페이지를 끌어내리는 원인이 됨 → '랜딩 최상단' 규칙에 따라 제거. 2026-07-26)
     } catch(_) {}
   }
   if (document.body) bjHighlightPartnership();
