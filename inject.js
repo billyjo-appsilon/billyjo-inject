@@ -987,6 +987,18 @@
     function measureW() { W = pager.clientWidth || 360; }
     function panelH(i) { return panels[i].firstChild.scrollHeight; }
     function moveInd(t) { ind.style.width = (t.offsetWidth - 24) + 'px'; ind.style.transform = 'translateX(' + (t.offsetLeft + 12) + 'px)'; }
+    // 탭바(가로 스크롤 컨테이너)만 스크롤한다. scrollIntoView는 block:'nearest'라도 탭이
+    // 뷰포트 밖(홈 하단)에 있으면 문서 세로 스크롤까지 끌고 가서, 랜딩 시 go(0,false)가
+    // 페이지를 중간(모바일 ≈5200px)으로 점프시키는 사고가 있었다. (2026-07-26)
+    function centerTab(t, animate) {
+      try {
+        var max = tabbar.scrollWidth - tabbar.clientWidth;
+        if (max <= 0) return; // 넘치지 않으면 스크롤할 것도 없음
+        var target = Math.max(0, Math.min(max, t.offsetLeft - (tabbar.clientWidth - t.offsetWidth) / 2));
+        if (tabbar.scrollTo) tabbar.scrollTo({ left: target, behavior: animate ? 'smooth' : 'auto' });
+        else tabbar.scrollLeft = target;
+      } catch (_) { }
+    }
     function place(dx, dir) {
       panels.forEach(function (p, i) {
         var x;
@@ -1000,7 +1012,7 @@
       i = Math.max(0, Math.min(CAT_META.length - 1, i)); idx = i;
       tabs.forEach(function (t, j) { t.classList.toggle('on', j === i); });
       moveInd(tabs[i]);
-      tabs[i].scrollIntoView({ behavior: animate ? 'smooth' : 'auto', inline: 'center', block: 'nearest' });
+      centerTab(tabs[i], animate);
       cntEl.textContent = listFor(CAT_META[i].key).length;
       measureW();
       if (!animate) sec.classList.add('bjct-noanim');
