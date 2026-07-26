@@ -9160,3 +9160,167 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',apply);
   else apply();
 })();
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   Lottie 아이콘 업그레이드 (2026-07-26)
+   자사몰 스프라이트 아이콘 <svg class="ico"><use href="#i-*"> 을 Lordicon Lottie 로 교체한다.
+   심볼 단위 매핑이라 카드 그리드·스텝 카드 전체가 한 번에 올라간다.
+
+   설계 근거
+   - 기존 SVG 의 렌더 박스를 복제한 holder 를 앞에 꽂고 SVG 는 숨긴다 → 정렬 델타 0 (실측 0px)
+   - Lordicon 아트보드에 자체 여백이 있어 같은 박스면 작게 보인다 → 시각만 1.2배 (실측 1.19)
+   - 뷰포트 진입 시 1회 재생. 카드 그리드에서 loop 는 시각적 소음이라 쓰지 않는다
+   - 런타임·데이터 모두 지연 로드. 실패하면 원래 SVG 가 그대로 남는다(마운트 성공 후에만 숨김)
+   - prefers-reduced-motion 이면 아예 관여하지 않는다
+   - #i-user(후기 아바타 21개) 등 반복 요소는 매핑에서 제외
+   ═══════════════════════════════════════════════════════════════════════════ */
+(function () {
+  'use strict';
+  if (window.__bjLottieUp) return;
+  window.__bjLottieUp = 1;
+
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!window.IntersectionObserver || !window.fetch || !window.Promise) return;
+
+  var BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@13ad578/';
+  var RUNTIME = BASE + 'tools/icons/vendor/lottie_light.min.js';
+  var THEME = 'brand-mono';
+  var SCALE = 1.2;
+
+  var MAP = {
+    '#i-search': 'empty-search',
+    '#i-edit': 'sym-edit',
+    '#i-headphones': 'consult-headset',
+    '#i-truck': 'benefit-delivery',
+    '#i-gift': 'benefit-gift',
+    '#i-ticket': 'benefit-discount',
+    '#i-coins': 'sym-coins',
+    '#i-card': 'sym-card',
+    '#i-shield': 'sym-shield',
+    '#i-message': 'sym-message',
+    '#i-clipboard': 'sym-clipboard',
+    '#i-scale': 'sym-scale',
+    '#i-sparkles': 'sym-sparkles'
+  };
+
+  // 기존 스프라이트는 stroke:currentColor 라 인스턴스마다 색이 다르다
+  // (흰 카드 = 브랜드 블루 #0838f8, 파란 카드 = 흰색).
+  // Lottie 쪽도 stroke 를 통째로 currentColor 로 흘려 사이트 색을 그대로 따라가게 한다.
+  // → 나중에 빌리조 테마 색이 바뀌면 CSS 만 바뀌어도 아이콘이 자동으로 따라온다(재생성 불필요).
+  // fill 은 건드리지 않는다. 우리 아이콘에서 fill 은 의도된 흰색(문서 본문 등)뿐이다.
+  (function () {
+    var st = document.createElement('style');
+    st.id = 'bj-lot-css';
+    st.textContent = '.bj-lot svg *[stroke]:not([stroke="none"]){stroke:currentColor !important}';
+    (document.head || document.documentElement).appendChild(st);
+  })();
+
+  var runtimeP = null;
+  function runtime() {
+    if (runtimeP) return runtimeP;
+    runtimeP = new Promise(function (res, rej) {
+      if (window.lottie) return res(window.lottie);
+      var s = document.createElement('script');
+      s.src = RUNTIME; s.async = true;
+      s.onload = function () { window.lottie ? res(window.lottie) : rej(0); };
+      s.onerror = function () { rej(0); };
+      (document.head || document.documentElement).appendChild(s);
+    });
+    return runtimeP;
+  }
+
+  var dataP = {};
+  function data(name) {
+    if (!dataP[name]) {
+      dataP[name] = fetch(BASE + 'icons/lottie/' + name + '.' + THEME + '.json')
+        .then(function (r) { if (!r.ok) throw 0; return r.json(); });
+    }
+    return dataP[name];
+  }
+
+  // Raw 익스포트는 여러 state 를 한 타임라인에 이어 붙인다. default: 마커 구간만 재생한다.
+  function segment(d) {
+    var ms = (d.markers || []).filter(function (m) { return m.dr > 0; });
+    var def = null, first = null;
+    for (var i = 0; i < ms.length; i++) {
+      if (!def && ms[i].cm.indexOf('default:') === 0) def = ms[i];
+      if (!first && ms[i].cm.indexOf('in-') !== 0) first = ms[i];
+    }
+    var p = def || first || ms[0];
+    return p ? [p.tm, p.tm + p.dr] : null;
+  }
+
+  function mount(svg, name) {
+    var rect = svg.getBoundingClientRect();
+    // 아직 레이아웃 전이면(캐러셀 비활성 슬라이드 등) 표시를 지워 다음 스캔에서 재시도한다
+    if (!rect.width || !rect.height) { svg.dataset.bjLot = ''; return; }
+    var cs = getComputedStyle(svg);
+    var holder = document.createElement('span');
+    holder.className = 'bj-lot';
+    holder.style.cssText =
+      'display:' + (cs.display === 'inline' ? 'inline-block' : cs.display) +
+      ';width:' + rect.width + 'px;height:' + rect.height + 'px' +
+      ';min-width:0;max-width:100%;overflow:visible;line-height:0' +
+      ';margin:' + cs.margin + ';vertical-align:' + cs.verticalAlign;
+
+    // 원본 아이콘의 계산된 색을 그대로 물려준다 (currentColor 의 기준값)
+    if (cs.color) holder.style.color = cs.color;
+
+    Promise.all([runtime(), data(name)]).then(function (r) {
+      var lottie = r[0], d = r[1];
+      if (!svg.parentNode) return;
+      svg.parentNode.insertBefore(holder, svg);
+      var anim = lottie.loadAnimation({
+        container: holder, renderer: 'svg', loop: false, autoplay: false,
+        animationData: d,
+        rendererSettings: { preserveAspectRatio: 'xMidYMid meet', progressiveLoad: true }
+      });
+      anim.addEventListener('DOMLoaded', function () {
+        var inner = holder.querySelector('svg');
+        if (inner) {
+          inner.style.transform = 'scale(' + SCALE + ')';
+          inner.style.transformOrigin = 'center';
+        }
+        svg.style.display = 'none';                   // 성공한 뒤에만 원본을 숨긴다
+        var seg = segment(d);
+        seg ? anim.playSegments(seg, true) : anim.play();
+      });
+    })['catch'](function () {
+      if (holder.parentNode) holder.parentNode.removeChild(holder);
+      svg.style.display = '';                         // 실패 시 원래 아이콘 유지
+    });
+  }
+
+  var io = new IntersectionObserver(function (entries) {
+    entries.forEach(function (e) {
+      if (!e.isIntersecting) return;
+      io.unobserve(e.target);
+      mount(e.target, e.target.__bjName);
+    });
+  }, { rootMargin: '200px' });
+
+  function scan() {
+    var list = document.querySelectorAll('svg.ico');
+    for (var i = 0; i < list.length; i++) {
+      var svg = list[i];
+      if (svg.dataset.bjLot) continue;
+      var u = svg.querySelector('use');
+      var href = u && (u.getAttribute('href') || u.getAttribute('xlink:href'));
+      if (!href || !MAP[href]) continue;
+      svg.dataset.bjLot = '1';
+      svg.__bjName = MAP[href];
+      io.observe(svg);
+    }
+  }
+
+  // inject.js 가 뒤늦게 만드는 섹션(혜택 2×2 등)까지 잡으려면 재스캔이 필요하다
+  var timer = null;
+  function rescan() { clearTimeout(timer); timer = setTimeout(scan, 250); }
+  if (window.MutationObserver) {
+    new MutationObserver(rescan).observe(document.documentElement, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', scan);
+  else scan();
+  setTimeout(scan, 1500);
+  setTimeout(scan, 4000);
+})();
