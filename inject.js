@@ -48,6 +48,37 @@
 })();
 
 /* =========================================================================
+ * [패치] SNS 아이콘 링크 교정 (2026-07-26)
+ *   admin1 설정 sns_link1이 'billyjo.official'(인스타 핸들만)로 저장돼 스킨이
+ *   href를 그대로 렌더 → 상대경로로 해석돼 /html/dh/billyjo.official 등 없는 주소(500)로 감.
+ *   헤더 + 모바일/PC 푸터 3곳. 원본(admin1 sns_link1)이 정상 URL로 고쳐지면 이 패치는 자동 무동작.
+ * ========================================================================= */
+(function bjFixSnsLinks() {
+  function fix() {
+    var as = document.querySelectorAll('a.sns_icon[href]');
+    for (var i = 0; i < as.length; i++) {
+      var a = as[i];
+      var raw = (a.getAttribute('href') || '').trim();
+      if (!raw) continue;
+      if (/^(https?:)?\/\//i.test(raw) || raw.charAt(0) === '/' || raw.charAt(0) === '#') continue; // 이미 정상
+      if (/^(javascript|mailto|tel):/i.test(raw)) continue;
+      var url = null;
+      if (raw.indexOf('/') >= 0 && raw.indexOf('.') >= 0) url = 'https://' + raw;      // 도메인+경로만 적힌 경우
+      else if (/^[A-Za-z0-9._]+$/.test(raw)) url = 'https://www.instagram.com/' + raw + '/'; // 인스타 핸들만
+      if (!url) continue;
+      a.setAttribute('href', url);
+      a.setAttribute('target', '_blank');
+      a.setAttribute('rel', 'noopener noreferrer');
+    }
+  }
+  try {
+    fix();
+    document.addEventListener('DOMContentLoaded', fix);
+    [300, 1200, 3000].forEach(function (d) { setTimeout(fix, d); });
+  } catch (_) { }
+})();
+
+/* =========================================================================
  * [모듈 A] skin-css/inject.js — 빌리조 사이트 전역 패치
  * ========================================================================= */
 // BillyJo Inject - Auto-generated from logscript
