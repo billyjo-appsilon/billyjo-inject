@@ -1,0 +1,263 @@
+{
+  "icons": {
+    "consult-headset": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-463-headset-customer-support",
+        "title": "wired-outline-463-headset-customer-support",
+        "rel": "wired-outline-463-headset-customer-support.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "consult-call": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-3589-phone-circle",
+        "title": "wired-outline-3589-phone-circle",
+        "rel": "wired-outline-3589-phone-circle.json"
+      },
+      "themes": [
+        "brand",
+        "admin-light",
+        "admin-dark"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "benefit-gift": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-412-gift",
+        "title": "wired-outline-412-gift",
+        "rel": "wired-outline-412-gift.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "benefit-delivery": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-757-delivery",
+        "title": "wired-outline-757-delivery",
+        "rel": "wired-outline-757-delivery.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "status-delivered": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-3556-box-check",
+        "title": "wired-outline-3556-box-check",
+        "rel": "wired-outline-3556-box-check.json"
+      },
+      "themes": [
+        "brand",
+        "admin-light",
+        "admin-dark"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "benefit-discount": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-2154-percentage",
+        "title": "wired-outline-2154-percentage",
+        "rel": "wired-outline-2154-percentage.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "badge-promo": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-756-bargain-off-promotion-percentage",
+        "title": "wired-outline-756-bargain-off-promotion-percentage",
+        "rel": "wired-outline-756-bargain-off-promotion-percentage.json"
+      },
+      "themes": [
+        "brand",
+        "admin-light",
+        "admin-dark"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "review-section": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-760-review",
+        "title": "wired-outline-760-review",
+        "rel": "wired-outline-760-review.json"
+      },
+      "themes": [
+        "brand",
+        "admin-light",
+        "admin-dark"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "review-star": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-237-star-rating",
+        "title": "wired-outline-237-star-rating-morph",
+        "rel": "wired-outline-237-star-rating.json"
+      },
+      "themes": [
+        "brand",
+        "admin-light",
+        "admin-dark"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "empty-search": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-19-magnifier-zoom-search",
+        "title": "wired-outline-19-magnifier-zoom-search",
+        "rel": "wired-outline-19-magnifier-zoom-search.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "empty-data": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-120-folder",
+        "title": "wired-outline-120-folder",
+        "rel": "wired-outline-120-folder.json"
+      },
+      "themes": [
+        "brand",
+        "admin-light",
+        "admin-dark"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "sym-edit": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-245-edit-document",
+        "title": "wired-outline-245-edit-document",
+        "rel": "wired-outline-245-edit-document.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "sym-coins": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-298-coins",
+        "title": "wired-outline-298-coins",
+        "rel": "wired-outline-298-coins.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "sym-card": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-799-credit-card",
+        "title": "wired-outline-799-credit-card",
+        "rel": "wired-outline-799-credit-card.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "sym-shield": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-457-shield-security",
+        "title": "wired-outline-457-shield-security",
+        "rel": "wired-outline-457-shield-security.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "sym-message": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-203-chat-message",
+        "title": "wired-outline-203-chat-message",
+        "rel": "wired-outline-203-chat-message.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "sym-clipboard": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-454-calculator",
+        "title": "wired-outline-454-calculator",
+        "rel": "wired-outline-454-calculator.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "sym-scale": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-1409-compare",
+        "title": "wired-outline-1409-compare",
+        "rel": "wired-outline-1409-compare.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    },
+    "sym-sparkles": {
+      "source": {
+        "origin": "library",
+        "id": "wired-outline-2474-sparkles-glitter",
+        "title": "wired-outline-2474-sparkles-glitter",
+        "rel": "wired-outline-2474-sparkles-glitter.json"
+      },
+      "themes": [
+        "brand-mono"
+      ],
+      "addedAt": "2026-07-26",
+      "usedIn": []
+    }
+  }
+}

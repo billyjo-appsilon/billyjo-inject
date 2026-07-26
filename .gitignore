@@ -3,3 +3,6 @@ deploy/.env
 works/
 *.pre-merge-*.bak
 .logs/
+
+# Lordicon 원본 라이브러리 (배치 다운로드본) — 용량이 커서 커밋하지 않는다
+icons/library/
