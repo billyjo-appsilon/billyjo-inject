@@ -1199,3 +1199,26 @@ admin logscript(서버렌더)에 추가/강화:
 
 **참고(별건)**: 홈에 상대경로 `billyjo.official` 링크가 있어 `/html/dh/billyjo.official` 등으로
 잘못 연결됨(HTTP 500). 스크롤과 무관한 별도 이슈로 남김.
+
+---
+
+## 2026-07-26 — SNS 아이콘 깨진 링크 수정 (인스타)
+
+**증상**: 헤더 + 모바일/PC 푸터의 인스타 아이콘 3곳이 `/html/dh/billyjo.official` 같은
+없는 주소(HTTP 500)로 연결. 어느 페이지에서 눌렀느냐에 따라 주소가 달라짐.
+
+**원인**: admin1 `admin_user/m/edit/3403` 의 **`sns_link1` 값이 `billyjo.official`**(인스타 핸들만).
+스킨이 `href="{sns_link1}"` 을 그대로 렌더 → 스킴이 없어 브라우저가 **상대경로**로 해석.
+계정 자체는 실존(@billyjo.official, 팔로워 3.8천 / 빌리조 BillyJo 공식).
+
+**조치**
+1. inject.js `bjFixSnsLinks`: 스킴 없는 `a.sns_icon[href]` 를 정상 URL로 교정
+   (핸들만 → `https://www.instagram.com/<handle>/`, 도메인+경로 → `https://` 접두).
+   `target=_blank` + `rel=noopener noreferrer` 부여. **원본이 고쳐지면 자동 무동작.**
+2. 원본(admin1 `sns_link1`) 교정은 도구만 준비 — `admin2_backend/tools/admin1_fix_sns_link.py`
+   (`--set sns_link1=https://www.instagram.com/billyjo.official/`, `--dry` 지원,
+   logscript 등 무관 필드 보존 검증 포함). 권한 정책상 대표님이 직접 실행 필요.
+   ⚠️ 서버렌더 HTML은 여전히 깨진 href라 크롤러/SNS 미리보기 관점에선 원본 교정이 필요.
+
+**배포**: inject.js `8f83c3d` → jsDelivr 200 → 핀 `@bac45db→@8f83c3d` → 라이브 검증
+(홈/목록/상세 3곳 모두 정상 URL). 랜딩 스크롤 재검증 54케이스 전부 `scrollY=0` 유지.
