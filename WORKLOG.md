@@ -1150,3 +1150,25 @@ admin logscript(서버렌더)에 추가/강화:
 - **Organization 강화**: slogan/areaServed(대한민국)/knowsAbout(정수기·공청·비데 렌탈·코웨이·웅진·청호나이스 등)
 - **FAQPage 5문항**: 빌리조 서비스/소유권이전형 렌탈/취급 브랜드/혜택/렌탈료 — AI가 직접 인용
 - 핀 @6d2d712 유지(다른 세션 홈간격 작업 보존). 라이브 검증 완료(GPTBot UA로 Org+FAQPage 노출 확인).
+
+---
+
+## 2026-07-26 — 랜딩 시 페이지가 중간으로 점프하는 스크롤 버그 수정
+
+**증상**: billyjo.co.kr 접속 시 화면이 맨 위가 아니라 페이지 중간에서 시작(모바일 scrollY≈5224).
+
+**원인**: 홈 카테고리 탭 모듈(bjct) 초기화 `go(0, false)` →
+`tabs[0].scrollIntoView({inline:'center', block:'nearest'})`.
+`block:'nearest'`는 "세로로 안 움직임"이 아니라 **요소가 뷰포트 밖이면 가장 가까운 모서리까지 문서를 세로 스크롤**한다.
+탭바가 홈 하단(≈5200px)에 있어 로드 직후 그 지점으로 점프. 데스크탑은 탭바가 뷰포트 안이라 재현 안 됨 → 모바일 전용처럼 보였음.
+
+**수정**: `centerTab(tab, animate)` — 탭바 컨테이너의 `scrollLeft`만 직접 계산해 이동(문서 스크롤 무관).
+넘침 없으면(`scrollWidth<=clientWidth`) no-op.
+
+**검증**(playwright, 모바일 390×844 / 데스크탑 1440×900):
+- 로드 후 8초간 `scrollY=0` 유지 (수정 전 모바일 5224)
+- 마지막 탭 클릭 → 탭바만 `scrollLeft 0→393`, `pageY=0` 유지, 탭 활성/패널 정상
+
+**배포**: inject.js `70d14aa` → jsDelivr 200 확인 → logscript 핀 `@8b994c9→@70d14aa` (admin1 push, 라이브 재검증 완료)
+
+**교훈**: 초기화 시점에 `scrollIntoView`를 부르지 말 것. 가로 캐러셀/탭 정렬은 컨테이너 `scrollLeft`로 직접.
