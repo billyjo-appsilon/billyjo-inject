@@ -1172,3 +1172,30 @@ admin logscript(서버렌더)에 추가/강화:
 **배포**: inject.js `70d14aa` → jsDelivr 200 확인 → logscript 핀 `@8b994c9→@70d14aa` (admin1 push, 라이브 재검증 완료)
 
 **교훈**: 초기화 시점에 `scrollIntoView`를 부르지 말 것. 가로 캐러셀/탭 정렬은 컨테이너 `scrollLeft`로 직접.
+
+---
+
+## 2026-07-26 — 전 사이트 랜딩 스크롤 점검 + 최상단 가드 (룰)
+
+**규칙(신규)**: 모바일/PC 무관, **모든 페이지는 새로 진입(랜딩)하면 화면 최상단에서 시작**해야 한다.
+
+**점검 방법**: playwright로 내부 링크를 크롤해 경로 shape 21종 수집 → 대표 URL 27개 ×
+모바일(390×844)/데스크탑(1440×900) = 54케이스. 각 케이스 로드 후 7초간 `scrollY` 샘플링(200ms),
+동시에 `window.scrollTo`/`scrollBy`/`Element.scrollIntoView`/`document.scrollTop=`/`focusin`을
+후킹해 스크롤 유발 지점의 스택을 기록.
+
+**발견 및 조치**
+1. 홈 카테고리 탭 `scrollIntoView` → 모바일 랜딩 시 scrollY≈5224 점프. (`70d14aa`에서 수정)
+2. `bjHighlightPartnership`의 `scrollIntoView({block:'start'})` — 현재 레이아웃에선 하이라이트가
+   문서 top(offsetTop=0)이라 no-op이지만, 헤더/컨테이너 구조가 바뀌면 점프 원인. → 제거.
+3. **랜딩 최상단 가드** 추가(inject.js 최상단 IIFE): 진입 후 2.5초간, 사용자 입력 전에는
+   `scrollY>0`이면 0으로 복귀. 이후 어떤 모듈이 같은 실수를 해도 사용자 화면은 안 튐.
+   - 제외: 뒤로가기/새로고침(브라우저 복원 존중), `#앵커` 진입, 사용자 입력 이후.
+
+**검증 결과**: 54케이스 전부 `maxY=0`. 가드 회귀 4종(랜딩 직후 사용자 스크롤 유지 / 가드창 종료 후
+스크롤 / 뒤로가기 복원 43·182px / 앵커 클릭) 통과. 콘솔 에러 0. 홈 탭 전환·목록·상세·제휴카드 정상.
+
+**배포**: inject.js `bac45db` → jsDelivr 200 → logscript 핀 `@70d14aa→@bac45db` (admin1) → 라이브 재검증.
+
+**참고(별건)**: 홈에 상대경로 `billyjo.official` 링크가 있어 `/html/dh/billyjo.official` 등으로
+잘못 연결됨(HTTP 500). 스크롤과 무관한 별도 이슈로 남김.
