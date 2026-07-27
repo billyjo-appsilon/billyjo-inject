@@ -8760,26 +8760,30 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var BRIEF = '<path d="M3 7m0 2a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v9a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2z" /><path d="M8 7v-2a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v2" /><path d="M3 13a20 20 0 0 0 18 0" /><path d="M12 12v.01" />';
     var GEAR = '<path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" /><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />';
     var USER = '<path d="M8 7a4 4 0 1 0 8 0a4 4 0 0 0 -8 0" /><path d="M6 21v-2a4 4 0 0 1 4 -4h4a4 4 0 0 1 4 4v2" />';
+    /* 세 번째 값 = Lottie 아이콘 이름. 정적 SVG 와 1:1 로 맞춰 둔다
+       (일부만 바꾸면 같은 줄에서 애니메이션과 정적이 섞인다). */
     var PMAP = [
-      [/가족|3\s*-?\s*4\s*인|패밀리|식구|육아|아이|키즈|맘/, USERS],
-      [/신혼|커플/, UHEART],
-      [/오피스|사무|직장|회사|업무/, BRIEF],
-      [/시니어|노년|부모|어르신|실버/, UHEART],
-      [/가성비|합리|가격|절약|저렴|경제|부담/, COIN],
-      [/정수|물맛|음용|미네랄|직수/, DROP],
-      [/신뢰|브랜드|a\/?s|내구|품질|안심|검증/, SHIELD],
-      [/좁|컴팩트|소형|원룸|미니|공간|슬림/, HOME],
-      [/셀프|자가관리|위생|필터|청결|관리/, GEAR],
-      [/1인|자취|혼자/, UHEART]
+      [/가족|3\s*-?\s*4\s*인|패밀리|식구|육아|아이|키즈|맘/, USERS, 'pv-users'],
+      [/신혼|커플/, UHEART, 'pv-heart'],
+      [/오피스|사무|직장|회사|업무/, BRIEF, 'pv-brief'],
+      [/시니어|노년|부모|어르신|실버/, UHEART, 'pv-heart'],
+      [/가성비|합리|가격|절약|저렴|경제|부담/, COIN, 'pv-coin'],
+      [/정수|물맛|음용|미네랄|직수/, DROP, 'pv-drop'],
+      [/신뢰|브랜드|a\/?s|내구|품질|안심|검증/, SHIELD, 'pv-shield'],
+      [/좁|컴팩트|소형|원룸|미니|공간|슬림/, HOME, 'pv-home'],
+      [/셀프|자가관리|위생|필터|청결|관리/, GEAR, 'pv-gear'],
+      [/1인|자취|혼자/, UHEART, 'pv-heart']
     ];
     root.querySelectorAll('.p .p-top i').forEach(function(el){
       var card = el.closest ? el.closest('.p') : null;
       var tEl = card ? card.querySelector('.rec-p-title') : null;
       var dEl = card ? card.querySelector('.p-d') : null;
       var txt = ((tEl ? tEl.textContent : '') + ' ' + (dEl ? dEl.textContent : '')).toLowerCase();
-      var path = USER;
-      for (var k = 0; k < PMAP.length; k++){ if (PMAP[k][0].test(txt)){ path = PMAP[k][1]; break; } }
+      var path = USER, lot = 'pv-user';
+      for (var k = 0; k < PMAP.length; k++){ if (PMAP[k][0].test(txt)){ path = PMAP[k][1]; lot = PMAP[k][2]; break; } }
       var sp = document.createElement('span'); sp.className = 'bj-persona-ic'; sp.innerHTML = svg(path);
+      var isv = sp.querySelector('svg');
+      if (isv) isv.setAttribute('data-bj-lot-name', lot);   // 아래 Lottie 블록이 이 표식을 보고 교체
       el.parentNode.replaceChild(sp, el);
     });
   }
@@ -9182,7 +9186,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   if (!window.IntersectionObserver || !window.fetch || !window.Promise) return;
 
-  var BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@13ad578/';
+  var BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@9087af1/';
   var RUNTIME = BASE + 'tools/icons/vendor/lottie_light.min.js';
   var THEME = 'brand-mono';
   var SCALE = 1.2;
@@ -9310,6 +9314,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       svg.dataset.bjLot = '1';
       svg.__bjName = MAP[href];
       io.observe(svg);
+    }
+    /* 상세페이지 페르소나 아이콘 — 스프라이트가 아니라 inject.js 가 직접 그리므로
+       생성 시점에 data-bj-lot-name 을 달아 두고 여기서 같은 경로로 처리한다. */
+    var plist = document.querySelectorAll('svg[data-bj-lot-name]');
+    for (var j = 0; j < plist.length; j++) {
+      var psvg = plist[j];
+      if (psvg.dataset.bjLot) continue;
+      psvg.dataset.bjLot = '1';
+      psvg.__bjName = psvg.getAttribute('data-bj-lot-name');
+      io.observe(psvg);
     }
   }
 
