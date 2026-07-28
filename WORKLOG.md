@@ -1251,3 +1251,41 @@ admin logscript(서버렌더)에 추가/강화:
 
 **배포**: inject.js `8f83c3d` → jsDelivr 200 → 핀 `@bac45db→@8f83c3d` → 라이브 검증
 (홈/목록/상세 3곳 모두 정상 URL). 랜딩 스크롤 재검증 54케이스 전부 `scrollY=0` 유지.
+
+---
+
+## 2026-07-28 — 상세페이지: 고객 후기 블록이 '상세 스펙' 제목 옆에 렌더되는 오류
+
+**증상**: `prod_view/24129` 등에서 후기 섹션(`#bj-reviews-root`) 전체가 AI 카드의
+'상세 스펙' 제목 **옆에** 좁은 세로 칼럼으로 렌더. 모바일에선 폭 204px(부모 336px)까지 눌려
+글자가 한두 글자씩 끊김. 후기 블록을 누르면 상세 스펙이 같이 접혔다 펴짐.
+
+**원인**: AI 카드는 별도 저장소(`billyjo-cards`)에서 fetch 하는 외부 마크업이다.
+SLOT6이 `<div class="sec"><div class="sec-t">상세 스펙</div>…` 에서
+`<details class="sec spec-collapse"><summary><span class="sec-t">상세 스펙</span>…` (섹션 전체 접기)로
+바뀌었는데, `fetchAndInjectReviews()`는 `.sec-t` 를 찾아 **그 `parentNode` 에** 후기 블록을 넣고 있었다.
+바뀐 구조에선 그 parent가 `<summary>`(`display:flex`)라 후기 전체가 제목 옆 flex 아이템이 됐다.
+카드 저장소만 바뀌어도 inject.js 쪽이 깨지는 구조였고, 커밋 없이 증상만 발생.
+
+**조치** (inject.js)
+1. `bjRvSectionAnchor()` — `.sec-t` → `closest('.sec')` 로 **섹션 블록 단위 승격**,
+   `summary` 안이면 부모 `details` 까지 올린다. 그 '앞'에 삽입. (`div.sec` / `details.sec` 둘 다 커버)
+2. `bjRvBadParent()` — `SUMMARY/LABEL/BUTTON/A/SPAN/H1-6/TABLE…` 등 블록을 담을 수 없는
+   컨테이너면 앵커를 버리고 기존 폴백(`.prod_view_top` 다음)으로 내려간다.
+3. `bjRvEnsurePlacement()` **워치독**(절대 규칙 #33과 같은 fail-safe): 후기 블록이 어떤 이유로든
+   `summary` 등에 들어가 있으면 섹션 앞으로 되돌린다. `runAll()` + 독립 타이머 `4/6/9/13초`.
+   → 카드 템플릿이 또 바뀌어도 화면은 자동 복구된다.
+4. CSS `#bj-reviews-root{flex:1 1 100%}` — 부모가 flex 여도 한 줄을 차지(복구 전 한 프레임 보험).
+
+**재발 방지 도구**: `deploy/review-placement-check.js` (playwright, 데스크탑+모바일)
+- `node review-placement-check.js` — 로컬 inject.js 를 route 주입해 **배포 전** 검사
+- `node review-placement-check.js live [상품번호]` — **배포 후** 라이브 검사
+- 검사 항목: `summary` 내부 여부 / '상세 스펙' 섹션 내부 여부 / 부모 대비 폭 90% / 순서(페르소나 → 후기 → 상세 스펙). 실패 시 exit 1.
+- **카드 저장소(`billyjo-cards`) 템플릿을 바꾸면 이 검사를 반드시 돌릴 것.**
+
+**검증**: 라이브(@4aeeeba) 재현 확인 → `inSummary:true`, 모바일 폭 204px.
+수정본은 데스크탑/모바일 모두 `inSummary:false`, 폭 1346/336px(부모 1392/370),
+순서 페르소나(1759) → 후기(1984) → 상세 스펙(3772). 워치독은 후기 블록을 강제로 summary 에
+집어넣은 뒤에도 `div.card` 내 `details.sec.spec-collapse` 앞으로 복구 확인.
+
+**배포**: (대기) inject.js 커밋·push → jsDelivr 확인 → logscript 핀 `@4aeeeba→<신규>` → 라이브 재검사.

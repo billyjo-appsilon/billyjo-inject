@@ -7856,7 +7856,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (document.getElementById('bj-rv-style')) return;
     var st=document.createElement('style'); st.id='bj-rv-style';
     st.textContent=[
-      "#bj-reviews-root{font-family:'Pretendard',sans-serif;background:#fff;border:1px solid #e6e8ee;border-radius:12px;padding:20px;margin:14px 0;min-width:0;clear:both;box-sizing:border-box;color:#222}",
+      /* flex:1 1 100% — 부모가 flex(예: 카드 SLOT6 summary)로 바뀌어도 옆에 붙지 않고 한 줄 차지.
+         위치 자체는 bjRvEnsurePlacement()가 되돌리지만, 그 전 한 프레임의 깨짐까지 막는 보험. */
+      "#bj-reviews-root{font-family:'Pretendard',sans-serif;background:#fff;border:1px solid #e6e8ee;border-radius:12px;padding:20px;margin:14px 0;min-width:0;clear:both;flex:1 1 100%;box-sizing:border-box;color:#222}",
       "#bj-reviews-root *{box-sizing:border-box}",
       "#bj-reviews-root .rv-summary{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-bottom:14px;border-bottom:1px solid #e6e8ee;margin-bottom:14px;min-width:0}",
       "#bj-reviews-root .rv-score{text-align:center;flex:0 0 auto}",
@@ -7910,6 +7912,53 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     return lb;
   }
 
+  /* ── 후기 블록 삽입 위치 안전장치 ───────────────────────────────────────────
+     AI 카드(billyjo-cards)는 별도 저장소에서 오는 외부 마크업이라 구조가 언제든 바뀐다.
+     실제 사고: SLOT6이 <div class="sec"><div class="sec-t">상세 스펙</div>… 에서
+     <details class="sec spec-collapse"><summary><span class="sec-t">상세 스펙</span>… 로 바뀌면서
+     '.sec-t 의 parentNode 에 넣는다'는 기존 로직이 후기 블록을 <summary> 안에 넣었고,
+     summary 가 display:flex 라 후기 전체가 '상세 스펙' 제목 옆에 나란히 렌더됐다.
+     → 앵커는 항상 섹션 블록(.sec / details) 단위로 승격해서 그 '앞'에 넣는다. */
+  var BJ_RV_BAD_PARENT = /^(SUMMARY|LABEL|BUTTON|A|SPAN|B|I|EM|STRONG|P|H1|H2|H3|H4|H5|H6|TABLE|THEAD|TBODY|TFOOT|TR|SELECT|OPTION)$/;
+  function bjRvBadParent(p){
+    return !p || p.nodeType !== 1 || BJ_RV_BAD_PARENT.test(p.tagName);
+  }
+  /* 헤더 element(.sec-t) → 그 헤더가 속한 섹션 블록. summary 안이면 details 까지 올린다. */
+  function bjRvSectionAnchor(el){
+    var a = (el.closest && el.closest('.sec')) || el;
+    var sm = a.closest && a.closest('summary');
+    if (sm) a = (sm.parentNode && sm.parentNode.tagName === 'DETAILS') ? sm.parentNode : sm;
+    return a;
+  }
+  /* AI 카드의 '상세 스펙'(SLOT6) 섹션 블록. 카드 미로드/미발견이면 null. */
+  function bjRvSpecAnchor(){
+    var card = document.querySelector('#ai-card-root'); if (!card) return null;
+    var secs = card.querySelectorAll('.sec-t');
+    for (var i = 0; i < secs.length; i++){
+      if (/상세\s*스펙/.test(secs[i].textContent || '')) return bjRvSectionAnchor(secs[i]);
+    }
+    return null;
+  }
+  /* 워치독(절대 규칙 #33과 동일한 fail-safe 사고): 후기 블록이 어떤 이유로든
+     <summary> 등 블록을 담을 수 없는 컨테이너 안에 있으면 섹션 앞으로 되돌린다.
+     카드 템플릿이 또 바뀌어도 '리뷰 옆에 상세스펙' 증상이 재발하지 않게 하는 마지막 방어선. */
+  function bjRvEnsurePlacement(){
+    try {
+      var root = document.getElementById('bj-reviews-root'); if (!root) return;
+      var inSummary = root.closest ? root.closest('summary') : null;
+      if (!inSummary && !bjRvBadParent(root.parentNode)) return; // 정상 위치
+      var tgt = bjRvSpecAnchor();
+      // tgt 가 root 를 품고 있어도 insertBefore 는 먼저 떼어내므로 안전.
+      if (tgt && tgt.parentNode && tgt !== root && !root.contains(tgt) && !bjRvBadParent(tgt.parentNode)) {
+        tgt.parentNode.insertBefore(root, tgt); return;
+      }
+      var card = document.querySelector('#ai-card-root'); // 폴백: AI 카드 바로 앞
+      if (card && card.parentNode && !root.contains(card) && !bjRvBadParent(card.parentNode)) {
+        card.parentNode.insertBefore(root, card);
+      }
+    } catch(e){}
+  }
+
   // 미리보기 게이트 — 이 상품번호에만 후기 섹션 노출. 전체 적용 시 빈 배열([])로 변경.
   var BJ_RV_ONLY = []; // 전체 상품 적용 (빈 배열=모든 prod_view)
   function fetchAndInjectReviews(){
@@ -7935,10 +7984,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if(!brand || !category) return; // 분류 불가 → 후기 미표시(다음 runAll 재시도)
     // 모델코드 추출 (제품 단위 매칭용). .model_name(예 "CHPI-7400N_V2 4개월관리") 우선, 없으면 제품명.
     var model = bjRvExtractModel(txt('.model_name')+' '+nameTxt);
-    // 삽입 위치: AI 카드의 '상세 스펙'(SLOT6) 바로 앞 = '이런 분에게 추천해요'(SLOT5) 다음.
+    // 삽입 위치: AI 카드의 '상세 스펙'(SLOT6) 섹션 블록 바로 앞 = '이런 분에게 추천해요'(SLOT5) 다음.
     // 카드는 async 주입이라 로드 대기(최대 4초), 카드 없으면 .prod_view_top 다음으로 폴백.
-    var anchor=null, parent=null, card=document.querySelector('#ai-card-root');
-    if(card){ var secs=card.querySelectorAll('.sec-t'); for(var si=0;si<secs.length;si++){ if(/상세\s*스펙/.test(secs[si].textContent||'')){ anchor=secs[si]; parent=secs[si].parentNode; break; } } }
+    // 앵커는 bjRvSpecAnchor()가 섹션 블록(.sec/details)까지 승격 — summary 안에 넣으면 안 된다.
+    var anchor=bjRvSpecAnchor(), parent=anchor?anchor.parentNode:null;
+    if(anchor && bjRvBadParent(parent)){ anchor=null; parent=null; } // 담을 수 없는 컨테이너 → 폴백
     if(!anchor){
       if(!window.__bjRvFirst) window.__bjRvFirst=Date.now();
       if(Date.now()-window.__bjRvFirst < 4000) return; // 카드 로드 대기
@@ -8834,6 +8884,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     applyTextClamp();          /* v0.6.9: [다음단계] 긴 문장 2줄 클램프+더보기 (24578 테스트) */
     mountFontSizer();          /* v0.6.1: 글씨 크기 조절 컨트롤(돋보기 −/+) */
     fetchAndInjectReviews();   /* 고객 후기 섹션 — .prod_view_top 다음 */
+    bjRvEnsurePlacement();     /* 후기 블록이 카드 summary 안으로 들어가는 사고 자동 복구 */
     hideOriginalSpecsAndSimplifyLpt();
     setupBottomBarVisibility();
     injectNewlywedGnb();
@@ -8888,6 +8939,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     } catch(e){}
   }
   [3000, 7000].forEach(function(d){ setTimeout(ensureBottomWidgetAlive, d); });
+
+  /* 후기 블록 위치 워치독 — runAll 타이머(최대 5s)·MutationObserver(8s 후 해제) 이후에도
+     카드가 늦게 주입/재렌더될 수 있어 독립 타이머로 한 번 더 확인. */
+  [4000, 6000, 9000, 13000].forEach(function(d){ setTimeout(bjRvEnsurePlacement, d); });
 
   /* v0.5.71: enhanceBottomBar 1회 가드로 buildWidgetSelector가 LPT 채워지기 전에만 실행되는 문제 보강.
      LPT signature가 변경(또는 채워짐)되면 약정 pill을 새 데이터(타사보상 포함)로 재빌드.
