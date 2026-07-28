@@ -6,14 +6,18 @@
 export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
 export HOME="${HOME:-/Users/appsilon}"
 
-LOG_DIR="$HOME/repos/billyJo/skin-css/.logs"
+# 스크립트 자신의 위치를 기준으로 동작한다. 클론을 옮겨도 crontab 경로만 바꾸면 되고,
+# 두 클론에 같은 스크립트가 있을 때 엉뚱한 쪽 works/ 를 건드리는 사고도 막는다.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+
+LOG_DIR="$SCRIPT_DIR/.logs"
 LOG_FILE="$LOG_DIR/works-sync.log"
 mkdir -p "$LOG_DIR"
 
 TS=$(date "+%Y-%m-%d %H:%M:%S")
 {
   echo "===== $TS ====="
-  cd "$HOME/repos/billyJo/skin-css/works" || { echo "❌ works directory not found"; exit 1; }
+  cd "$SCRIPT_DIR/works" || { echo "❌ works directory not found"; exit 1; }
   git fetch origin main --quiet
   LOCAL=$(git rev-parse HEAD)
   REMOTE=$(git rev-parse origin/main)

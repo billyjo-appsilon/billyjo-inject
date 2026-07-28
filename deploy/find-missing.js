@@ -5,7 +5,7 @@ const fs = require('fs');
   const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await ctx.newPage();
 
-  var existing = new Set(fs.readdirSync('/Users/appsilon/repos/billyJo/skin-css/works/cards/').map(f => f.replace('.html', '')));
+  var existing = new Set(fs.readdirSync(require('path').join(__dirname, '..', 'works', 'cards')).map(f => f.replace('.html', '')));
   console.log('existing cards:', existing.size);
 
   // Find ALL prod_view links from various billyjo pages

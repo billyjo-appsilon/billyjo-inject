@@ -1,5 +1,5 @@
 const fs = require('fs');
-const CARDS_DIR = '/Users/appsilon/repos/billyJo/skin-css/works/cards';
+const CARDS_DIR = require('path').join(__dirname, '..', 'works', 'cards');
 
 const REFINED = {
   '10914': {

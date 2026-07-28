@@ -1,7 +1,7 @@
 /**
  * 카드 자동 생성기 (v1, family-templated).
  * 입력: /tmp/scraped-batch.json (제품 스크래핑 데이터)
- * 출력: skin-css/works/cards/{prodNo}.html
+ * 출력: ../works/cards/{prodNo}.html (스크립트 상대경로)
  *
  * 알고리즘:
  *  1. 제품명/스펙에서 family (F01~F14) 추정
@@ -15,8 +15,8 @@ const fs = require('fs');
 const path = require('path');
 
 const SCRAPED = JSON.parse(fs.readFileSync('/tmp/scraped-batch.json', 'utf-8'));
-const TEMPLATE = fs.readFileSync('/Users/appsilon/repos/billyJo/skin-css/works/cards/10914.html', 'utf-8');
-const OUT_DIR = '/Users/appsilon/repos/billyJo/skin-css/works/cards';
+const TEMPLATE = fs.readFileSync(require('path').join(__dirname, '..', 'works', 'cards', '10914.html'), 'utf-8');
+const OUT_DIR = require('path').join(__dirname, '..', 'works', 'cards');
 
 // Family detection
 function detectFamily(name, specs) {

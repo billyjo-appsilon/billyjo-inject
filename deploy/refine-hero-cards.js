@@ -4,7 +4,7 @@
  */
 
 const fs = require('fs');
-const CARDS_DIR = '/Users/appsilon/repos/billyJo/skin-css/works/cards';
+const CARDS_DIR = require('path').join(__dirname, '..', 'works', 'cards');
 
 // 정교화 데이터 (수동 작성, 룰북 v0.4.2 기준)
 const REFINED = {
