@@ -1333,3 +1333,14 @@ inject.js `hydrateThumbnails` 는 `if(!url) return` 만 보고 빈 문자열이 
 **검증**: 무작위 12개 상품 prod vs patched 비교 — 카드 수 감소 0건, POS/키오스크 1건은
 2장→3장으로 오히려 채워짐. 24129: 2장(1장 깨짐) → **3장 전부 정상**
 (세스코 EW-210 11,900 · 쿠쿠 12,900 · 현대렌탈서비스 13,900 — 전부 정수전용, 이미지 정상).
+
+**배포 상태(미완 2건)**
+1. inject.js `73bd3dc` push·jsDelivr 200 완료, 핀 `@653e418→@73bd3dc` 파일 반영 완료.
+   ❌ **admin1 패널 push 미완** — `deploy-fix.js` 가 쓰는 `BILLYJO_ADMIN_USER/PASS` 가
+   이 맥에서 사라졌다. 원본이던 `~/repos/billyJo/skin-css` 클론이 2026-07-28 15:09 에
+   아카이브(`skin-css-*-2026-07-28`)되면서 gitignore 대상인 `deploy/.env` 가 함께 없어짐.
+   → `deploy/.env.example` 기준으로 재생성 후
+   `cd deploy && node --env-file=.env deploy-fix.js` 실행 필요.
+2. admin2 백엔드 `449f8c4` 커밋 완료, ❌ **Vercel prod 배포 미완**(`vercel --prod` 가
+   이 세션 권한 정책에 막힘). 배포 전까지 추천 API 는 여전히 이미지 없는 후보를 내려보낸다
+   (그동안은 inject.js 방어선이 그 카드를 제거 — 24129 기준 카드 1장).
