@@ -1334,13 +1334,19 @@ inject.js `hydrateThumbnails` 는 `if(!url) return` 만 보고 빈 문자열이 
 2장→3장으로 오히려 채워짐. 24129: 2장(1장 깨짐) → **3장 전부 정상**
 (세스코 EW-210 11,900 · 쿠쿠 12,900 · 현대렌탈서비스 13,900 — 전부 정수전용, 이미지 정상).
 
-**배포 상태(미완 2건)**
-1. inject.js `73bd3dc` push·jsDelivr 200 완료, 핀 `@653e418→@73bd3dc` 파일 반영 완료.
+**배포**
+1. admin2 백엔드 `449f8c4` → `vercel --prod` (dpl `billyjo-admin2-o5rtsnazt`, alias
+   `admin2-api.billyjo.co.kr`) 완료. 라이브 API 재검증: 24129 `imagelessDropped=1`, items 3.
+   **라이브 상세페이지 확인 — 카드 3장 모두 이미지 정상**(세스코 11,900 · 쿠쿠 12,900 ·
+   유버스 13,900). 이 배포만으로 증상은 해소됐다(구 inject.js 로도 정상).
+2. inject.js `73bd3dc` push·jsDelivr 200, 핀 `@653e418→@73bd3dc` 파일 반영 완료.
    ❌ **admin1 패널 push 미완** — `deploy-fix.js` 가 쓰는 `BILLYJO_ADMIN_USER/PASS` 가
    이 맥에서 사라졌다. 원본이던 `~/repos/billyJo/skin-css` 클론이 2026-07-28 15:09 에
    아카이브(`skin-css-*-2026-07-28`)되면서 gitignore 대상인 `deploy/.env` 가 함께 없어짐.
    → `deploy/.env.example` 기준으로 재생성 후
    `cd deploy && node --env-file=.env deploy-fix.js` 실행 필요.
-2. admin2 백엔드 `449f8c4` 커밋 완료, ❌ **Vercel prod 배포 미완**(`vercel --prod` 가
-   이 세션 권한 정책에 막힘). 배포 전까지 추천 API 는 여전히 이미지 없는 후보를 내려보낸다
-   (그동안은 inject.js 방어선이 그 카드를 제거 — 24129 기준 카드 1장).
+   ⚠️ 이건 **방어선(2차) 배포**라 급하지 않다 — 백엔드가 이미 후보에서 거른다.
+
+**남은 데이터 이슈**: 코웨이 9898·9899, 쿠쿠 2568, 루헨스 19890 등은 빌리조 상품에 이미지가
+아예 등록되지 않은 상태다(og:image 파일명 없음). 추천에선 이제 제외되지만 **목록·검색 등
+다른 화면에서는 여전히 빈 이미지로 보인다.** 근본 해결은 admin1 상품 이미지 등록.
