@@ -1288,7 +1288,13 @@ SLOT6이 `<div class="sec"><div class="sec-t">상세 스펙</div>…` 에서
 순서 페르소나(1759) → 후기(1984) → 상세 스펙(3772). 워치독은 후기 블록을 강제로 summary 에
 집어넣은 뒤에도 `div.card` 내 `details.sec.spec-collapse` 앞으로 복구 확인.
 
-**배포**: inject.js `653e418` → jsDelivr 200(567,864 bytes) → logscript 핀 `@4aeeeba→@653e418`.
-⚠️ **admin 패널 반영은 미완** — 이 clone(`~/repos/jaden/billyjo-inject`)에 `deploy/.env` 가 없어
-`node --env-file=.env deploy-fix.js` 를 돌리지 못했다. 자격증명 있는 환경에서 실행해야 라이브 반영.
-반영 후 `cd deploy && node review-placement-check.js live` 로 확인할 것.
+**배포**: inject.js `653e418` → jsDelivr 200(567,864 bytes) → logscript 핀 `@4aeeeba→@653e418`
+→ admin 반영(`deploy-fix.js`, len 4389 재조회 검증) → 라이브 재검사 `24129`·`24578` 데스크탑/모바일
+전부 `OK`(summary 밖, 폭 1346/336, 순서 페르소나→후기→상세 스펙). 카드·후기·하단위젯 정상, 랜딩 `scrollY=0`.
+
+⚠️ 이 clone(`~/repos/jaden/billyjo-inject`)에는 `deploy/.env` 가 없다.
+자격증명은 원본 clone `~/repos/billyJo/skin-css/deploy/.env` 에 있으므로
+`cd deploy && node --env-file=/Users/appsilon/repos/billyJo/skin-css/deploy/.env deploy-fix.js` 로 실행.
+
+**별건(기존 이슈)**: 상세페이지 콘솔에 Google Sheets 공개 CSV 1건이 `400` 으로 실패한다
+(inject.js 2430~ 의 `2PACX-…/pub?gid=…&output=csv` 중 하나). 이번 수정과 무관한 선재 이슈로 남김.
