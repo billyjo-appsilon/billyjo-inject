@@ -1401,5 +1401,41 @@ cards-index.json 은 2026-05-31 생성본이라 그 사실을 모른 채 계속 
 - inject.js `c815267` push·jsDelivr 200, 핀 `@73bd3dc→@c815267` 파일 반영.
   ❌ admin1 패널 push 대기(자격증명 `deploy/.env` 미복구). 구버전 핀(@653e418)으로도 정상 —
   백엔드가 후보를 거르고 클라이언트는 og:image 폴백으로 동작(라이브 3장 이미지 정상 확인).
-- 주 1회 갱신 cron 등록: `30 4 * * 0 tools/image_status_sync.sh`
-  (로그 `admin2_backend/var/cron_image_status.log`). 목록 변경 시 "다음 배포 시 반영 필요" 로그.
+- 주 1회 갱신 cron 등록: `30 4 * * 0 tools/image_status_sync.sh` → 아래에서 매일로 교체.
+
+---
+
+## 2026-07-28 — 목록 이탈 감지 자동화 (배포 없이 반영 + 감시)
+
+**문제**: 위 조치의 제외 목록은 **배포 번들에 든 정적 스냅샷**이었다. 상품이 목록에서 내려가도
+다음 백엔드 배포까지 계속 추천된다 — 자동화가 운영에 닿지 않았다. 잡이 죽어도 화면은 멀쩡해
+보이므로(옛 목록으로 계속 거름) 아무도 모른다.
+
+**구성 (admin2 `d734784`)**
+
+| 단계 | 무엇 | 주기 |
+|---|---|---|
+| 1. 수집 | `scripts/build_image_status.py` — 카테고리 목록 ajax 126요청(약 2분) | 매일 04:30 |
+| 2. 발행 | `--publish` → billyjo-inject `data/image-status.json` 커밋·푸시 | 〃 |
+| 3. 반영 | 백엔드가 raw.githubusercontent 에서 **30분 TTL** 로 읽음 → **배포 불필요** | 상시 |
+| 4. 보고 | `ops_heartbeats(image_status_sync)` 하트비트 | 〃 |
+| 5. 감시 | 워치독 — 3일 이상 미실행/실패 시 문제 보고(Slack) | 워치독 주기 |
+| 6. 화면 카나리 | `deploy/reco-image-check.js` — 실제 상세페이지 카드 이미지 로드 확인 | 일요일 05:30 |
+| 7. 카나리 감시 | `ops_heartbeats(reco_image_canary)` + 워치독 10일 신선도 | 〃 |
+
+- 발행처가 billyjo-cards 가 아닌 billyjo-inject 인 이유: `appsilon-ai` 계정에 billyjo-cards
+  push 권한이 없다(403). billyjo-inject 는 jsDelivr 로 이미 공개돼 있어 raw 읽기가 된다.
+- **안전장치**: 수집량 1,000 미만이면 파일을 쓰지 않는다(사이트 장애 대비). 백엔드도 `ok` 가
+  비었거나 `imageless > ok` 인 파일은 무시한다 — 수집 실패본을 받아 멀쩡한 상품 수천 개가
+  한 번에 추천에서 사라지는 사고 방지. 원격 실패 시 번들 스냅샷 → 빈 저장소 순 폴백
+  (감시 데이터가 없다고 추천이 멈추면 안 된다).
+- 실패를 기본값으로 두고 성공 경로에서만 뒤집는 하트비트 정책은 works-sync-cron.sh 와 동일.
+
+**crontab (이 맥)**
+```
+30 4 * * *  admin2_backend/tools/image_status_sync.sh        # 목록 스캔 → 발행 → 하트비트
+30 5 * * 0  billyjo-inject/deploy/reco-image-canary-cron.sh  # 화면 카나리 → 하트비트
+```
+
+**검증**: 스캔→발행→raw 200(추천가능 2,195 / 제외 304) 확인. 라이브 카나리 24129·24578
+데스크탑/모바일 **카드 14장 전부 이미지 정상**.
