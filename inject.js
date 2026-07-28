@@ -3575,6 +3575,28 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     return m ? m[1] : null;
   }
 
+  /* 썸네일 URL이 실제 파일을 가리키는지. 이미지 미등록 상품은 og:image가 디렉터리로
+     끝나(".../goodsImages/") 그대로 <img>에 넣으면 빈 회색 박스가 된다. (2026-07-28) */
+  function usableThumb(url) {
+    if (!url) return false;
+    var name = String(url).split('?')[0].split('#')[0].split('/').pop();
+    return !!name && name.indexOf('.') > 0;
+  }
+
+  /* 이미지를 못 그리는 카드는 제거 — 깨진 썸네일을 보여주느니 카드를 빼는 게 낫다.
+     추천 후보에서 거르는 건 백엔드(admin2 /v1/products/recommendations)가 하고,
+     여기는 백엔드가 놓쳤을 때(이미지가 방금 내려갔다든지)의 마지막 방어선이다. */
+  function dropCard(card) {
+    var section = card.closest ? card.closest('.bj-reco-section') : null;
+    if (card.parentNode) card.parentNode.removeChild(card);
+    if (!section) return;
+    // 카드가 하나도 안 남으면 섹션(주입 zone)째 숨긴다 — 제목만 뜬 빈 섹션 방지
+    if (!section.querySelector('a.bj-reco-card, a.bj-reco-top-card')) {
+      var zone = section.closest ? section.closest('[data-bj-reco-zone]') : null;
+      (zone || section).style.display = 'none';
+    }
+  }
+
   // 주입된 섹션의 각 카드 placeholder를 실제 썸네일 <img>로 교체 (비동기, 도착 순)
   function hydrateThumbnails(root) {
     if (!root) return;
@@ -3586,10 +3608,15 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (!box) return;
       var isTop = box.classList.contains('bj-reco-top-img');
       fetchThumb(pid).then(function(url) {
-        if (!url) return;  // 못 찾으면 placeholder 유지
+        if (!usableThumb(url)) { dropCard(card); return; }  // 이미지 없는 제품 → 카드 제외
         var radius = isTop ? '14px' : '12px';
-        box.innerHTML = '<img src="' + escapeHtml(url) + '" alt="" ' +
-          'style="width:100%;height:100%;object-fit:cover;border-radius:' + radius + '">';
+        var im = document.createElement('img');
+        im.alt = '';
+        im.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:' + radius;
+        im.onerror = function() { dropCard(card); };  // URL은 멀쩡한데 404/깨진 파일
+        im.src = url;
+        box.innerHTML = '';
+        box.appendChild(im);
       });
     });
   }
