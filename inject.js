@@ -3597,7 +3597,22 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     }
   }
 
-  // 주입된 섹션의 각 카드 placeholder를 실제 썸네일 <img>로 교체 (비동기, 도착 순)
+  /* 카드 이미지 박스를 <img>로 채운다. 로드 실패하면 onFail() (폴백 or 카드 제거). */
+  function paintThumb(box, url, isTop, onFail) {
+    var im = document.createElement('img');
+    im.alt = '';
+    im.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:' + (isTop ? '14px' : '12px');
+    im.onerror = onFail;
+    im.src = url;
+    box.innerHTML = '';
+    box.appendChild(im);
+  }
+
+  /* 주입된 섹션의 각 카드 이미지를 채운다.
+     1순위 — 추천 API가 실어 보낸 목록 썸네일(item.image). 상품마다 prod_view를 여는
+             왕복이 사라져 카드가 즉시 뜬다.
+     2순위 — prod_view og:image (구버전 API 응답·신규 상품 대비 폴백).
+     둘 다 실패하면 카드를 제거한다 — 깨진 썸네일을 보여주느니 빼는 게 낫다. */
   function hydrateThumbnails(root) {
     if (!root) return;
     var cards = root.querySelectorAll('a.bj-reco-card, a.bj-reco-top-card');
@@ -3607,17 +3622,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var box = card.querySelector('.bj-reco-top-img') || card.querySelector('.bj-reco-img');
       if (!box) return;
       var isTop = box.classList.contains('bj-reco-top-img');
-      fetchThumb(pid).then(function(url) {
-        if (!usableThumb(url)) { dropCard(card); return; }  // 이미지 없는 제품 → 카드 제외
-        var radius = isTop ? '14px' : '12px';
-        var im = document.createElement('img');
-        im.alt = '';
-        im.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:' + radius;
-        im.onerror = function() { dropCard(card); };  // URL은 멀쩡한데 404/깨진 파일
-        im.src = url;
-        box.innerHTML = '';
-        box.appendChild(im);
-      });
+      var given = card.getAttribute('data-bj-img') || '';
+
+      function fromProdView() {
+        fetchThumb(pid).then(function(url) {
+          if (!usableThumb(url)) { dropCard(card); return; }   // 이미지 없는 제품 → 카드 제외
+          paintThumb(box, url, isTop, function() { dropCard(card); });
+        });
+      }
+      if (usableThumb(given)) paintThumb(box, given, isTop, fromProdView);
+      else fromProdView();
     });
   }
 
@@ -3645,7 +3659,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var imgHtml = item.image
       ? '<img src="' + escapeHtml(item.image) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px">'
       : '<div>제품 이미지</div>';
-    return '<a class="bj-reco-card' + bestCls + '" href="' + escapeHtml(item.href) + '">' +
+    return '<a class="bj-reco-card' + bestCls + '" data-bj-img="' + escapeHtml(item.image || '') + '"' +
+      ' href="' + escapeHtml(item.href) + '">' +
       '<span class="bj-reco-badge' + badgeCls + '">' + escapeHtml(item.badge) + '</span>' +
       '<div class="bj-reco-img">' + imgHtml + '</div>' +
       '<div class="bj-reco-body" style="display:flex;flex-direction:column;gap:10px;min-width:0">' +
@@ -3681,7 +3696,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       ? '<span class="bj-reco-top-price">' + item.price.toLocaleString() + '</span>' +
         '<span class="bj-reco-top-price-suffix">원/월</span>' + diffStr
       : '<span class="bj-reco-top-price-suffix" style="font-size:13px">렌탈료 상세에서 확인</span>';
-    return '<a class="bj-reco-top-card" href="' + escapeHtml(item.href || '#') + '">' +
+    return '<a class="bj-reco-top-card" data-bj-img="' + escapeHtml(item.image || '') + '"' +
+      ' href="' + escapeHtml(item.href || '#') + '">' +
       '<span class="bj-reco-top-badge">' + escapeHtml(item.badge || '🔥 최고 인기') + '</span>' +
       '<div class="bj-reco-top-img">' + imgHtml + '</div>' +
       '<div class="bj-reco-top-body">' +
@@ -3871,7 +3887,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         grade: apiTop.grade || 'A+',
         strengths: apiTop.strengths || [],
         reviewCount: apiTop.reviewCount || 0,
-        image: '',  // placeholder — hydrateThumbnails가 prod_view og:image로 교체
+        image: apiTop.image || '',  // 추천 API의 목록 썸네일. 없으면 og:image 폴백
         href: apiTop.productId ? (PV + apiTop.productId) : '#',
       };
     }
@@ -3891,7 +3907,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         reviewCount: it.reviewCount || 0,
         personaIcon: it.personaIcon || '👨‍👩‍👧',
         personaText: it.personaText || '',
-        image: '',  // placeholder — hydrateThumbnails가 prod_view og:image로 교체
+        image: it.image || '',  // 추천 API의 목록 썸네일. 없으면 og:image 폴백
         href: it.productId ? (PV + it.productId) : '#'
       };
     });
