@@ -51,6 +51,7 @@ if [ -n "$HB_SECRET" ]; then
 else
   echo "  heartbeat: 건너뜀 ($OPS_ENV 에 HEARTBEAT_SECRET 없음)"
 fi
-echo ""
+# /collections 목록의 '최근 결과'는 stdout 마지막 줄이 그대로 들어간다 — 여기서 한 줄로 요약.
+echo "$NOTE"
 
 [ "$STATUS" = "success" ] || exit 1
