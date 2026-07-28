@@ -1398,9 +1398,17 @@ cards-index.json 은 2026-05-31 생성본이라 그 사실을 모른 채 계속 
 - admin2 `7e5b2c0` → `vercel --prod` (dpl `billyjo-admin2-g3v4mscu8`) 완료. 라이브 API 확인:
   24129 items 3장 전부 `image` 보유. 다른 세션이 같은 트리를 편집 중이라 5분 무변경 + app import
   확인 후 배포(그쪽 미배포 변경 동반 방지).
-- inject.js `c815267` push·jsDelivr 200, 핀 `@73bd3dc→@c815267` 파일 반영.
-  ❌ admin1 패널 push 대기(자격증명 `deploy/.env` 미복구). 구버전 핀(@653e418)으로도 정상 —
-  백엔드가 후보를 거르고 클라이언트는 og:image 폴백으로 동작(라이브 3장 이미지 정상 확인).
+- inject.js `c815267` push·jsDelivr 200, 핀 `@653e418→@c815267` admin1 패널 반영 완료(2026-07-29).
+  라이브 재검증: 추천 카드 이미지 카나리 14장 전부 정상 + 후기 섹션 위치 정상(데스크탑/모바일).
+
+**⚠️ admin1 자격증명 위치 (2026-07-29 정정)**
+`deploy/.env`는 2026-07-28 원본 클론(`~/repos/billyJo/skin-css`) 아카이브 때 함께 사라졌다.
+**같은 계정이 `~/repos/jaden/billyjo_admin2/admin2_backend/.env` 에 `ADMIN1_USERNAME` /
+`ADMIN1_PASSWORD` 로 이미 있다** — 시크릿 사본을 또 만들지 말고 그걸 쓴다.
+`deploy-fix.js` 가 두 이름을 모두 받도록 고쳤으므로 다음 한 줄이면 된다:
+```bash
+cd deploy && node --env-file=/Users/appsilon/repos/jaden/billyjo_admin2/admin2_backend/.env deploy-fix.js
+```
 - 주 1회 갱신 cron 등록: `30 4 * * 0 tools/image_status_sync.sh` → 아래에서 매일로 교체.
 
 ---

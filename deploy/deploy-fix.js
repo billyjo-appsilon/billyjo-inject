@@ -1,10 +1,17 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 
-const ADMIN_USER = process.env.BILLYJO_ADMIN_USER;
-const ADMIN_PASS = process.env.BILLYJO_ADMIN_PASS;
+// admin1(adminnew.rental-shop.net) 로그인 정보.
+// 원래는 이 폴더의 .env(BILLYJO_ADMIN_USER/PASS)를 썼는데, 2026-07-28 원본 클론
+// (~/repos/billyJo/skin-css)이 아카이브되면서 gitignore 대상인 .env 가 함께 사라졌다.
+// 같은 계정이 admin2_backend/.env 에 ADMIN1_USERNAME/ADMIN1_PASSWORD 로 이미 있으므로
+// 그 이름도 받는다 — 시크릿 사본을 하나 더 만들지 않기 위해서다. 실행 예:
+//   node --env-file=/Users/appsilon/repos/jaden/billyjo_admin2/admin2_backend/.env deploy-fix.js
+const ADMIN_USER = process.env.BILLYJO_ADMIN_USER || process.env.ADMIN1_USERNAME;
+const ADMIN_PASS = process.env.BILLYJO_ADMIN_PASS || process.env.ADMIN1_PASSWORD;
 if (!ADMIN_USER || !ADMIN_PASS) {
-  console.error('Set BILLYJO_ADMIN_USER and BILLYJO_ADMIN_PASS (e.g. node --env-file=.env deploy-fix.js)');
+  console.error('자격증명 없음 — BILLYJO_ADMIN_USER/PASS 또는 ADMIN1_USERNAME/ADMIN1_PASSWORD 필요.');
+  console.error('예: node --env-file=/Users/appsilon/repos/jaden/billyjo_admin2/admin2_backend/.env deploy-fix.js');
   process.exit(1);
 }
 
