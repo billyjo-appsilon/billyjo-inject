@@ -1288,4 +1288,7 @@ SLOT6이 `<div class="sec"><div class="sec-t">상세 스펙</div>…` 에서
 순서 페르소나(1759) → 후기(1984) → 상세 스펙(3772). 워치독은 후기 블록을 강제로 summary 에
 집어넣은 뒤에도 `div.card` 내 `details.sec.spec-collapse` 앞으로 복구 확인.
 
-**배포**: (대기) inject.js 커밋·push → jsDelivr 확인 → logscript 핀 `@4aeeeba→<신규>` → 라이브 재검사.
+**배포**: inject.js `653e418` → jsDelivr 200(567,864 bytes) → logscript 핀 `@4aeeeba→@653e418`.
+⚠️ **admin 패널 반영은 미완** — 이 clone(`~/repos/jaden/billyjo-inject`)에 `deploy/.env` 가 없어
+`node --env-file=.env deploy-fix.js` 를 돌리지 못했다. 자격증명 있는 환경에서 실행해야 라이브 반영.
+반영 후 `cd deploy && node review-placement-check.js live` 로 확인할 것.
