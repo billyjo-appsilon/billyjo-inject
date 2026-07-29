@@ -315,7 +315,7 @@
       '<div id="bj-do-body">' +
         '<div class="bj-do-sec"><h3>' + esc((state.cfg.personaSection && state.cfg.personaSection.title) || '1. 필요한 제품을 고르세요') + '</h3><div class="bj-do-cats"></div></div>' +
         '<div class="bj-do-sec"><h3>' + esc((state.cfg.productsSection && state.cfg.productsSection.title) || '2. 함께 많이 신청한 BEST') + '</h3><div class="bj-do-products"></div></div>' +
-        '<div id="bj-do-total"><div class="bj-do-total-k">선택 제품 기준 예상 지원금 합계</div><div class="bj-do-total-v">0원</div><div class="bj-do-total-sub">수수료·내부 요율은 고객 화면에 노출하지 않습니다.</div></div>' +
+        '<div id="bj-do-total"><div class="bj-do-total-k">선택 제품 기준 예상 지원금 합계</div><div class="bj-do-total-v">0원</div><div class="bj-do-total-sub">제품·약정·본사 정책에 따라 실제 지급액은 상담 후 확정됩니다.</div></div>' +
         '<textarea class="bj-do-memo" readonly></textarea>' +
         '<button type="button" class="bj-do-copy">' + esc(state.cfg.ctaLabel || '설계 내역 복사하고 렌탈 신청 계속하기') + '</button>' +
         '<div class="bj-do-note">확인번호와 설계 내역을 주문 메모에 붙여넣으면 본사 접수/계약 확인 시 매칭할 수 있습니다.</div>' +
