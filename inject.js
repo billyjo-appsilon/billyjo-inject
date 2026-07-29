@@ -47,6 +47,336 @@
   } catch (_) { }
 })();
 
+/* v0.7.9: 복수제품 설계 팝업 — admin2 설정 ON일 때만 동작.
+   실제 상품/사진/후기/사은품은 admin2 공개 API를 단일 소스로 사용한다. */
+(function(){
+  if (window.__bjDirectOfferLoaded) return;
+  window.__bjDirectOfferLoaded = true;
+
+  var API = window.__bjConsultApiUrl || 'https://admin2-api.billyjo.co.kr';
+  var PAGE_KEY = 'direct_offer';
+  var BLUE = '#0838f8';
+  var STORE_DETAIL = 'https://billyjo.co.kr/html/dh_product/prod_view/{pid}';
+  var state = {
+    cfg: null,
+    cats: [],
+    selected: {},
+    current: null,
+    reviews: {},
+    offerId: null,
+    opened: false,
+    countdownUntil: null
+  };
+
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function won(n){ n = Math.max(0, Math.round(Number(n) || 0)); return n.toLocaleString('ko-KR') + '원'; }
+  function pad(n){ return String(n).padStart(2, '0'); }
+  function nowTime(){ var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
+  function fmtDate(d){ return String(d.getFullYear()).slice(2) + '.' + pad(d.getMonth()+1) + '.' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+  function money70(p){ var rate = ((state.cfg && state.cfg.directOffer && state.cfg.directOffer.customerGiftRate) || 0.7); return Math.floor(((p && p.maxGift) || 0) * rate / 10000) * 10000; }
+  function getProdNo(){
+    var m = location.pathname.match(/(?:prod_view|rental\/d)\/(\d+)/);
+    if (m) return m[1];
+    var link = document.querySelector('a[href*="prod_view/"]');
+    var lm = link && link.href && link.href.match(/prod_view\/(\d+)/);
+    return lm ? lm[1] : null;
+  }
+  function pageProductName(){
+    var el = document.querySelector('.prod_name b') || document.querySelector('.prod_name') || document.querySelector('h1');
+    return el && el.textContent ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+  }
+  function pageProductImage(){
+    var img = document.querySelector('.prod_view_top img[src*="goodsImages"]') ||
+              document.querySelector('.prod_img img') ||
+              document.querySelector('meta[property="og:image"]');
+    return img ? (img.getAttribute('content') || img.getAttribute('src')) : '';
+  }
+  function fetchJson(url, opts){
+    return fetch(url, opts || {}).then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
+  }
+  function loadCfg(){
+    return fetchJson(API + '/v1/landing/' + PAGE_KEY).then(function(j){
+      var cfg = (j && j.config) || {};
+      var d = cfg.directOffer || {};
+      if (!cfg.enabled && !d.enabled) return null;
+      cfg.directOffer = Object.assign({
+        enabled: false,
+        showTopBar: true,
+        showActivity: true,
+        countdownMinutes: 15,
+        activityMinSeconds: 40,
+        activityMaxSeconds: 70,
+        activityLookbackHours: 48,
+        customerGiftRate: 0.7,
+        autoOpen: false,
+        openDelaySeconds: 2
+      }, d);
+      return cfg;
+    }).catch(function(){ return null; });
+  }
+  function loadProducts(){
+    var per = Math.max(1, Math.min(8, (state.cfg && state.cfg.perCategory) || 3));
+    return fetchJson(API + '/v1/packages/popular?page=' + encodeURIComponent(PAGE_KEY) + '&per=' + per + '&sort=popular')
+      .then(function(j){ return (j && j.categories) || []; })
+      .catch(function(){ return []; });
+  }
+  function loadOneReview(p){
+    if (!p || !p.model || state.reviews[p.model]) return Promise.resolve(state.reviews[p && p.model]);
+    return fetchJson(API + '/v1/reviews?model=' + encodeURIComponent(p.model) + '&limit=1')
+      .then(function(j){
+        var item = j && j.items && j.items[0];
+        state.reviews[p.model] = item ? item.text : '';
+        return state.reviews[p.model];
+      })
+      .catch(function(){ state.reviews[p.model] = ''; return ''; });
+  }
+  function allProducts(){
+    var out = [];
+    (state.cats || []).forEach(function(c){ (c.products || []).forEach(function(p){ out.push(p); }); });
+    return out;
+  }
+  function findCurrent(){
+    var prodNo = getProdNo();
+    var found = null;
+    (state.cats || []).forEach(function(c){
+      (c.products || []).forEach(function(p){
+        if (prodNo && String(p.prodNo) === String(prodNo)) found = p;
+      });
+    });
+    if (found) return found;
+    var name = pageProductName();
+    if (!name) return null;
+    return {
+      model: 'current-' + (prodNo || Date.now()),
+      prodNo: prodNo,
+      name: name,
+      brand: '',
+      category: '현재 상품',
+      image: pageProductImage(),
+      maxGift: 0,
+      reviewCount: 0,
+      avgStars: null,
+      detailUrl: prodNo ? STORE_DETAIL.replace('{pid}', prodNo) : location.href
+    };
+  }
+  function ensureCurrentSelected(){
+    state.current = findCurrent();
+    if (state.current && state.current.model) state.selected[state.current.model] = state.current;
+  }
+  function selectedList(){
+    return Object.keys(state.selected).map(function(k){ return state.selected[k]; }).filter(Boolean);
+  }
+  function createOfferId(){
+    var d = new Date(), pid = getProdNo() || '000000';
+    return 'BJ' + String(d.getFullYear()).slice(2) + pad(d.getMonth()+1) + pad(d.getDate()) + '-' +
+      pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds()) + '-' + pid;
+  }
+  function injectStyles(){
+    if (document.getElementById('bj-direct-offer-style')) return;
+    var s = document.createElement('style'); s.id = 'bj-direct-offer-style';
+    s.textContent =
+      '#bj-do-topbar{position:sticky;top:0;z-index:99998;background:'+BLUE+';color:#fff;font-family:Pretendard,Arial,sans-serif;font-size:12px;line-height:1.2;box-shadow:0 2px 10px rgba(0,0,0,.16)}' +
+      '#bj-do-topbar .bj-do-topin{max-width:1180px;margin:0 auto;padding:8px 14px;display:flex;gap:12px;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}' +
+      '#bj-do-topbar b{font-weight:900}.bj-do-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18),0 0 13px rgba(34,197,94,.9);display:inline-block;margin-right:6px;vertical-align:-1px}' +
+      '#bj-do-fab{position:fixed;right:18px;bottom:92px;z-index:99998;border:0;border-radius:999px;background:'+BLUE+';color:#fff;font:800 13px Pretendard,Arial,sans-serif;padding:12px 16px;box-shadow:0 12px 28px rgba(8,56,248,.28);cursor:pointer}' +
+      '#bj-do-back{position:fixed;inset:0;background:rgba(13,18,30,.55);z-index:100001;display:flex;align-items:center;justify-content:center;padding:16px;font-family:Pretendard,Arial,sans-serif}' +
+      '#bj-do-box{width:100%;max-width:460px;max-height:88vh;overflow:auto;background:#fff;border-radius:18px;box-shadow:0 22px 70px rgba(0,0,0,.28);color:#172033}' +
+      '#bj-do-head{padding:18px 18px 12px;border-bottom:1px solid #edf0f7;position:relative}.bj-do-badge{font-size:11px;font-weight:900;color:'+BLUE+';background:#eef3ff;border-radius:999px;padding:4px 9px;display:inline-block}.bj-do-h{font-size:21px;font-weight:900;line-height:1.18;margin:10px 0 6px;white-space:pre-line}.bj-do-sub{font-size:12.5px;color:#647084;line-height:1.45}.bj-do-x{position:absolute;right:12px;top:12px;border:0;background:transparent;color:#9aa3b2;font-size:22px;cursor:pointer}' +
+      '#bj-do-body{padding:14px 14px 16px}.bj-do-sec{margin-top:14px}.bj-do-sec:first-child{margin-top:0}.bj-do-sec h3{font-size:13px;margin:0 0 8px;font-weight:900;color:#263248}.bj-do-cats{display:flex;gap:6px;overflow:auto;padding-bottom:2px}.bj-do-chip{border:1px solid #dbe2f1;background:#fff;color:#445065;border-radius:999px;padding:7px 10px;font-size:12px;font-weight:800;white-space:nowrap}.bj-do-chip.on{border-color:'+BLUE+';background:#eef3ff;color:'+BLUE+'}' +
+      '.bj-do-card{border:1px solid #e4e8f1;border-radius:12px;padding:10px;margin-bottom:8px;display:grid;grid-template-columns:64px 1fr auto;gap:10px;align-items:center;background:#fff}.bj-do-card.on{border-color:'+BLUE+';box-shadow:0 0 0 2px rgba(8,56,248,.08)}.bj-do-card img{width:64px;height:64px;object-fit:contain;border-radius:10px;background:#f5f7fb}.bj-do-pname{font-size:12.5px;font-weight:900;line-height:1.25;color:#182236}.bj-do-meta{font-size:11px;color:#7b8596;margin-top:3px}.bj-do-gift{font-size:12px;font-weight:900;color:'+BLUE+';margin-top:4px}.bj-do-review{font-size:11.5px;color:#606b7c;line-height:1.35;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.bj-do-add{border:0;border-radius:999px;padding:7px 10px;background:#eef3ff;color:'+BLUE+';font-size:11px;font-weight:900;cursor:pointer}.bj-do-card.on .bj-do-add{background:'+BLUE+';color:#fff}' +
+      '#bj-do-total{background:linear-gradient(135deg,#eef3ff,#fff);border:1px solid #dbe5ff;border-radius:14px;padding:12px;margin-top:12px}.bj-do-total-k{font-size:11px;color:#647084}.bj-do-total-v{font-size:24px;font-weight:950;color:'+BLUE+';line-height:1.1}.bj-do-total-sub{font-size:11px;color:#8a93a3;margin-top:4px}.bj-do-memo{width:100%;min-height:112px;margin-top:10px;border:1px solid #dbe2f1;border-radius:12px;padding:10px;font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,monospace;color:#374151;box-sizing:border-box}.bj-do-copy{width:100%;border:0;border-radius:12px;background:'+BLUE+';color:#fff;font-size:14px;font-weight:900;padding:12px;margin-top:10px;cursor:pointer}.bj-do-note{font-size:10.5px;color:#9aa3b2;line-height:1.4;margin-top:8px}' +
+      '#bj-do-toast{position:fixed;left:50%;top:42px;transform:translateX(-50%);z-index:100000;background:#fff;border:1px solid #dfe6f4;border-radius:999px;padding:9px 13px;box-shadow:0 12px 34px rgba(0,0,0,.18);font:800 12px Pretendard,Arial,sans-serif;color:#263248;opacity:0;pointer-events:none;transition:opacity .22s, transform .22s;white-space:nowrap}#bj-do-toast.show{opacity:1;transform:translateX(-50%) translateY(8px)}' +
+      '@media(max-width:560px){#bj-do-topbar .bj-do-topin{justify-content:flex-start;overflow-x:auto}.bj-do-card{grid-template-columns:56px 1fr}.bj-do-card img{width:56px;height:56px}.bj-do-add{grid-column:1 / -1}.bj-do-fab{right:12px;bottom:82px}}';
+    document.head.appendChild(s);
+  }
+  function mountTopBar(){
+    if (!state.cfg.directOffer.showTopBar || document.getElementById('bj-do-topbar')) return;
+    var bar = document.createElement('div'); bar.id = 'bj-do-topbar';
+    bar.innerHTML = '<div class="bj-do-topin"><span><b id="bj-do-clock">15:00</b> 동안 이 화면 조건 유지</span><span><span class="bj-do-dot"></span>지금 이 조건 확인 중 <b id="bj-do-viewers">14</b>명</span><span>오늘 복수제품 설계 <b id="bj-do-count">37</b>건</span><span id="bj-do-recent">최근 정수기 + 제습기 신청</span></div>';
+    document.body.insertBefore(bar, document.body.firstChild);
+    state.countdownUntil = Date.now() + ((state.cfg.directOffer.countdownMinutes || 15) * 60000);
+    setInterval(function(){
+      var left = Math.max(0, state.countdownUntil - Date.now());
+      var m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
+      var el = document.getElementById('bj-do-clock'); if (el) el.textContent = pad(m) + ':' + pad(s);
+      var v = document.getElementById('bj-do-viewers'); if (v && Math.random() < .08) v.textContent = String(12 + Math.floor(Math.random() * 8));
+    }, 1000);
+  }
+  function mountFab(){
+    if (document.getElementById('bj-do-fab')) return;
+    var b = document.createElement('button'); b.id = 'bj-do-fab'; b.type = 'button'; b.textContent = '복수제품 혜택 설계';
+    b.onclick = openModal;
+    document.body.appendChild(b);
+  }
+  function visibleCategories(){
+    var currCat = state.current && state.current.category;
+    return (state.cats || []).filter(function(c){ return c.products && c.products.length && c.category !== currCat; }).slice(0, 5);
+  }
+  function renderProductCard(p, current){
+    var on = !!state.selected[p.model];
+    var rv = state.reviews[p.model] || '';
+    var stars = p.avgStars ? ('★ ' + Number(p.avgStars).toFixed(1)) : '후기';
+    return '<div class="bj-do-card ' + (on ? 'on' : '') + '" data-model="' + esc(p.model) + '">' +
+      '<img src="' + esc(p.image || pageProductImage() || '') + '" alt="">' +
+      '<div><div class="bj-do-pname">' + esc(p.name || p.model) + '</div>' +
+        '<div class="bj-do-meta">' + esc(p.category || '') + (p.reviewCount ? ' · ' + stars + ' · 리뷰 ' + p.reviewCount.toLocaleString('ko-KR') + '개' : '') + '</div>' +
+        '<div class="bj-do-gift">예상 지원금 ' + (p.maxGift ? won(money70(p)) : '상담 시 확인') + '</div>' +
+        (rv ? '<div class="bj-do-review">“' + esc(rv) + '”</div>' : '') +
+      '</div>' +
+      '<button type="button" class="bj-do-add">' + (current ? '포함됨' : (on ? '선택됨' : '추가')) + '</button>' +
+    '</div>';
+  }
+  function calcTotal(){
+    return selectedList().reduce(function(sum, p){ return sum + money70(p); }, 0);
+  }
+  function makeMemo(){
+    if (!state.offerId) state.offerId = createOfferId();
+    var list = selectedList();
+    var lines = [
+      '[빌리조 복수제품 혜택 설계]',
+      '확인번호: ' + state.offerId,
+      '생성시각: ' + fmtDate(new Date()),
+      '혜택구간: ' + ((state.cfg.directOffer.countdownMinutes || 15)) + '분 내 신청 기준',
+      '고객 안내 예상 지원금: 최대 ' + won(calcTotal())
+    ];
+    list.forEach(function(p, i){
+      lines.push('선택상품 ' + (i + 1) + ': ' + (p.name || p.model) + ' / ' + (p.term || '약정 상담확인') + ' / 예상지원금 ' + (p.maxGift ? won(money70(p)) : '상담확인'));
+    });
+    lines.push('※ 실제 지급액은 본사 조건 및 최종 승인 후 확정');
+    return lines.join('\n');
+  }
+  function refreshModal(box){
+    var cats = visibleCategories();
+    var catHtml = '<button type="button" class="bj-do-chip on">현재 상품 포함</button>' + cats.map(function(c){ return '<button type="button" class="bj-do-chip">' + esc(c.category) + '</button>'; }).join('');
+    var cards = state.current ? renderProductCard(state.current, true) : '';
+    cats.forEach(function(c){
+      cards += (c.products || []).map(function(p){ return renderProductCard(p, false); }).join('');
+    });
+    box.querySelector('.bj-do-cats').innerHTML = catHtml;
+    box.querySelector('.bj-do-products').innerHTML = cards;
+    box.querySelector('.bj-do-total-v').textContent = won(calcTotal());
+    box.querySelector('.bj-do-memo').value = makeMemo();
+    Array.prototype.forEach.call(box.querySelectorAll('.bj-do-card'), function(card){
+      card.onclick = function(){
+        var model = card.getAttribute('data-model');
+        if (!model || (state.current && model === state.current.model)) return;
+        var p = allProducts().filter(function(x){ return x.model === model; })[0];
+        if (!p) return;
+        if (state.selected[model]) delete state.selected[model];
+        else {
+          if (selectedList().length >= ((state.cfg && state.cfg.maxSelect) || 5)) return;
+          state.selected[model] = p;
+          loadOneReview(p).then(function(){ refreshModal(box); });
+        }
+        refreshModal(box);
+      };
+    });
+  }
+  function openModal(){
+    if (state.opened) return;
+    state.opened = true;
+    state.offerId = state.offerId || createOfferId();
+    injectStyles();
+    var back = document.createElement('div'); back.id = 'bj-do-back';
+    var box = document.createElement('div'); box.id = 'bj-do-box';
+    var hero = state.cfg.hero || {};
+    box.innerHTML =
+      '<div id="bj-do-head"><button type="button" class="bj-do-x" aria-label="닫기">×</button>' +
+        '<span class="bj-do-badge">' + esc(hero.badge || '복수제품 설계') + '</span>' +
+        '<div class="bj-do-h">' + esc(hero.headline || '지금 고른 상품 기준\\n추가 혜택까지 한 번에') + '</div>' +
+        '<div class="bj-do-sub">' + esc(hero.subcopy || '현재 보고 있는 제품은 자동 포함하고, 함께 많이 신청한 제품을 더해 예상 지원금을 계산합니다.') + '</div>' +
+      '</div>' +
+      '<div id="bj-do-body">' +
+        '<div class="bj-do-sec"><h3>' + esc((state.cfg.personaSection && state.cfg.personaSection.title) || '1. 필요한 제품을 고르세요') + '</h3><div class="bj-do-cats"></div></div>' +
+        '<div class="bj-do-sec"><h3>' + esc((state.cfg.productsSection && state.cfg.productsSection.title) || '2. 함께 많이 신청한 BEST') + '</h3><div class="bj-do-products"></div></div>' +
+        '<div id="bj-do-total"><div class="bj-do-total-k">선택 제품 기준 예상 지원금 합계</div><div class="bj-do-total-v">0원</div><div class="bj-do-total-sub">수수료·내부 요율은 고객 화면에 노출하지 않습니다.</div></div>' +
+        '<textarea class="bj-do-memo" readonly></textarea>' +
+        '<button type="button" class="bj-do-copy">' + esc(state.cfg.ctaLabel || '설계 내역 복사하고 렌탈 신청 계속하기') + '</button>' +
+        '<div class="bj-do-note">확인번호와 설계 내역을 주문 메모에 붙여넣으면 본사 접수/계약 확인 시 매칭할 수 있습니다.</div>' +
+      '</div>';
+    back.appendChild(box); document.body.appendChild(back);
+    function close(){ state.opened = false; try { back.remove(); } catch(_){} }
+    box.querySelector('.bj-do-x').onclick = close;
+    back.addEventListener('click', function(e){ if (e.target === back) close(); });
+    box.querySelector('.bj-do-copy').onclick = function(){
+      var memo = makeMemo();
+      box.querySelector('.bj-do-memo').value = memo;
+      try { navigator.clipboard.writeText(memo); } catch(_){}
+      box.querySelector('.bj-do-copy').textContent = '설계 내역 복사됨';
+      setTimeout(function(){ var b = box.querySelector('.bj-do-copy'); if (b) b.textContent = state.cfg.ctaLabel || '설계 내역 복사하고 렌탈 신청 계속하기'; }, 1400);
+    };
+    refreshModal(box);
+    selectedList().concat(allProducts().slice(0, 8)).forEach(function(p){
+      loadOneReview(p).then(function(){ if (document.body.contains(box)) refreshModal(box); });
+    });
+  }
+  function activityKey(){ return 'bj_direct_offer_activity_v1'; }
+  function loadHistory(){
+    try {
+      var cutoff = Date.now() - ((state.cfg.directOffer.activityLookbackHours || 48) * 3600000);
+      return (JSON.parse(localStorage.getItem(activityKey()) || '[]') || []).filter(function(x){ return x && x.t >= cutoff; });
+    } catch(_){ return []; }
+  }
+  function saveHistory(h){ try { localStorage.setItem(activityKey(), JSON.stringify(h.slice(-300))); } catch(_){} }
+  function maskedName(seed){
+    var surnames = ['김','이','박','최','정','강','조','윤','장','임','한','오','서','신','권','황','안','송','류','홍'];
+    return surnames[seed % surnames.length] + 'OO';
+  }
+  function showActivity(){
+    if (!state.cfg.directOffer.showActivity) return;
+    var products = allProducts().filter(function(p){ return p.maxGift > 0; });
+    if (!products.length) return;
+    var hist = loadHistory();
+    var used = {};
+    hist.forEach(function(x){ used[x.k] = true; });
+    var chosen = null, name = '';
+    for (var i = 0; i < 80; i++){
+      var p = products[Math.floor(Math.random() * products.length)];
+      name = maskedName(Math.floor(Math.random() * 1000));
+      var k = name + '|' + p.model;
+      if (!used[k]) { chosen = p; hist.push({ k: k, t: Date.now() }); saveHistory(hist); break; }
+    }
+    if (!chosen) return;
+    var toast = document.getElementById('bj-do-toast');
+    if (!toast) { toast = document.createElement('div'); toast.id = 'bj-do-toast'; document.body.appendChild(toast); }
+    toast.textContent = name + ' 고객 ' + (chosen.name || chosen.model) + ' 사은품 ' + won(money70(chosen)) + ' 신청 ' + nowTime();
+    toast.classList.add('show');
+    setTimeout(function(){ toast.classList.remove('show'); }, 5200);
+    var recent = document.getElementById('bj-do-recent');
+    if (recent) recent.textContent = '최근 ' + (chosen.category || '렌탈') + ' 신청';
+  }
+  function scheduleActivity(first){
+    if (!state.cfg.directOffer.showActivity) return;
+    var d = state.cfg.directOffer;
+    var min = Math.max(10, Number(d.activityMinSeconds) || 40);
+    var max = Math.max(min, Number(d.activityMaxSeconds) || 70);
+    var wait = first ? 3000 : (min + Math.random() * (max - min)) * 1000;
+    setTimeout(function(){ showActivity(); scheduleActivity(false); }, wait);
+  }
+  function init(){
+    var path = location.pathname || '';
+    if (!/(prod_view|dh_order\/rental\/d)/.test(path)) return;
+    loadCfg().then(function(cfg){
+      if (!cfg) return;
+      state.cfg = cfg;
+      injectStyles();
+      Promise.all([loadProducts()]).then(function(r){
+        state.cats = r[0] || [];
+        ensureCurrentSelected();
+        if (!state.current) return;
+        mountTopBar();
+        mountFab();
+        scheduleActivity(true);
+        if (state.cfg.directOffer.autoOpen) {
+          setTimeout(openModal, ((state.cfg.directOffer.openDelaySeconds || 2) * 1000));
+        }
+      });
+    });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+
 /* =========================================================================
  * [패치] SNS 아이콘 링크 교정 (2026-07-26)
  *   admin1 설정 sns_link1이 'billyjo.official'(인스타 핸들만)로 저장돼 스킨이
