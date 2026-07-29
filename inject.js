@@ -56,7 +56,7 @@
   var API = window.__bjConsultApiUrl || 'https://admin2-api.billyjo.co.kr';
   var PAGE_KEY = 'direct_offer';
   var BLUE = '#0838f8';
-  var STORE_DETAIL = 'https://billyjo.co.kr/html/dh_product/prod_view/{pid}';
+  var STORE_DETAIL = 'https://billyjo.co.kr/html/dh_prod/prod_view/{pid}';
   var state = {
     cfg: null,
     cats: [],
@@ -120,6 +120,13 @@
       .then(function(j){ return (j && j.categories) || []; })
       .catch(function(){ return []; });
   }
+  function loadCurrentProduct(){
+    var prodNo = getProdNo();
+    if (!prodNo) return Promise.resolve(null);
+    return fetchJson(API + '/v1/packages/product/' + encodeURIComponent(prodNo))
+      .then(function(j){ return j && j.product ? j.product : null; })
+      .catch(function(){ return null; });
+  }
   function loadOneReview(p){
     if (!p || !p.model || state.reviews[p.model]) return Promise.resolve(state.reviews[p && p.model]);
     return fetchJson(API + '/v1/reviews?model=' + encodeURIComponent(p.model) + '&limit=1')
@@ -135,7 +142,8 @@
     (state.cats || []).forEach(function(c){ (c.products || []).forEach(function(p){ out.push(p); }); });
     return out;
   }
-  function findCurrent(){
+  function findCurrent(apiProduct){
+    if (apiProduct && apiProduct.model) return apiProduct;
     var prodNo = getProdNo();
     var found = null;
     (state.cats || []).forEach(function(c){
@@ -159,8 +167,8 @@
       detailUrl: prodNo ? STORE_DETAIL.replace('{pid}', prodNo) : location.href
     };
   }
-  function ensureCurrentSelected(){
-    state.current = findCurrent();
+  function ensureCurrentSelected(apiProduct){
+    state.current = findCurrent(apiProduct);
     if (state.current && state.current.model) state.selected[state.current.model] = state.current;
   }
   function selectedList(){
@@ -360,9 +368,9 @@
       if (!cfg) return;
       state.cfg = cfg;
       injectStyles();
-      Promise.all([loadProducts()]).then(function(r){
+      Promise.all([loadProducts(), loadCurrentProduct()]).then(function(r){
         state.cats = r[0] || [];
-        ensureCurrentSelected();
+        ensureCurrentSelected(r[1]);
         if (!state.current) return;
         mountTopBar();
         mountFab();
