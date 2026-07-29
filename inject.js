@@ -83,13 +83,31 @@
   }
   function pageProductName(){
     var el = document.querySelector('.prod_name b') || document.querySelector('.prod_name') || document.querySelector('h1');
-    return el && el.textContent ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+    var name = el && el.textContent ? el.textContent.replace(/\s+/g, ' ').trim() : '';
+    if (name && !/렌탈신청|빌리조/i.test(name)) return name;
+    var cells = document.querySelectorAll('.cart-list tbody td, table.order-field.cart-list tbody td');
+    for (var i = 0; i < cells.length; i++){
+      var t = (cells[i].textContent || '').replace(/\s+/g, ' ').trim();
+      if (t && t.length >= 6 && !/렌탈기간|월 렌탈료|카드할인가|수량/.test(t)) return t;
+    }
+    return '';
   }
   function pageProductImage(){
     var img = document.querySelector('.prod_view_top img[src*="goodsImages"]') ||
               document.querySelector('.prod_img img') ||
+              document.querySelector('.cart-list tbody img[src*="goodsImages"]') ||
               document.querySelector('meta[property="og:image"]');
     return img ? (img.getAttribute('content') || img.getAttribute('src')) : '';
+  }
+  function inferCategory(name){
+    name = String(name || '');
+    var pairs = [
+      ['정수기','정수기'], ['공기청정','공기청정기'], ['제습','제습기'], ['비데','비데'],
+      ['매트리스','매트리스'], ['안마','안마의자'], ['에어컨','에어컨'], ['건조기','건조기'],
+      ['세탁','세탁기'], ['청소기','청소기'], ['냉장','냉장고'], ['TV','TV']
+    ];
+    for (var i = 0; i < pairs.length; i++) if (name.indexOf(pairs[i][0]) >= 0) return pairs[i][1];
+    return '현재 상품';
   }
   function fetchJson(url, opts){
     return fetch(url, opts || {}).then(function(r){ if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); });
@@ -159,7 +177,7 @@
       prodNo: prodNo,
       name: name,
       brand: '',
-      category: '현재 상품',
+      category: inferCategory(name),
       image: pageProductImage(),
       maxGift: 0,
       reviewCount: 0,
