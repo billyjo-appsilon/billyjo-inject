@@ -7125,6 +7125,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     suppliers.forEach(function(s, si){
       s.terms.forEach(function(t, ti){
         if (t.effective <= 0) return;
+        /* underlying 없는 약정(타사보상)은 기본 선택에서 제외 — 주문폼에 실을 수 없어
+           "화면 가격 ≠ 접수 가격"이 된다. pill 로는 계속 보여주되 기본값은 주문 가능한 것만. */
+        if (!t.el) return;
         var months = digits(t.month);
         if (t.effective < bestEff || (t.effective === bestEff && months < bestMonths)) {
           bestEff = t.effective;
@@ -7229,12 +7232,53 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
          약정 pill에 노출(중복 회피). 핸들 ⓘ도 제거 — 안내는 별도 chip으로 노출. */
       var hp = handle.querySelector('.bj-bar-handle-price');
       if (hp) {
-        if (term.price) {
-          hp.innerHTML = '월 ' + term.price + '원';
-        } else {
-          hp.innerHTML = '문의';
-        }
+        /* 타사보상 행의 price 는 LPT signature 에서 와 이미 '원'이 붙어 있다('49,410원').
+           그대로 이으면 '월 49,410원원' 이 된다 — 숫자만 남기고 다시 포맷한다. */
+        var priceLabel = wonLabel(term.price, term.priceNum);
+        hp.innerHTML = priceLabel ? '월 ' + priceLabel + '원' : '문의';
       }
+
+      syncTopChips(term);
+    }
+
+    /* '49,410원' / '49,410' 어느 쪽이 와도 '49,410' 으로 정규화 */
+    function wonLabel(raw, num){
+      var s = String(raw == null ? '' : raw).replace(/[^\d,]/g, '');
+      if (s) return s;
+      return num > 0 ? num.toLocaleString() : '';
+    }
+
+    /* 상단 가격박스를 **하단 위젯이 선택한 약정**에 맞춘다.
+       native 는 상단을 "정가 최저 약정"으로, 위젯은 "카드 적용 후 최저(effective)" 약정으로 잡아
+       기준이 서로 달랐다 — 웰스 미미(WP610NWA)에서 상단 17,900 vs 하단 21,900 으로 갈렸다.
+       기준은 하단 위젯이다: 고객이 실제로 고르고 주문에 실리는 약정이 거기 있다.
+       카드할인가 칩은 실제 할인이 있을 때만(0 은 음수 잘림이라 숨김 — hideZeroCardPriceChip 과 같은 규칙). */
+    function syncTopChips(term){
+      if (!term) return;
+      /* underlying 없는 약정(타사보상)은 주문폼에 실을 수 없다 — 그 가격을 상단까지 올리면
+         "상단·하단은 43,560원인데 접수는 51,900원" 이 된다. 주문에 실리는 값만 상단에 쓴다. */
+      if (!term.el) return;
+      var priceLabel = wonLabel(term.price, term.priceNum);
+      var priceHtml = priceLabel ? '월 <b>' + escapeWidgetHtml(priceLabel) + '</b>원' : '';
+      ['.top_min_price', '.top_min_price_m'].forEach(function(sel){
+        var el = document.querySelector(sel);
+        if (el && priceHtml) el.innerHTML = priceHtml;
+      });
+      var showCard = term.effective > 0 && term.effective < term.priceNum;
+      ['.top_min_price_minus_card', '.top_min_price_minus_card_m'].forEach(function(sel){
+        var el = document.querySelector(sel);
+        if (!el) return;
+        var box = el.closest ? el.closest('.box') : null;
+        if (!box) return;
+        if (showCard) {
+          el.innerHTML = '<b>' + escapeWidgetHtml(term.effective.toLocaleString()) + '</b>원';
+          box.style.setProperty('display', 'flex', 'important');
+          box.removeAttribute('data-bj-zero-card');
+        } else {
+          box.style.setProperty('display', 'none', 'important');
+          box.setAttribute('data-bj-zero-card', '1');
+        }
+      });
     }
 
     function selectSupplier(i){
@@ -7250,13 +7294,29 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       render();
       triggerUnderlying();
     }
+    /* 주문폼이 이미 이 약정을 담고 있는가 — 불필요한 클릭(=토글 해제)을 막는 판정 */
+    function orderFormMatches(t){
+      try {
+        var o = document.order;
+        if (!o || !o.price || !o.month) return false;
+        return digits(o.price.value) === t.priceNum && String(o.month.value || '') === String(t.month);
+      } catch(_) { return false; }
+    }
+
     function triggerUnderlying(){
       /* underlying의 .month_box.layer_price 클릭 — 가격 데이터 동기화.
-         타사보상 약정(t.el === null)은 underlying이 없으므로 skip — 사용자가 상담/주문 시 별도 안내. */
+         타사보상 약정(t.el === null)은 underlying이 없으므로 skip — 사용자가 상담/주문 시 별도 안내.
+         ⚠️ native .month_box 핸들러는 **수동 토글**이다 — 이미 .on 인 행을 다시 클릭하면
+            주문폼(price·dcprice·month…)을 전부 '' 로 비운다. 그래서 맞으면 건드리지 않고,
+            .on 인데 주문폼이 어긋나 있으면 한 번 눌러 해제한 뒤 다시 눌러 세팅한다. */
       var t = suppliers[state.supIdx].terms[state.termIdx];
-      if (t && t.el) {
-        try { t.el.click(); } catch(_){}
+      if (!t || !t.el) return;
+      if (orderFormMatches(t)) return;
+      var box = t.el.closest ? t.el.closest('div') : null;
+      if (box && box.classList.contains('on')) {
+        try { t.el.click(); } catch(_){}   /* 토글 해제 */
       }
+      try { t.el.click(); } catch(_){}     /* 선택 */
     }
 
     mount.addEventListener('click', function(e){
@@ -7268,6 +7328,14 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
     render();
     triggerUnderlying();  // 초기 선택 동기화
+
+    /* native prod_view 의 $(function(){...}) 가 우리 초기 동기화보다 늦게 돌면서
+       주문폼을 자기 기본 약정으로 되돌려놓는다(웰스 미미: 위젯은 21,900 약정인데 주문폼은 17,900).
+       늦게 몇 번 더 확인해 **위젯 선택이 주문폼의 최종 상태**가 되게 한다.
+       state 를 읽으므로 사용자가 그사이 다른 약정을 골랐으면 그 선택을 재확인할 뿐이다. */
+    [700, 1600, 3200].forEach(function(d){
+      setTimeout(function(){ try { triggerUnderlying(); render(); } catch(_){} }, d);
+    });
   }
 
   function escapeWidgetHtml(s){
