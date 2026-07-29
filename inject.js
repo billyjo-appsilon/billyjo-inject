@@ -9140,13 +9140,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 })();
 
 /* ==========================================================================
- * [모듈 SEO] 검색엔진·AEO 최적화 (v1.0) — 전 페이지
- *  해결 대상:
- *   1) canonical 이 전 페이지 홈(billyjo.kr) 을 지목 → 상품/목록 색인 차단 버그.
- *      → 자기참조 canonical + 대표도메인 billyjo.co.kr 통일.
- *   2) meta description / og:description 이 전 페이지 "빌리조" 한 단어 → 페이지별 동적 생성.
- *   3) 구조화 데이터 부재 → 홈=WebSite(SearchAction), 상세=Product+BreadcrumbList, 목록=BreadcrumbList.
- *  주의: 네이버 Yeti 는 JS 실행이 제한적. Organization/인증 정적 태그는 logscript(서버렌더 head)에
+ * [모듈 SEO] 검색엔진·AEO 최적화 (v1.1) — 전 페이지
+ *  역할:
+ *   1) meta description / og:description 이 전 페이지 "빌리조" 한 단어 → 페이지별 동적 생성.
+ *   2) 구조화 데이터 부재 → 홈=WebSite(SearchAction), 상세=Product+BreadcrumbList, 목록=BreadcrumbList.
+ *  주의: canonical 은 서버가 자기참조로 emit하므로 inject 에서는 건드리지 않는다.
+ *        네이버 Yeti 는 JS 실행이 제한적. Organization/인증 정적 태그는 logscript(서버렌더 head)에
  *        별도 배치했고, 이 IIFE 는 구글/빙/AEO 및 동적 per-page 태그를 담당한다.
  * ========================================================================== */
 (function billyjoSEO(){
@@ -9157,11 +9156,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var el=document.head.querySelector('meta['+attr+'="'+key+'"]');
     if(!el){ el=document.createElement('meta'); el.setAttribute(attr,key); document.head.appendChild(el); }
     el.setAttribute('content',val);
-  }
-  function setLink(rel,href){ if(!href) return;
-    var el=document.head.querySelector('link[rel="'+rel+'"]');
-    if(!el){ el=document.createElement('link'); el.setAttribute('rel',rel); document.head.appendChild(el); }
-    el.setAttribute('href',href);
   }
   function ld(id,obj){ if(document.getElementById(id)) return;
     var s=document.createElement('script'); s.type='application/ld+json'; s.id=id;
@@ -9198,7 +9192,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var desc=name+' 렌탈'+(minP?' 월 '+minP.toLocaleString('en-US')+'원부터':'')
              +' — 카드 제휴할인·현금 사은품까지 빌리조에서 최저가로 비교하고 신청하세요. 가전 렌탈 전문 빌리조.';
       desc=C(desc).slice(0,158);
-      setLink('canonical',canonical);
       setMeta('property','og:url',canonical);
       setMeta('name','description',desc);
       setMeta('property','og:description',desc);
@@ -9224,7 +9217,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var d=cat+' 렌탈 가격비교 — '+cat+' 월 렌탈료·카드 제휴할인·현금 사은품을 한눈에. '
            +'코웨이·LG·SK매직·청호나이스 등 인기 브랜드 '+cat+' 렌탈을 빌리조에서 최저가로 신청하세요.';
       d=C(d).slice(0,158);
-      setLink('canonical',canonical);
       setMeta('property','og:url',canonical);
       setMeta('name','description',d);
       setMeta('property','og:description',d);
@@ -9240,7 +9232,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
            +'브랜드별로 비교하고 카드 제휴할인과 현금 사은품까지 한 번에. 지금 최저가로 신청하세요.';
       hd=C(hd).slice(0,158);
       if(/^\s*빌리조/.test(document.title) && document.title.length<20) document.title='가전렌탈 최저가 비교 | 빌리조(Billy Jo)';
-      setLink('canonical',PRIMARY+'/');
       setMeta('property','og:url',PRIMARY+'/');
       setMeta('name','description',hd);
       setMeta('property','og:description',hd);
@@ -9253,9 +9244,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           "query-input":"required name=search_term_string"}
       });
     }
-    // ── 기타(주문/게시판 등): canonical 자기참조로 홈 지목 버그만 해소 ──
+    // ── 기타(주문/게시판 등): 대표 URL 신호만 보강 ──
     else {
-      setLink('canonical',canonical);
       setMeta('property','og:url',canonical);
     }
   }
