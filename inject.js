@@ -8172,6 +8172,31 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
     // (4) PC 가격박스 .fix_price.hide-767 → .prod_name 다음으로 이동
     reorderFixPriceAfterProdName();
+
+    // (5) 상단 "카드할인가 0원" 칩 제거 — 화면마다 값이 갈리던 걸 통일한다
+    hideZeroCardPriceChip();
+  }
+
+  /* 상단 가격박스의 "카드할인가 0원" 칩을 숨긴다.
+     native prod_view 스크립트가 `$(".org").show(); $(".top_min_price_minus_card").html("0원")` 로
+     dcprice 를 그대로 찍는데, 그 0 은 max(0, 월렌탈료 − 카드최대할인) 의 **음수 잘림**이다
+     (웰스 미미 WP610NWA 17,900 − 20,000 → 0. 같은 제품 21,900 약정은 1,900 으로 정상 게시).
+     같은 제품인데 화면마다 달랐다 — PC 상단만 0원, 목록은 정상가(bj-pz), 모바일 상단은 미노출,
+     광고 랜딩(live·meta)도 정상 렌탈료. PC 상단만 튀는 걸 나머지에 맞춘다.
+     ※ 0 이 아닌 카드할인가(900·2,900·15,400…)는 실제 게시값이므로 그대로 둔다. */
+  function hideZeroCardPriceChip(){
+    ['.top_min_price_minus_card', '.top_min_price_minus_card_m'].forEach(function(sel){
+      var el = document.querySelector(sel);
+      if (!el) return;
+      var box = el.closest ? el.closest('.box') : null;
+      if (!box) return;
+      var n = parseInt(String(el.textContent || '').replace(/[^\d]/g, ''), 10);
+      // 아직 native 스크립트가 값을 안 채웠으면(빈 문자열) 건드리지 않는다 — 다음 tick 에 다시 본다
+      if (!/\d/.test(el.textContent || '')) return;
+      if (n > 0) { box.removeAttribute('data-bj-zero-card'); return; }
+      box.style.setProperty('display', 'none', 'important');
+      box.setAttribute('data-bj-zero-card', '1');
+    });
   }
 
   // lpt entries 캐시 — underlying이 덮어쓴 후 우리 thead/tbody 구조 바뀌어도
