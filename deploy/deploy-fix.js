@@ -21,13 +21,9 @@ if (!ADMIN_USER || !ADMIN_PASS) {
 
   function ensureRequiredSnippets(content) {
     const gtm = `<script>window.BILLYJO_GTM_ID='GTM-W32HD9CG';(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-W32HD9CG');</script>`;
-    const facebookDomainVerification = `<meta name="facebook-domain-verification" content="b92rqd32dcxyj4vka8dyrxnw7s7glc" />`;
     let prefix = '';
     if (!content.includes('GTM-W32HD9CG') && !content.includes('googletagmanager.com/gtm.js')) {
       prefix += gtm;
-    }
-    if (!content.includes('facebook-domain-verification') && !content.includes('b92rqd32dcxyj4vka8dyrxnw7s7glc')) {
-      prefix += facebookDomainVerification;
     }
     return prefix + content;
   }
@@ -55,7 +51,22 @@ if (!ADMIN_USER || !ADMIN_PASS) {
     ta.value = content;
     ta.dispatchEvent(new Event('input', { bubbles: true }));
     ta.dispatchEvent(new Event('change', { bubbles: true }));
-    return { set: ta.value.length, last50: ta.value.substring(ta.value.length - 50) };
+    var webmasterName = document.querySelector('input[name="google_webmaster_name"]');
+    var webmasterContent = document.querySelector('input[name="google_webmaster"]');
+    if (webmasterName && webmasterContent) {
+      webmasterName.value = 'facebook-domain-verification';
+      webmasterContent.value = 'b92rqd32dcxyj4vka8dyrxnw7s7glc';
+      webmasterName.dispatchEvent(new Event('input', { bubbles: true }));
+      webmasterName.dispatchEvent(new Event('change', { bubbles: true }));
+      webmasterContent.dispatchEvent(new Event('input', { bubbles: true }));
+      webmasterContent.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+    return {
+      set: ta.value.length,
+      last50: ta.value.substring(ta.value.length - 50),
+      webmasterName: webmasterName && webmasterName.value,
+      webmasterContent: webmasterContent && webmasterContent.value
+    };
   }, logscript);
   console.log('After setValue:', JSON.stringify(setResult));
 
@@ -82,7 +93,9 @@ if (!ADMIN_USER || !ADMIN_PASS) {
       hasFallback: ta.value.includes('Fallback'),
       has49d: ta.value.includes('49d134'),
       hasGtm: ta.value.includes('GTM-W32HD9CG') || ta.value.includes('googletagmanager.com/gtm.js'),
-      hasFacebookDomainVerification: ta.value.includes('facebook-domain-verification') || ta.value.includes('b92rqd32dcxyj4vka8dyrxnw7s7glc')
+      hasFacebookDomainVerificationInLogscript: ta.value.includes('facebook-domain-verification') || ta.value.includes('b92rqd32dcxyj4vka8dyrxnw7s7glc'),
+      webmasterName: document.querySelector('input[name="google_webmaster_name"]')?.value,
+      webmasterContent: document.querySelector('input[name="google_webmaster"]')?.value
     };
   });
   console.log('Verified:', JSON.stringify(verify, null, 2));
