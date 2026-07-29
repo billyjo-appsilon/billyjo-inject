@@ -19,15 +19,20 @@ if (!ADMIN_USER || !ADMIN_PASS) {
   const browser = await chromium.launch({ headless: true });
   const page = await browser.newPage();
 
-  function ensureGtmSnippet(content) {
-    if (content.includes('GTM-W32HD9CG') || content.includes('googletagmanager.com/gtm.js')) {
-      return content;
-    }
+  function ensureRequiredSnippets(content) {
     const gtm = `<script>window.BILLYJO_GTM_ID='GTM-W32HD9CG';(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-W32HD9CG');</script>`;
-    return gtm + content;
+    const facebookDomainVerification = `<meta name="facebook-domain-verification" content="b92rqd32dcxyj4vka8dyrxnw7s7glc" />`;
+    let prefix = '';
+    if (!content.includes('GTM-W32HD9CG') && !content.includes('googletagmanager.com/gtm.js')) {
+      prefix += gtm;
+    }
+    if (!content.includes('facebook-domain-verification') && !content.includes('b92rqd32dcxyj4vka8dyrxnw7s7glc')) {
+      prefix += facebookDomainVerification;
+    }
+    return prefix + content;
   }
 
-  const logscript = ensureGtmSnippet(fs.readFileSync('current-logscript.html', 'utf8'));
+  const logscript = ensureRequiredSnippets(fs.readFileSync('current-logscript.html', 'utf8'));
   console.log('Local file size:', logscript.length);
 
   // Login
@@ -76,7 +81,8 @@ if (!ADMIN_USER || !ADMIN_PASS) {
       hasBottomBar: ta.value.includes('billyjo-bottom-bar'),
       hasFallback: ta.value.includes('Fallback'),
       has49d: ta.value.includes('49d134'),
-      hasGtm: ta.value.includes('GTM-W32HD9CG') || ta.value.includes('googletagmanager.com/gtm.js')
+      hasGtm: ta.value.includes('GTM-W32HD9CG') || ta.value.includes('googletagmanager.com/gtm.js'),
+      hasFacebookDomainVerification: ta.value.includes('facebook-domain-verification') || ta.value.includes('b92rqd32dcxyj4vka8dyrxnw7s7glc')
     };
   });
   console.log('Verified:', JSON.stringify(verify, null, 2));
