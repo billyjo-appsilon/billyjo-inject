@@ -65,6 +65,8 @@
     reviews: {},
     offerId: null,
     opened: false,
+    pendingProceed: null,
+    pendingOpen: false,
     countdownUntil: null
   };
 
@@ -299,8 +301,10 @@
       };
     });
   }
-  function openModal(){
-    if (state.opened) return;
+  function openModal(proceed){
+    if (proceed) state.pendingProceed = proceed;
+    if (!state.cfg || !state.current) return false;
+    if (state.opened) return true;
     state.opened = true;
     state.offerId = state.offerId || createOfferId();
     injectStyles();
@@ -335,14 +339,50 @@
       var memo = makeMemo();
       box.querySelector('.bj-do-memo').value = memo;
       try { navigator.clipboard.writeText(memo); } catch(_){}
-      box.querySelector('.bj-do-copy').textContent = '설계 내역 복사됨';
+      var next = state.pendingProceed;
+      state.pendingProceed = null;
+      box.querySelector('.bj-do-copy').textContent = next ? '복사됨. 렌탈신청으로 이동합니다' : '설계 내역 복사됨';
+      if (next) {
+        setTimeout(function(){ try { close(); } catch(_){} next(); }, 420);
+        return;
+      }
       setTimeout(function(){ var b = box.querySelector('.bj-do-copy'); if (b) b.textContent = state.cfg.ctaLabel || '설계 내역 복사하고 렌탈 신청 계속하기'; }, 1400);
     };
     refreshModal(box);
     selectedList().concat(allProducts().slice(0, 8)).forEach(function(p){
       loadOneReview(p).then(function(){ if (document.body.contains(box)) refreshModal(box); });
     });
+    return true;
   }
+  window.__bjDirectOfferOpen = function(proceed){
+    if (!state.cfg || !state.current) {
+      if (proceed) state.pendingProceed = proceed;
+      state.pendingOpen = true;
+      setTimeout(function(){
+        if (!state.pendingOpen || (state.cfg && state.current)) return;
+        var next = state.pendingProceed;
+        state.pendingOpen = false;
+        state.pendingProceed = null;
+        if (next) next();
+      }, 15000);
+      return true;
+    }
+    state.pendingOpen = false;
+    return openModal(proceed);
+  };
+  document.addEventListener('click', function(e){
+    var t = e.target;
+    var btn = t && t.closest && t.closest('.bj-btn-rent-gift');
+    if (!btn) return;
+    if (window.__bjDirectOfferOpen(function(){
+      if (typeof window.shoporder === 'function') window.shoporder('rent');
+      else window.location.href = '/html/dh/counsel';
+    })) {
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+    }
+  }, true);
   function activityKey(){ return 'bj_direct_offer_activity_v1'; }
   function loadHistory(){
     try {
@@ -400,6 +440,10 @@
         mountTopBar();
         mountFab();
         scheduleActivity(true);
+        if (state.pendingOpen) {
+          state.pendingOpen = false;
+          openModal(state.pendingProceed);
+        }
         if (state.cfg.directOffer.autoOpen) {
           setTimeout(openModal, ((state.cfg.directOffer.openDelaySeconds || 2) * 1000));
         }
@@ -7101,6 +7145,21 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
        사용자 요청: 상담은 전화 통화로 진행되므로 직관적 phone 아이콘이 적절. */
     var SVG_PHONE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>';
     var SVG_CART = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12L8.1 13h7.45c.75 0 1.41-.41 1.75-1.03L21.7 4H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>';
+    function continueRentOrder(){
+      if (typeof window.shoporder === 'function') window.shoporder('rent');
+      else window.location.href = '/html/dh/counsel';
+    }
+    function openDirectOfferThenRent(e){
+      if (typeof window.__bjDirectOfferOpen === 'function' && window.__bjDirectOfferOpen(continueRentOrder)) {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+        }
+        return true;
+      }
+      return false;
+    }
 
     // 버튼 격상 또는 fallback 생성
     if (bbInner) {
@@ -7108,6 +7167,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (rentBtn) {
         rentBtn.classList.add('bj-btn-rent-gift');
         rentBtn.innerHTML = SVG_GIFT + '렌탈+사은품 신청';
+        if (!rentBtn.getAttribute('data-bj-do-wired')) {
+          rentBtn.setAttribute('data-bj-do-wired', '1');
+          rentBtn.addEventListener('click', openDirectOfferThenRent, true);
+        }
       }
       var rightTop = bbInner.querySelector('.bb-right-top');
       if (rightTop) {
@@ -7160,8 +7223,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         else window.location.href = '/html/dh_order/shop_cart';
       });
       fb.querySelector('.bj-fb-rent').addEventListener('click', function(){
-        if (typeof window.shoporder === 'function') window.shoporder('rent');
-        else window.location.href = '/html/dh/counsel';
+        if (!openDirectOfferThenRent()) continueRentOrder();
       });
       fb.querySelector('.bj-fb-consult').addEventListener('click', openConsultModal);
     }
