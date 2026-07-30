@@ -641,7 +641,11 @@
     ".cs__benefit .list__param01{color:#0838F8 !important}",
     ".cs__benefit .list__param02{color:#475569 !important}",
     ".cs__benefit .list__param03{color:#94A3B8 !important}",
-    ".cs__benefit .list__param03 span{color:#0838F8 !important;font-weight:700}"
+    ".cs__benefit .list__param03 span{color:#0838F8 !important;font-weight:700}",
+    /* 상세페이지 섹션 제목(.v_tit '상품정보' 등) — 18px/400 회색(#4B4B4B)이라 같은 화면의
+       AI 카드 섹션 제목(#2A2A2A/700)과 무게가 달라 떠 보였다. 카드 쪽에 맞춰 진한 톤+굵게.
+       크기는 원본 18px 유지 — 레이아웃을 건드리지 않는다. (2026-07-30) */
+    ".v_tit{color:#1A1F36 !important;font-weight:700 !important}"
   ].join("");
   document.head.appendChild(bjCsTheme);
 
