@@ -628,10 +628,14 @@
   var bjCsTheme = document.createElement("style");
   bjCsTheme.id = "bj-cs-theme";
   bjCsTheme.textContent = [
-    /* 상단 3블록 — 1번은 브랜드 블루, 2·3번은 같은 계열 딥네이비(원본의 '1번만 강조' 위계 유지) */
+    /* 상단 3블록 — 1번은 브랜드 블루 원색, 2·3번은 같은 파랑을 한 단계 밝게(#4A6BFA).
+       처음엔 딥네이비(#1A2B63)로 뒀는데 "테마와 안 맞는다"는 피드백(2026-07-30) — 어두운
+       남색은 브랜드 파랑 계열로 안 읽힌다. 원색 대비 밝은 톤이면 '1번 강조' 위계는 유지되고
+       파랑 계열이라는 건 분명해진다. #4A6BFA 는 추천 카드 hover 보더에 이미 쓰는 값이다. */
     ".new-cs .cs__top > li:nth-child(1){background-color:#0838F8 !important}",
-    ".new-cs .cs__top > li:nth-child(2),.new-cs .cs__top > li:nth-child(3){background-color:#1A2B63 !important}",
-    ".new-cs .cs__top .top__param01{color:rgba(255,255,255,.72) !important}",
+    ".new-cs .cs__top > li:nth-child(2),.new-cs .cs__top > li:nth-child(3){background-color:#4A6BFA !important}",
+    /* 밝아진 배경에서 라벨이 묻히지 않게 흰색 투명도를 72% → 88% 로 올린다 */
+    ".new-cs .cs__top .top__param01{color:rgba(255,255,255,.88) !important}",
     ".new-cs .cs__top .top__param02,.new-cs .cs__top .top__param03{color:#fff !important}",
     /* BENEFIT(주문혜택) 카드 — 제목은 아이콘과 같은 브랜드 블루, 설명·번호는 중성 톤 하나로 */
     ".cs__benefit .list__param01{color:#0838F8 !important}",
