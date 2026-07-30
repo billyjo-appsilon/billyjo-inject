@@ -6943,7 +6943,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     setTimeout(function(){
       assignConsultant().then(function(data){
         if (!modal.parentNode) return;
-        renderImmediateCall(modal, data);
+        try {
+          renderImmediateCall(modal, data);
+        } catch (renderErr) {
+          try { console.error('[bj-consult] immediate call render failed:', renderErr); } catch(_){}
+          throw renderErr;
+        }
       }).catch(function(err){
         if (!modal.parentNode) return;
         renderAssignError(modal, err);
