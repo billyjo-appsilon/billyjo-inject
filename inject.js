@@ -4996,7 +4996,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     st.textContent =
       '.new-qb .quick .link .bj-ai-quote-quick{position:relative}' +
       '.new-qb .quick .link .bj-ai-quote-quick a{background:#fff!important;border:2.5px solid #0838f8!important;color:#0838f8!important}' +
-      '.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:34px!important;height:34px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;object-fit:contain!important;margin:0!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick svg.bj-ai-quote-icon{width:31px!important;height:31px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;color:#0838f8!important;margin:0!important;overflow:visible!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick svg.bj-ai-quote-icon *{stroke:#0838f8!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-label{display:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-badge{display:none!important;position:absolute!important;right:-6px!important;top:-6px!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;background:#0838f8!important;color:#fff!important;border:2px solid #fff!important;align-items:center!important;justify-content:center!important;font:900 10px/1 Pretendard,Arial,sans-serif!important;box-shadow:0 2px 7px rgba(8,56,248,.28)!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick.has-count .bj-ai-quote-badge{display:flex!important}' +
@@ -5032,7 +5033,17 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     a.setAttribute('title', 'AI 견적함');
     a.setAttribute('aria-label', 'AI 견적함으로 이동');
     a.innerHTML =
-      '<img class="bj-ai-quote-icon" src="https://media.lordicon.com/icons/wired/outline/147-trolley-plus.gif" alt="" width="34" height="34" loading="lazy" decoding="async">' +
+      '<svg class="bj-ai-quote-icon" viewBox="0 0 430 430" fill="none" aria-hidden="true">' +
+        '<g stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">' +
+          '<path stroke-width="18" d="M118.337 278.361s-8.476 1.088-12.28 5.805c-5.957 7.385-5.831 19.632 15.055 19.632H296.4"/>' +
+          '<path stroke-width="18" d="M134.062 303.798c15.316 0 27.75 12.435 27.75 27.75 0 15.316-12.434 27.75-27.75 27.75-15.315 0-27.75-12.434-27.75-27.75 0-15.315 12.435-27.75 27.75-27.75zm164.188 0c15.315 0 27.75 12.435 27.75 27.75 0 15.316-12.435 27.75-27.75 27.75s-27.75-12.434-27.75-27.75c0-15.315 12.435-27.75 27.75-27.75z"/>' +
+          '<path stroke-width="4.8" transform="matrix(3.7 0 0 3.7 205.75 214.998)" d="M-47-38h6.875c3.794 0 7.618 4.419 8.534 9.862L-24 17m-7.75-45h77.875c.345 0 .516.377.382.84l-3.028 10.446L38.409.77c-1.536 5.301-7.236 10.112-12.72 10.737l-39.378 4.486c-5.484.625-10.68 1.484-11.596 1.917 0 0-.631-.491-1.659.784"/>' +
+          '<path stroke-width="7.6" transform="rotate(90 4.769 185.893) scale(2.22)" d="M3.625 3.125v-16.5"/>' +
+          '<path stroke-width="7.6" transform="rotate(90 25.166 206.29) scale(2.22)" d="M3.625 3.125v-16.5"/>' +
+          '<path stroke-width="7.6" transform="matrix(2.22 0 0 2.22 214.39 220.947)" d="M3.625 3.125v-16.5"/>' +
+          '<path stroke-width="7.6" transform="matrix(2.22 0 0 2.22 214.39 180.155)" d="M3.625 3.125v-16.5"/>' +
+        '</g>' +
+      '</svg>' +
       '<span class="bj-ai-quote-label">AI 견적함</span>' +
       '<span class="bj-ai-quote-badge" aria-hidden="true"></span>';
     p.appendChild(a);
