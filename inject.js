@@ -617,6 +617,30 @@
   style.textContent = css;
   document.head.appendChild(style);
 
+  /* === 고객센터 zone(.new-cs) 색상 테마 통일 (2026-07-30) ===
+     홈은 다크 푸터로 대체돼 이 영역이 숨지만(.new-cs{display:none}), 상품목록·상세·게시판에는
+     원본이 그대로 노출된다. 그쪽 색이 테마와 어긋나 통일감이 없었다 — 실측:
+       상단 3블록 : 1번 #284B90 남색 / 2·3번 #3E3E3E 중성 회색
+       BENEFIT 카드: 제목이 #284B90(무상 A/S·고급 사은품 증정·배송관리)과 #545454(초기비용 0원)로 갈림
+       혜택 번호   : #6B6B6B / #333 혼재
+     브랜드 블루(#0838F8)와 그 계열 딥네이비로 정리한다. 아이콘·BENEFIT 제목이 이미 #0838F8 이라
+     제목을 같은 값으로 맞추면 카드 안에서 색이 하나로 읽힌다. */
+  var bjCsTheme = document.createElement("style");
+  bjCsTheme.id = "bj-cs-theme";
+  bjCsTheme.textContent = [
+    /* 상단 3블록 — 1번은 브랜드 블루, 2·3번은 같은 계열 딥네이비(원본의 '1번만 강조' 위계 유지) */
+    ".new-cs .cs__top > li:nth-child(1){background-color:#0838F8 !important}",
+    ".new-cs .cs__top > li:nth-child(2),.new-cs .cs__top > li:nth-child(3){background-color:#1A2B63 !important}",
+    ".new-cs .cs__top .top__param01{color:rgba(255,255,255,.72) !important}",
+    ".new-cs .cs__top .top__param02,.new-cs .cs__top .top__param03{color:#fff !important}",
+    /* BENEFIT(주문혜택) 카드 — 제목은 아이콘과 같은 브랜드 블루, 설명·번호는 중성 톤 하나로 */
+    ".cs__benefit .list__param01{color:#0838F8 !important}",
+    ".cs__benefit .list__param02{color:#475569 !important}",
+    ".cs__benefit .list__param03{color:#94A3B8 !important}",
+    ".cs__benefit .list__param03 span{color:#0838F8 !important;font-weight:700}"
+  ].join("");
+  document.head.appendChild(bjCsTheme);
+
   // === 메인 카테고리 섹션 제목 텍스트 숨김 (시안 반영, 2026-07-02) ===
   //   아이콘은 유지, 제목만: PC ".new-mc__tit"(고객님들이 많이 찾는 주요 카테고리) / 모바일 ".m_tit"(인기 카테고리)
   (function hideCategoryTitle() {
