@@ -5000,8 +5000,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     st.textContent =
       '.new-qb .quick .link .bj-ai-quote-quick{position:relative}' +
       '.new-qb .quick .link .bj-ai-quote-quick a{background:#fff!important;border:2.5px solid #0838f8!important;color:#0838f8!important}' +
-      '.new-qb .quick .link .bj-ai-quote-quick svg.bj-ai-quote-icon{width:39px!important;height:39px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;color:#0838f8!important;margin:0!important;overflow:visible!important}' +
-      '.new-qb .quick .link .bj-ai-quote-quick svg.bj-ai-quote-icon *{stroke:#0838f8!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:43px!important;height:43px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;object-fit:contain!important;margin:0!important;pointer-events:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-label{display:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-badge{display:none!important;position:absolute!important;right:-6px!important;top:-6px!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;background:#0838f8!important;color:#fff!important;border:2px solid #fff!important;align-items:center!important;justify-content:center!important;font:900 10px/1 Pretendard,Arial,sans-serif!important;box-shadow:0 2px 7px rgba(8,56,248,.28)!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick.has-count .bj-ai-quote-badge{display:flex!important}' +
@@ -5028,6 +5027,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       badge.textContent = '';
     }
   }
+  function quoteIconUrl(){
+    var scripts = document.getElementsByTagName('script');
+    for (var i = scripts.length - 1; i >= 0; i--) {
+      var src = scripts[i].src || '';
+      if (src.indexOf('billyjo-inject@') !== -1 && src.indexOf('/inject.js') !== -1) {
+        return src.replace(/\/inject\.js(?:\?.*)?$/, '/icons/trolley-plus-transparent.gif');
+      }
+    }
+    return 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/icons/trolley-plus-transparent.gif';
+  }
   function mountQuoteQuick(link){
     if (!link || link.querySelector('.bj-ai-quote-quick')) return;
     var p = document.createElement('p');
@@ -5036,18 +5045,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     a.href = '/html/dh_order/shop_cart';
     a.setAttribute('title', 'AI 견적함');
     a.setAttribute('aria-label', 'AI 견적함으로 이동');
+    var iconUrl = quoteIconUrl();
     a.innerHTML =
-      '<svg class="bj-ai-quote-icon" viewBox="18 38 285 270" fill="none" aria-hidden="true">' +
-        '<g stroke="currentColor" stroke-width="23" stroke-linecap="round" stroke-linejoin="round">' +
-          '<path d="M34 52h35c20 0 30 10 35 31l12 122"/>' +
-          '<path d="M105 92h174l-30 104c-4 14-15 22-31 23l-130 8"/>' +
-          '<path d="M94 224h145"/>' +
-          '<path d="M164 120v70"/>' +
-          '<path d="M129 155h70"/>' +
-          '<circle cx="94" cy="265" r="23"/>' +
-          '<circle cx="230" cy="265" r="23"/>' +
-        '</g>' +
-      '</svg>' +
+      '<img class="bj-ai-quote-icon" src="' + iconUrl + '" alt="" width="43" height="43" loading="lazy" decoding="async">' +
       '<span class="bj-ai-quote-label">AI 견적함</span>' +
       '<span class="bj-ai-quote-badge" aria-hidden="true"></span>';
     p.appendChild(a);
