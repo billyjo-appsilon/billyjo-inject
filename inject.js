@@ -383,7 +383,7 @@
     box.querySelector('.bj-do-memo').value = makeMemo();
     var copyBtn = box.querySelector('.bj-do-copy');
     if (copyBtn) {
-      copyBtn.textContent = 'AI 예상 견적 신청하기';
+      copyBtn.textContent = '담고 AI 견적받기';
     }
     Array.prototype.forEach.call(box.querySelectorAll('.bj-do-card'), function(card){
       card.onclick = function(){
@@ -426,7 +426,7 @@
           '<div class="bj-do-side">' +
             '<div id="bj-do-total"><div class="bj-do-total-k">AI 예상 지원금 합계</div><div class="bj-do-total-v">0원</div><div class="bj-do-total-sub">선택한 제품 구성 기준으로 산출한 예상 혜택입니다. 실제 지급액은 상담 후 확정됩니다.</div></div>' +
             '<textarea class="bj-do-memo" readonly></textarea>' +
-            '<button type="button" class="bj-do-copy">AI 예상 견적 신청하기</button>' +
+            '<button type="button" class="bj-do-copy">담고 AI 견적받기</button>' +
             '<div class="bj-do-note">선택 상품은 장바구니에 담긴 뒤 예상 견적/신청 단계로 이동합니다.</div>' +
           '</div>' +
         '</div>' +
@@ -4965,10 +4965,70 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
  *     (아이콘은 CSS content:url 교체, 가로채기 제외는 data-bj-text-inquiry)
  * ========================================================================== */
 (function billyjoQuickButtonRoles(){
+  function ensureStyle(){
+    if (document.getElementById('bj-ai-quote-quick-style')) return;
+    var st = document.createElement('style');
+    st.id = 'bj-ai-quote-quick-style';
+    st.textContent =
+      '.new-qb .quick .link .bj-ai-quote-quick{position:relative}' +
+      '.new-qb .quick .link .bj-ai-quote-quick a{background:#fff!important;border:2.5px solid #0838f8!important;color:#0838f8!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick svg.bj-ai-quote-icon{width:29px!important;height:29px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;color:#0838f8!important;display:block!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick .bj-lot{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;color:#0838f8!important;margin:0!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick .bj-lot svg{width:29px!important;height:29px!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick .bj-lot + svg.bj-ai-quote-icon{display:none!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-label{display:none!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-badge{display:none!important;position:absolute!important;right:-6px!important;top:-6px!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;background:#0838f8!important;color:#fff!important;border:2px solid #fff!important;align-items:center!important;justify-content:center!important;font:900 10px/1 Pretendard,Arial,sans-serif!important;box-shadow:0 2px 7px rgba(8,56,248,.28)!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick.has-count .bj-ai-quote-badge{display:flex!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick a:after{content:"AI 견적함";position:absolute;right:62px;top:50%;transform:translateY(-50%);background:#172033;color:#fff;border-radius:8px;padding:7px 9px;font:800 12px/1 Pretendard,Arial,sans-serif;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;box-shadow:0 8px 20px rgba(0,0,0,.18)}' +
+      '.new-qb .quick .link .bj-ai-quote-quick a:hover:after{opacity:1;transform:translateY(-50%) translateX(-3px)}' +
+      '@media(max-width:767px){.new-qb .quick .link .bj-ai-quote-quick a:after{display:none!important}}';
+    (document.head || document.documentElement).appendChild(st);
+  }
+  function cartCount(){
+    var el = document.querySelector('.cart__count');
+    var n = el ? parseInt((el.textContent || '').replace(/[^0-9]/g, ''), 10) : 0;
+    return isNaN(n) ? 0 : n;
+  }
+  function syncQuoteBadge(btn){
+    if (!btn) return;
+    var n = cartCount();
+    var badge = btn.querySelector('.bj-ai-quote-badge');
+    if (!badge) return;
+    if (n > 0) {
+      btn.classList.add('has-count');
+      badge.textContent = n > 99 ? '99+' : String(n);
+    } else {
+      btn.classList.remove('has-count');
+      badge.textContent = '';
+    }
+  }
+  function mountQuoteQuick(link){
+    if (!link || link.querySelector('.bj-ai-quote-quick')) return;
+    var p = document.createElement('p');
+    p.className = 'org clearfix bj-ai-quote-quick';
+    var a = document.createElement('a');
+    a.href = '/html/dh_order/shop_cart';
+    a.setAttribute('title', 'AI 견적함');
+    a.setAttribute('aria-label', 'AI 견적함으로 이동');
+    a.innerHTML =
+      '<svg class="ico bj-ai-quote-icon" data-bj-lot-name="sym-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+        '<path d="M9 4h6l1 2h2a2 2 0 0 1 2 2v10.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2l1-2Z"></path>' +
+        '<path d="M9 4h6v4H9z"></path>' +
+        '<path d="M8 12h8"></path><path d="M8 16h5"></path>' +
+        '<path d="M17.5 10.5l.45.95 1.05.15-.75.74.18 1.04-.93-.49-.93.49.18-1.04-.75-.74 1.05-.15.45-.95Z"></path>' +
+      '</svg>' +
+      '<span class="bj-ai-quote-label">AI 견적함</span>' +
+      '<span class="bj-ai-quote-badge" aria-hidden="true"></span>';
+    p.appendChild(a);
+    link.insertBefore(p, link.firstChild);
+    syncQuoteBadge(p);
+  }
   function apply(){
+    ensureStyle();
     /* PC용 전화 상담 버튼 — native 수화기(q_call_red)는 show-767(모바일 전용)이라
        PC에 전화 버튼이 없음. .org 원형 스타일 재사용, 문의하기 버튼 위에 삽입. */
     var link = document.querySelector('.new-qb .quick .link');
+    mountQuoteQuick(link);
     if (link && !link.querySelector('.bj-pc-phone')) {
       var p = document.createElement('p');
       p.className = 'org clearfix hide-767 bj-pc-phone';
@@ -5000,6 +5060,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         if (!img.getAttribute('alt')) img.setAttribute('alt', '문자 문의');
       }
     });
+    syncQuoteBadge(document.querySelector('.bj-ai-quote-quick'));
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
   else apply();
