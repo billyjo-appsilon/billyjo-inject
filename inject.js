@@ -274,6 +274,87 @@
     lines.push('※ 실제 지급액은 본사 조건 및 최종 승인 후 확정');
     return lines.join('\n');
   }
+  function readInput(form, name){
+    var el = form && form.querySelector('[name="' + name + '"]');
+    return el ? (el.value || el.getAttribute('value') || '') : '';
+  }
+  function pickMonthBox(doc, product){
+    var boxes = Array.prototype.slice.call(doc.querySelectorAll('.month_box.layer_price'));
+    if (!boxes.length) return null;
+    var term = product && product.term ? String(product.term).replace(/\s+/g, '') : '';
+    if (term) {
+      for (var i = 0; i < boxes.length; i++) {
+        if (String(boxes[i].getAttribute('data-month') || '').replace(/\s+/g, '') === term) return boxes[i];
+      }
+    }
+    return boxes[0];
+  }
+  function buildCartPayloadFromDoc(doc, product){
+    var form = doc.querySelector('form[name="order"], #order');
+    if (!form) return null;
+    var box = pickMonthBox(doc, product);
+    var payload = {
+      mode: 'cart',
+      public_model_no: readInput(form, 'public_model_no'),
+      prod_model_no: readInput(form, 'prod_model_no'),
+      sup_code: box ? (box.getAttribute('data-supcode') || '') : readInput(form, 'sup_code'),
+      sup_name: box ? (box.getAttribute('data-supname') || '') : readInput(form, 'sup_name'),
+      month: box ? (box.getAttribute('data-month') || '') : readInput(form, 'month'),
+      month_key: box ? (box.getAttribute('data-month_key') || '') : readInput(form, 'month_key'),
+      amt: '1',
+      price: box ? (box.getAttribute('data-price') || '') : readInput(form, 'price'),
+      dcprice: box ? (box.getAttribute('data-dcprice') || '0') : (readInput(form, 'dcprice') || '0'),
+      rebate: box ? (box.getAttribute('data-rebate') || '0') : (readInput(form, 'rebate') || '0'),
+      opt_name: readInput(form, 'opt_name'),
+      prod_name: readInput(form, 'prod_name'),
+      cate_no: readInput(form, 'cate_no')
+    };
+    if (!payload.public_model_no || !payload.prod_name || !payload.sup_code || !payload.month || !payload.price) return null;
+    return payload;
+  }
+  function postCartPayload(payload){
+    var body = new URLSearchParams();
+    Object.keys(payload || {}).forEach(function(k){ body.append(k, payload[k] == null ? '' : payload[k]); });
+    return fetch('/html/dh_order/shop_cart', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: body
+    }).then(function(r){ if (!r.ok) throw new Error('cart HTTP ' + r.status); return true; });
+  }
+  function addProductToCart(product){
+    if (!product || !product.prodNo) return Promise.resolve(false);
+    var currentNo = getProdNo();
+    if (currentNo && String(product.prodNo) === String(currentNo)) {
+      var here = buildCartPayloadFromDoc(document, product);
+      if (!here) return Promise.resolve(false);
+      return postCartPayload(here);
+    }
+    var url = product.detailUrl || STORE_DETAIL.replace('{pid}', product.prodNo);
+    try {
+      var u = new URL(url, location.href);
+      url = location.origin + u.pathname + u.search;
+    } catch(_) {}
+    return fetch(url, { credentials: 'include' })
+      .then(function(r){ if (!r.ok) throw new Error('detail HTTP ' + r.status); return r.text(); })
+      .then(function(html){
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var payload = buildCartPayloadFromDoc(doc, product);
+        if (!payload) throw new Error('missing order payload');
+        return postCartPayload(payload);
+      });
+  }
+  function addSelectedToCart(){
+    var seen = {};
+    var list = selectedList().filter(function(p){
+      if (!p || !p.prodNo || seen[p.prodNo]) return false;
+      seen[p.prodNo] = true;
+      return true;
+    });
+    return list.reduce(function(chain, p){
+      return chain.then(function(){ return addProductToCart(p); });
+    }, Promise.resolve(true));
+  }
   function refreshModal(box){
     var cats = visibleCategories();
     var catHtml = '<button type="button" class="bj-do-chip on">현재 상품 포함</button>' + cats.map(function(c){ return '<button type="button" class="bj-do-chip">' + esc(c.category) + '</button>'; }).join('');
@@ -285,6 +366,12 @@
     box.querySelector('.bj-do-products').innerHTML = cards;
     box.querySelector('.bj-do-total-v').textContent = won(calcTotal());
     box.querySelector('.bj-do-memo').value = makeMemo();
+    var copyBtn = box.querySelector('.bj-do-copy');
+    if (copyBtn) {
+      copyBtn.textContent = selectedList().length > 1
+        ? '선택 상품 장바구니 담고 렌탈 신청하기'
+        : (state.cfg.ctaLabel || '설계 내역 복사하고 렌탈 신청 계속하기');
+    }
     Array.prototype.forEach.call(box.querySelectorAll('.bj-do-card'), function(card){
       card.onclick = function(){
         var model = card.getAttribute('data-model');
@@ -338,9 +425,25 @@
     box.querySelector('.bj-do-copy').onclick = function(){
       var memo = makeMemo();
       box.querySelector('.bj-do-memo').value = memo;
-      try { navigator.clipboard.writeText(memo); } catch(_){}
+      try {
+        var clip = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(memo) : null;
+        if (clip && clip.catch) clip.catch(function(){});
+      } catch(_){}
       var next = state.pendingProceed;
       state.pendingProceed = null;
+      if (selectedList().length > 1) {
+        var btn = box.querySelector('.bj-do-copy');
+        btn.textContent = '선택 상품을 장바구니에 담는 중';
+        btn.disabled = true;
+        addSelectedToCart().then(function(){
+          btn.textContent = '장바구니로 이동합니다';
+          setTimeout(function(){ location.href = '/html/dh_order/shop_cart'; }, 320);
+        }).catch(function(){
+          btn.disabled = false;
+          btn.textContent = '장바구니 담기 실패. 다시 시도';
+        });
+        return;
+      }
       box.querySelector('.bj-do-copy').textContent = next ? '복사됨. 렌탈신청으로 이동합니다' : '설계 내역 복사됨';
       if (next) {
         setTimeout(function(){ try { close(); } catch(_){} next(); }, 420);
