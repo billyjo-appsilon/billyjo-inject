@@ -4996,10 +4996,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     st.textContent =
       '.new-qb .quick .link .bj-ai-quote-quick{position:relative}' +
       '.new-qb .quick .link .bj-ai-quote-quick a{background:#fff!important;border:2.5px solid #0838f8!important;color:#0838f8!important}' +
-      '.new-qb .quick .link .bj-ai-quote-quick svg.bj-ai-quote-icon{width:29px!important;height:29px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;color:#0838f8!important;display:block!important}' +
-      '.new-qb .quick .link .bj-ai-quote-quick .bj-lot{position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;color:#0838f8!important;margin:0!important}' +
-      '.new-qb .quick .link .bj-ai-quote-quick .bj-lot svg{width:29px!important;height:29px!important}' +
-      '.new-qb .quick .link .bj-ai-quote-quick .bj-lot + svg.bj-ai-quote-icon{display:none!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:34px!important;height:34px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;object-fit:contain!important;margin:0!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-label{display:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-badge{display:none!important;position:absolute!important;right:-6px!important;top:-6px!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;background:#0838f8!important;color:#fff!important;border:2px solid #fff!important;align-items:center!important;justify-content:center!important;font:900 10px/1 Pretendard,Arial,sans-serif!important;box-shadow:0 2px 7px rgba(8,56,248,.28)!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick.has-count .bj-ai-quote-badge{display:flex!important}' +
@@ -5035,12 +5032,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     a.setAttribute('title', 'AI 견적함');
     a.setAttribute('aria-label', 'AI 견적함으로 이동');
     a.innerHTML =
-      '<svg class="ico bj-ai-quote-icon" data-bj-lot-name="sym-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
-        '<path d="M9 4h6l1 2h2a2 2 0 0 1 2 2v10.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2l1-2Z"></path>' +
-        '<path d="M9 4h6v4H9z"></path>' +
-        '<path d="M8 12h8"></path><path d="M8 16h5"></path>' +
-        '<path d="M17.5 10.5l.45.95 1.05.15-.75.74.18 1.04-.93-.49-.93.49.18-1.04-.75-.74 1.05-.15.45-.95Z"></path>' +
-      '</svg>' +
+      '<img class="bj-ai-quote-icon" src="https://media.lordicon.com/icons/wired/outline/147-trolley-plus.gif" alt="" width="34" height="34" loading="lazy" decoding="async">' +
       '<span class="bj-ai-quote-label">AI 견적함</span>' +
       '<span class="bj-ai-quote-badge" aria-hidden="true"></span>';
     p.appendChild(a);
