@@ -645,7 +645,15 @@
     /* 상세페이지 섹션 제목(.v_tit '상품정보' 등) — 18px/400 회색(#4B4B4B)이라 같은 화면의
        AI 카드 섹션 제목(#2A2A2A/700)과 무게가 달라 떠 보였다. 카드 쪽에 맞춰 진한 톤+굵게.
        크기는 원본 18px 유지 — 레이아웃을 건드리지 않는다. (2026-07-30) */
-    ".v_tit{color:#1A1F36 !important;font-weight:700 !important}"
+    ".v_tit{color:#1A1F36 !important;font-weight:700 !important}",
+    /* 안내 박스(.page_desc, 장바구니 등) 배경 — 중성 회색(#F6F6F6)이라 파랑 톤 카드(#EEF1F8)와
+       따로 놀았다. 카드 쪽 값으로 통일한다(카드는 그대로 두고 안내 박스를 맞춘다). (2026-07-30) */
+    ".page_desc{background-color:#EEF1F8 !important}",
+    /* BENEFIT 카드 높이 — 원본이 height:170px 로 고정돼 있고 위아래 패딩도 37px 이라 세로로 길었다
+       (내용은 제목 18 + 설명 45 정도라 절반이 빈 공간). 높이 고정을 풀어 내용에 맞추고,
+       위아래 여백을 좌우 여백(마진 10px)과 같은 리듬으로 정리한다. 가로 패딩은 우측
+       아이콘(72px 배경 이미지) 자리라 그대로 둔다. (2026-07-30) */
+    ".cs__benefit .item{height:auto !important;margin:10px !important;padding:20px 100px 20px 27px !important}"
   ].join("");
   document.head.appendChild(bjCsTheme);
 
@@ -3897,7 +3905,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjSup.className = 'bj-fsupport';
       bjSup.innerHTML = '<div class="bj-fs-ic"><svg class="ico"><use href="#i-headphones"></use></svg></div>' +
         '<div class="bj-fs-lb">고객 상담 운영 · 평일 09:00~18:00 (주말·공휴일 휴무)</div>' +
-        '<div class="bj-fs-tel">1600-0000</div>' +
+        // 대표번호 — 사이트 상단 고객센터 블록(070-4918-7683)과 같은 번호로 (2026-07-30)
+        '<div class="bj-fs-tel"><a href="tel:07049187683" style="color:inherit;text-decoration:none">070-4918-7683</a></div>' +
         '<div class="bj-fs-hr">궁금한 점은 언제든 편하게 문의해 주세요</div>';
       bjFaqSec.insertBefore(bjSup, bjFaqSec.firstChild);
       var bjFnav = document.createElement('div');
@@ -6909,7 +6918,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function bjpwEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   function openConsultModal(){
-    if (bjPersonaNeedsGate()){ bjPersonaGate(function(){ openConsultModal(); }); return; }
     var prev = document.getElementById('bj-consult-modal');
     if (prev) prev.remove();
     var modal = document.createElement('div');
@@ -6935,7 +6943,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     setTimeout(function(){
       assignConsultant().then(function(data){
         if (!modal.parentNode) return;
-        renderAssignedConsultant(modal, data);
+        renderImmediateCall(modal, data);
       }).catch(function(err){
         if (!modal.parentNode) return;
         renderAssignError(modal, err);
