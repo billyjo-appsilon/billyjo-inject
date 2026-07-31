@@ -3572,8 +3572,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
 // === 메인 페이지: 주요 카테고리 ↔ 이달의 추천제품 사이 v5 컨텐츠 주입 ===
 (function injectMainPageV5() {
-  var V5_URL = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@56422cc/preview-detail-page-v5.html';
-  var CDN_BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@56422cc';
+  var V5_URL = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@4c8fe10/preview-detail-page-v5.html';
+  var CDN_BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@4c8fe10';
   var INJECTED_ID = 'bj-v5-injected';
 
   function findTargetHeading() {
@@ -3930,6 +3930,28 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     }
   }
 
+  /* 후기 카드 '예상 지원금' 배지 최신화 (2026-07-31)
+     배지 값을 HTML 에 박아두면 매달 수수료가 바뀔 때 옛 금액이 그대로 남는다 — 고객 노출
+     금액이라 그러면 안 된다. 정책 수집 잡이 발행하는 review-gift.json(수수료×0.8, 10만원
+     단위)을 읽어 data-model 별로 덮어쓴다. 못 읽으면 HTML 의 기존 값을 그대로 둔다. */
+  var GIFT_URL = 'https://raw.githubusercontent.com/billyjo-appsilon/billyjo-inject/main/data/review-gift.json';
+  function refreshGiftBadges(root) {
+    var badges = (root || document).querySelectorAll('.rv-gift[data-model]');
+    if (!badges.length) return;
+    fetch(GIFT_URL, { cache: 'no-cache' })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(j) {
+        var tiers = j && j.tiers;
+        if (!tiers) return;
+        Array.prototype.forEach.call(badges, function(b) {
+          var t = tiers[b.getAttribute('data-model')];
+          if (t) b.textContent = '예상 지원금 ' + t + '만원 이상';
+          else b.style.display = 'none';   // 이번 달 정책이 없으면 금액을 지어내지 않는다
+        });
+      })
+      .catch(function() { /* 기존 값 유지 */ });
+  }
+
   function injectContent(html) {
     if (isInjected()) return;
     var target = findTargetHeading();
@@ -3973,6 +3995,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       wrapZones(pageEl);
       reorderHome(pageEl);
     } catch (e) { console.error('[bj-v5] inject failed:', e); }
+    refreshGiftBadges(document.getElementById(INJECTED_ID));
   }
 
   function start() {
