@@ -675,6 +675,39 @@
     padding: 7px 14px; border-radius: 999px;
     align-self: center;
   }
+  /* 사진 있는 실제 후기 (2026-07-31) — 사진을 위에 두고 본문은 아래로.
+     사진은 사람·장소가 특정되지 않는 제품 중심 컷만 선별해 넣는다. */
+  .review-item .rv-photo {
+    width: 100%; height: 150px; object-fit: cover;
+    border-radius: 14px; background: #EEF1F8;
+    margin-bottom: 14px; display: block;
+  }
+  .review-item .rv-body {
+    display: flex; flex-direction: column; align-items: center;
+    flex: 1; width: 100%;
+  }
+  /* 지원금은 '제품 기준 예상치'다 — 후기 작성자가 받은 금액이 아니라는 게 드러나게 라벨을 붙인다 */
+  .review-item .rv-gift {
+    display: inline-flex; align-items: center; gap: 5px;
+    background: linear-gradient(135deg, #0838F8, #4A6BFA);
+    color: #fff; font-size: 12.5px; font-weight: 800;
+    padding: 6px 13px; border-radius: 999px;
+    margin-bottom: 10px; letter-spacing: -0.2px;
+  }
+  .review-item .rv-gift::before { content: "💰"; font-size: 12px; }
+  .rv-multi {
+    margin: 22px auto 0; max-width: 720px;
+    background: #EEF1F8; border: 1px solid #DCE3F5;
+    border-radius: 16px; padding: 18px 22px; text-align: center;
+  }
+  .rv-multi-t { font-size: 17px; font-weight: 800; color: #1A1F36; letter-spacing: -0.3px; }
+  .rv-multi-t strong { color: var(--primary); }
+  .rv-multi-d { margin-top: 7px; font-size: 13.5px; line-height: 1.6; color: var(--text-sub); word-break: keep-all; }
+  @media (max-width: 767px) {
+    .rv-multi { margin: 16px 16px 0; padding: 15px 16px; }
+    .rv-multi-t { font-size: 15px; }
+    .rv-multi-d { font-size: 12.5px; }
+  }
 
   /* ============ PENALTY (#4 — 최하단) ============ */
   .penalty-wrap {
@@ -1523,129 +1556,216 @@
     <div class="review-section">
       <div class="review-track-wrap">
         <div class="review-track">
-          <!-- Set 1 (원본 10) -->
+          <!-- Set 1 — 실제 수집 후기(사진 포함). 사람·장소가 특정되지 않는 제품 중심 사진만 선별. -->
           <div class="review-item">
-            <span class="cat-badge">정수기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"사은품 패키지 풍성하게 챙겨주셔서 만족해요. 본사가 그대로 들어와 안심."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>이*진님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260727_141/1785079819345CyaGG_JPEG/IMG_3981.jpeg" alt="냉온정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">냉온정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"아주 좋아요. 뜨거운 물로 요리하거나 차 마시기에도 좋아요"</div>
+              <span class="rv-gift">예상 지원금 30만원 이상</span>
+              <span class="author">CHP-7220N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">공기청정기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"이사 가서 주소 변경 무료로 해주셨어요. 신혼 때 단기 렌탈로 시작한 게 정답."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>김*수님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_234/1785053059644eE63L_JPEG/IMG_8147.jpeg" alt="얼음정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">얼음정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"삶의질 수직상승.. 진짜 해피합니다"</div>
+              <span class="rv-gift">예상 지원금 40만원 이상</span>
+              <span class="author">CHPI-7430N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">비데</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"비교해보고 가입한 거라 후회 없어요. 사은품도 본사보다 더 챙겨주시고."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>박*영님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_190/1785042376459W6vbd_JPEG/tmp_8264066653958240853.jpg" alt="냉온정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">냉온정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"온도와 물용량을 여러 단계로 설정할 수 있어 좋아요 물이 잘 튀지않게 설계된 점도 만족합니다 디자인도 깔끔해…"</div>
+              <span class="rv-gift">예상 지원금 30만원 이상</span>
+              <span class="author">CHP-7220N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">안마의자</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"위약금 공식을 가입 전에 다 알려주셔서 결정이 쉬웠어요. 정직한 게 좋아요."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>정*아님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_122/1785040273272RDBwV_JPEG/image.jpg" alt="얼음정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">얼음정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"없을 땐 몰랐는데 이젠 얼음정수기 없이는 못 살 것 같아요!"</div>
+              <span class="rv-gift">예상 지원금 40만원 이상</span>
+              <span class="author">CHPI-7430N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">안마의자</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"부모님 효도 선물로 보냈는데 설치·관리 다 본사에서 해주시니 안심됩니다."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>최*호님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_250/1785033886613dqK72_JPEG/image.jpg" alt="냉온정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">냉온정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"따뜻한 물 필요할때마다 인덕션 안켜서 너무 좋아요~"</div>
+              <span class="rv-gift">예상 지원금 30만원 이상</span>
+              <span class="author">CHP-7220N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">정수기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"전화로 상담받으면서 신청했는데 응대 빠르고 친절했어요. 어르신들께도 추천."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>윤*민님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260725_25/1784972155971yXukK_JPEG/image.jpg" alt="얼음정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">얼음정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"1인가구기준 완전 만족합니다 얼음이 녹아서 나오는게 아쉽긴 하지만 시원한 물마시고 싶을 때 너무너무 편해요"</div>
+              <span class="rv-gift">예상 지원금 40만원 이상</span>
+              <span class="author">CHPI-7430N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">식기세척기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"광고 전화 안 와서 너무 좋아요. 다른 사이트는 가입하자마자 전화 폭탄."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>강*우님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_131/1785024825368E86Hz_JPEG/IMG_4635.jpeg" alt="냉온정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">냉온정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"너무 만족하면서 사용중이에요 작아서 좋아요"</div>
+              <span class="rv-gift">예상 지원금 30만원 이상</span>
+              <span class="author">CHP-7220N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">비데</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"본사 가격과 같은데 사은품을 더 받을 수 있어서 안 할 이유가 없죠."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>송*희님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_238/17850641908669knX5_JPEG/PayApp_20260726_200930_3987811022336342826.jpg" alt="얼음정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">얼음정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"사용하기 편하고, 사이즈도 미니라 마음에 들어요 아주 잘 쓰고 있습니다 너무 좋아요~~^^♡"</div>
+              <span class="rv-gift">예상 지원금 40만원 이상</span>
+              <span class="author">CHPI-7430N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">공기청정기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"셀프로 신청해서 깔끔하게 끝났어요. 본사 코디 시간 맞춰 잘 와주셨고."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>임*진님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_100/1785069304426nR6c1_JPEG/24883.jpg" alt="냉온정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">냉온정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"맘에들어요 잘 쓸게요"</div>
+              <span class="rv-gift">예상 지원금 30만원 이상</span>
+              <span class="author">CHP-7220N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">정수기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"여러 본사 가격을 한 번에 비교할 수 있어서 결정 시간이 확 줄었어요."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>한*솔님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_197/1785067744295HAfus_JPEG/1785067732380.jpg" alt="얼음정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">얼음정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"얼음 기능 좋습니다. 잘 사용하고 있습니다."</div>
+              <span class="rv-gift">예상 지원금 40만원 이상</span>
+              <span class="author">CHPI-7430N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <!-- Set 2 (seamless loop용 복제) -->
           <div class="review-item">
-            <span class="cat-badge">정수기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"사은품 패키지 풍성하게 챙겨주셔서 만족해요. 본사가 그대로 들어와 안심."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>이*진님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260727_141/1785079819345CyaGG_JPEG/IMG_3981.jpeg" alt="냉온정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">냉온정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"아주 좋아요. 뜨거운 물로 요리하거나 차 마시기에도 좋아요"</div>
+              <span class="rv-gift">예상 지원금 30만원 이상</span>
+              <span class="author">CHP-7220N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">공기청정기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"이사 가서 주소 변경 무료로 해주셨어요. 신혼 때 단기 렌탈로 시작한 게 정답."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>김*수님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_234/1785053059644eE63L_JPEG/IMG_8147.jpeg" alt="얼음정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">얼음정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"삶의질 수직상승.. 진짜 해피합니다"</div>
+              <span class="rv-gift">예상 지원금 40만원 이상</span>
+              <span class="author">CHPI-7430N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">비데</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"비교해보고 가입한 거라 후회 없어요. 사은품도 본사보다 더 챙겨주시고."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>박*영님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_190/1785042376459W6vbd_JPEG/tmp_8264066653958240853.jpg" alt="냉온정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">냉온정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"온도와 물용량을 여러 단계로 설정할 수 있어 좋아요 물이 잘 튀지않게 설계된 점도 만족합니다 디자인도 깔끔해…"</div>
+              <span class="rv-gift">예상 지원금 30만원 이상</span>
+              <span class="author">CHP-7220N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">안마의자</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"위약금 공식을 가입 전에 다 알려주셔서 결정이 쉬웠어요. 정직한 게 좋아요."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>정*아님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_122/1785040273272RDBwV_JPEG/image.jpg" alt="얼음정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">얼음정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"없을 땐 몰랐는데 이젠 얼음정수기 없이는 못 살 것 같아요!"</div>
+              <span class="rv-gift">예상 지원금 40만원 이상</span>
+              <span class="author">CHPI-7430N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">안마의자</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"부모님 효도 선물로 보냈는데 설치·관리 다 본사에서 해주시니 안심됩니다."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>최*호님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_250/1785033886613dqK72_JPEG/image.jpg" alt="냉온정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">냉온정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"따뜻한 물 필요할때마다 인덕션 안켜서 너무 좋아요~"</div>
+              <span class="rv-gift">예상 지원금 30만원 이상</span>
+              <span class="author">CHP-7220N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">정수기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"전화로 상담받으면서 신청했는데 응대 빠르고 친절했어요. 어르신들께도 추천."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>윤*민님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260725_25/1784972155971yXukK_JPEG/image.jpg" alt="얼음정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">얼음정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"1인가구기준 완전 만족합니다 얼음이 녹아서 나오는게 아쉽긴 하지만 시원한 물마시고 싶을 때 너무너무 편해요"</div>
+              <span class="rv-gift">예상 지원금 40만원 이상</span>
+              <span class="author">CHPI-7430N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">식기세척기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"광고 전화 안 와서 너무 좋아요. 다른 사이트는 가입하자마자 전화 폭탄."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>강*우님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_131/1785024825368E86Hz_JPEG/IMG_4635.jpeg" alt="냉온정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">냉온정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"너무 만족하면서 사용중이에요 작아서 좋아요"</div>
+              <span class="rv-gift">예상 지원금 30만원 이상</span>
+              <span class="author">CHP-7220N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">비데</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"본사 가격과 같은데 사은품을 더 받을 수 있어서 안 할 이유가 없죠."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>송*희님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_238/17850641908669knX5_JPEG/PayApp_20260726_200930_3987811022336342826.jpg" alt="얼음정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">얼음정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"사용하기 편하고, 사이즈도 미니라 마음에 들어요 아주 잘 쓰고 있습니다 너무 좋아요~~^^♡"</div>
+              <span class="rv-gift">예상 지원금 40만원 이상</span>
+              <span class="author">CHPI-7430N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">공기청정기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"셀프로 신청해서 깔끔하게 끝났어요. 본사 코디 시간 맞춰 잘 와주셨고."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>임*진님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_100/1785069304426nR6c1_JPEG/24883.jpg" alt="냉온정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">냉온정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"맘에들어요 잘 쓸게요"</div>
+              <span class="rv-gift">예상 지원금 30만원 이상</span>
+              <span class="author">CHP-7220N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
           <div class="review-item">
-            <span class="cat-badge">정수기</span>
-            <div class="stars">★★★★★</div>
-            <div class="quote">"여러 본사 가격을 한 번에 비교할 수 있어서 결정 시간이 확 줄었어요."</div>
-            <span class="author"><svg class="ico"><use href="#i-user"/></svg>한*솔님 후기 중</span>
+            <img class="rv-photo" loading="lazy" src="https://phinf.pstatic.net/checkout.phinf/20260726_197/1785067744295HAfus_JPEG/1785067732380.jpg" alt="얼음정수기 실사용 후기 사진">
+            <div class="rv-body">
+              <span class="cat-badge">얼음정수기</span>
+              <div class="stars">★★★★★</div>
+              <div class="quote">"얼음 기능 좋습니다. 잘 사용하고 있습니다."</div>
+              <span class="rv-gift">예상 지원금 40만원 이상</span>
+              <span class="author">CHPI-7430N · 코웨이 공식 판매처 구매자 후기</span>
+            </div>
           </div>
         </div>
+        </div>
+      </div>
+      <!-- 다건 구독 안내 (2026-07-31) — 후기가 아니라 '혜택 안내'다.
+           없는 고객 후기를 만들지 않고 사실만 적는다. -->
+      <div class="rv-multi">
+        <div class="rv-multi-t">2개 이상 함께 구독하면 <strong>지원금이 합산</strong>됩니다</div>
+        <div class="rv-multi-d">정수기 + 공기청정기처럼 여러 대를 한 번에 신청하면 제품별 지원금을 각각 받습니다. 제품 구성에 따라 금액이 달라져 상담 시 정확한 합계를 안내해 드려요.</div>
       </div>
     </div>
   </section>
