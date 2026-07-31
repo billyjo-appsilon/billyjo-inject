@@ -5200,6 +5200,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
                     document.querySelector('#container') ||
                     document.body;
       content.insertBefore(wrap, content.firstChild);
+      var sourceList = targetLi.parentElement;
+      if (sourceList && sourceList.children && sourceList.children.length > 1) {
+        sourceList.setAttribute('data-bj-partnership-filtered', 'true');
+        sourceList.style.display = 'none';
+      }
       // 하이라이트는 content 최상단에 삽입되므로 별도 스크롤 불필요.
       // (기존 scrollIntoView는 현재 레이아웃에선 no-op이었지만, 헤더/컨테이너가 바뀌면
       //  랜딩 직후 페이지를 끌어내리는 원인이 됨 → '랜딩 최상단' 규칙에 따라 제거. 2026-07-26)
