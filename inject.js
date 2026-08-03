@@ -3858,7 +3858,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         }
         var product = names[model] || raw.replace(/\s*·\s*.*$/, '');
         if (!product || product.indexOf('공식') !== -1) return;
-        author.textContent = product + ' · (코웨이 공식)구매자 후기';
+        product = product.replace(/^코웨이\s+/, '');
+        author.textContent = '(코웨이 공식) ' + product + ' · 구매자후기';
       });
     }
     function bjNormalizeHomeReviews() {
