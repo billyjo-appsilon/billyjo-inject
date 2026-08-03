@@ -3837,8 +3837,36 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         if (t.indexOf('예상 지원금') !== -1) el.textContent = t.replace(/예상\s*지원금/g, '비밀 혜택');
       });
     }
-    bjRenameHomeReviewBenefits();
-    [500, 1500, 3000].forEach(function(t) { setTimeout(bjRenameHomeReviewBenefits, t); });
+    function bjRenameHomeReviewAuthors() {
+      var names = {
+        'CHP-7220N': '코웨이 아이콘3 냉온정수기',
+        'CP-7220N': '코웨이 아이콘3 냉정수기',
+        'CHPI-7430N': '코웨이 아이콘 얼음정수기',
+        'CHPI-7410N': '코웨이 아이콘 얼음정수기',
+        'CPI-7410N': '코웨이 아이콘 얼음정수기',
+        'CHP-7212N': '코웨이 아이콘 프로 2.0 냉온정수기'
+      };
+      Array.prototype.forEach.call(pageEl.querySelectorAll('.review-track .review-item'), function(item) {
+        var author = item.querySelector('.author');
+        if (!author) return;
+        var gift = item.querySelector('.rv-gift[data-model]');
+        var raw = (author.textContent || '').replace(/\s+/g, ' ').trim();
+        var model = gift ? (gift.getAttribute('data-model') || '') : '';
+        if (!model) {
+          var m = raw.match(/^([^·\s]+)/);
+          model = m ? m[1] : '';
+        }
+        var product = names[model] || raw.replace(/\s*·\s*.*$/, '');
+        if (!product || product.indexOf('공식') !== -1) return;
+        author.textContent = product + ' · (코웨이 공식)구매자 후기';
+      });
+    }
+    function bjNormalizeHomeReviews() {
+      bjRenameHomeReviewBenefits();
+      bjRenameHomeReviewAuthors();
+    }
+    bjNormalizeHomeReviews();
+    [500, 1500, 3000].forEach(function(t) { setTimeout(bjNormalizeHomeReviews, t); });
 
     // 혜택 2×2 섹션(시안 Image #19) 신규 삽입 — 신청방법(8) 뒤 order 9 (bg-unify 전에 생성해 배경 자동 교차) (2026-07-03)
     if (!pageEl.querySelector('.bj-ben-zone')) {
