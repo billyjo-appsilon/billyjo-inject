@@ -2876,8 +2876,9 @@ function bjHeaderMainInit() {
       });
       items.forEach(function(it, idx){
         if (it.parentNode === list && list.children[idx] !== it) moved = true;
-        list.appendChild(it);
       });
+      if (!moved) return;
+      items.forEach(function(it){ list.appendChild(it); });
       if (moved) list.setAttribute('data-bj-water-popular', '1');
     };
     bjWaterPopularSort();
