@@ -2041,15 +2041,10 @@ function bjHeaderMainInit() {
     var iconList = document.querySelector('ul.inline_wrap.header_m_icon');
     var headerEl = document.querySelector('header');
     if (iconList && headerEl) {
-      // 1. Extract event banner link, create full-width top bar
+      // 1. 진행 이벤트가 없으므로 이벤트/기획전 링크는 상단바로 복제하지 않고 제거
       var eventLi = iconList.querySelector('li:first-child');
       var eventLink = eventLi ? eventLi.querySelector('a') : null;
       if (eventLink && eventLink.textContent.indexOf('이벤트') !== -1) {
-        var banner = document.createElement('div');
-        banner.id = 'bj-top-banner';
-        banner.innerHTML = '<a href="' + eventLink.href + '">' + eventLink.textContent.trim() + '</a>';
-        headerEl.insertBefore(banner, headerEl.firstChild);
-        // Remove event LI entirely from DOM
         eventLi.remove();
       }
 
@@ -4730,46 +4725,38 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 // (제품 리스트 카드 가격은 위 'bj-pz' 모듈이 신혼가전 칩 스타일로 단일 담당. 별도 restyle 모듈 없음.)
 
 // =============================================================================
-// 이벤트/기획전 버튼 텍스트 rewrite — "#이벤트/기획전 바로가기!!" → "이벤트 기획전 보기"
+// 이벤트/기획전 버튼 비활성화 — 진행 이벤트가 없을 때 상단/헤더 노출 제거
 // =============================================================================
-(function billyjoRewriteEventButton() {
-  var TARGET = '이벤트 기획전 보기';
-  function rewrite() {
-    var links = document.querySelectorAll('a[href*="dh_board/lists/display"]');
+(function billyjoHideEventButton() {
+  if (!document.getElementById('bj-hide-inactive-event-style')) {
+    var style = document.createElement('style');
+    style.id = 'bj-hide-inactive-event-style';
+    style.textContent = '#bj-top-banner,a.right__event[href*="display"],a[href*="dh_board/lists/display"]{display:none!important}';
+    (document.head || document.documentElement).appendChild(style);
+  }
+  function hide() {
+    var links = document.querySelectorAll('#bj-top-banner, a[href*="dh_board/lists/display"], a.right__event[href*="display"]');
     for (var i = 0; i < links.length; i++) {
-      var a = links[i];
-      var txt = (a.textContent || '').trim();
-      if (txt === TARGET) continue;
-      if (txt && (txt.indexOf('이벤트') >= 0 || txt.indexOf('기획전') >= 0 || txt.indexOf('바로가기') >= 0)) {
-        // 이미지/아이콘 자식이 있으면 텍스트 노드만 갈아끼우기
-        var hasChild = a.children && a.children.length > 0;
-        if (hasChild) {
-          // 마지막 텍스트 노드 찾아 교체, 없으면 새 텍스트 노드 append
-          var replaced = false;
-          for (var n = a.childNodes.length - 1; n >= 0; n--) {
-            var node = a.childNodes[n];
-            if (node.nodeType === 3 && (node.nodeValue || '').trim()) {
-              node.nodeValue = TARGET;
-              replaced = true;
-              break;
-            }
-          }
-          if (!replaced) a.appendChild(document.createTextNode(TARGET));
-        } else {
-          a.textContent = TARGET;
-        }
+      var el = links[i];
+      var txt = (el.textContent || '').trim();
+      var isBanner = el.id === 'bj-top-banner';
+      var isEvent = txt.indexOf('이벤트') >= 0 || txt.indexOf('기획전') >= 0 || txt.indexOf('바로가기') >= 0;
+      if (isBanner || isEvent) {
+        var target = isBanner ? el : (el.closest('li') || el);
+        target.style.setProperty('display', 'none', 'important');
+        target.setAttribute('aria-hidden', 'true');
       }
     }
   }
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', rewrite);
+    document.addEventListener('DOMContentLoaded', hide);
   } else {
-    rewrite();
+    hide();
   }
   // 빌리조 헤더가 늦게 hydrate되는 경우 대비
   var tries = 0;
   var iv = setInterval(function() {
-    rewrite();
+    hide();
     if (++tries >= 8) clearInterval(iv);
   }, 400);
 })();
@@ -6971,24 +6958,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
   function restoreMobileEventLink(){
     var banner = document.getElementById('bj-top-banner');
-    if (!banner) return;
-    var iconList = document.getElementById('bj-header-icons')
-      || document.querySelector('ul.inline_wrap.header_m_icon');
-    if (!iconList) { banner.remove(); return; }
-    var bannerA = banner.querySelector('a');
-    if (!bannerA) { banner.remove(); return; }
-    var href = bannerA.getAttribute('href') || '';
-    if (iconList.querySelector('a[href="' + href.replace(/"/g,'') + '"]')) {
-      banner.remove(); return;
-    }
-    var li = document.createElement('li');
-    var a = document.createElement('a');
-    a.href = href;
-    a.setAttribute('style', 'background-color:#ff3700;color:#fff;font-size:11px;font-weight:bold;padding:5px;border-radius:5px;');
-    a.textContent = bannerA.textContent.trim();
-    li.appendChild(a);
-    iconList.insertBefore(li, iconList.firstChild);
-    banner.remove();
+    if (banner) banner.remove();
   }
 
   /* (b) 하단 위젯 — CSS specificity 안전망 + 핸들 + 버튼 격상 */
