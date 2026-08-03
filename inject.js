@@ -3774,7 +3774,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         ".bj-logo{display:inline-block !important;vertical-align:middle !important;height:1.5em !important;width:2.97em !important;background:url('https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@25e1555/images/billyjo-wordmark.png') no-repeat left center/contain !important;color:transparent !important;text-indent:-9999px !important;overflow:hidden !important;white-space:nowrap !important}" +
         // 브랜드 로고 그리드 → 가로 마퀴 (시안 디자인 맞춤, 카피 16개 유지) (2026-07-02)
         "#bj-v5-injected .brand-grid[data-bjmq]{display:block !important;overflow:hidden !important;grid-template-columns:none !important;height:auto !important;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}" +
-        ".bj-brand-track{display:flex !important;width:max-content !important;gap:12px !important;align-items:center;animation:bjBrandScroll 26s linear infinite}" +
+        ".bj-brand-track{display:flex !important;width:max-content !important;gap:12px !important;align-items:center;animation:bjBrandScroll 37s linear infinite}" +
         "#bj-v5-injected .brand-grid[data-bjmq-rev]{margin-top:10px !important}" +
         ".bj-brand-track.bj-brand-track-rev{animation-name:bjBrandScrollReverse !important}" +
         ".bj-brand-track:hover{animation-play-state:paused}" +
