@@ -3813,7 +3813,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     }
 
     // 브릿지 캡션 신규 추가 (시안 9:89, 2026-07-02) — 히어로 다음·후기 위(order 2). "오래 사용할 가전인데..."
-    // 2026-08-04: 대표 카피 바로 아래에 사진 있는 구매자 후기 롤링 트랙을 붙인다.
     if (!document.getElementById('bj-bridge-css')) {
       var bs = document.createElement('style');
       bs.id = 'bj-bridge-css';
@@ -3821,56 +3820,24 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '.bj-bridge .bj-bq{font-size:48px;color:#c2c6d2;font-weight:800;line-height:.7}' +
         '.bj-bridge p{margin:6px 0;font-size:34px;font-weight:800;line-height:1.6;letter-spacing:-.02em;color:#0838f8;word-break:keep-all}' +
         '.bj-bridge p b{color:#0838f8}' +
-        '.bj-home-review-roll{margin:22px auto 0;max-width:1180px;overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent);mask-image:linear-gradient(90deg,transparent,#000 5%,#000 95%,transparent)}' +
-        '.bj-home-review-track{display:flex;gap:14px;width:max-content;animation:bjHomeReviewRoll 58s linear infinite;will-change:transform}' +
-        '.bj-home-review-track:hover{animation-play-state:paused}' +
-        '.bj-home-rv{width:272px;flex:0 0 272px;background:#fff;border:1px solid #e8edf7;border-radius:14px;box-shadow:0 8px 22px rgba(20,32,70,.08);overflow:hidden;text-align:left}' +
-        '.bj-home-rv img{display:block;width:100%;height:154px;object-fit:cover;background:#eef1f6}' +
-        '.bj-home-rv .body{padding:12px 13px 13px}' +
-        '.bj-home-rv .cat{display:inline-flex;align-items:center;height:22px;padding:0 8px;border-radius:999px;background:#eef3ff;color:#0838f8;font-size:11px;font-weight:800}' +
-        '.bj-home-rv .stars{margin-top:7px;color:#ffb400;font-size:13px;letter-spacing:1px}' +
-        '.bj-home-rv .quote{margin-top:7px;color:#1f2937;font-size:13px;font-weight:700;line-height:1.55;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:40px;word-break:keep-all}' +
-        '.bj-home-rv .gift{display:block;margin-top:10px;color:#0838f8;font-size:12px;font-weight:900}' +
-        '.bj-home-rv .author{display:block;margin-top:5px;color:#7a8494;font-size:11px;font-weight:700}' +
-        '@keyframes bjHomeReviewRoll{from{transform:translateX(0)}to{transform:translateX(-50%)}}' +
-        '@media(max-width:768px){.bj-home-review-roll{margin-top:16px;max-width:none}.bj-home-review-track{gap:10px;animation-duration:44s}.bj-home-rv{width:218px;flex-basis:218px;border-radius:12px}.bj-home-rv img{height:122px}.bj-home-rv .body{padding:10px}.bj-home-rv .quote{font-size:12px;min-height:37px}.bj-home-rv .gift{font-size:11px}.bj-home-rv .author{font-size:10.5px}}' +
         '@media(max-width:768px){.bj-bridge{padding:12px 18px}.bj-bridge p{font-size:21px;margin:4px 0}.bj-bridge .bj-bq{font-size:30px}}';
       (document.head || document.documentElement).appendChild(bs);
-    }
-    function bjHomeReviewCard(r) {
-      return '<div class="bj-home-rv">' +
-        '<img loading="lazy" src="' + r.img + '" alt="' + r.cat + ' 실사용 후기 사진">' +
-        '<div class="body"><span class="cat">' + r.cat + '</span><div class="stars">★★★★★</div>' +
-        '<div class="quote">"' + r.quote + '"</div>' +
-        '<span class="gift">' + r.gift + '</span>' +
-        '<span class="author">' + r.product + ' 구매자 후기</span></div></div>';
-    }
-    function bjHomeReviewHTML() {
-      var reviews = [
-        { img: 'https://phinf.pstatic.net/checkout.phinf/20260727_141/1785079819345CyaGG_JPEG/IMG_3981.jpeg', cat: '냉온정수기', quote: '아주 좋아요. 뜨거운 물로 요리하거나 차 마시기에도 좋아요', gift: '예상 지원금 30만원 이상', product: '코웨이 아이콘3 냉온정수기' },
-        { img: 'https://phinf.pstatic.net/checkout.phinf/20260726_234/1785053059644eE63L_JPEG/IMG_8147.jpeg', cat: '얼음정수기', quote: '삶의질 수직상승.. 진짜 해피합니다', gift: '예상 지원금 40만원 이상', product: '코웨이 아이콘 얼음정수기' },
-        { img: 'https://phinf.pstatic.net/checkout.phinf/20260726_190/1785042376459W6vbd_JPEG/tmp_8264066653958240853.jpg', cat: '냉온정수기', quote: '온도와 물용량을 여러 단계로 설정할 수 있어 좋아요 물이 잘 튀지않게 설계된 점도 만족합니다 디자인도 깔끔해요', gift: '예상 지원금 30만원 이상', product: '코웨이 아이콘3 냉온정수기' },
-        { img: 'https://phinf.pstatic.net/checkout.phinf/20260726_122/1785040273272RDBwV_JPEG/image.jpg', cat: '얼음정수기', quote: '없을 땐 몰랐는데 이젠 얼음정수기 없이는 못 살 것 같아요!', gift: '예상 지원금 40만원 이상', product: '코웨이 아이콘 얼음정수기' },
-        { img: 'https://phinf.pstatic.net/checkout.phinf/20260726_250/1785033886613dqK72_JPEG/image.jpg', cat: '냉온정수기', quote: '따뜻한 물 필요할때마다 인덕션 안켜서 너무 좋아요~', gift: '예상 지원금 30만원 이상', product: '코웨이 아이콘3 냉온정수기' },
-        { img: 'https://phinf.pstatic.net/checkout.phinf/20260725_25/1784972155971yXukK_JPEG/image.jpg', cat: '얼음정수기', quote: '1인가구기준 완전 만족합니다 시원한 물마시고 싶을 때 너무너무 편해요', gift: '예상 지원금 40만원 이상', product: '코웨이 아이콘 얼음정수기' },
-        { img: 'https://phinf.pstatic.net/checkout.phinf/20260726_131/1785024825368E86Hz_JPEG/IMG_4635.jpeg', cat: '냉온정수기', quote: '너무 만족하면서 사용중이에요 작아서 좋아요', gift: '예상 지원금 30만원 이상', product: '코웨이 아이콘3 냉온정수기' },
-        { img: 'https://phinf.pstatic.net/checkout.phinf/20260726_238/17850641908669knX5_JPEG/PayApp_20260726_200930_3987811022336342826.jpg', cat: '얼음정수기', quote: '사용하기 편하고, 사이즈도 미니라 마음에 들어요 아주 잘 쓰고 있습니다 너무 좋아요', gift: '예상 지원금 40만원 이상', product: '코웨이 아이콘 얼음정수기' },
-        { img: 'https://phinf.pstatic.net/checkout.phinf/20260726_100/1785069304426nR6c1_JPEG/24883.jpg', cat: '냉온정수기', quote: '맘에들어요 잘 쓸게요', gift: '예상 지원금 30만원 이상', product: '코웨이 아이콘3 냉온정수기' },
-        { img: 'https://phinf.pstatic.net/checkout.phinf/20260726_197/1785067744295HAfus_JPEG/1785067732380.jpg', cat: '얼음정수기', quote: '얼음 기능 좋습니다. 잘 사용하고 있습니다.', gift: '예상 지원금 40만원 이상', product: '코웨이 아이콘 얼음정수기' }
-      ];
-      var cards = reviews.map(bjHomeReviewCard).join('');
-      return '<div class="bj-home-review-roll" aria-label="구매자 후기 롤링">' +
-        '<div class="bj-home-review-track">' + cards + cards + '</div></div>';
     }
     if (!pageEl.querySelector('.bj-bridge')) {
       var br = document.createElement('div');
       br.className = 'bj-bridge';
-      br.innerHTML = '<p>오래 사용할 가전인데,<br><b>신중하게 비교하고 골라야 하지 않을까요?</b></p>' + bjHomeReviewHTML();
+      br.innerHTML = '<p>오래 사용할 가전인데,<br><b>신중하게 비교하고 골라야 하지 않을까요?</b></p>';
       pageEl.appendChild(br);
-    } else {
-      var existingBr = pageEl.querySelector('.bj-bridge');
-      if (existingBr && !existingBr.querySelector('.bj-home-review-roll')) existingBr.insertAdjacentHTML('beforeend', bjHomeReviewHTML());
     }
+
+    function bjRenameHomeReviewBenefits() {
+      Array.prototype.forEach.call(pageEl.querySelectorAll('.rv-gift'), function(el) {
+        var t = el.textContent || '';
+        if (t.indexOf('예상 지원금') !== -1) el.textContent = t.replace(/예상\s*지원금/g, '비밀 혜택');
+      });
+    }
+    bjRenameHomeReviewBenefits();
+    [500, 1500, 3000].forEach(function(t) { setTimeout(bjRenameHomeReviewBenefits, t); });
 
     // 혜택 2×2 섹션(시안 Image #19) 신규 삽입 — 신청방법(8) 뒤 order 9 (bg-unify 전에 생성해 배경 자동 교차) (2026-07-03)
     if (!pageEl.querySelector('.bj-ben-zone')) {
