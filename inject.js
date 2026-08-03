@@ -2651,6 +2651,8 @@ function bjHeaderMainInit() {
       return d === '' ? null : parseInt(d, 10);
     };
     var bjpFmt = function(n) { return n.toLocaleString('ko-KR'); };
+    var PRELOADED_PRICE_SNAPSHOT_DATE = '2026-08-04';
+    var PRELOADED_PRICE_SNAPSHOT = {"ok":true,"by_model":{"CHP-1111N":{"reward":17810,"name":"엘리트 빌트인"},"CHP-1112N":{"reward":17810,"name":"엘리트 빌트인"},"CHP-5610N 재고 소진시 즉시 단종":{"reward":13300,"name":"아이콘 스탠드"},"CHP-5711L":{"reward":13310,"name":"워터스탠드2"},"CHP-5711R":{"reward":15110,"name":"워터스탠드2"},"CHP-5730L":{"reward":13310,"name":"워터스탠드플러스"},"CHP-5730R":{"reward":15110,"name":"워터스탠드플러스"},"CHP-5730N":{"reward":15110,"name":"워터스탠드플러스N"},"CHP-6340L":{"reward":17810,"name":"엘리트 정수기"},"CP-6340L":{"reward":16010,"name":"엘리트 정수기"},"CHP-7211N":{"reward":15560,"name":"아이콘2.0"},"CP-7211N":{"reward":13760,"name":"아이콘2.0"},"CHP-7220N":{"reward":16010,"name":"아이콘3.0"},"CP-7220N":{"reward":14210,"name":"아이콘3.0"},"CHP-7212N":{"reward":16910,"name":"아이콘 프로"},"CHPI-5820L":{"reward":38060,"name":"아이스 스탠드3.0 정수기"},"CHPI-5801LB":{"reward":41210,"name":"아이스 스탠드"},"CHPI-5801LW":{"reward":40310,"name":"아이스 스탠드"},"CHPI-620L":{"reward":34010,"name":"아이스 스탠드 슬림"},"CHPI-7430N":{"reward":28610,"name":"아이콘얼음 미니"},"CHPI-7410N":{"reward":31310,"name":"아이콘얼음 스탠다드"},"CPI-7410N":{"reward":27710,"name":"아이콘얼음 스탠다드"},"CHPI-7420N":{"reward":34010,"name":"아이콘얼음 맥스"},"CHPI-7400N":{"reward":30860,"name":"아이콘얼음정수기"},"CPI-7400N":{"reward":27260,"name":"아이콘얼음정수기"},"CHPI-7511L":{"reward":28160,"name":"AIS 3.0"},"CPI-7511L":{"reward":24560,"name":"AIS 3.0"},"CHPI-7521L":{"reward":26360,"name":"얼음정수기 RO"},"CPSI-8510L":{"reward":34010,"name":"AIS 3.0 스파클링"},"AP-1023F":{"reward":6560,"name":"싱글파워"},"AP-1523D":{"reward":15110,"name":"멀티액션"},"AP-1623M":{"reward":17810,"name":"노블청정기"},"AP-2023K":{"reward":20510,"name":"노블청정기"},"AP-3021D":{"reward":33110,"name":"노블청정기"},"AP-3024H":{"reward":33110,"name":"노블청정기"},"AP-4025D":{"reward":36710,"name":"노블청정기"},"APD-1023A":{"reward":20510,"name":"듀얼클린 제습"},"APD-1025E":{"reward":24110,"name":"노블 제습공기청정기"},"BA36-B":{"reward":6560,"name":"프라임 비데"},"BAS37-C":{"reward":11960,"name":"더블케어"},"BAS38-C":{"reward":12860,"name":"더블케어플러스"},"BAS40-A":{"reward":6560,"name":"스스로케어(일반)"},"BAS41-A":{"reward":7910,"name":"스타일케어"},"BAS49-A":{"reward":9710,"name":"슬리믹"},"MB-M05M":{"reward":69900,"name":"리클라이닝 마사지셋"},"MB-M03M":{"reward":63100,"name":"마사지셋"},"MB-R05M":{"reward":63950,"name":"리클라이닝 코어셋"},"MB-R03M":{"reward":57150,"name":"코어셋"},"MC-B02":{"reward":30410,"name":"마인플러스"},"MC-B03":{"reward":28610,"name":"마인2"},"MC-C01":{"reward":41900,"name":"페블체어"},"MC-C02AT":{"reward":46900,"name":"페블체어2"},"MC-R01":{"reward":47900,"name":"트리플체어"},"MC-R01M":{"reward":49900,"name":"트리플체어(바퀴형)"},"WI-37C90720N":{"reward":26900,"name":"WI-37C90720N"},"WI-36C90620N":{"reward":29900,"name":"WI-36C90620N"},"WI-36C80620N":{"reward":29900,"name":"WI-36C80620N"},"WI-60C9600M":{"reward":29900,"name":"WI-60C9600M"},"WI-55S90510M":{"reward":29900,"name":"WI-55S90510M"},"WI-55S9P510M":{"reward":30900,"name":"WI-55S9P510M"},"WI-70S90010M":{"reward":33900,"name":"WI-70S90010M"},"WI-70S9P010M":{"reward":34900,"name":"WI-70S9P010M"},"WI-15C7500":{"reward":63900,"name":"WI-15C7500"},"WI-60C90511M":{"reward":29900,"name":"WI-60C90511M"},"WI-60C80511M":{"reward":27900,"name":"WI-60C80511M"},"WI-80S9P510M":{"reward":37900,"name":"WI-80S9P510M"},"WP-30B90620N":{"reward":23900,"name":"WP-30B90620N"},"WP-60C90010M":{"reward":18900,"name":"WP-60C90010M"},"WP-60C90511M":{"reward":17900,"name":"WP-60C90511M"},"WP-45C90020M":{"reward":11900,"name":"WP-45C90020M"},"WP-35C90010N":{"reward":11900,"name":"WP-35C90010N"},"WP-46S90510M":{"reward":18900,"name":"WP-46S90510M"},"WP-46S9P510M":{"reward":20900,"name":"WP-46S9P510M"},"WP-50S90010M":{"reward":13900,"name":"WP-50S90010M"},"WP-50S90010U":{"reward":12900,"name":"WP-50S90010U"},"WP-31S90010N":{"reward":20900,"name":"WP-31S90010N"},"WP-45S9P010M":{"reward":22900,"name":"WP-45S9P010M"},"WP-80S9P510M":{"reward":29900,"name":"WP-80S9P510M"},"WP-60C80511M":{"reward":15900,"name":"WP-60C80511M"},"WP-43C60000M":{"reward":9900,"name":"WP-43C60000M"},"WP-40C60000M":{"reward":5900,"name":"WP-40C60000M"},"WP-50C90621N":{"reward":19900,"name":"WP-50C90621N"},"WP-50C80621N":{"reward":16900,"name":"WP-50C80621N"},"WP-30C8460N":{"reward":37900,"name":"WP-30C8460N"},"WP-46S90510N":{"reward":20900,"name":"WP-46S90510N"},"CP-AMS100":{"reward":14210,"name":"직수- 데스크형"},"CP-ABS100":{"reward":12410,"name":"직수- 데스크형"},"CP-ABSC100":{"reward":13310,"name":"직수- 데스크형"},"CP-AHS100":{"reward":25010,"name":"얼음- 데스크형"},"CP-AHSC100":{"reward":25910,"name":"얼음- 데스크형"},"CP-AJS801SW":{"reward":28160,"name":"얼음 -스탠드형"},"CP-AJS821SW":{"reward":28160,"name":"얼음 -스탠드형"},"CBT-KFFS31RW":{"reward":2660,"name":"비데"},"CBT-QSB1041W":{"reward":6060,"name":"비데"},"CBT-PFF31RW":{"reward":1810,"name":"비데"},"CBT-QSF1041W":{"reward":3510,"name":"비데"}}}; // scripts/update-price-snapshot.mjs가 매일 최신값으로 채운다.
     var BJ_LIST_PRICE_OVERRIDES = {
       // 상세 LPT 기준 보강: 운영 리스트 원본 fee2가 0원으로 내려와 할인 라인이 숨는 핵심 정수기.
       // card = 제휴카드 적용 최종 월액, reward = 타사보상+카드 적용 최종 월액.
@@ -2667,6 +2669,18 @@ function bjHeaderMainInit() {
       var m = href.match(/prod_view\/(\d+)/);
       return m ? m[1] : '';
     };
+    var BJ_PRICE_MODEL_KEYS = PRELOADED_PRICE_SNAPSHOT && PRELOADED_PRICE_SNAPSHOT.by_model
+      ? Object.keys(PRELOADED_PRICE_SNAPSHOT.by_model).sort(function(a, b) { return b.length - a.length; })
+      : [];
+    var bjpModelOverride = function(item) {
+      if (!BJ_PRICE_MODEL_KEYS.length) return null;
+      var text = ((item.querySelector('.brand') || {}).textContent || '') + ' ' + ((item.querySelector('.name') || {}).textContent || '');
+      var hay = text.toUpperCase().replace(/\s+/g, ' ');
+      for (var i = 0; i < BJ_PRICE_MODEL_KEYS.length; i++) {
+        if (hay.indexOf(BJ_PRICE_MODEL_KEYS[i]) !== -1) return PRELOADED_PRICE_SNAPSHOT.by_model[BJ_PRICE_MODEL_KEYS[i]];
+      }
+      return null;
+    };
     var bjpFormat = function(item) {
       if (item.getAttribute('data-bjp')) return;
       var fee = item.querySelector('.fee');
@@ -2675,11 +2689,13 @@ function bjHeaderMainInit() {
       var reg = bjpParse(fee.querySelector('.price'));
       if (reg === null) return;
       var card = fee2 ? bjpParse(fee2.querySelector('.price')) : null;
-      var override = BJ_LIST_PRICE_OVERRIDES[bjpProdNo(item)];
+      var override = BJ_LIST_PRICE_OVERRIDES[bjpProdNo(item)] || bjpModelOverride(item);
       var hasOverrideCard = override && Object.prototype.hasOwnProperty.call(override, 'card');
       if (hasOverrideCard) card = override.card;
+      if (!hasOverrideCard && fee2 && card === 0 && reg > 30000) card = reg - 30000;
       var reward = (override && Object.prototype.hasOwnProperty.call(override, 'reward')) ? override.reward : null;
-      var hasDisc = card !== null && card < reg && (card > 0 || hasOverrideCard);
+      var hasNativeCardLine = !!fee2;
+      var hasDisc = card !== null && card < reg && (card > 0 || hasNativeCardLine || hasOverrideCard);
       var hasReward = reward !== null && reward >= 0 && reward < reg;
       var bjpPct = hasDisc ? Math.round((reg - card) / reg * 100) : 0;
       var rewardPct = hasReward ? Math.round((reg - reward) / reg * 100) : 0;
