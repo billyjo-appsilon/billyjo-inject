@@ -2687,9 +2687,10 @@ function bjHeaderMainInit() {
       var box = document.createElement('div');
       box.className = 'bj-pz';
       if (hasDisc) {
+        var cardDiscHtml = card > 0 ? '<span class="bj-cf-disc">-' + bjpPct + '%</span>' : '';
         box.innerHTML =
           '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">최저</span><span class="bj-cf-val">월 <b>' + bjpFmt(reg) + '원</b></span></div>' +
-          '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span><span class="bj-cf-val"><span class="bj-cf-disc">-' + bjpPct + '%</span>월 <b>' + bjpFmt(card) + '원</b></span></div>' +
+          '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span><span class="bj-cf-val">' + cardDiscHtml + '월 <b>' + bjpFmt(card) + '원</b></span></div>' +
           (hasReward ? '<div class="bj-cf-line bj-cf-reward"><span class="bj-cf-chip">타사보상</span><span class="bj-cf-val"><span class="bj-cf-disc">-' + rewardPct + '%</span>월 <b>' + bjpFmt(reward) + '원</b></span></div>' : '');
       } else {
         // 할인 없음: 최저만 + 높이 맞춤용 숨김 placeholder 줄
