@@ -5148,7 +5148,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     st.textContent =
       '.new-qb .quick .link .bj-ai-quote-quick{position:relative}' +
       '.new-qb .quick .link .bj-ai-quote-quick a{background:#fff!important;border:2.5px solid #0838f8!important;color:#0838f8!important}' +
-      '.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:43px!important;height:43px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;object-fit:contain!important;margin:0!important;pointer-events:none!important}' +
+      '.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:34px!important;height:34px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;object-fit:contain!important;margin:0!important;pointer-events:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-label{display:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-badge{display:none!important;position:absolute!important;right:-6px!important;top:-6px!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;background:#0838f8!important;color:#fff!important;border:2px solid #fff!important;align-items:center!important;justify-content:center!important;font:900 10px/1 Pretendard,Arial,sans-serif!important;box-shadow:0 2px 7px rgba(8,56,248,.28)!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick.has-count .bj-ai-quote-badge{display:flex!important}' +
@@ -5195,7 +5195,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     a.setAttribute('aria-label', 'AI 견적함으로 이동');
     var iconUrl = quoteIconUrl();
     a.innerHTML =
-      '<img class="bj-ai-quote-icon" src="' + iconUrl + '" alt="" width="43" height="43" loading="lazy" decoding="async">' +
+      '<img class="bj-ai-quote-icon" src="' + iconUrl + '" alt="" width="34" height="34" loading="lazy" decoding="async">' +
       '<span class="bj-ai-quote-label">AI 견적함</span>' +
       '<span class="bj-ai-quote-badge" aria-hidden="true"></span>';
     p.appendChild(a);
