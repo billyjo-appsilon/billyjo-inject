@@ -3775,9 +3775,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         // 브랜드 로고 그리드 → 가로 마퀴 (시안 디자인 맞춤, 카피 16개 유지) (2026-07-02)
         "#bj-v5-injected .brand-grid[data-bjmq]{display:block !important;overflow:hidden !important;grid-template-columns:none !important;height:auto !important;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}" +
         ".bj-brand-track{display:flex !important;width:max-content !important;gap:12px !important;align-items:center;animation:bjBrandScroll 26s linear infinite}" +
+        "#bj-v5-injected .brand-grid[data-bjmq-rev]{margin-top:10px !important}" +
+        ".bj-brand-track.bj-brand-track-rev{animation-name:bjBrandScrollReverse !important}" +
         ".bj-brand-track:hover{animation-play-state:paused}" +
         ".bj-brand-track .brand-cell{flex:0 0 auto !important;width:132px !important;height:60px !important;margin:0 !important}" +
         "@keyframes bjBrandScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}" +
+        "@keyframes bjBrandScrollReverse{from{transform:translateX(-50%)}to{transform:translateX(0)}}" +
         // 신뢰도 섹션: 마퀴↔보장바 사이 헤딩 + 2번째 보장 바 (시안 Image #14 맞춤) (2026-07-02)
         "#bj-v5-injected .bj-trust-sub{display:block !important;text-align:center !important;font-size:20px !important;font-weight:800 !important;color:#111 !important;letter-spacing:-.02em !important;line-height:1.6 !important;word-break:keep-all !important;margin:24px auto 14px !important;max-width:none !important;width:auto !important}" +
         "#bj-v5-injected .bj-trust-sub strong{color:#0838f8 !important}" +
@@ -3959,6 +3962,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjCells.forEach(function(c) { bjTrack.appendChild(c); });
       bjCells.forEach(function(c) { bjTrack.appendChild(c.cloneNode(true)); });
       bjBrandGrid.appendChild(bjTrack);
+    }
+    if (bjBrandGrid && !pageEl.querySelector('.brand-grid[data-bjmq-rev]')) {
+      var bjBrandGrid2 = bjBrandGrid.cloneNode(true);
+      bjBrandGrid2.setAttribute('data-bjmq-rev', '1');
+      var bjTrack2 = bjBrandGrid2.querySelector('.bj-brand-track');
+      if (bjTrack2) bjTrack2.classList.add('bj-brand-track-rev');
+      bjBrandGrid.parentNode.insertBefore(bjBrandGrid2, bjBrandGrid.nextSibling);
     }
 
     // 신뢰도 섹션: 시안(Image #14)대로 "본사 동일 제품에" 헤딩 + 2번째 보장 바 추가 (2026-07-02)
