@@ -2622,23 +2622,25 @@ function bjHeaderMainInit() {
         '.bj-pz .bj-cf-normal{font-size:15px;color:#555}' +
         '.bj-pz .bj-cf-normal b{font-weight:700;color:#333}' +
         '.bj-pz .bj-cf-deal{font-size:15px;font-weight:800;color:#0838F8;margin-top:5px}' +
+        '.bj-pz .bj-cf-reward{font-size:14px;font-weight:800;color:#008a6a;margin-top:5px}' +
         '.bj-pz .bj-cf-ph{visibility:hidden}' +
         '.bj-pz .bj-cf-chip{display:inline-flex;align-items:center;justify-content:center;min-width:46px;font-size:11px;font-weight:700;border-radius:5px;padding:4px 9px;flex-shrink:0}' +
         '.bj-pz .bj-cf-normal .bj-cf-chip{color:#6b7280;background:#eceff3}' +
         '.bj-pz .bj-cf-deal .bj-cf-chip{color:#fff;background:#0838f8}' +
+        '.bj-pz .bj-cf-reward .bj-cf-chip{color:#fff;background:#008a6a}' +
         '.bj-pz .bj-cf-disc{font-size:11px;font-weight:800;color:#fff;background:#d6336c;border-radius:6px;padding:4px 7px;flex-shrink:0}' +
         // 모바일: 칩(제휴💳)+할인태그(-NN%)+가격이 좁은 카드 폭을 넘쳐 가격이 잘림
         // → 폰트·gap·칩 축소로 6자리 가격도 들어가게. ≤360px(iPhone SE)는 한 단계 더 축소.
         '@media all and (max-width:640px){' +
         '.bj-pz .bj-cf-line{gap:4px}' +   // 모바일도 우측 정렬(space-between 상속), gap만 축소
         '.bj-pz .bj-cf-val{gap:2px}' +
-        '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal{font-size:11.5px;letter-spacing:-.3px}' +
+        '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal,.bj-pz .bj-cf-reward{font-size:11.5px;letter-spacing:-.3px}' +
         '.bj-pz .bj-cf-chip{font-size:9px;min-width:0;padding:3px 5px}' +
         // 최저 칩 폭을 제휴💳 칩과 맞춤(우측 가격 시작점 정렬) — 제휴 줄은 안 건드려 가격 잘림 무영향
         '.bj-pz .bj-cf-normal .bj-cf-chip{min-width:26px}' +
         '.bj-pz .bj-cf-disc{font-size:9px;padding:3px 4px}}' +
         '@media all and (max-width:360px){' +
-        '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal{font-size:10.5px}' +
+        '.bj-pz .bj-cf-normal,.bj-pz .bj-cf-deal,.bj-pz .bj-cf-reward{font-size:10.5px}' +
         '.bj-pz .bj-cf-chip{font-size:8.5px}' +
         '.bj-pz .bj-cf-disc{font-size:8.5px}}';
       (document.head || document.documentElement).appendChild(bjcfStyle);
@@ -2649,6 +2651,22 @@ function bjHeaderMainInit() {
       return d === '' ? null : parseInt(d, 10);
     };
     var bjpFmt = function(n) { return n.toLocaleString('ko-KR'); };
+    var BJ_LIST_PRICE_OVERRIDES = {
+      // 상세 LPT 기준 보강: 운영 리스트 원본 fee2가 0원으로 내려와 할인 라인이 숨는 핵심 정수기.
+      // card = 제휴카드 적용 최종 월액, reward = 타사보상+카드 적용 최종 월액.
+      '27061': { card: 2900, reward: 19610 },
+      '27062': { card: 0, reward: 16910 },
+      '32099': { card: 1900, reward: 18710 },
+      '32098': { card: 0, reward: 16010 },
+      '32097': { card: 0 },
+      '32096': { card: 0 }
+    };
+    var bjpProdNo = function(item) {
+      var a = item && item.querySelector('a[href*="/prod_view/"]');
+      var href = a ? (a.getAttribute('href') || '') : '';
+      var m = href.match(/prod_view\/(\d+)/);
+      return m ? m[1] : '';
+    };
     var bjpFormat = function(item) {
       if (item.getAttribute('data-bjp')) return;
       var fee = item.querySelector('.fee');
@@ -2657,15 +2675,22 @@ function bjHeaderMainInit() {
       var reg = bjpParse(fee.querySelector('.price'));
       if (reg === null) return;
       var card = fee2 ? bjpParse(fee2.querySelector('.price')) : null;
-      var hasDisc = card !== null && card > 0 && card < reg;
+      var override = BJ_LIST_PRICE_OVERRIDES[bjpProdNo(item)];
+      var hasOverrideCard = override && Object.prototype.hasOwnProperty.call(override, 'card');
+      if (hasOverrideCard) card = override.card;
+      var reward = (override && Object.prototype.hasOwnProperty.call(override, 'reward')) ? override.reward : null;
+      var hasDisc = card !== null && card < reg && (card > 0 || hasOverrideCard);
+      var hasReward = reward !== null && reward >= 0 && reward < reg;
       var bjpPct = hasDisc ? Math.round((reg - card) / reg * 100) : 0;
-      item.setAttribute('data-bj-disc', String(bjpPct));   // 할인높은순 정렬용
+      var rewardPct = hasReward ? Math.round((reg - reward) / reg * 100) : 0;
+      item.setAttribute('data-bj-disc', String(Math.max(bjpPct, rewardPct)));   // 할인높은순 정렬용
       var box = document.createElement('div');
       box.className = 'bj-pz';
       if (hasDisc) {
         box.innerHTML =
           '<div class="bj-cf-line bj-cf-normal"><span class="bj-cf-chip">최저</span><span class="bj-cf-val">월 <b>' + bjpFmt(reg) + '원</b></span></div>' +
-          '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span><span class="bj-cf-val"><span class="bj-cf-disc">-' + bjpPct + '%</span>월 <b>' + bjpFmt(card) + '원</b></span></div>';
+          '<div class="bj-cf-line bj-cf-deal"><span class="bj-cf-chip">제휴💳</span><span class="bj-cf-val"><span class="bj-cf-disc">-' + bjpPct + '%</span>월 <b>' + bjpFmt(card) + '원</b></span></div>' +
+          (hasReward ? '<div class="bj-cf-line bj-cf-reward"><span class="bj-cf-chip">타사보상</span><span class="bj-cf-val"><span class="bj-cf-disc">-' + rewardPct + '%</span>월 <b>' + bjpFmt(reward) + '원</b></span></div>' : '');
       } else {
         // 할인 없음: 최저만 + 높이 맞춤용 숨김 placeholder 줄
         box.innerHTML =
@@ -2850,7 +2875,7 @@ function bjHeaderMainInit() {
           name:'코웨이 아이콘3 아이콘 3.0 냉온정수기',
           img:'https://rentalshop.site/_data/file/goodsImages/ab9345e2cea9608a46ad0538a6370329.png',
           fee:'31,900',
-          cardFee:'0'
+          cardFee:'1,900'
         }));
       }
     };
