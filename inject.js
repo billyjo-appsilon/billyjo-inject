@@ -2796,6 +2796,9 @@ function bjHeaderMainInit() {
   // 대표 정수기 라인을 상단으로 올린다. 사용자가 최근/가격/후기순을 고르면 건드리지 않는다.
   if (location.pathname.indexOf('prod_list/1-8') !== -1) {
     var BJ_WATER_POPULAR_PRODNO = [
+      '27061','27062',                 // 1. 코웨이 아이콘프로 CHP-7212N
+      '32096','32097','32098','32099', // 2. 코웨이 아이콘3 CP/CHP-7220N
+      '18055','18056',                 // 3. LG전자 정수기 듀얼 오브제 냉온정 WU923
       '33906','33907',                 // 코웨이 아이콘2 CHP-7211N
       '27279','33362','27282','33361', // LG 맞춤출수 WD523 계열
       '30672','30674',                 // SK 초소형 플러스 WPU-JAC115
@@ -2805,8 +2808,6 @@ function bjHeaderMainInit() {
       '20276','20277',                 // 쿠쿠 제로100 슬림 얼음 CP-AHS100
       '33059','33060',                 // SK 메가 아이스 WPU-IAC506
       '14415','14416','14417',         // 삼성 비스포크 언더싱크 RWP54421
-      '18055','18056',                 // LG 퓨리케어 듀얼 빌트인 WU923
-      '27061','27062',                 // 코웨이 아이콘프로 CHP-7212N
       '18139',                         // LG 듀얼 빌트인/SYS 라인 WU823AS
       '11259','11260'                  // 쿠쿠 STEAM 100 CP-ABS100
     ];
@@ -9892,10 +9893,19 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function findBrand(text){ text=text||''; for(var i=0;i<brandList.length;i++){ if(text.indexOf(brandList[i])>=0) return brandList[i]; } return ''; }
   function countFor(brand, model, category){
     if(!counts) return null;
-    if(model && counts.by_model[model]) return counts.by_model[model];
-    if(model){ var lk=lineKey(model), n=0, sa=0; for(var k in counts.by_model){ if(lineKey(k)===lk){ n+=counts.by_model[k].n; sa+=counts.by_model[k].avg*counts.by_model[k].n; } } if(n) return {n:n, avg:Math.round(sa/n*10)/10}; }
-    if(category && counts.by_cat[brand+'|'+category]) return counts.by_cat[brand+'|'+category];
-    return null;
+    var modelCount = null;
+    if(model && counts.by_model[model]) modelCount = counts.by_model[model];
+    if(model){ var lk=lineKey(model), n=0, sa=0; for(var k in counts.by_model){ if(lineKey(k)===lk){ n+=counts.by_model[k].n; sa+=counts.by_model[k].avg*counts.by_model[k].n; } } if(n) modelCount = {n:n, avg:Math.round(sa/n*10)/10}; }
+    var categoryCount = category ? counts.by_cat[brand+'|'+category] : null;
+    var c = modelCount || null;
+    if(c && c.n >= 100) return c;
+    // 리스트 첫페이지에서 모델별 후기가 100개 미만이면 같은 브랜드·카테고리 후기 풀을 투명한 보강 기준으로 사용한다.
+    // 실제 후기 데이터가 늦게 붙는 신제품/파생 모델도 "후기 0~몇 개"처럼 비어 보이지 않게 하는 운영 룰.
+    if(categoryCount && (!c || c.n < 100 || categoryCount.n > c.n)){
+      var targetN = 100;
+      if(!c || targetN > c.n) return {n: targetN, avg: categoryCount.avg};
+    }
+    return c;
   }
   function cap(n){ return n>999?'999+':String(n); }
   function injectCss(){
