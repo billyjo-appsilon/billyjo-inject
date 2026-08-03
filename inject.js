@@ -2791,6 +2791,73 @@ function bjHeaderMainInit() {
     setTimeout(function() { clearInterval(bjSortIv); }, 20000);
   }
 
+  // === 정수기 인기순 보정: 운영 추천 핵심 모델을 기본 인기순 상단에 고정 ===
+  // native 인기순이 후기 수집/상품명 갱신 타이밍에 흔들릴 수 있어, /prod_list/1-8의 기본 인기순에서만
+  // 대표 정수기 라인을 상단으로 올린다. 사용자가 최근/가격/후기순을 고르면 건드리지 않는다.
+  if (location.pathname.indexOf('prod_list/1-8') !== -1) {
+    var BJ_WATER_POPULAR_PRODNO = [
+      '33906','33907',                 // 코웨이 아이콘2 CHP-7211N
+      '27279','33362','27282','33361', // LG 맞춤출수 WD523 계열
+      '30672','30674',                 // SK 초소형 플러스 WPU-JAC115
+      '30530','30531',                 // SK 원코크 플러스 WPU-IAC425
+      '28309','28310',                 // 코웨이 아이콘 얼음 미니 CHPI-7430N
+      '28247','28248','28249','28250', // 코웨이 아이콘 얼음 스탠다드 CHPI/CPI-7410N
+      '20276','20277',                 // 쿠쿠 제로100 슬림 얼음 CP-AHS100
+      '33059','33060',                 // SK 메가 아이스 WPU-IAC506
+      '14415','14416','14417',         // 삼성 비스포크 언더싱크 RWP54421
+      '18055','18056',                 // LG 퓨리케어 듀얼 빌트인 WU923
+      '27061','27062',                 // 코웨이 아이콘프로 CHP-7212N
+      '18139',                         // LG 듀얼 빌트인/SYS 라인 WU823AS
+      '11259','11260'                  // 쿠쿠 STEAM 100 CP-ABS100
+    ];
+    var BJ_WATER_POPULAR_RANK = {};
+    BJ_WATER_POPULAR_PRODNO.forEach(function(no, idx){ BJ_WATER_POPULAR_RANK[no] = idx + 1; });
+    var bjWaterProdNo = function(item) {
+      var a = item && item.querySelector('a[href*="/prod_view/"]');
+      var href = a ? (a.getAttribute('href') || '') : '';
+      var m = href.match(/prod_view\/(\d+)/);
+      return m ? m[1] : '';
+    };
+    var bjIsNativePopular = function() {
+      var pc = document.querySelector('.bj-sortdd__tit');
+      var mo = document.querySelector('.sort__tit');
+      var txt = ((pc && pc.textContent) || (mo && mo.textContent) || '인기순').trim();
+      return !txt || txt.indexOf('인기') !== -1;
+    };
+    var bjWaterPopularSort = function() {
+      if (!bjIsNativePopular()) return;
+      var list = document.querySelector('.prod_list'); if (!list) return;
+      var items = Array.prototype.slice.call(list.querySelectorAll('.item'));
+      if (!items.length) return;
+      var moved = false;
+      items.forEach(function(it, i){
+        if (!it.getAttribute('data-bj-native-order')) it.setAttribute('data-bj-native-order', String(i + 1));
+      });
+      items.sort(function(a, b){
+        var ra = BJ_WATER_POPULAR_RANK[bjWaterProdNo(a)] || 9999;
+        var rb = BJ_WATER_POPULAR_RANK[bjWaterProdNo(b)] || 9999;
+        if (ra !== rb) return ra - rb;
+        return (+a.getAttribute('data-bj-native-order') || 0) - (+b.getAttribute('data-bj-native-order') || 0);
+      });
+      items.forEach(function(it, idx){
+        if (it.parentNode === list && list.children[idx] !== it) moved = true;
+        list.appendChild(it);
+      });
+      if (moved) list.setAttribute('data-bj-water-popular', '1');
+    };
+    bjWaterPopularSort();
+    var bjWaterIv = setInterval(bjWaterPopularSort, 500);
+    setTimeout(function(){ clearInterval(bjWaterIv); }, 20000);
+    var bjWaterAttach = setInterval(function(){
+      var list = document.querySelector('.prod_list'); if (!list) return;
+      clearInterval(bjWaterAttach);
+      var t;
+      new MutationObserver(function(){ clearTimeout(t); t = setTimeout(bjWaterPopularSort, 120); })
+        .observe(list, { childList: true });
+    }, 500);
+    setTimeout(function(){ clearInterval(bjWaterAttach); }, 20000);
+  }
+
   // === 카테고리 탭(.prod_list__cate) 순서 재배치 ===
   // 목표: 정수기·에어컨 유지 + 제습기/가습기·로봇청소기·비데를 공기청정기 뒤로 전진. 나머지는 원래 상대순서 유지.
   if (location.pathname.indexOf('prod_list') !== -1) {
@@ -9810,7 +9877,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function normBrand(b){ b=(b||'').trim(); return BMAP[b]||b; }
   function catOf(name){ name=name||''; for(var i=0;i<CMAP.length;i++){ if(name.indexOf(CMAP[i][0])>=0) return CMAP[i][1]; } return ''; }
   function extractModel(title){ var s=String(title||'').toUpperCase(); var c=s.match(/[A-Z]{2,}[A-Z0-9-]*[0-9][A-Z0-9-]*/g); if(!c) return null; var STOP=/^(LED|USB|BLDC|HEPA|UVC?|KC|AI|TV|PC|3D|2D|[0-9]+[LWGKMH]|V[0-9]+|NEW|HD|FHD|UHD)$/; var m=c.filter(function(x){return x.length>=4&&x.length<=30&&!STOP.test(x)&&/[0-9]/.test(x)&&/[A-Z]/.test(x);}); if(!m.length) return null; m.sort(function(a,b){return b.length-a.length;}); return m[0].replace(/[_].*$/,'').replace(/-$/,''); }
-  function lineKey(m){ if(!m) return ''; var x=String(m).toUpperCase().match(/^([A-Z]+-?[0-9])/); return x?x[1]:String(m).toUpperCase().slice(0,4); }
+  function lineKey(m){
+    if(!m) return '';
+    var s=String(m).toUpperCase().replace(/[^A-Z0-9]/g,'');
+    // 관리형/색상/방문주기 접미사(SNW, 2개월, 색상코드 등)를 떼고 모델 라인으로 묶는다.
+    // 예: WPUIAC425SNW ↔ WPU-IAC425P, WD523VHSPM ↔ WD523VC, CPABS100GWGP ↔ CP-ABS100G.
+    var x=s.match(/^([A-Z]+[0-9]+)/);
+    if(x) return x[1];
+    x=s.match(/^([A-Z]+[0-9]{2})/);
+    return x?x[1]:s.slice(0,5);
+  }
   var counts=null, brandList=[];
   // 카드 텍스트(제품명·모델·이미지alt)에서 알려진 브랜드 키워드 탐색 (제품명이 브랜드로 시작 안 할 때 보강)
   function findBrand(text){ text=text||''; for(var i=0;i<brandList.length;i++){ if(text.indexOf(brandList[i])>=0) return brandList[i]; } return ''; }
