@@ -2797,7 +2797,7 @@ function bjHeaderMainInit() {
   if (location.pathname.indexOf('prod_list/1-8') !== -1) {
     var BJ_WATER_POPULAR_PRODNO = [
       '27061','27062',                 // 1. 코웨이 아이콘프로 CHP-7212N
-      '32096','32097','32098','32099', // 2. 코웨이 아이콘3 CP/CHP-7220N
+      '32099','32098','32097','32096', // 2. 코웨이 아이콘3 CP/CHP-7220N
       '18055','18056',                 // 3. LG전자 정수기 듀얼 오브제 냉온정 WU923
       '33906','33907',                 // 코웨이 아이콘2 CHP-7211N
       '27279','33362','27282','33361', // LG 맞춤출수 WD523 계열
@@ -2819,6 +2819,39 @@ function bjHeaderMainInit() {
       var m = href.match(/prod_view\/(\d+)/);
       return m ? m[1] : '';
     };
+    var bjWaterHasProd = function(list, prodNos) {
+      for (var i=0; i<prodNos.length; i++) {
+        if (list.querySelector('a[href*="/prod_view/'+prodNos[i]+'"]')) return true;
+      }
+      return false;
+    };
+    var bjWaterCard = function(d) {
+      var item = document.createElement('div');
+      item.className = 'item bj-water-priority-card';
+      item.innerHTML =
+        '<div class="box"><a href="/html/dh_prod/prod_view/'+d.no+'" target="_self">' +
+        '<div class="thumb"><img src="'+d.img+'" alt="'+d.name+'"></div>' +
+        '<div class="txt"><div class="txt__cate"><p style="display:none;">&nbsp;</p><p style="display:none;">&nbsp;</p><p style="display:none;">&nbsp;</p></div>' +
+        '<p class="brand">'+d.brand+'</p><p class="name">'+d.name+'</p></div>' +
+        '<div class="fee"><span class="label">월 렌탈료</span><p class="price sale"><strong>'+d.fee+'</strong>원</p></div>' +
+        '<div class="fee2"><span class="label">제휴카드 할인</span><p class="price sale"><strong>'+d.cardFee+'</strong>원</p></div>' +
+        '</a></div>';
+      return item;
+    };
+    var bjEnsureWaterPriorityCards = function() {
+      var list = document.querySelector('.prod_list'); if (!list) return;
+      if (!bjIsNativePopular()) return;
+      if (!bjWaterHasProd(list, ['32099','32098','32097','32096'])) {
+        list.appendChild(bjWaterCard({
+          no:'32099',
+          brand:'CHP-7220N 반값할인',
+          name:'코웨이 아이콘3 아이콘 3.0 냉온정수기',
+          img:'https://rentalshop.site/_data/file/goodsImages/ab9345e2cea9608a46ad0538a6370329.png',
+          fee:'31,900',
+          cardFee:'0'
+        }));
+      }
+    };
     var bjIsNativePopular = function() {
       var pc = document.querySelector('.bj-sortdd__tit');
       var mo = document.querySelector('.sort__tit');
@@ -2828,6 +2861,7 @@ function bjHeaderMainInit() {
     var bjWaterPopularSort = function() {
       if (!bjIsNativePopular()) return;
       var list = document.querySelector('.prod_list'); if (!list) return;
+      bjEnsureWaterPriorityCards();
       var items = Array.prototype.slice.call(list.querySelectorAll('.item'));
       if (!items.length) return;
       var moved = false;
