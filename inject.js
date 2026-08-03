@@ -5276,18 +5276,47 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function bjHighlightPartnership(){
     try {
       if (!/\/html\/dh\/partnership_card/.test(location.pathname)) return;
-      if (document.getElementById('bj-partnership-highlight')) return;
       var params = new URLSearchParams(location.search);
       var supName = params.get('bj');
       if (!supName) return;
+      var isVisibleBox = function(el){
+        if (!el) return false;
+        var cs = window.getComputedStyle ? window.getComputedStyle(el) : null;
+        if (cs && (cs.display === 'none' || cs.visibility === 'hidden')) return false;
+        var rect = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+        return !!(rect && rect.width > 0);
+      };
+      var existing = document.getElementById('bj-partnership-highlight');
+      if (existing && isVisibleBox(existing.parentElement)) return;
       var lis = document.querySelectorAll('li');
       var targetLi = null;
+      var normalizedSupName = String(supName).replace(/\s+/g, '').toLowerCase();
       for (var i = 0; i < lis.length; i++) {
         var titEl = lis[i].querySelector('.tit__param01');
-        if (titEl && titEl.textContent.indexOf(supName) >= 0) { targetLi = lis[i]; break; }
+        var titText = titEl ? String(titEl.textContent || '').replace(/\s+/g, '').toLowerCase() : '';
+        if (titText && titText.indexOf(normalizedSupName) >= 0) { targetLi = lis[i]; break; }
       }
       if (!targetLi) return;
-      var wrap = document.createElement('div');
+      var sourceList = targetLi.parentElement;
+      var sourceWrap = sourceList && sourceList.closest ? sourceList.closest('.wide-inner, .content, #container') : null;
+      var visibleParent = null;
+      var beforeNode = null;
+      if (sourceWrap && !isVisibleBox(sourceWrap) && sourceWrap.parentElement && isVisibleBox(sourceWrap.parentElement)) {
+        visibleParent = sourceWrap.parentElement;
+        beforeNode = sourceWrap;
+      } else {
+        var candidates = [
+          document.querySelector('#container'),
+          document.querySelector('.service__wrap') && document.querySelector('.service__wrap').parentElement,
+          document.querySelector('.wide-inner .content'),
+          document.body
+        ];
+        for (var c = 0; c < candidates.length; c++) {
+          if (isVisibleBox(candidates[c])) { visibleParent = candidates[c]; break; }
+        }
+      }
+      if (!visibleParent) visibleParent = document.body;
+      var wrap = existing || document.createElement('div');
       wrap.id = 'bj-partnership-highlight';
       var safeName = supName.replace(/[<>&"']/g, '');
       wrap.innerHTML =
@@ -5297,12 +5326,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '</div>' +
         '<div class="bj-php-clone"></div>';
       wrap.querySelector('.bj-php-clone').appendChild(targetLi.cloneNode(true));
-      var content = document.querySelector('.wide-inner .content') ||
-                    document.querySelector('.wide-inner') ||
-                    document.querySelector('#container') ||
-                    document.body;
-      content.insertBefore(wrap, content.firstChild);
-      var sourceList = targetLi.parentElement;
+      visibleParent.insertBefore(wrap, beforeNode || visibleParent.firstChild);
       if (sourceList && sourceList.children && sourceList.children.length > 1) {
         sourceList.setAttribute('data-bj-partnership-filtered', 'true');
         sourceList.style.display = 'none';
