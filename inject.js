@@ -36,6 +36,28 @@
   } catch (_) { }
 })();
 
+/* Home application step cards — mobile density fix (2026-08-05).
+   Keep the desktop card design, but on mobile make icon + title read as one header row. */
+(function bjMobileStepCardHeader(){
+  try {
+    if (document.getElementById('bj-mobile-step-card-css')) return;
+    var css = '@media(max-width:768px){'
+      + '.step-card{display:grid!important;grid-template-columns:46px minmax(0,1fr)!important;grid-template-areas:"num num" "icon title" "desc desc"!important;align-items:center!important;text-align:left!important;column-gap:10px!important;row-gap:0!important;padding:18px 18px 17px!important}'
+      + '.step-card .step-num{grid-area:num!important;margin:0 0 11px!important;justify-content:flex-start!important;align-items:center!important}'
+      + '.step-card .step-icon-wrap{grid-area:icon!important;width:42px!important;height:42px!important;margin:0!important;display:flex!important;align-items:center!important;justify-content:center!important}'
+      + '.step-card .step-icon-wrap .bj-lot{width:22px!important;height:22px!important}'
+      + '.step-card .step-icon-wrap svg.ico{width:22px!important;height:22px!important}'
+      + '.step-card .step-t{grid-area:title!important;margin:0!important;text-align:left!important;font-size:17px!important;line-height:1.25!important;letter-spacing:0!important;min-width:0!important}'
+      + '.step-card .step-d{grid-area:desc!important;margin:10px 0 0!important;text-align:left!important;font-size:13.5px!important;line-height:1.58!important;min-width:0!important}'
+      + '}'
+      + '@media(max-width:360px){.step-card{grid-template-columns:42px minmax(0,1fr)!important;padding:17px 16px 16px!important}.step-card .step-icon-wrap{width:40px!important;height:40px!important}.step-card .step-t{font-size:16px!important}.step-card .step-d{font-size:13px!important}}';
+    var style = document.createElement('style');
+    style.id = 'bj-mobile-step-card-css';
+    style.textContent = css;
+    (document.head || document.documentElement).appendChild(style);
+  } catch (_) { }
+})();
+
 /* Partner badge cleanup — older builds mounted Meta/toss logos in the native footer.
    The logos now live in the home trust card where the message has context. */
 (function () {
