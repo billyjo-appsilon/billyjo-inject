@@ -36,6 +36,66 @@
   } catch (_) { }
 })();
 
+/* Footer partner badges — show Meta Business Partner + toss in the native Billyjo footer.
+   The home page can render the original `.new-footer` instead of the injected FAQ footer,
+   so this module mounts independently and keeps the logo cards the same size. */
+(function () {
+  'use strict';
+  if (window.__bjNativeFooterPartners) return;
+  window.__bjNativeFooterPartners = 1;
+
+  function asset(path) {
+    var scripts = document.getElementsByTagName('script');
+    for (var i = scripts.length - 1; i >= 0; i--) {
+      var src = scripts[i].src || '';
+      if (src.indexOf('billyjo-inject@') !== -1 && src.indexOf('/inject.js') !== -1) {
+        return src.replace(/\/inject\.js(?:\?.*)?$/, '/' + path);
+      }
+    }
+    return 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/' + path;
+  }
+
+  function ensureStyle() {
+    if (document.getElementById('bj-native-partner-css')) return;
+    var st = document.createElement('style');
+    st.id = 'bj-native-partner-css';
+    st.textContent =
+      '.bj-native-partners{display:flex!important;justify-content:center!important;align-items:center!important;gap:10px!important;flex-wrap:wrap!important;margin:0 auto 18px!important;padding:0 0 18px!important;border-bottom:1px solid rgba(255,255,255,.1)!important}' +
+      '.bj-native-partner{width:148px!important;height:54px!important;padding:10px 14px!important;border-radius:12px!important;background:#fff!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 10px 24px rgba(0,0,0,.18)!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important}' +
+      '.bj-native-partner img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important}' +
+      '@media(max-width:420px){.bj-native-partners{gap:8px!important}.bj-native-partner{width:min(43vw,148px)!important;height:50px!important;padding:9px 11px!important}}';
+    (document.head || document.documentElement).appendChild(st);
+  }
+
+  function mount() {
+    var footer = document.querySelector('.new-footer');
+    if (!footer || footer.querySelector('.bj-native-partners')) return false;
+    var anchor = footer.querySelector('.footer__info') || footer.querySelector('.footer__wrap') || footer;
+    if (!anchor) return false;
+    ensureStyle();
+    var wrap = document.createElement('div');
+    wrap.className = 'bj-native-partners';
+    wrap.setAttribute('aria-label', '공식 파트너 및 결제 로고');
+    wrap.innerHTML =
+      '<div class="bj-native-partner"><img src="' + asset('images/meta-business-partner.webp') + '" alt="Meta Business Partner" loading="lazy" decoding="async"></div>' +
+      '<div class="bj-native-partner"><img src="' + asset('images/toss-logo.webp') + '" alt="toss" loading="lazy" decoding="async"></div>';
+    anchor.insertBefore(wrap, anchor.firstChild);
+    return true;
+  }
+
+  function boot() {
+    if (mount()) return;
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries += 1;
+      if (mount() || tries > 30) clearInterval(timer);
+    }, 300);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+
 /* =========================================================================
  * [가드] 랜딩 최상단 보장 (2026-07-26)
  *   규칙: 모바일/PC 어느 페이지든 "새로 진입(랜딩)"하면 화면 최상단에서 시작해야 한다.
