@@ -36,50 +36,17 @@
   } catch (_) { }
 })();
 
-/* Footer partner badges — show Meta Business Partner + toss in the native Billyjo footer.
-   The home page can render the original `.new-footer` instead of the injected FAQ footer,
-   so this module mounts independently and keeps the logo cards the same size. */
+/* Partner badge cleanup — older builds mounted Meta/toss logos in the native footer.
+   The logos now live in the home trust card where the message has context. */
 (function () {
   'use strict';
   if (window.__bjNativeFooterPartners) return;
   window.__bjNativeFooterPartners = 1;
 
-  function asset(path) {
-    var scripts = document.getElementsByTagName('script');
-    for (var i = scripts.length - 1; i >= 0; i--) {
-      var src = scripts[i].src || '';
-      if (src.indexOf('billyjo-inject@') !== -1 && src.indexOf('/inject.js') !== -1) {
-        return src.replace(/\/inject\.js(?:\?.*)?$/, '/' + path);
-      }
-    }
-    return 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/' + path;
-  }
-
-  function ensureStyle() {
-    if (document.getElementById('bj-native-partner-css')) return;
-    var st = document.createElement('style');
-    st.id = 'bj-native-partner-css';
-    st.textContent =
-      '.bj-native-partners{display:flex!important;justify-content:center!important;align-items:center!important;gap:10px!important;flex-wrap:wrap!important;margin:0 auto 18px!important;padding:0 0 18px!important;border-bottom:1px solid rgba(255,255,255,.1)!important}' +
-      '.bj-native-partner{width:148px!important;height:54px!important;padding:10px 14px!important;border-radius:12px!important;background:#fff!important;border:1px solid rgba(255,255,255,.14)!important;box-shadow:0 10px 24px rgba(0,0,0,.18)!important;display:flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important}' +
-      '.bj-native-partner img{display:block!important;width:100%!important;height:100%!important;object-fit:contain!important}' +
-      '@media(max-width:420px){.bj-native-partners{gap:8px!important}.bj-native-partner{width:min(43vw,148px)!important;height:50px!important;padding:9px 11px!important}}';
-    (document.head || document.documentElement).appendChild(st);
-  }
-
   function mount() {
-    var footer = document.querySelector('.new-footer');
-    if (!footer || footer.querySelector('.bj-native-partners')) return false;
-    var anchor = footer.querySelector('.footer__info') || footer.querySelector('.footer__wrap') || footer;
-    if (!anchor) return false;
-    ensureStyle();
-    var wrap = document.createElement('div');
-    wrap.className = 'bj-native-partners';
-    wrap.setAttribute('aria-label', '공식 파트너 및 결제 로고');
-    wrap.innerHTML =
-      '<div class="bj-native-partner"><img src="' + asset('images/meta-business-partner.webp') + '" alt="Meta Business Partner" loading="lazy" decoding="async"></div>' +
-      '<div class="bj-native-partner"><img src="' + asset('images/toss-logo.webp') + '" alt="toss" loading="lazy" decoding="async"></div>';
-    anchor.insertBefore(wrap, anchor.firstChild);
+    Array.prototype.forEach.call(document.querySelectorAll('.bj-native-partners'), function (el) {
+      if (el && el.parentNode) el.parentNode.removeChild(el);
+    });
     return true;
   }
 
@@ -3952,6 +3919,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     });
 
     // 신뢰도 트러스트 카드(.hero "설치 케어는 본사에서") → 시안 "믿고 맡길 수 있는 빌리조"로 텍스트 교체 + 후기 다음(order 4) (2026-07-02)
+    if (!document.getElementById('bj-trust-partners-css')) {
+      var bjTrustCss = document.createElement('style');
+      bjTrustCss.id = 'bj-trust-partners-css';
+      bjTrustCss.textContent =
+        '.bj-trust-partners{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px auto 0;max-width:330px}' +
+        '.bj-trust-partner{width:148px;height:54px;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid rgba(8,56,248,.12);box-shadow:0 10px 24px rgba(8,28,92,.1);display:flex;align-items:center;justify-content:center;box-sizing:border-box}' +
+        '.bj-trust-partner img{display:block;width:100%;height:100%;object-fit:contain}' +
+        '@media(max-width:420px){.bj-trust-partners{gap:8px;margin-top:14px;max-width:100%}.bj-trust-partner{width:min(43vw,148px);height:50px;padding:9px 11px}}';
+      (document.head || document.documentElement).appendChild(bjTrustCss);
+    }
     var bjTrust = pageEl.querySelector('.hero');
     if (bjTrust && !bjTrust.getAttribute('data-bj-trust')) {
       bjTrust.setAttribute('data-bj-trust', '1');
@@ -3959,9 +3936,19 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var bjTh = bjTrust.querySelector('h1');
       if (bjTh) bjTh.innerHTML = '믿고 맡길 수 있는 <span class="yellow">빌리조</span>';
       var bjTp = bjTrust.querySelector('p');
-      if (bjTp) bjTp.innerHTML = '막막했던 설치부터 관리까지 부담 Zero!<br>빌리조는 전 상품 정품 보장하는 직계약 렌탈 플랫폼입니다.';
+      if (bjTp) bjTp.innerHTML = '빌리조는 Meta, Toss 공식파트너사가 직접 운영하는<br>AI 렌탈 비교, 직계약 서비스입니다.';
       var bjEb = bjTrust.querySelector('.badge-hero');
       if (bjEb) bjEb.style.display = 'none';
+      if (!bjTrust.querySelector('.bj-trust-partners')) {
+        var bjTrustPartners = document.createElement('div');
+        bjTrustPartners.className = 'bj-trust-partners';
+        bjTrustPartners.setAttribute('aria-label', '빌리조 공식 파트너 로고');
+        bjTrustPartners.innerHTML =
+          '<div class="bj-trust-partner"><img src="' + bjInjectAsset('images/meta-business-partner.webp') + '" alt="Meta Business Partner" loading="lazy" decoding="async"></div>' +
+          '<div class="bj-trust-partner"><img src="' + bjInjectAsset('images/toss-logo.webp') + '" alt="toss" loading="lazy" decoding="async"></div>';
+        if (bjTp && bjTp.parentNode) bjTp.parentNode.insertBefore(bjTrustPartners, bjTp.nextSibling);
+        else bjTrust.appendChild(bjTrustPartners);
+      }
     }
 
     // 브릿지 캡션 신규 추가 (시안 9:89, 2026-07-02) — 히어로 다음·후기 위(order 2). "오래 사용할 가전인데..."
@@ -4227,13 +4214,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       // 푸터 링크 = 개인정보처리방침(법정 필수) + 1:1 문의(→간편문의 페이지). 회사소개·이용약관·제휴문의는 실제 페이지 없어 제외 (2026-07-07)
       bjFnav.innerHTML = '<a href="/html/dh/privacy_policy">개인정보처리방침</a><a href="/html/dh/counsel">1:1 문의</a><a href="https://guide.billyjo.co.kr/guide" target="_blank" rel="noopener">렌탈 가이드</a>';
       bjFaqSec.appendChild(bjFnav);
-      var bjFpartners = document.createElement('div');
-      bjFpartners.className = 'bj-fpartners';
-      bjFpartners.setAttribute('aria-label', '공식 파트너 및 결제 로고');
-      bjFpartners.innerHTML =
-        '<div class="bj-fpartner"><img src="' + bjInjectAsset('images/meta-business-partner.webp') + '" alt="Meta Business Partner" loading="lazy" decoding="async"></div>' +
-        '<div class="bj-fpartner"><img src="' + bjInjectAsset('images/toss-logo.webp') + '" alt="toss" loading="lazy" decoding="async"></div>';
-      bjFaqSec.appendChild(bjFpartners);
       var bjFinfo = document.createElement('div');
       bjFinfo.className = 'bj-finfo';
       // 공정위 통신판매 사업자정보 확인 링크(전자상거래법 표시 대상) — 푸터 맨 아래(저작권 다음)에 배치, 팝업 오픈 (2026-07-07)
