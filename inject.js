@@ -3948,9 +3948,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '.bj-trust-partners{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px auto 0;max-width:330px}' +
         '.bj-trust-partner{width:148px;height:54px;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid rgba(8,56,248,.12);box-shadow:0 10px 24px rgba(8,28,92,.1);display:flex;align-items:center;justify-content:center;box-sizing:border-box}' +
         '.bj-trust-partner img{display:block;width:100%;height:100%;object-fit:contain}' +
-        '.bj-trust-kicker{font-size:16px;line-height:1.25;font-weight:900;color:#1f2937;letter-spacing:0;margin:0 auto 5px;text-align:center}' +
+        '.bj-trust-kicker{font-size:17px;line-height:1.25;font-weight:900;color:#1f2937;letter-spacing:0;margin:0 auto 5px;text-align:center}' +
         '.bj-trust-kicker .yellow{color:#ffd000;font-size:inherit;line-height:inherit}' +
-        '@media(max-width:420px){.bj-trust-partners{gap:8px;margin-top:14px;max-width:100%}.bj-trust-partner{width:min(43vw,148px);height:50px;padding:9px 11px}}';
+        '@media(max-width:420px){.hero[data-bj-trust="1"] h1{font-size:24px!important;line-height:1.24!important}.bj-trust-partners{gap:8px;margin-top:14px;max-width:100%}.bj-trust-partner{width:min(43vw,148px);height:50px;padding:9px 11px}}';
       (document.head || document.documentElement).appendChild(bjTrustCss);
     }
     var bjTrust = pageEl.querySelector('.hero');
@@ -3961,7 +3961,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (bjTh && !bjTrust.querySelector('.bj-trust-kicker')) {
         var bjKicker = document.createElement('div');
         bjKicker.className = 'bj-trust-kicker';
-        bjKicker.innerHTML = '필요한건 최대로 받고 <span class="yellow">빌리조</span>';
+        bjKicker.innerHTML = '혜택은 최대로, 필요한건 <span class="yellow">빌리조!</span>';
         bjTh.parentNode.insertBefore(bjKicker, bjTh);
       }
       if (bjTh) bjTh.innerHTML = '믿고 맡길 수 있는 <span class="yellow">빌리조</span>';
