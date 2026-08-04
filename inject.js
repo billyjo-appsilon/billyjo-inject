@@ -3948,6 +3948,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '.bj-trust-partners{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px auto 0;max-width:330px}' +
         '.bj-trust-partner{width:148px;height:54px;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid rgba(8,56,248,.12);box-shadow:0 10px 24px rgba(8,28,92,.1);display:flex;align-items:center;justify-content:center;box-sizing:border-box}' +
         '.bj-trust-partner img{display:block;width:100%;height:100%;object-fit:contain}' +
+        '.bj-trust-kicker{font-size:13px;font-weight:900;color:#6b7280;letter-spacing:0;margin:0 auto 7px;text-align:center}' +
+        '.bj-trust-kicker .yellow{color:#ffd000}' +
         '@media(max-width:420px){.bj-trust-partners{gap:8px;margin-top:14px;max-width:100%}.bj-trust-partner{width:min(43vw,148px);height:50px;padding:9px 11px}}';
       (document.head || document.documentElement).appendChild(bjTrustCss);
     }
@@ -3956,6 +3958,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjTrust.setAttribute('data-bj-trust', '1');
       bjTrust.style.order = '4';
       var bjTh = bjTrust.querySelector('h1');
+      if (bjTh && !bjTrust.querySelector('.bj-trust-kicker')) {
+        var bjKicker = document.createElement('div');
+        bjKicker.className = 'bj-trust-kicker';
+        bjKicker.innerHTML = '필요한건 최대로 받고 <span class="yellow">빌리조</span>';
+        bjTh.parentNode.insertBefore(bjKicker, bjTh);
+      }
       if (bjTh) bjTh.innerHTML = '믿고 맡길 수 있는 <span class="yellow">빌리조</span>';
       var bjTp = bjTrust.querySelector('p');
       if (bjTp) bjTp.innerHTML = '빌리조는 Meta, Toss 공식파트너사가 직접 운영하는<br>AI 렌탈 비교, 직계약 서비스입니다.';
