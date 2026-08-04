@@ -1905,12 +1905,22 @@
     "}";
   document.head.appendChild(heroDeskFix);
 
-  // === 헤더 아이콘 SVG 교체: 검색 돋보기 + 장바구니 쇼핑백 (브랜드 블루 라인) ===
+  // === 헤더 아이콘 교체: 검색 돋보기 + 장바구니 카트 GIF (브랜드 블루 라인) ===
   // 네이티브 PNG(search_icon/new-search_icon/cart_icon)가 테마와 안 어울려 깔끔한
-  // Lucide 스타일 라인 SVG(#0838f8)로 교체. 모바일 헤더·데스크톱 검색버튼·스크롤헤더 모두 커버.
+  // 브랜드 블루 아이콘으로 교체. 모바일 헤더·데스크톱 검색버튼·스크롤헤더 모두 커버.
   (function bjHeaderIcons() {
     var SEARCH = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#aaaaaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>';
-    var BAG = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#aaaaaa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"></path><path d="M3 6h18"></path><path d="M16 10a4 4 0 0 1-8 0"></path></svg>';
+    function cartIconUrl(){
+      var scripts = document.getElementsByTagName('script');
+      for (var i = scripts.length - 1; i >= 0; i--) {
+        var src = scripts[i].src || '';
+        if (src.indexOf('billyjo-inject@') !== -1 && src.indexOf('/inject.js') !== -1) {
+          return src.replace(/\/inject\.js(?:\?.*)?$/, '/icons/trolley-plus-transparent.gif');
+        }
+      }
+      return 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/icons/trolley-plus-transparent.gif';
+    }
+    window.__bjTrolleyPlusIconUrl = cartIconUrl;
     function mk(svg) {
       var s = document.createElement('span');
       s.className = 'bj-hdr-svg';
@@ -1918,11 +1928,23 @@
       s.innerHTML = svg;
       return s.firstChild;
     }
+    function mkCart() {
+      var img = document.createElement('img');
+      img.className = 'bj-hdr-cart-gif';
+      img.src = cartIconUrl();
+      img.alt = '장바구니';
+      img.width = 28;
+      img.height = 28;
+      img.loading = 'lazy';
+      img.decoding = 'async';
+      img.style.cssText = 'width:28px!important;height:28px!important;object-fit:contain!important;display:block!important';
+      return img;
+    }
     function swap() {
       var sr = document.querySelectorAll('img[src*="search_icon"],img[src*="new-search_icon"]');
       for (var i = 0; i < sr.length; i++) sr[i].replaceWith(mk(SEARCH));
       var ct = document.querySelectorAll('img[src*="cart_icon"]');
-      for (var j = 0; j < ct.length; j++) ct[j].replaceWith(mk(BAG));
+      for (var j = 0; j < ct.length; j++) ct[j].replaceWith(mkCart());
     }
     if (document.readyState !== 'loading') swap();
     else document.addEventListener('DOMContentLoaded', swap);
@@ -2153,9 +2175,12 @@ function bjHeaderMainInit() {
     // Logo row
     var shLogo = document.createElement('div');
     shLogo.className = 'bj-sh-logo';
+    var shCartIcon = window.__bjTrolleyPlusIconUrl
+      ? window.__bjTrolleyPlusIconUrl()
+      : 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/icons/trolley-plus-transparent.gif';
     shLogo.innerHTML = '<img class="bj-sh-hamburger" src="https://billyjo.kr/image/common/m_menu.png">'
       + '<img class="bj-sh-logo-img" src="' + (document.querySelector('a.logo img') ? document.querySelector('a.logo img').src : '') + '">'
-      + '<div class="bj-sh-icons"><a href="javascript:void(0)"><img src="https://billyjo.kr/image/common/search_icon.png"></a><a href="/html/order/cart"><img src="https://billyjo.kr/image/common/cart_icon.png"></a></div>';
+      + '<div class="bj-sh-icons"><a href="javascript:void(0)"><img src="https://billyjo.kr/image/common/search_icon.png"></a><a href="/html/order/cart"><img class="bj-hdr-cart-gif" src="' + shCartIcon + '" alt="장바구니" style="width:28px!important;height:28px!important;object-fit:contain!important;display:block!important"></a></div>';
     shLogo.querySelector('.bj-sh-hamburger').addEventListener('click', function() {
       var orig = document.querySelector('.gnb__hamburger');
       if (orig) orig.click();
