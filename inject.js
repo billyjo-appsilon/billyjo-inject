@@ -14,6 +14,29 @@
  */
 
 /* =========================================================================
+ * [가드] 기기 다크모드 강제 반전 방지 (2026-08-04)
+ *   빌리조 본사이트는 브랜드 블루/화이트 기준의 스킨이다. 모바일 OS/브라우저가
+ *   다크모드라고 해서 입력창·배경·텍스트를 자동 반전하면 가격/CTA 가독성이 깨진다.
+ * ========================================================================= */
+(function bjForceLightScheme(){
+  try {
+    var head = document.head || document.getElementsByTagName('head')[0];
+    if (head && !document.querySelector('meta[name="color-scheme"]')) {
+      var meta = document.createElement('meta');
+      meta.name = 'color-scheme';
+      meta.content = 'only light';
+      head.appendChild(meta);
+    }
+    var css = ':root,html,body{color-scheme:only light!important;background-color:#fff;}'
+      + 'input,select,textarea{color-scheme:only light!important;background-color:#fff;color:#111827;}';
+    var style = document.createElement('style');
+    style.id = 'bj-force-light-scheme';
+    style.textContent = css;
+    (head || document.documentElement).appendChild(style);
+  } catch (_) { }
+})();
+
+/* =========================================================================
  * [가드] 랜딩 최상단 보장 (2026-07-26)
  *   규칙: 모바일/PC 어느 페이지든 "새로 진입(랜딩)"하면 화면 최상단에서 시작해야 한다.
  *   배경: 홈 카테고리 탭의 scrollIntoView가 랜딩 직후 페이지를 중간(≈5200px)으로 점프시킨 사고.
