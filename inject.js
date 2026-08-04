@@ -10116,6 +10116,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     return x?x[1]:s.slice(0,5);
   }
   var counts=null, brandList=[];
+  var BJ_REVIEW_PROD_OVERRIDES = {
+    // 원본 리스트의 V2 관리/색상 파생 모델명은 리뷰 스냅샷 모델키와 직접 매칭되지 않는다.
+    // 여름 주력 얼음정수기 라인은 홈 카테고리 스냅샷의 실제 보유 리뷰수를 리스트 배지에도 유지한다.
+    '24578': { n: 429, avg: 4.9 },
+    '24579': { n: 429, avg: 4.9 },
+    '24580': { n: 429, avg: 4.9 }
+  };
   function normalizeCounts(j){
     if(!j || !j.by_model || !j.by_cat) return null;
     return j;
@@ -10150,6 +10157,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     return c;
   }
   function cap(n){ return n>999?'999+':String(n); }
+  function prodNoOfItem(it){
+    var a = it && it.querySelector('a[href*="/prod_view/"]');
+    var href = a ? (a.getAttribute('href') || '') : '';
+    var m = href.match(/prod_view\/(\d+)/);
+    return m ? m[1] : '';
+  }
   function injectCss(){
     if(document.getElementById('bj-rv-list-style')) return;
     var st=document.createElement('style'); st.id='bj-rv-list-style';
@@ -10174,7 +10187,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var alt=im?(im.getAttribute('alt')||''):'';
       // 브랜드: 제품명/이미지alt에서 알려진 브랜드 키워드 우선, 없으면 제품명 첫 토큰
       var brand=normBrand(findBrand(name+' '+alt) || (name.split(/\s+/)[0]||''));
-      var c=countFor(brand, extractModel(modelTxt+' '+name), catOf(name+' '+alt));
+      var prodOverride = BJ_REVIEW_PROD_OVERRIDES[prodNoOfItem(it)];
+      var c=prodOverride || countFor(brand, extractModel(modelTxt+' '+name), catOf(name+' '+alt));
       it.setAttribute('data-bj-rv','1');
       it.setAttribute('data-bj-rvn', c?c.n:0);
       if(!c) return;
