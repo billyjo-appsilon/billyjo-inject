@@ -4100,6 +4100,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     });
 
     // FAQ 섹션 → 다크 푸터 블록 (시안 Image #25): 상담 헤더 + FAQ + 푸터 nav/저작권, 원본 푸터 숨김 (2026-07-03)
+    function bjInjectAsset(path) {
+      var scripts = document.getElementsByTagName('script');
+      for (var i = scripts.length - 1; i >= 0; i--) {
+        var src = scripts[i].src || '';
+        if (src.indexOf('billyjo-inject@') !== -1 && src.indexOf('/inject.js') !== -1) {
+          return src.replace(/\/inject\.js(?:\?.*)?$/, '/' + path);
+        }
+      }
+      return 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/' + path;
+    }
     if (!document.getElementById('bj-footer-css')) {
       var bjFC = document.createElement('style');
       bjFC.id = 'bj-footer-css';
@@ -4128,6 +4138,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '.bj-footer .answer b{color:#dbe0ea !important}' +
         '.bj-fnav{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 18px;padding:24px 20px 14px;border-top:1px solid rgba(255,255,255,.09)}' +
         '.bj-fnav a{color:#c4cbdb;font-size:13px;text-decoration:none;font-weight:500}' +
+        '.bj-fpartners{display:flex;justify-content:center;align-items:center;gap:10px;flex-wrap:wrap;padding:22px 20px 0;border-top:1px solid rgba(255,255,255,.09)}' +
+        '.bj-fpartner{width:148px;height:54px;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 24px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center}' +
+        '.bj-fpartner img{display:block;width:100%;height:100%;object-fit:contain}' +
+        '@media(max-width:420px){.bj-fpartners{gap:8px}.bj-fpartner{width:min(43vw,148px);height:50px;padding:9px 11px}}' +
         '.bj-finfo{text-align:center;color:#6b7488;font-size:11.5px;line-height:1.75;padding:6px 20px 36px}';
       (document.head || document.documentElement).appendChild(bjFC);
     }
@@ -4153,6 +4167,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       // 푸터 링크 = 개인정보처리방침(법정 필수) + 1:1 문의(→간편문의 페이지). 회사소개·이용약관·제휴문의는 실제 페이지 없어 제외 (2026-07-07)
       bjFnav.innerHTML = '<a href="/html/dh/privacy_policy">개인정보처리방침</a><a href="/html/dh/counsel">1:1 문의</a><a href="https://guide.billyjo.co.kr/guide" target="_blank" rel="noopener">렌탈 가이드</a>';
       bjFaqSec.appendChild(bjFnav);
+      var bjFpartners = document.createElement('div');
+      bjFpartners.className = 'bj-fpartners';
+      bjFpartners.setAttribute('aria-label', '공식 파트너 및 결제 로고');
+      bjFpartners.innerHTML =
+        '<div class="bj-fpartner"><img src="' + bjInjectAsset('images/meta-business-partner.webp') + '" alt="Meta Business Partner" loading="lazy" decoding="async"></div>' +
+        '<div class="bj-fpartner"><img src="' + bjInjectAsset('images/toss-logo.webp') + '" alt="toss" loading="lazy" decoding="async"></div>';
+      bjFaqSec.appendChild(bjFpartners);
       var bjFinfo = document.createElement('div');
       bjFinfo.className = 'bj-finfo';
       // 공정위 통신판매 사업자정보 확인 링크(전자상거래법 표시 대상) — 푸터 맨 아래(저작권 다음)에 배치, 팝업 오픈 (2026-07-07)
