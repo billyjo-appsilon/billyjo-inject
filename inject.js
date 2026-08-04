@@ -4320,6 +4320,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 .bj-reco-price-diff { margin-left: auto; font-size: 10px; font-weight: 700; }\
 .bj-reco-price-diff.is-down { color: #16A34A; }\
 .bj-reco-price-diff.is-up { color: #475569; }\
+.bj-reco-reward { margin-top: -4px; padding: 6px 8px; border-radius: 10px; background: #ECFDF5; color: #047857; font-size: 11px; font-weight: 800; }\
+.bj-reco-reward b { font-size: 13px; color: #065F46; }\
 .bj-reco-strengths { display: flex; flex-wrap: wrap; gap: 4px; }\
 .bj-reco-chip { display: inline-flex; align-items: center; gap: 3px; padding: 3px 8px; background: #F4F6FC; border-radius: 999px; font-size: 10px; color: #475569; font-weight: 600; }\
 .bj-reco-chip.is-grade { background: #EEF2FF; color: #0838F8; }\
@@ -4346,6 +4348,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 .bj-reco-top-price { font-size: 22px; font-weight: 800; color: #0838F8; letter-spacing: -.5px; }\
 .bj-reco-top-price-suffix { font-size: 11px; color: #94A3B8; }\
 .bj-reco-top-diff { font-size: 11px; font-weight: 700; color: #16A34A; margin-left: 4px; }\
+.bj-reco-top-reward { display: inline-flex; width: fit-content; margin-top: 2px; padding: 5px 9px; border-radius: 999px; background: #ECFDF5; color: #047857; font-size: 11px; font-weight: 800; }\
+.bj-reco-top-reward b { color: #065F46; }\
 .bj-reco-top-strengths { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }\
 .bj-reco-top-chip { display: inline-flex; padding: 3px 8px; background: #F4F6FC; color: #475569; border-radius: 999px; font-size: 10px; font-weight: 600; }\
 .bj-reco-top-cta { background: #0838F8; color: #fff; font-size: 13px; font-weight: 700; padding: 10px 16px; border-radius: 10px; white-space: nowrap; }\
@@ -4358,6 +4362,26 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function escapeHtml(s) {
     return String(s == null ? '' : s)
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  var RECO_REWARD_BY_MODEL = {
+    'CHPI-620L': 34010, 'CHPI-620': 34010,
+    'WI-36C90620N': 29900, 'WI-36C90620': 29900,
+    'CHPI-7400N': 30860, 'CHPI-7400': 30860,
+    'CHP-6340L': 17810, 'CHP-6340': 17810,
+    'WU923A': 22900, 'WU923': 22900,
+    'CHP-7212N': 16910, 'CHP-7212': 16910,
+    'AP-3021D': 33110, 'AP-3021': 33110,
+    'CBT-QSB1041W': 6060, 'CBT-QSB1041': 6060
+  };
+
+  function rewardForRecommendation(item) {
+    var text = (((item && item.model) || '') + ' ' + ((item && item.name) || '')).toUpperCase();
+    var keys = Object.keys(RECO_REWARD_BY_MODEL).sort(function(a, b) { return b.length - a.length; });
+    for (var i = 0; i < keys.length; i++) {
+      if (text.indexOf(keys[i]) !== -1) return RECO_REWARD_BY_MODEL[keys[i]];
+    }
+    return 0;
   }
 
   // ── 추천 카드 썸네일: 빌리조 prod_view og:image 동적 fetch + 캐시 ──
@@ -4484,6 +4508,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     }
     var bestCls = idx === 0 ? ' is-best' : '';
     var badgeCls = item.badgeStyle === 'accent' ? ' is-accent' : '';
+    var reward = rewardForRecommendation(item);
+    var rewardHtml = reward && (!item.price || reward < item.price)
+      ? '<div class="bj-reco-reward">타사보상 카드가 월 <b>' + reward.toLocaleString() + '원~</b></div>'
+      : '';
     var imgHtml = item.image
       ? '<img src="' + escapeHtml(item.image) + '" alt="" style="width:100%;height:100%;object-fit:cover;border-radius:12px">'
       : '<div>제품 이미지</div>';
@@ -4496,6 +4524,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '<div class="bj-reco-name">' + escapeHtml(item.name) + '</div>' +
       (item.model ? '<div class="bj-reco-model">' + escapeHtml(item.model) + '</div>' : '') +
       '<div class="bj-reco-price-row">' + priceRow + '</div>' +
+      rewardHtml +
       (item.reviewCount ? '<div class="bj-reco-reviews">⭐ 실사용 후기 ' + item.reviewCount.toLocaleString() + '개</div>' : '') +
       '<div class="bj-reco-strengths">' + strengths + '</div>' +
       '<div class="bj-reco-persona"><span>' + item.personaIcon + '</span><span>' + item.personaText + '</span></div>' +
@@ -4524,6 +4553,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       ? '<span class="bj-reco-top-price">' + item.price.toLocaleString() + '</span>' +
         '<span class="bj-reco-top-price-suffix">원/월</span>' + diffStr
       : '<span class="bj-reco-top-price-suffix" style="font-size:13px">렌탈료 상세에서 확인</span>';
+    var reward = rewardForRecommendation(item);
+    var rewardHtml = reward && (!item.price || reward < item.price)
+      ? '<div class="bj-reco-top-reward">타사보상 카드가 월 <b>' + reward.toLocaleString() + '원~</b></div>'
+      : '';
     return '<a class="bj-reco-top-card" data-bj-img="' + escapeHtml(item.image || '') + '"' +
       ' href="' + escapeHtml(item.href || '#') + '">' +
       '<span class="bj-reco-top-badge">' + escapeHtml(item.badge || '🔥 최고 인기') + '</span>' +
@@ -4534,6 +4567,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '<div class="bj-reco-top-name">' + escapeHtml(item.name || '') + '</div>' +
         (item.model ? '<div class="bj-reco-top-model">' + escapeHtml(item.model) + '</div>' : '') +
         '<div class="bj-reco-top-price-row">' + topPriceRow + '</div>' +
+        rewardHtml +
         (item.reviewCount ? '<div class="bj-reco-top-reviews">⭐ 실사용 후기 ' + item.reviewCount.toLocaleString() + '개</div>' : '') +
         '<div class="bj-reco-top-strengths">' + strengths + '</div>' +
       '</div>' +
