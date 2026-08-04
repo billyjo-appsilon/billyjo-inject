@@ -43,12 +43,19 @@
 
   w.BillyjoKarrotTrack = w.BillyjoKarrotTrack || track;
 
-  addScript('https://karrot-pixel.business.daangn.com/0.2/karrot-pixel.umd.js', function () {
-    if (w.karrotPixel) {
-      w.karrotPixel.init(PIXEL_ID);
-      w.BillyjoKarrotTrack('ViewPage');
-    }
-  });
+  if (!w.karrotPixel) {
+    w.karrotPixel = { stub: true, queue: [] };
+    w.karrotPixel.init = function () {
+      w.karrotPixel.queue.push(['init', arguments, Date.now()]);
+    };
+    w.karrotPixel.track = function () {
+      w.karrotPixel.queue.push(['track', arguments, Date.now()]);
+    };
+    addScript('https://karrot-pixel.business.daangn.com/karrot-pixel.js');
+  }
+
+  w.karrotPixel.init(PIXEL_ID);
+  w.BillyjoKarrotTrack('ViewPage');
 
   if (w.fetch && !w.__billyjoKarrotFetchWrapped) {
     var nativeFetch = w.fetch;
