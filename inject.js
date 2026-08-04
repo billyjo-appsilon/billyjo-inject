@@ -4768,6 +4768,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         grade: apiTop.grade || 'A+',
         strengths: apiTop.strengths || [],
         reviewCount: apiTop.reviewCount || 0,
+        giftBudget: apiTop.giftBudget || 0,
         image: apiTop.image || '',  // 추천 API의 목록 썸네일. 없으면 og:image 폴백
         href: apiTop.productId ? (PV + apiTop.productId) : '#',
       };
@@ -4786,6 +4787,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         grade: it.grade || 'A',
         strengths: it.strengths || [],
         reviewCount: it.reviewCount || 0,
+        giftBudget: it.giftBudget || 0,
         personaIcon: it.personaIcon || '👨‍👩‍👧',
         personaText: it.personaText || '',
         image: it.image || '',  // 추천 API의 목록 썸네일. 없으면 og:image 폴백
