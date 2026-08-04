@@ -4082,6 +4082,28 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var bjBrandGrid = pageEl.querySelector('.brand-grid');
     if (bjBrandGrid && !bjBrandGrid.getAttribute('data-bjmq')) {
       bjBrandGrid.setAttribute('data-bjmq', '1');
+      if (!bjBrandGrid.querySelector('img[alt*="Dyson"], img[alt*="다이슨"]')) {
+        var bjSamsungCell = Array.prototype.slice.call(bjBrandGrid.children).find(function(cell) {
+          var img = cell && cell.querySelector ? cell.querySelector('img') : null;
+          var alt = img ? (img.getAttribute('alt') || '') : '';
+          return /samsung|삼성/i.test(alt);
+        });
+        var bjInsertAfter = bjSamsungCell;
+        [
+          ['https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Dyson_logo.svg/960px-Dyson_logo.svg.png', 'Dyson 다이슨'],
+          ['https://upload.wikimedia.org/wikipedia/commons/thumb/4/41/Roborock_logo.svg/500px-Roborock_logo.svg.png', 'Roborock 로보락']
+        ].forEach(function(brand) {
+          var cell = document.createElement('div');
+          cell.className = 'brand-cell';
+          cell.innerHTML = '<img src="' + brand[0] + '" alt="' + brand[1] + '" loading="lazy" decoding="async">';
+          if (bjInsertAfter && bjInsertAfter.parentNode === bjBrandGrid) {
+            bjBrandGrid.insertBefore(cell, bjInsertAfter.nextSibling);
+            bjInsertAfter = cell;
+          } else {
+            bjBrandGrid.appendChild(cell);
+          }
+        });
+      }
       var bjCells = Array.prototype.slice.call(bjBrandGrid.children);
       var bjTrack = document.createElement('div');
       bjTrack.className = 'bj-brand-track';
