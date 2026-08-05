@@ -3884,6 +3884,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "#bj-v5-injected .bj-trust-sub strong{color:#0838f8 !important}" +
         // 섹션 헤딩(.lead) 2줄 문구 줄간격 확대: 네이티브 1.40 → 1.6 (다른 스택 문구와 통일, 2026-07-23)
         "#bj-v5-injected .lead{line-height:1.6 !important}" +
+        "#bj-v5-injected .steps-grid{grid-template-columns:repeat(4,1fr) !important}" +
+        "#bj-v5-injected .rv-multi{display:none !important}" +
+        "@media(min-width:768px) and (max-width:1100px){#bj-v5-injected .steps-grid{grid-template-columns:repeat(2,1fr) !important}#bj-v5-injected .step-card:not(:last-child)::after,#bj-v5-injected .step-card:not(:last-child)::before{display:none !important}}" +
         "#bj-v5-injected .highlight-bar[data-bj-bar2]{margin-top:10px !important}" +
         // 두 보장 바 1행 2열 (PC 나란히 / 모바일 세로 스택) (2026-07-03)
         "#bj-v5-injected .bj-bars-row{display:flex !important;gap:14px !important;align-items:stretch !important}" +
@@ -4186,6 +4189,19 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (bjCurLead) bjCurLead.innerHTML = '나의 라이프스타일에 맞춘<br><strong>무료 큐레이션 서비스</strong>';
       var bjCurDesc = bjCurZone.querySelector('.desc');
       if (bjCurDesc) bjCurDesc.innerHTML = '가격, 크기, 관리 등등 개인별 조건을 넣기만 하면<br>매니저가 최적의 조합을 1:1 맞춤 설계해 드립니다.';
+      var bjSteps = bjCurZone.querySelector('.steps-grid');
+      if (bjSteps && (bjSteps.textContent || '').indexOf('더할수록 커지는 혜택') === -1) {
+        var cards = bjSteps.querySelectorAll('.step-card');
+        if (cards[2]) cards[2].classList.remove('accent');
+        var bjStep4 = document.createElement('div');
+        bjStep4.className = 'step-card accent';
+        bjStep4.innerHTML =
+          '<div class="step-num"><span class="n">04</span><span class="lbl">BENEFIT</span></div>' +
+          '<div class="step-icon-wrap"><svg class="ico"><use href="#i-gift"></use></svg></div>' +
+          '<div class="step-t"><span class="nb">더할수록 커지는 혜택 설계</span></div>' +
+          '<div class="step-d"><span class="nb">2개 이상 함께 신청하면</span><br><strong><span class="nb">제품별 혜택을 합산</span></strong>해 최종 안내</div>';
+        bjSteps.appendChild(bjStep4);
+      }
     }
 
     // 신청방법 섹션 헤딩: "어렵지 않아요!" → "렌탈? 어렵지 않아요!" (서브는 유지) (2026-07-03)

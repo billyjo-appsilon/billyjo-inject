@@ -361,7 +361,7 @@
 
   /* ============ 컨설팅 STEP 섹션 (라이프스타일 + 최저가 설계) ============ */
   .steps-grid {
-    display: grid; grid-template-columns: repeat(3, 1fr);
+    display: grid; grid-template-columns: repeat(4, 1fr);
     gap: 18px; margin-top: 32px;
     position: relative;
   }
@@ -466,6 +466,11 @@
   .step-card.accent .step-t { color: #fff; }
   .step-card.accent .step-d { color: rgba(255,255,255,0.92); }
   .step-card.accent .step-d strong { color: #FFCE00; }
+  @media (min-width: 768px) and (max-width: 1100px) {
+    .steps-grid { grid-template-columns: repeat(2, 1fr); }
+    .step-card:not(:last-child)::after,
+    .step-card:not(:last-child)::before { display: none; }
+  }
 
   .consult-cta {
     margin-top: 40px; text-align: center;
@@ -1447,13 +1452,22 @@
           <strong><span class="nb">모든 변수를 한 번에</span></strong> 검토
         </div>
       </div>
-      <div class="step-card accent">
+      <div class="step-card">
         <div class="step-num"><span class="n">03</span><span class="lbl">RESULT</span></div>
         <div class="step-icon-wrap"><svg class="ico"><use href="#i-sparkles"/></svg></div>
         <div class="step-t"><span class="nb">최저가 라인업 설계</span></div>
         <div class="step-d">
           <span class="nb">결합·시점 최적화로</span><br>
           <strong><span class="nb">표시가보다 더 절감된</span></strong> <span class="nb">맞춤 견적</span>
+        </div>
+      </div>
+      <div class="step-card accent">
+        <div class="step-num"><span class="n">04</span><span class="lbl">BENEFIT</span></div>
+        <div class="step-icon-wrap"><svg class="ico"><use href="#i-gift"/></svg></div>
+        <div class="step-t"><span class="nb">더할수록 커지는 혜택 설계</span></div>
+        <div class="step-d">
+          <span class="nb">2개 이상 함께 신청하면</span><br>
+          <strong><span class="nb">제품별 혜택을 합산</span></strong>해 최종 안내
         </div>
       </div>
     </div>
@@ -1760,12 +1774,6 @@
           </div>
         </div>
         </div>
-      </div>
-      <!-- 다건 구독 안내 (2026-07-31) — 후기가 아니라 '혜택 안내'다.
-           없는 고객 후기를 만들지 않고 사실만 적는다. -->
-      <div class="rv-multi">
-        <div class="rv-multi-t">2개 이상 함께 구독하면 <strong>지원금이 합산</strong>됩니다</div>
-        <div class="rv-multi-d">정수기 + 공기청정기처럼 여러 대를 한 번에 신청하면 제품별 지원금을 각각 받습니다. 제품 구성에 따라 금액이 달라져 상담 시 정확한 합계를 안내해 드려요.</div>
       </div>
     </div>
   </section>
