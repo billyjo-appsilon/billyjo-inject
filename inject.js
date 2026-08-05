@@ -4173,7 +4173,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         var card = document.createElement('div');
         card.className = 'diff-card bj-svc-card';
         card.innerHTML = '<div class="num-circle">' + c.no + ' ' + c.lb + '</div>' +
-          '<div class="icon"><svg class="ico"><use href="' + c.ic + '"></use></svg></div>' +
+          '<div class="icon"><svg class="ico" data-bj-lot-loop="1"><use href="' + c.ic + '"></use></svg></div>' +
           '<div class="t">' + c.t + '</div>';
         bjSvcGrid.appendChild(card);
       });
@@ -5453,9 +5453,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var st = document.createElement('style');
     st.id = 'bj-ai-quote-quick-style';
     st.textContent =
-      '.new-qb .quick .link .bj-ai-quote-quick{position:relative}' +
-      '.new-qb .quick .link .bj-ai-quote-quick a{background:#fff!important;border:2.5px solid #0838f8!important;color:#0838f8!important}' +
-      '.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:34px!important;height:34px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;object-fit:contain!important;margin:0!important;pointer-events:none!important}' +
+      '.new-qb .quick .link>p{position:relative!important}' +
+      '.new-qb .quick .link>p>a,.new-qb .quick .link .bj-ai-quote-quick a{width:53px!important;height:53px!important;box-sizing:border-box!important;background:#fff!important;border:2.5px solid #0838f8!important;border-radius:999px!important;color:#0838f8!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:none!important}' +
+      '.new-qb .quick .link>p>a>img,.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:34px!important;height:34px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;object-fit:contain!important;margin:0!important;pointer-events:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-label{display:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-badge{display:none!important;position:absolute!important;right:-6px!important;top:-6px!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;background:#0838f8!important;color:#fff!important;border:2px solid #fff!important;align-items:center!important;justify-content:center!important;font:900 10px/1 Pretendard,Arial,sans-serif!important;box-shadow:0 2px 7px rgba(8,56,248,.28)!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick.has-count .bj-ai-quote-badge{display:flex!important}' +
@@ -10605,8 +10605,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var lottie = r[0], d = r[1];
       if (!svg.parentNode) return;
       svg.parentNode.insertBefore(holder, svg);
+      var shouldLoop = svg.getAttribute('data-bj-lot-loop') === '1';
       var anim = lottie.loadAnimation({
-        container: holder, renderer: 'svg', loop: false, autoplay: false,
+        container: holder, renderer: 'svg', loop: shouldLoop, autoplay: false,
         animationData: d,
         rendererSettings: { preserveAspectRatio: 'xMidYMid meet', progressiveLoad: true }
       });
@@ -10618,7 +10619,14 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         }
         svg.style.display = 'none';                   // 성공한 뒤에만 원본을 숨긴다
         var seg = segment(d);
-        seg ? anim.playSegments(seg, true) : anim.play();
+        if (seg) {
+          anim.playSegments(seg, true);
+          if (shouldLoop) {
+            anim.addEventListener('complete', function () { anim.playSegments(seg, true); });
+          }
+        } else {
+          anim.play();
+        }
       });
     })['catch'](function () {
       if (holder.parentNode) holder.parentNode.removeChild(holder);
