@@ -36,6 +36,63 @@
   } catch (_) { }
 })();
 
+/* v0.7.x: meta LP의 무상담 진입은 메인 첫 화면이 아니라 시크릿 1:1 패키지 폼을 바로 연다. */
+(function(){
+  'use strict';
+  var WIDGET = 'https://admin2.billyjo.co.kr/persona-wizard.js';
+
+  function shouldOpenSecretPackage(){
+    try {
+      var q = new URLSearchParams(location.search || '');
+      return q.get('bj_persona') === '1' || q.get('from') === 'meta_direct_apply';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  function openSecretPackage(){
+    var opts = {
+      style: 'curation',
+      origin: '시크릿 1:1 패키지',
+      headerTitle: '시크릿 1:1 패키지'
+    };
+    function open(){ if (window.bjPersona) window.bjPersona.open(opts); }
+    if (window.bjPersona) {
+      open();
+      return;
+    }
+    if (window.__bjWizLoading) {
+      var tries = 0;
+      var t = setInterval(function(){
+        tries += 1;
+        if (window.bjPersona) { clearInterval(t); open(); }
+        else if (tries > 30) clearInterval(t);
+      }, 100);
+      return;
+    }
+    window.__bjWizLoading = true;
+    var s = document.createElement('script');
+    s.src = WIDGET;
+    s.onload = open;
+    document.head.appendChild(s);
+  }
+
+  window.bjOpenSecretPackage = openSecretPackage;
+
+  function init(){
+    if (!shouldOpenSecretPackage()) return;
+    var key = 'bj_secret_persona_auto_open:' + location.pathname + location.search;
+    try {
+      if (sessionStorage.getItem(key)) return;
+      sessionStorage.setItem(key, '1');
+    } catch (_) {}
+    setTimeout(openSecretPackage, 500);
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  else init();
+})();
+
 /* Home application step cards — mobile density fix (2026-08-05).
    Keep the desktop card design, but on mobile make icon + title read as one header row. */
 (function bjMobileStepCardHeader(){
