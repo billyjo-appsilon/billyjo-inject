@@ -3723,6 +3723,53 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }, 400);
 })();
 
+// Counsel page title: 고객센터 → 당일문의 접수 (2026-08-05)
+(function renameCounselPageTitle() {
+  var OLD = '고객센터';
+  var NEW = '당일문의 접수';
+
+  function isCounselPage() {
+    return /\/html\/dh\/counsel\/?$/.test(window.location.pathname || '');
+  }
+
+  function isChromeOrFooter(el) {
+    return !!(el && el.closest && el.closest('header, footer, nav, .new-cs, .m_customer, .gnb__right, .new-gnb, .category__wrap, .bj-inj-right'));
+  }
+
+  function shouldRenameElement(el) {
+    if (!el || isChromeOrFooter(el)) return false;
+    var tag = (el.tagName || '').toLowerCase();
+    var cls = String(el.className || '');
+    if (tag === 'h1' || tag === 'h2') return true;
+    return /(^|[_\-\s])(m_)?tit(le)?($|[_\-\s])|subject|page/i.test(cls);
+  }
+
+  function rename() {
+    if (!isCounselPage()) return;
+    if (document.title.indexOf(OLD) !== -1) document.title = document.title.split(OLD).join(NEW);
+
+    var metaTitle = document.querySelector('meta[property="og:title"], meta[name="twitter:title"]');
+    if (metaTitle && metaTitle.content && metaTitle.content.indexOf(OLD) !== -1) {
+      metaTitle.content = metaTitle.content.split(OLD).join(NEW);
+    }
+
+    if (!document.body) return;
+    var selectors = [
+      'h1', 'h2',
+      '.m_tit', '.tit', '.title', '.page_tit', '.page_title', '.sub_tit', '.sub_title',
+      '[class*="tit"]', '[class*="title"]'
+    ].join(',');
+    Array.prototype.forEach.call(document.querySelectorAll(selectors), function(el) {
+      if (!shouldRenameElement(el)) return;
+      if ((el.textContent || '').trim() === OLD) el.textContent = NEW;
+    });
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', rename);
+  else rename();
+  [250, 800, 1600, 3000].forEach(function(ms) { setTimeout(rename, ms); });
+})();
+
 // Rename top-level category label: 정수기·환경 → 물·공기·청소가전 (category prod_list/1-8)
 (function renameWaterAirCategory() {
   var OLD = '정수기·환경';
