@@ -3886,6 +3886,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "#bj-v5-injected .lead{line-height:1.6 !important}" +
         "#bj-v5-injected .steps-grid{grid-template-columns:repeat(4,1fr) !important}" +
         "#bj-v5-injected .rv-multi{display:none !important}" +
+        "@media(max-width:767px){#bj-v5-injected .steps-grid{grid-template-columns:1fr !important}}" +
         "@media(min-width:768px) and (max-width:1100px){#bj-v5-injected .steps-grid{grid-template-columns:repeat(2,1fr) !important}#bj-v5-injected .step-card:not(:last-child)::after,#bj-v5-injected .step-card:not(:last-child)::before{display:none !important}}" +
         "#bj-v5-injected .highlight-bar[data-bj-bar2]{margin-top:10px !important}" +
         // 두 보장 바 1행 2열 (PC 나란히 / 모바일 세로 스택) (2026-07-03)
@@ -4203,6 +4204,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         bjSteps.appendChild(bjStep4);
       }
     }
+    Array.prototype.forEach.call(pageEl.querySelectorAll('.rv-multi'), function (el) {
+      el.remove();
+    });
 
     // 신청방법 섹션 헤딩: "어렵지 않아요!" → "렌탈? 어렵지 않아요!" (서브는 유지) (2026-07-03)
     Array.prototype.forEach.call(pageEl.querySelectorAll('.lead'), function (ld) {
