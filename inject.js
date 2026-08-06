@@ -7535,7 +7535,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
             throw err;
           });
         }
-        return r.json();
+        return r.json().then(function(data){
+          _pushCatalogDataLayer('generate_lead', _catalogProductFromBody(body), {
+            lead_id: String(data && (data.requestId || data.code) || '').slice(0, 120)
+          });
+          return data;
+        });
       });
   }
 
@@ -7681,6 +7686,67 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function _consultApiBase(){
     return window.__bjConsultApiUrl || 'https://admin2-api.billyjo.co.kr';
   }
+
+  function _metaCatalogId(prodNo){
+    prodNo = String(prodNo || '').trim();
+    return /^\d+$/.test(prodNo) ? ('BJ-' + prodNo) : '';
+  }
+
+  function _catalogProductFromBody(body){
+    var prodNo = body && body.productId;
+    if (!prodNo && body && body.selection && body.selection.requestedProducts) {
+      for (var i = 0; i < body.selection.requestedProducts.length; i++) {
+        var p = body.selection.requestedProducts[i] || {};
+        if (p.prodNo && p.prodNoConfidence !== 'ambiguous') { prodNo = p.prodNo; break; }
+      }
+    }
+    var id = _metaCatalogId(prodNo);
+    if (!id) return null;
+    return {
+      prodNo: String(prodNo),
+      id: id,
+      name: (body && body.productName) || '',
+      price: body && body.selection && (body.selection.cardDiscountedPrice || body.selection.displayedMonthlyFee) || 0
+    };
+  }
+
+  function _pushCatalogDataLayer(eventName, product, extra){
+    if (!product || !product.id) return;
+    var price = Number(product.price || 0) || 0;
+    var payload = {
+      event: eventName,
+      meta_event_name: eventName === 'view_item' ? 'ViewContent' : 'Lead',
+      content_ids: [product.id],
+      content_type: 'product',
+      contents: [{ id: product.id, quantity: 1 }],
+      currency: 'KRW',
+      product_id: product.prodNo,
+      product_name: product.name || ''
+    };
+    if (price > 0) {
+      payload.value = price;
+      payload.contents[0].item_price = price;
+    }
+    if (extra) Object.keys(extra).forEach(function(k){ payload[k] = extra[k]; });
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push(payload);
+  }
+
+  function _trackCatalogViewContent(){
+    if (!IS_PROD_VIEW || window.__bjMetaCatalogViewTracked) return;
+    var prodNo = (location.pathname.match(/prod_view\/(\d+)/) || [])[1] || '';
+    var id = _metaCatalogId(prodNo);
+    if (!id) return;
+    window.__bjMetaCatalogViewTracked = true;
+    var nameEl = document.querySelector('.prod_name b') || document.querySelector('.prod_name');
+    _pushCatalogDataLayer('view_item', {
+      prodNo: prodNo,
+      id: id,
+      name: nameEl && nameEl.textContent ? nameEl.textContent.replace(/\s+/g, ' ').trim() : '',
+      price: 0
+    });
+  }
+  setTimeout(_trackCatalogViewContent, 0);
 
   function _beaconConsult(path, payload){
     var url = _consultApiBase() + path;
