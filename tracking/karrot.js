@@ -15,13 +15,18 @@
 
   function pushDataLayer(eventName, params) {
     w.dataLayer = w.dataLayer || [];
-    w.dataLayer.push(Object.assign({
+    var payload = Object.assign({
       event: eventName === 'CompleteRegistration' ? 'bj_karrot_complete_registration' : 'bj_karrot_view_page',
       karrot_event: eventName,
       karrot_pixel_id: PIXEL_ID,
       page_location: location.href,
       page_referrer: d.referrer || ''
-    }, params || {}));
+    }, params || {});
+    // Params may include a marketing event label, but it must not replace the
+    // GTM trigger name. Otherwise a Karrot event can be mistaken for a generic
+    // generate_lead event and repeatedly fire unrelated tags.
+    payload.event = eventName === 'CompleteRegistration' ? 'bj_karrot_complete_registration' : 'bj_karrot_view_page';
+    w.dataLayer.push(payload);
   }
 
   function track(eventName, params) {
@@ -71,7 +76,6 @@
         if (res && res.ok && /\/v1\/consult\/quick-assign(?:\?|$)/.test(url)) {
           setTimeout(function () {
             w.BillyjoKarrotTrack('CompleteRegistration', {
-              event: 'generate_lead',
               lead_source_event: 'generate_lead',
               source: 'billyjo.co.kr',
               value: 1,
