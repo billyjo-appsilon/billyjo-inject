@@ -196,7 +196,8 @@
     opened: false,
     pendingProceed: null,
     pendingOpen: false,
-    countdownUntil: null
+    countdownUntil: null,
+    active: false
   };
 
   function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -512,7 +513,7 @@
     box.querySelector('.bj-do-memo').value = makeMemo();
     var copyBtn = box.querySelector('.bj-do-copy');
     if (copyBtn) {
-      copyBtn.textContent = '담고 AI 견적받기';
+      copyBtn.textContent = 'AI 견적신청하기';
     }
     Array.prototype.forEach.call(box.querySelectorAll('.bj-do-card'), function(card){
       card.onclick = function(){
@@ -555,7 +556,7 @@
           '<div class="bj-do-side">' +
             '<div id="bj-do-total"><div class="bj-do-total-k">AI 예상 지원금 합계</div><div class="bj-do-total-v">0원</div><div class="bj-do-total-sub">선택한 제품 구성 기준으로 산출한 예상 혜택입니다. 실제 지급액은 상담 후 확정됩니다.</div></div>' +
             '<textarea class="bj-do-memo" readonly></textarea>' +
-            '<button type="button" class="bj-do-copy">담고 AI 견적받기</button>' +
+            '<button type="button" class="bj-do-copy">AI 견적신청하기</button>' +
             '<div class="bj-do-note">선택 상품은 장바구니에 담긴 뒤 예상 견적/신청 단계로 이동합니다.</div>' +
           '</div>' +
         '</div>' +
@@ -589,12 +590,12 @@
         });
         return;
       }
-      box.querySelector('.bj-do-copy').textContent = next ? '복사됨. 렌탈신청으로 이동합니다' : '설계 내역 복사됨';
+      box.querySelector('.bj-do-copy').textContent = next ? 'AI 견적신청으로 이동합니다' : '설계 내역 복사됨';
       if (next) {
         setTimeout(function(){ try { close(); } catch(_){} next(); }, 420);
         return;
       }
-      setTimeout(function(){ var b = box.querySelector('.bj-do-copy'); if (b) b.textContent = state.cfg.ctaLabel || '설계 내역 복사하고 렌탈 신청 계속하기'; }, 1400);
+      setTimeout(function(){ var b = box.querySelector('.bj-do-copy'); if (b) b.textContent = state.cfg.ctaLabel || 'AI 견적신청하기'; }, 1400);
     };
     refreshModal(box);
     selectedList().concat(allProducts().slice(0, 8)).forEach(function(p){
@@ -603,6 +604,7 @@
     return true;
   }
   window.__bjDirectOfferOpen = function(proceed){
+    if (!state.active) return false;
     if (!state.cfg || !state.current) {
       if (proceed) state.pendingProceed = proceed;
       state.pendingOpen = true;
@@ -678,13 +680,14 @@
     var path = location.pathname || '';
     if (!/(prod_view|dh_order\/rental\/d)/.test(path)) return;
     loadCfg().then(function(cfg){
-      if (!cfg) return;
+      if (!cfg) { state.active = false; return; }
       state.cfg = cfg;
       injectStyles();
       Promise.all([loadProducts(), loadCurrentProduct()]).then(function(r){
         state.cats = r[0] || [];
         ensureCurrentSelected(r[1]);
-        if (!state.current) return;
+        if (!state.current) { state.active = false; return; }
+        state.active = true;
         mountTopBar();
         mountFab();
         scheduleActivity(true);
