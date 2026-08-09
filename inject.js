@@ -5187,6 +5187,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 #bj-consult-modal .bj-agent-counts { font-size: 11px; color: #777; margin-top: 4px; }\
 #bj-consult-modal .bj-code-box { text-align: center; margin: 18px 0 14px; padding: 14px; background: #0838f8; border: none; border-radius: 12px; box-shadow: 0 4px 14px rgba(8,56,248,0.25); }\
 #bj-consult-modal .bj-code-label { font-size: 11px; color: rgba(255,255,255,0.85); margin-bottom: 4px; }\
+#bj-consult-modal .bj-code-label small { font-size: 10px; font-weight: 600; opacity: 0.82; margin-left: 4px; }\
 #bj-consult-modal .bj-code { font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #fff; }\
 #bj-consult-modal .bj-phone-label { font-size: 13px; font-weight: 700; color: #333; margin: 14px 0 6px; }\
 #bj-consult-modal .bj-phone-input { width: 100%; padding: 14px; border: 1.5px solid #d0d8ff; border-radius: 10px; font-size: 18px; text-align: center; letter-spacing: 2px; outline: none; }\
@@ -5342,6 +5343,21 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var base = String(name || '빌리조').replace(/\s*(상담사|매니저)\s*$/g, '').trim() || '빌리조';
     return base + ' 매니저';
   }
+  function startCouponCountdown(root, minutes){
+    var el = root && root.querySelector && root.querySelector('[data-bj-coupon-countdown]');
+    if (!el) return;
+    var end = Date.now() + Math.max(1, Number(minutes || 1440)) * 60000;
+    function fmt(){
+      var remain = Math.max(0, end - Date.now());
+      var total = Math.ceil(remain / 60000);
+      var h = Math.floor(total / 60);
+      var m = total % 60;
+      el.textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+      if (remain <= 0 && timer) clearInterval(timer);
+    }
+    var timer = setInterval(fmt, 1000);
+    fmt();
+  }
 
   function showAssigned(data) {
     var card = data.consultantCard || {};
@@ -5368,7 +5384,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bio + field +
       '</div></div>' +
       '<div class="bj-code-box">' +
-      '<div class="bj-code-label">통화 안내 코드 (쿠폰번호)</div>' +
+      '<div class="bj-code-label">쿠폰번호 <small>(만료 <span data-bj-coupon-countdown>24:00</span> 내 사용)</small></div>' +
       '<div class="bj-code">' + escapeHtml(data.code) + '</div>' +
       '</div>' +
       cta + reserveBtn +
@@ -5376,6 +5392,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var wrap = buildModal(html);
     var rb = wrap.querySelector('#bj-reserve-open');
     if (rb) rb.addEventListener('click', function() { showReservation(data); });
+    startCouponCountdown(wrap, data.expiresAtMinutes || 1440);
   }
 
   // 예약 가능 슬롯 — 지금부터 24시간 이내 통화 가능한 시간대만. 1시간 단위.
@@ -5469,10 +5486,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function() {
         var codeBox = data.code
-          ? '<div class="bj-code-box"><div class="bj-code-label">통화 안내 코드</div>' +
+          ? '<div class="bj-code-box"><div class="bj-code-label">쿠폰번호 <small>(만료 <span data-bj-coupon-countdown>24:00</span> 내 사용)</small></div>' +
             '<div class="bj-code">' + escapeHtml(data.code) + '</div></div>'
           : '';
-        buildModal(
+        var done = buildModal(
           '<div class="bj-reserve-done">' +
           '<div class="bj-done-check">✓</div>' +
           '<div class="bj-done-title">예약이 접수되었습니다</div>' +
@@ -5482,6 +5499,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           codeBox +
           '</div>'
         );
+        startCouponCountdown(done, data.expiresAtMinutes || 1440);
       })
       .catch(function(e) {
         console.error('[bj-consult] schedule failed:', e);
@@ -6501,7 +6519,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '.bj-consult-status{ font-size:13px; color:#666; margin-top:6px }',
     '.bj-consult-agent{ font-size:14px; color:#444; margin-bottom:16px; line-height:1.4 }',
     '.bj-consult-agent strong{ color:#0838F8; font-weight:800 }',
-    '.bj-consult-code-label{ font-size:11px; color:#888; font-weight:600; letter-spacing:1px; margin-bottom:8px; text-transform:uppercase }',
+    '.bj-consult-code-label{ font-size:12px; color:#555; font-weight:800; letter-spacing:0; margin-bottom:8px }',
+    '.bj-consult-code-label small{ font-size:10px; color:#888; font-weight:600; margin-left:4px }',
     '.bj-consult-code{ display:flex; justify-content:center; gap:8px; margin-bottom:14px }',
     '.bj-consult-code-digit{',
     '  display:flex; align-items:center; justify-content:center;',
@@ -7630,6 +7649,21 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var base = String(name || '빌리조').replace(/\s*(상담사|매니저)\s*$/g, '').trim() || '빌리조';
     return base + ' 매니저';
   }
+  function bjModalStartCouponCountdown(root, minutes){
+    var el = root && root.querySelector && root.querySelector('[data-bj-coupon-countdown]');
+    if (!el) return;
+    var end = Date.now() + Math.max(1, Number(minutes || 1440)) * 60000;
+    function tick(){
+      var remain = Math.max(0, end - Date.now());
+      var total = Math.ceil(remain / 60000);
+      var h = Math.floor(total / 60);
+      var m = total % 60;
+      el.textContent = String(h).padStart(2, '0') + ':' + String(m).padStart(2, '0');
+      if (remain <= 0 && timer) clearInterval(timer);
+    }
+    var timer = setInterval(tick, 1000);
+    tick();
+  }
 
   function openConsultModal(){
     var prev = document.getElementById('bj-consult-modal');
@@ -7907,7 +7941,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           '<div class="bj-choice-meta">상담사가 발신</div>' +
         '</button>' +
       '</div>' +
-      '<div class="bj-consult-expires">유효시간 ' + (d.expiresAtMinutes || 30) + '분</div>';
+      '<div class="bj-consult-expires">쿠폰 유효시간 ' + Math.round((d.expiresAtMinutes || 1440) / 60) + '시간</div>';
     body.querySelector('[data-choice="now"]').onclick = function(){ renderImmediateCall(modal, d); };
     body.querySelector('[data-choice="resv"]').onclick = function(){ renderScheduleForm(modal, d); };
   }
@@ -8002,7 +8036,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     modal.querySelector('.bj-consult-modal-body').innerHTML =
       '<div class="bj-consult-title bj-consult-title-ok">' + escapeWidgetHtml(bjModalManagerLabel(d.agentName)) + '</div>' +
       '<div class="bj-consult-agent">' + escapeWidgetHtml(intro) + '</div>' +
-      '<div class="bj-consult-code-label">통화 안내 코드 (쿠폰번호)</div>' +
+      '<div class="bj-consult-code-label">쿠폰번호 <small>(만료 <span data-bj-coupon-countdown>24:00</span> 내 사용)</small></div>' +
       '<div class="bj-consult-code">' +
         codeDigits.map(function(n){ return '<span class="bj-consult-code-digit">' + n + '</span>'; }).join('') +
       '</div>' +
@@ -8012,12 +8046,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '<span class="bj-consult-call-cta">바로 견적 문의하기</span>' +
       '</a>' +
       '<button type="button" class="bj-resv-submit" data-reserve-after-code="1">상담 예약</button>' +
-      '<div class="bj-consult-expires">유효시간 ' + (d.expiresAtMinutes || 30) + '분</div>';
+      '<div class="bj-consult-expires">쿠폰 유효시간 ' + Math.round((d.expiresAtMinutes || 1440) / 60) + '시간</div>';
     /* 통화 버튼 클릭 시 beacon — page unload(tel:) 전에도 안전 */
     modal.querySelector('[data-tel]').addEventListener('click', function(){
       _beaconConsult('/v1/consult/dial', { code: d.code, requestId: d.requestId });
     });
     modal.querySelector('[data-reserve-after-code]').onclick = function(){ renderScheduleForm(modal, d); };
+    bjModalStartCouponCountdown(modal, d.expiresAtMinutes || 1440);
   }
 
   /* v0.7.0: 모달 2단계 — 상담 예약 화면 (시간 + 폰번호 입력) */
@@ -8125,7 +8160,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '<div class="bj-resv-to">' + escapeWidgetHtml(state.phone) + '로</div>' +
       '</div>' +
       '<div class="bj-consult-agent"><strong>' + escapeWidgetHtml(d.agentName || '상담사') + '</strong>님이 정확한 시간에 발신해 드립니다.</div>' +
-      '<div class="bj-consult-instructions">통화 안내 코드(쿠폰번호) <strong>' + escapeWidgetHtml(d.code || '0000') + '</strong> · 페이지를 닫으셔도 콜백은 진행됩니다</div>';
+      '<div class="bj-consult-code-card">' +
+        '<div class="bj-consult-code-label">쿠폰번호 <small>(만료 <span data-bj-coupon-countdown>24:00</span> 내 사용)</small></div>' +
+        '<div class="bj-consult-code">' + escapeWidgetHtml(d.code || '0000') + '</div>' +
+      '</div>' +
+      '<div class="bj-consult-instructions">페이지를 닫으셔도 콜백은 진행됩니다</div>';
+    bjModalStartCouponCountdown(modal, d.expiresAtMinutes || 1440);
   }
 
   function enhanceBottomBar(){
