@@ -5338,10 +5338,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     }
     return slots;
   }
+  function managerLabel(name){
+    var base = String(name || '빌리조').replace(/\s*(상담사|매니저)\s*$/g, '').trim() || '빌리조';
+    return base + ' 매니저';
+  }
 
   function showAssigned(data) {
     var card = data.consultantCard || {};
-    var stats = data.queueStats || {};
     var photoHtml = card.photoUrl
       ? '<img class="bj-photo" src="' + escapeAttr(card.photoUrl) + '" alt="">'
       : '<div class="bj-photo-placeholder">' + escapeHtml((card.name || '?').charAt(0)) + '</div>';
@@ -5350,30 +5353,22 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     // 누적 상담 횟수 대신 전문 분야 표기
     var field = '<div><span class="bj-agent-field">' + escapeHtml(consultSpecialty(card)) + '</span></div>';
 
-    // '지금 대기'·'활성 상담사' 제거 — '평균 응답'만 노출
-    var statsHtml =
-      '<div class="bj-stats">' +
-      '<div class="bj-stat"><div class="bj-stat-label">평균 응답</div><div class="bj-stat-value">' +
-      fmtSecs(stats.avgResponseSecs) + '</div></div>' +
-      '</div>';
-
     var cta =
       '<a class="bj-cta" href="' + escapeAttr(data.telLink || ('tel:,' + data.code)) + '">' +
-      PHONE_ICON + '<span>지금 ' + escapeHtml(card.name || '상담사') + '님과 통화</span></a>';
+      PHONE_ICON + '<span>바로 견적 문의하기</span></a>';
     var reserveBtn =
       '<button type="button" class="bj-cta bj-cta-secondary" id="bj-reserve-open">' +
       CAL_ICON + '<span>상담 예약 (24시간 이내)</span></button>';
 
     var html =
-      statsHtml +
       '<div class="bj-agent">' +
       photoHtml +
       '<div style="flex:1;min-width:0">' +
-      '<div class="bj-agent-name">' + escapeHtml(card.name || '상담사') + rating + '</div>' +
+      '<div class="bj-agent-name">' + escapeHtml(managerLabel(card.name)) + rating + '</div>' +
       bio + field +
       '</div></div>' +
       '<div class="bj-code-box">' +
-      '<div class="bj-code-label">통화 안내 코드 (자동 전송)</div>' +
+      '<div class="bj-code-label">통화 안내 코드 (쿠폰번호)</div>' +
       '<div class="bj-code">' + escapeHtml(data.code) + '</div>' +
       '</div>' +
       cta + reserveBtn +
@@ -5521,7 +5516,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '<div class="bj-phone-label">휴대폰 번호</div>' +
       '<input type="tel" class="bj-phone-input" id="bj-apply-phone" placeholder="010-0000-0000" maxlength="13" autocomplete="tel" inputmode="tel">' +
       '<div class="bj-phone-err" id="bj-apply-err"></div>' +
-      '<button type="button" class="bj-cta" id="bj-apply-now">' + PHONE_ICON + '<span>통화 안내 코드 받고 바로 전화</span></button>' +
+      '<button type="button" class="bj-cta" id="bj-apply-now">' + PHONE_ICON + '<span>지금 견적받기</span></button>' +
       '<div class="bj-phone-label">예약 시간대</div>' +
       '<div class="bj-reserve-sub" style="margin-bottom:10px">24시간 이내 통화 가능한 시간대만 선택할 수 있습니다.</div>' +
       slotButtons
@@ -7631,6 +7626,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     }
     return slots;
   }
+  function bjModalManagerLabel(name){
+    var base = String(name || '빌리조').replace(/\s*(상담사|매니저)\s*$/g, '').trim() || '빌리조';
+    return base + ' 매니저';
+  }
 
   function openConsultModal(){
     var prev = document.getElementById('bj-consult-modal');
@@ -7840,7 +7839,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var okPhone = bjModalValidPhone(phoneEl.value);
       nowBtn.disabled = !okPhone;
       reserveBtn.disabled = !(okPhone && selectedSlot);
-      nowBtn.textContent = okPhone ? '통화 안내 코드 받고 바로 전화' : '번호를 입력해 주세요';
+      nowBtn.textContent = okPhone ? '지금 견적받기' : '번호를 입력해 주세요';
       reserveBtn.textContent = okPhone && selectedSlot ? selectedSlot.label + ' 예약하기' : '시간대와 번호를 입력해 주세요';
     }
     function submit(contact){
@@ -7897,7 +7896,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '<div class="bj-choice-row">' +
         '<button type="button" class="bj-choice-card bj-choice-now" data-choice="now">' +
           '<div class="bj-choice-ic">📞</div>' +
-          '<div class="bj-choice-ttl">바로 상담</div>' +
+          '<div class="bj-choice-ttl">바로 견적 문의</div>' +
           '<div class="bj-choice-sub">지금 통화 연결</div>' +
           '<div class="bj-choice-meta">1577-9469</div>' +
         '</button>' +
@@ -7998,26 +7997,27 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function renderImmediateCall(modal, d){
     var codeDigits = String(d.code || '0000').split('');
     var telLink = d.telLink || ('tel:' + String(d.phone || '').replace(/[^\d]/g,'') + ',,' + (d.code || ''));
+    var card = d.consultantCard || {};
+    var intro = card.bio || d.agentBio || '상담 가능한 조건과 견적을 바로 안내해 드립니다.';
     modal.querySelector('.bj-consult-modal-body').innerHTML =
-      '<button type="button" class="bj-back-btn" data-back="1">← 다시 선택</button>' +
-      '<div class="bj-consult-title bj-consult-title-ok">📞 바로 상담</div>' +
-      '<div class="bj-consult-agent">담당 <strong>' + escapeWidgetHtml(d.agentName || '빌리조 상담팀') + '</strong></div>' +
-      '<div class="bj-consult-code-label">상담 코드</div>' +
+      '<div class="bj-consult-title bj-consult-title-ok">' + escapeWidgetHtml(bjModalManagerLabel(d.agentName)) + '</div>' +
+      '<div class="bj-consult-agent">' + escapeWidgetHtml(intro) + '</div>' +
+      '<div class="bj-consult-code-label">통화 안내 코드 (쿠폰번호)</div>' +
       '<div class="bj-consult-code">' +
         codeDigits.map(function(n){ return '<span class="bj-consult-code-digit">' + n + '</span>'; }).join('') +
       '</div>' +
-      '<div class="bj-consult-instructions">통화 버튼을 누르면 코드가 자동 전송됩니다</div>' +
       '<a class="bj-consult-call-btn" href="' + escapeWidgetHtml(telLink) + '" data-tel="1">' +
         '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" fill="currentColor"/></svg>' +
         '<span class="bj-consult-call-phone">' + escapeWidgetHtml(d.phone || '') + '</span>' +
-        '<span class="bj-consult-call-cta">지금 ' + escapeWidgetHtml(d.agentName || '상담사') + '님과 통화</span>' +
+        '<span class="bj-consult-call-cta">바로 견적 문의하기</span>' +
       '</a>' +
+      '<button type="button" class="bj-resv-submit" data-reserve-after-code="1">상담 예약</button>' +
       '<div class="bj-consult-expires">유효시간 ' + (d.expiresAtMinutes || 30) + '분</div>';
-    modal.querySelector('[data-back]').onclick = function(){ renderAssignedConsultant(modal, d); };
     /* 통화 버튼 클릭 시 beacon — page unload(tel:) 전에도 안전 */
     modal.querySelector('[data-tel]').addEventListener('click', function(){
       _beaconConsult('/v1/consult/dial', { code: d.code, requestId: d.requestId });
     });
+    modal.querySelector('[data-reserve-after-code]').onclick = function(){ renderScheduleForm(modal, d); };
   }
 
   /* v0.7.0: 모달 2단계 — 상담 예약 화면 (시간 + 폰번호 입력) */
@@ -8125,7 +8125,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '<div class="bj-resv-to">' + escapeWidgetHtml(state.phone) + '로</div>' +
       '</div>' +
       '<div class="bj-consult-agent"><strong>' + escapeWidgetHtml(d.agentName || '상담사') + '</strong>님이 정확한 시간에 발신해 드립니다.</div>' +
-      '<div class="bj-consult-instructions">상담 코드 <strong>' + escapeWidgetHtml(d.code || '0000') + '</strong> · 페이지를 닫으셔도 콜백은 진행됩니다</div>';
+      '<div class="bj-consult-instructions">통화 안내 코드(쿠폰번호) <strong>' + escapeWidgetHtml(d.code || '0000') + '</strong> · 페이지를 닫으셔도 콜백은 진행됩니다</div>';
   }
 
   function enhanceBottomBar(){
