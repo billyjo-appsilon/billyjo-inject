@@ -36,6 +36,171 @@
   } catch (_) { }
 })();
 
+;(function billyjoJourneyAnalyticsGlobal(){
+  if (window.__bjJourneyAnalyticsSetup) return;
+  window.__bjJourneyAnalyticsSetup = true;
+  var seen = {};
+
+  function clickIdsFromUrl(url){
+    var out = {};
+    try {
+      var q = new URL(url || location.href, location.href).searchParams;
+      ['fbclid','gclid','gbraid','wbraid','dclid','msclkid','ttclid','kclid','NaPm','n_media','n_query','n_rank','n_ad_group','n_ad','n_campaign_type'].forEach(function(k){
+        var v = q.get(k);
+        if (v) out[k] = String(v).slice(0, 255);
+      });
+    } catch(_){}
+    return out;
+  }
+  function platformFromClickIds(ids){
+    ids = ids || {};
+    if (ids.fbclid) return 'meta';
+    if (ids.gclid || ids.gbraid || ids.wbraid || ids.dclid) return 'google';
+    if (ids.ttclid) return 'tiktok';
+    if (ids.kclid) return 'kakao';
+    if (ids.NaPm || ids.n_media || ids.n_query) return 'naver';
+    if (ids.msclkid) return 'microsoft';
+    return '';
+  }
+  function platformFromUtm(){
+    var source = '';
+    try { source = new URLSearchParams(location.search).get('utm_source') || ''; } catch(_){}
+    source = source.toLowerCase();
+    if (/^(meta|facebook|fb|instagram|ig)$/.test(source)) return 'meta';
+    if (/^(google|gads|youtube)$/.test(source)) return 'google';
+    if (/^(naver|nv)$/.test(source)) return 'naver';
+    if (/^(kakao|kko)$/.test(source)) return 'kakao';
+    if (/^(tiktok|tt)$/.test(source)) return 'tiktok';
+    return '';
+  }
+  function firstLandingUrl(){
+    try {
+      var key = 'bj_first_landing_url';
+      var existing = sessionStorage.getItem(key);
+      if (existing) return existing;
+      sessionStorage.setItem(key, location.href);
+      return location.href;
+    } catch(_){ return location.href; }
+  }
+  function latestAdClickUrl(){
+    try {
+      var key = 'bj_latest_ad_click_url';
+      var ids = clickIdsFromUrl(location.href);
+      var hasUtm = /(?:^|[?&])utm_source=/.test(location.search || '');
+      if (Object.keys(ids).length || hasUtm) {
+        sessionStorage.setItem(key, location.href);
+        return location.href;
+      }
+      return sessionStorage.getItem(key) || '';
+    } catch(_){ return ''; }
+  }
+  function pageType(){
+    var p = location.pathname || '/';
+    if (/prod_view/.test(p)) return 'product_detail';
+    if (/prod_list/.test(p)) return 'product_list';
+    if (p === '/' || p === '') return 'home';
+    if (/guide/.test(p)) return 'guide';
+    return 'landing';
+  }
+  function landingId(){
+    var p = (location.pathname || '/').replace(/^\/+|\/+$/g, '').replace(/[^\w가-힣-]+/g, '_');
+    return p || 'home';
+  }
+  function productContext(){
+    var out = {};
+    var prodNo = (location.pathname.match(/prod_view\/(\d+)/) || [])[1] || '';
+    var nameEl = document.querySelector('.prod_name b') || document.querySelector('.prod_name');
+    if (prodNo) out.product_id = prodNo;
+    if (nameEl && nameEl.textContent) out.product_name = nameEl.textContent.replace(/\s+/g, ' ').trim().slice(0, 120);
+    return out;
+  }
+  function track(eventName, extra){
+    try {
+      var currentIds = clickIdsFromUrl(location.href);
+      var latestIds = clickIdsFromUrl(latestAdClickUrl());
+      var landingIds = clickIdsFromUrl(firstLandingUrl());
+      var platform = platformFromClickIds(currentIds) || platformFromClickIds(latestIds) || platformFromUtm() || platformFromClickIds(landingIds);
+      var payload = {
+        event: 'bj_' + eventName,
+        analytics_event_name: eventName,
+        landing_id: landingId(),
+        page_type: pageType(),
+        page_location: location.href,
+        page_path: location.pathname || '/',
+        page_title: document.title || '',
+        conversion_platform: platform,
+        ad_platform: platform,
+        attribution_model: 'last_click_only'
+      };
+      var product = productContext();
+      Object.keys(product).forEach(function(k){ payload[k] = product[k]; });
+      if (extra) Object.keys(extra).forEach(function(k){
+        if (extra[k] !== undefined && extra[k] !== null && extra[k] !== '') payload[k] = extra[k];
+      });
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push(payload);
+    } catch(_){}
+  }
+  function once(key, eventName, extra){
+    if (seen[key]) return;
+    seen[key] = true;
+    track(eventName, extra);
+  }
+  function sectionId(el, index){
+    var explicit = el.getAttribute('data-bj-section') || el.getAttribute('id') || '';
+    if (explicit) return explicit.replace(/[^\w가-힣-]+/g, '_').slice(0, 80);
+    var cls = String(el.className || '').split(/\s+/).filter(Boolean)[0] || '';
+    return (cls ? cls.replace(/[^\w가-힣-]+/g, '_') : ('section_' + index)).slice(0, 80);
+  }
+  function setup(){
+    once('landing_view', 'landing_view');
+    var marks = [25, 50, 75, 90];
+    function onScroll(){
+      var doc = document.documentElement || document.body;
+      var max = Math.max(1, (doc.scrollHeight || 0) - window.innerHeight);
+      var pct = Math.min(100, Math.round(((window.scrollY || window.pageYOffset || 0) / max) * 100));
+      marks.forEach(function(mark){ if (pct >= mark) once('scroll_' + mark, 'scroll_depth', { scroll_depth: mark }); });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    setTimeout(onScroll, 600);
+    if ('IntersectionObserver' in window) {
+      var candidates = Array.prototype.slice.call(document.querySelectorAll('[data-bj-section], section, main > div, .visual, .main, .service, .review, .faq, .prod_view, .prod_info, .rantal_wrap')).slice(0, 40);
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (!entry.isIntersecting || entry.intersectionRatio < 0.5) return;
+          var id = sectionId(entry.target, candidates.indexOf(entry.target));
+          once('section_' + id, 'section_view', { section_id: id, section_order: Math.max(0, candidates.indexOf(entry.target)) + 1 });
+        });
+      }, { threshold: [0.5] });
+      candidates.forEach(function(el){ io.observe(el); });
+    }
+    document.addEventListener('click', function(e){
+      var target = e.target && e.target.closest ? e.target.closest('a,button,[role="button"]') : null;
+      if (!target) return;
+      var text = (target.textContent || target.getAttribute('aria-label') || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+      var href = target.getAttribute('href') || '';
+      var isTel = /^tel:/i.test(href);
+      if (!isTel && !/상담|견적|예약|전화|쿠폰|신청/.test(text)) return;
+      track('cta_click', {
+        cta_id: (target.getAttribute('data-act') || target.getAttribute('class') || href || text || 'cta').replace(/[^\w가-힣-]+/g, '_').slice(0, 80),
+        cta_text: text,
+        cta_href_type: isTel ? 'tel' : (href ? 'link' : 'button')
+      });
+    }, true);
+    document.addEventListener('focusin', function(e){
+      var t = e.target;
+      if (!t || !/^(input|textarea)$/i.test(t.tagName || '')) return;
+      var type = String(t.getAttribute('type') || '').toLowerCase();
+      var name = String(t.getAttribute('name') || t.getAttribute('class') || '').toLowerCase();
+      if (type === 'tel' || /phone|tel|휴대폰|전화/.test(name)) {
+        once('lead_start_phone', 'lead_start', { lead_start_method: 'phone_input' });
+      }
+    }, true);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup);
+  else setup();
+})();
+
 /* v0.7.x: meta LP의 무상담 진입은 메인 첫 화면이 아니라 시크릿 1:1 패키지 폼을 바로 연다. */
 (function(){
   'use strict';
@@ -7554,6 +7719,122 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (Object.keys(clickIds).length) attr.clickIds = clickIds;
     return attr;
   }
+  var BJ_ANALYTICS_SEEN = {};
+  function bjPageType(){
+    var p = location.pathname || '/';
+    if (/prod_view/.test(p)) return 'product_detail';
+    if (/prod_list/.test(p)) return 'product_list';
+    if (p === '/' || p === '') return 'home';
+    if (/guide/.test(p)) return 'guide';
+    return 'landing';
+  }
+  function bjLandingId(){
+    var p = (location.pathname || '/').replace(/^\/+|\/+$/g, '').replace(/[^\w가-힣-]+/g, '_');
+    return p || 'home';
+  }
+  function bjProductContext(){
+    var out = {};
+    var prodNo = (location.pathname.match(/prod_view\/(\d+)/) || [])[1] || '';
+    var nameEl = document.querySelector('.prod_name b') || document.querySelector('.prod_name');
+    if (prodNo) out.product_id = prodNo;
+    if (nameEl && nameEl.textContent) out.product_name = nameEl.textContent.replace(/\s+/g, ' ').trim().slice(0, 120);
+    return out;
+  }
+  function bjAnalyticsPayload(eventName, extra){
+    var attr = {};
+    try { attr = bjReadAttribution() || {}; } catch(_){}
+    var payload = {
+      event: 'bj_' + eventName,
+      analytics_event_name: eventName,
+      landing_id: bjLandingId(),
+      page_type: bjPageType(),
+      page_location: location.href,
+      page_path: location.pathname || '/',
+      page_title: document.title || '',
+      conversion_platform: attr.adPlatform || '',
+      ad_platform: attr.adPlatform || '',
+      attribution_model: 'last_click_only'
+    };
+    var product = bjProductContext();
+    Object.keys(product).forEach(function(k){ payload[k] = product[k]; });
+    if (extra) Object.keys(extra).forEach(function(k){
+      if (extra[k] !== undefined && extra[k] !== null && extra[k] !== '') payload[k] = extra[k];
+    });
+    return payload;
+  }
+  function bjTrackJourney(eventName, extra){
+    try {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push(bjAnalyticsPayload(eventName, extra || {}));
+    } catch(_){}
+  }
+  function bjTrackJourneyOnce(key, eventName, extra){
+    if (BJ_ANALYTICS_SEEN[key]) return;
+    BJ_ANALYTICS_SEEN[key] = true;
+    bjTrackJourney(eventName, extra);
+  }
+  function bjSectionId(el, index){
+    if (!el) return '';
+    var explicit = el.getAttribute('data-bj-section') || el.getAttribute('id') || '';
+    if (explicit) return explicit.replace(/[^\w가-힣-]+/g, '_').slice(0, 80);
+    var cls = String(el.className || '').split(/\s+/).filter(Boolean)[0] || '';
+    return (cls ? cls.replace(/[^\w가-힣-]+/g, '_') : ('section_' + index)).slice(0, 80);
+  }
+  function bjSetupJourneyAnalytics(){
+    if (window.__bjJourneyAnalyticsSetup) return;
+    window.__bjJourneyAnalyticsSetup = true;
+    bjTrackJourneyOnce('landing_view', 'landing_view');
+    var scrollMarks = [25, 50, 75, 90];
+    function onScroll(){
+      var doc = document.documentElement || document.body;
+      var max = Math.max(1, (doc.scrollHeight || 0) - window.innerHeight);
+      var pct = Math.min(100, Math.round(((window.scrollY || window.pageYOffset || 0) / max) * 100));
+      scrollMarks.forEach(function(mark){
+        if (pct >= mark) bjTrackJourneyOnce('scroll_' + mark, 'scroll_depth', { scroll_depth: mark });
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    setTimeout(onScroll, 600);
+    if ('IntersectionObserver' in window) {
+      var candidates = Array.prototype.slice.call(document.querySelectorAll('[data-bj-section], section, .visual, .main, .service, .review, .faq, .prod_view, .prod_info, .rantal_wrap')).slice(0, 30);
+      var io = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          if (!entry.isIntersecting || entry.intersectionRatio < 0.5) return;
+          var id = bjSectionId(entry.target, candidates.indexOf(entry.target));
+          bjTrackJourneyOnce('section_' + id, 'section_view', {
+            section_id: id,
+            section_order: Math.max(0, candidates.indexOf(entry.target)) + 1
+          });
+        });
+      }, { threshold: [0.5] });
+      candidates.forEach(function(el){ io.observe(el); });
+    }
+    document.addEventListener('click', function(e){
+      var target = e.target && e.target.closest ? e.target.closest('a,button,[role="button"]') : null;
+      if (!target) return;
+      var text = (target.textContent || target.getAttribute('aria-label') || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+      var href = target.getAttribute('href') || '';
+      if (!text && !href) return;
+      var isTel = /^tel:/i.test(href);
+      var isLeadCta = isTel || /상담|견적|예약|전화|쿠폰|신청/.test(text);
+      if (!isLeadCta) return;
+      bjTrackJourney('cta_click', {
+        cta_id: (target.getAttribute('data-act') || target.getAttribute('class') || href || text || 'cta').replace(/[^\w가-힣-]+/g, '_').slice(0, 80),
+        cta_text: text,
+        cta_href_type: isTel ? 'tel' : (href ? 'link' : 'button')
+      });
+    }, true);
+    document.addEventListener('focusin', function(e){
+      var t = e.target;
+      if (!t || !/^(input|textarea)$/i.test(t.tagName || '')) return;
+      var type = String(t.getAttribute('type') || '').toLowerCase();
+      var name = String(t.getAttribute('name') || t.getAttribute('class') || '').toLowerCase();
+      if (type === 'tel' || /phone|tel|휴대폰|전화/.test(name)) {
+        bjTrackJourneyOnce('lead_start_phone', 'lead_start', { lead_start_method: 'phone_input' });
+      }
+    }, true);
+  }
+  setTimeout(bjSetupJourneyAnalytics, 0);
   function bjGetPersonaInput(){
     if (window.__bjPersonaInput) return window.__bjPersonaInput;
     try { var s = sessionStorage.getItem('bj_persona_input'); if (s){ window.__bjPersonaInput = JSON.parse(s); return window.__bjPersonaInput; } } catch(_){}
@@ -7756,6 +8037,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function openConsultModal(){
     var prev = document.getElementById('bj-consult-modal');
     if (prev) prev.remove();
+    bjTrackJourney('lead_start', { lead_start_method: 'consult_modal_open' });
     var modal = document.createElement('div');
     modal.id = 'bj-consult-modal';
     modal.className = 'bj-consult-modal-backdrop';
@@ -7800,13 +8082,29 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         }
         return r.json().then(function(data){
           var attr = (body && body.attribution) || {};
+          var requestId = data && data.requestId;
           _pushLeadDataLayers(_catalogProductFromBody(body), {
             lead_id: String(data && (data.requestId || data.code) || '').slice(0, 120),
-            request_id: data && data.requestId,
-            event_id: data && data.requestId ? ('billyjo_lead_' + data.requestId) : undefined,
+            request_id: requestId,
+            event_id: requestId ? ('billyjo_lead_' + requestId) : undefined,
             conversion_platform: attr.adPlatform || '',
             ad_platform: attr.adPlatform || ''
           });
+          bjTrackJourney('coupon_issued', {
+            request_id: requestId,
+            event_id: requestId ? ('billyjo_lead_' + requestId) : undefined,
+            coupon_issued: !!(data && data.code),
+            conversion_platform: attr.adPlatform || '',
+            ad_platform: attr.adPlatform || ''
+          });
+          if (data && data.status === 'scheduled') {
+            bjTrackJourney('consult_scheduled', {
+              request_id: requestId,
+              event_id: requestId ? ('billyjo_schedule_' + requestId) : undefined,
+              conversion_platform: attr.adPlatform || '',
+              ad_platform: attr.adPlatform || ''
+            });
+          }
           return data;
         });
       });
@@ -7972,6 +8270,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     function submit(contact){
       errEl.style.display = 'none';
       setBusy('접수 중...');
+      bjTrackJourney('phone_submit', {
+        consult_channel: contact && contact.minutes ? 'reservation' : 'phone',
+        callback_minutes: contact && contact.minutes
+      });
       assignConsultant(contact).then(function(data){
         if (!modal.parentNode) return;
         if (contact.minutes || data.status === 'scheduled') {
@@ -7984,6 +8286,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         }
         renderImmediateCall(modal, data);
       }).catch(function(err){
+        bjTrackJourney('lead_submit_error', {
+          error_status: err && err.status,
+          error_type: err && err.name || 'assign_failed'
+        });
         if (!modal.parentNode) return;
         errEl.textContent = '접수에 실패했습니다. 잠시 후 다시 시도해 주세요.';
         errEl.style.display = 'block';
@@ -8169,6 +8475,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '<div class="bj-consult-expires">쿠폰 유효시간 ' + Math.round((d.expiresAtMinutes || 1440) / 60) + '시간</div>';
     /* 통화 버튼 클릭 시 beacon — page unload(tel:) 전에도 안전 */
     modal.querySelector('[data-tel]').addEventListener('click', function(){
+      bjTrackJourney('quote_call_click', {
+        request_id: d.requestId,
+        event_id: d.requestId ? ('billyjo_call_' + d.requestId) : undefined
+      });
       _beaconConsult('/v1/consult/dial', { code: d.code, requestId: d.requestId });
     });
     modal.querySelector('[data-reserve-after-code]').onclick = function(){ renderScheduleForm(modal, d); };
@@ -8251,15 +8561,29 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       .then(function(res){
         if (!res.ok) {
           var msg = (res.json && res.json.detail && res.json.detail.message) || '예약에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+          bjTrackJourney('lead_submit_error', {
+            request_id: d.requestId,
+            error_type: 'schedule_failed',
+            error_message_code: res.json && res.json.detail && res.json.detail.code
+          });
           errEl.textContent = msg;
           errEl.style.display = 'block';
           submit.disabled = false;
           updateSubmit();
           return;
         }
+        bjTrackJourney('consult_scheduled', {
+          request_id: d.requestId,
+          event_id: d.requestId ? ('billyjo_schedule_' + d.requestId) : undefined,
+          callback_minutes: state.minutes
+        });
         renderScheduleConfirm(modal, d, state, res.json.data && res.json.data.scheduledAt);
       })
       .catch(function(){
+        bjTrackJourney('lead_submit_error', {
+          request_id: d.requestId,
+          error_type: 'schedule_network_error'
+        });
         errEl.textContent = '네트워크 오류로 예약에 실패했습니다.';
         errEl.style.display = 'block';
         submit.disabled = false;
