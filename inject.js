@@ -5206,6 +5206,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 #bj-consult-modal .bj-slots { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 4px; }\
 #bj-consult-modal .bj-slot { padding: 14px 8px; background: #f5f9ff; border: 1.5px solid #e0e8ff; border-radius: 12px; font-size: 15px; font-weight: 700; color: #1A1F36; cursor: pointer; transition: all 0.13s; }\
 #bj-consult-modal .bj-slot:hover, #bj-consult-modal .bj-slot:active { border-color: #0838f8; background: #eef2ff; color: #0838f8; }\
+#bj-consult-modal .bj-slot.on { border-color: #0838f8; background: #eef2ff; color: #0838f8; box-shadow: 0 0 0 2px rgba(8,56,248,0.08); }\
 #bj-consult-modal .bj-reserve-empty { text-align: center; color: #777; font-size: 13px; padding: 24px 0; }\
 #bj-consult-modal .bj-reserve-done { text-align: center; padding: 8px 0 4px; }\
 #bj-consult-modal .bj-done-check { width: 56px; height: 56px; margin: 0 auto 14px; border-radius: 50%; background: #16a34a; color: #fff; font-size: 32px; line-height: 56px; }\
@@ -5305,6 +5306,39 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   var CAL_ICON =
     '<svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2zm0 16H5V10h14v10zm0-12H5V6h14v2z"/></svg>';
 
+  function normalizePhoneInput(v){
+    var digits = String(v || '').replace(/[^\d]/g, '').slice(0, 11);
+    if (digits.length > 7) return digits.slice(0, 3) + '-' + digits.slice(3, 7) + '-' + digits.slice(7);
+    if (digits.length > 3) return digits.slice(0, 3) + '-' + digits.slice(3);
+    return digits;
+  }
+  function validPhone(v){
+    var digits = String(v || '').replace(/[^\d]/g, '');
+    return digits.indexOf('01') === 0 && (digits.length === 10 || digits.length === 11);
+  }
+  function callableSlot(d){
+    var day = d.getDay(); // 0 Sunday, 6 Saturday
+    return day !== 6 && d.getHours() >= 10 && d.getHours() < 19;
+  }
+  function roundUpToNextHour(d){
+    var x = new Date(d.getTime());
+    x.setSeconds(0, 0);
+    if (x.getMinutes() || x.getSeconds() || x.getMilliseconds()) x.setHours(x.getHours() + 1);
+    x.setMinutes(0, 0, 0);
+    return x;
+  }
+  function genReserveSlots24h(){
+    var now = new Date();
+    var limit = new Date(now.getTime() + 24 * 60 * 60000);
+    var cur = roundUpToNextHour(new Date(now.getTime() + 20 * 60000));
+    var slots = [];
+    while (cur.getTime() <= limit.getTime()) {
+      if (callableSlot(cur)) slots.push(new Date(cur.getTime()));
+      cur = new Date(cur.getTime() + 60 * 60000);
+    }
+    return slots;
+  }
+
   function showAssigned(data) {
     var card = data.consultantCard || {};
     var stats = data.queueStats || {};
@@ -5328,7 +5362,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       PHONE_ICON + '<span>지금 ' + escapeHtml(card.name || '상담사') + '님과 통화</span></a>';
     var reserveBtn =
       '<button type="button" class="bj-cta bj-cta-secondary" id="bj-reserve-open">' +
-      CAL_ICON + '<span>상담 예약 (2시간 이내)</span></button>';
+      CAL_ICON + '<span>상담 예약 (24시간 이내)</span></button>';
 
     var html =
       statsHtml +
@@ -5349,24 +5383,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (rb) rb.addEventListener('click', function() { showReservation(data); });
   }
 
-  // 예약 가능 슬롯 — 지금부터 2시간 이내(고객 전환율 ↓ 방지)로만. 20분 간격.
+  // 예약 가능 슬롯 — 지금부터 24시간 이내 통화 가능한 시간대만. 1시간 단위.
   function genReserveSlots() {
-    var now = new Date();
-    var start = new Date(now.getTime() + 20 * 60000); // 최소 20분 뒤
-    start.setSeconds(0, 0);
-    start.setMinutes(Math.ceil(start.getMinutes() / 20) * 20);
-    var limit = new Date(now.getTime() + 2 * 60 * 60000); // +2시간 상한
-    var slots = [];
-    for (var t = new Date(start); t.getTime() <= limit.getTime(); t = new Date(t.getTime() + 20 * 60000)) {
-      slots.push(new Date(t));
-    }
-    return slots;
+    return genReserveSlots24h();
   }
   function fmtSlot(d) {
+    var mmdd = ('0' + (d.getMonth() + 1)).slice(-2) + '.' + ('0' + d.getDate()).slice(-2);
     var h = d.getHours(), m = d.getMinutes();
     var ap = h < 12 ? '오전' : '오후';
     var h12 = h % 12; if (h12 === 0) h12 = 12;
-    return ap + ' ' + h12 + ':' + (m < 10 ? '0' + m : m);
+    return mmdd + ' ' + ap + ' ' + h12 + ':' + (m < 10 ? '0' + m : m);
   }
 
   function showReservation(data) {
@@ -5382,7 +5408,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '<div class="bj-reserve-head">' +
       '<button type="button" class="bj-back" id="bj-reserve-back">‹ 뒤로</button>' +
       '<div class="bj-reserve-title">상담 예약</div></div>' +
-      '<div class="bj-reserve-sub">' + escapeHtml(card.name || '상담사') + ' 상담사 · 지금부터 2시간 이내 예약 가능</div>' +
+      '<div class="bj-reserve-sub">' + escapeHtml(card.name || '상담사') + ' 상담사 · 24시간 이내 통화 가능한 시간대</div>' +
       slotsHtml +
       '<span class="bj-secondary">선택한 시간에 상담사가 전화드립니다.</span>';
     var wrap = buildModal(html);
@@ -5479,6 +5505,61 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     // 페르소나 헬퍼는 다른 IIFE 스코프 — 여기선 접근 불가일 수 있으므로 typeof 가드(ReferenceError 방지).
     if (typeof bjPersonaNeedsGate === 'function' && bjPersonaNeedsGate()){ bjPersonaGate(function(){ requestConsult(); }); return; }
     injectStyle();
+    showConsultApply();
+  }
+
+  function showConsultApply() {
+    var slots = genReserveSlots24h();
+    var slotButtons = slots.length
+      ? '<div class="bj-slots">' + slots.map(function(d, i) {
+          return '<button type="button" class="bj-slot" data-slot="' + i + '">' + escapeHtml(fmtSlot(d)) + '</button>';
+        }).join('') + '</div>'
+      : '<div class="bj-reserve-empty">24시간 이내 예약 가능한 시간이 없습니다.<br>바로 통화 신청을 이용해 주세요.</div>';
+    var wrap = buildModal(
+      '<div class="bj-reserve-head"><div class="bj-reserve-title">상담 신청</div></div>' +
+      '<div class="bj-reserve-sub">휴대폰 번호를 입력해야 통화 안내 코드와 상담사 전화 버튼이 표시됩니다.</div>' +
+      '<div class="bj-phone-label">휴대폰 번호</div>' +
+      '<input type="tel" class="bj-phone-input" id="bj-apply-phone" placeholder="010-0000-0000" maxlength="13" autocomplete="tel" inputmode="tel">' +
+      '<div class="bj-phone-err" id="bj-apply-err"></div>' +
+      '<button type="button" class="bj-cta" id="bj-apply-now">' + PHONE_ICON + '<span>통화 안내 코드 받고 바로 전화</span></button>' +
+      '<div class="bj-phone-label">예약 시간대</div>' +
+      '<div class="bj-reserve-sub" style="margin-bottom:10px">24시간 이내 통화 가능한 시간대만 선택할 수 있습니다.</div>' +
+      slotButtons
+    );
+    var input = wrap.querySelector('#bj-apply-phone');
+    var err = wrap.querySelector('#bj-apply-err');
+    function phone(){
+      return input ? input.value : '';
+    }
+    function requirePhone(){
+      if (validPhone(phone())) {
+        if (err) err.textContent = '';
+        return true;
+      }
+      if (err) err.textContent = '휴대전화 번호를 정확히 입력해 주세요. (예: 010-1234-5678)';
+      if (input) input.focus();
+      return false;
+    }
+    if (input) {
+      input.addEventListener('input', function(){ input.value = normalizePhoneInput(input.value); });
+      setTimeout(function(){ try { input.focus(); } catch(_){} }, 80);
+    }
+    var nowBtn = wrap.querySelector('#bj-apply-now');
+    if (nowBtn) nowBtn.addEventListener('click', function(){
+      if (!requirePhone()) return;
+      requestConsultWithPhone({ phone: phone(), slot: null });
+    });
+    Array.prototype.forEach.call(wrap.querySelectorAll('[data-slot]'), function(btn){
+      btn.addEventListener('click', function(){
+        if (!requirePhone()) return;
+        var slot = slots[Number(btn.getAttribute('data-slot'))];
+        if (!slot) return;
+        requestConsultWithPhone({ phone: phone(), slot: slot, label: fmtSlot(slot) });
+      });
+    });
+  }
+
+  function requestConsultWithPhone(contact) {
     showLoading();
     var ctx = detectProduct();
     // 외부 컨텍스트(예: 신혼부부 패키지 모달)가 출처·담은 제품을 실어두면 우선 사용 —
@@ -5488,6 +5569,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       productId: (oCtx && oCtx.productId) || ctx.productId,
       productName: (oCtx && oCtx.productName) || ctx.productName
     };
+    payload.customerPhone = contact.phone;
+    if (contact.slot) {
+      payload.callbackMinutes = Math.max(5, Math.round((contact.slot.getTime() - Date.now()) / 60000));
+      payload.customerMemo = ['웹사이트 상담신청', '상담 희망 시간대: ' + contact.label].join('\n');
+    }
     if (oCtx && oCtx.selection) payload.selection = oCtx.selection;
     if (typeof bjConsultExtras === 'function') bjConsultExtras(payload);   // utm(광고 인구통계 코드) + 고객 페르소나 위저드 답변
     fetch(API_BASE + '/v1/consult/quick-assign', {
@@ -5499,7 +5585,21 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.json();
       })
-      .then(function(data) { showAssigned(data); })
+      .then(function(data) {
+        if (contact.slot || data.status === 'scheduled') {
+          buildModal(
+            '<div class="bj-reserve-done">' +
+            '<div class="bj-done-check">✓</div>' +
+            '<div class="bj-done-title">예약이 접수되었습니다</div>' +
+            '<div class="bj-done-time">' + escapeHtml(contact.label || '선택한 시간') + '</div>' +
+            '<div class="bj-done-desc">' + escapeHtml((data.agentName || '상담사')) + ' 상담사가 <b>' +
+            escapeHtml(contact.phone) + '</b>로 전화드립니다.</div>' +
+            '</div>'
+          );
+          return;
+        }
+        showAssigned(data);
+      })
       .catch(function(err) {
         console.error('[bj-consult] failed:', err);
         showError(err && err.message);
@@ -5628,10 +5728,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var a = document.createElement('a');
       a.href = 'javascript:';
       a.setAttribute('data-bj-consult', '1');
-      a.setAttribute('title', '전화 상담 연결');
+      a.setAttribute('title', '상담 신청');
       var im = document.createElement('img');
       im.src = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@ae6cf20/icons/phonecall.gif';
-      im.alt = '전화 상담';
+      im.alt = '상담 신청';
       a.appendChild(im);
       p.appendChild(a);
       link.insertBefore(p, link.firstChild);
@@ -6383,7 +6483,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '.bj-back-btn{ position:absolute; top:14px; left:14px; background:transparent; border:0; color:#777; cursor:pointer; font-size:12px; padding:4px 8px; font-family:inherit }',
     '.bj-back-btn:hover{ color:#222 }',
     '.bj-resv-label{ font-size:13px; color:#555; font-weight:700; text-align:left; margin:14px 0 8px }',
-    '.bj-resv-mins{ display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:6px }',
+    '.bj-resv-mins{ display:grid; grid-template-columns:repeat(2,1fr); gap:6px; margin-bottom:6px }',
     '.bj-resv-min{ padding:10px 4px; border:1.5px solid #e0e8ff; background:#fff; border-radius:10px; cursor:pointer; font-size:14px; font-weight:700; color:#0838F8; font-family:inherit; transition:all .15s }',
     '.bj-resv-min:hover{ background:#f5f8ff }',
     '.bj-resv-min.on{ background:#0838F8; color:#fff; border-color:#0838F8 }',
@@ -7478,6 +7578,60 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
   function bjpwEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
+  function bjModalPhoneDigits(raw){
+    return String(raw || '').replace(/\D/g, '').slice(0, 11);
+  }
+  function bjModalFormatPhone(raw){
+    var d = bjModalPhoneDigits(raw);
+    if (d.length < 4) return d;
+    if (d.length < 8) return d.slice(0, 3) + '-' + d.slice(3);
+    return d.slice(0, 3) + '-' + d.slice(3, 7) + '-' + d.slice(7);
+  }
+  function bjModalValidPhone(raw){
+    var d = bjModalPhoneDigits(raw);
+    return (d.length === 10 || d.length === 11) && d.indexOf('01') === 0;
+  }
+  function bjModalCallableSlot(d){
+    var day = d.getDay();
+    return day !== 6 && d.getHours() >= 10 && d.getHours() < 19;
+  }
+  function bjModalRoundNextHour(d){
+    var x = new Date(d.getTime());
+    x.setMinutes(0, 0, 0);
+    if (d.getMinutes() || d.getSeconds() || d.getMilliseconds()) x.setHours(x.getHours() + 1);
+    return x;
+  }
+  function bjModalNextCallableSlot(from){
+    var d = bjModalRoundNextHour(from);
+    for (var i = 0; i < 72; i++) {
+      if (d.getHours() < 10) d.setHours(10, 0, 0, 0);
+      if (bjModalCallableSlot(d)) return d;
+      d.setHours(d.getHours() + 1, 0, 0, 0);
+    }
+    return null;
+  }
+  function bjModalSlotLabel(d){
+    var mmdd = String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
+    return mmdd + ' ' + String(d.getHours()).padStart(2, '0') + ':00~' + String(d.getHours() + 1).padStart(2, '0') + ':00';
+  }
+  function bjModalReserveSlots24h(){
+    var now = new Date();
+    var end = new Date(now.getTime() + 24 * 60 * 60000);
+    var cur = bjModalNextCallableSlot(new Date(now.getTime() + 20 * 60000));
+    var slots = [];
+    while (cur && cur <= end && slots.length < 12) {
+      if (bjModalCallableSlot(cur)) {
+        slots.push({
+          date: new Date(cur.getTime()),
+          label: bjModalSlotLabel(cur),
+          minutes: Math.max(5, Math.round((cur.getTime() - now.getTime()) / 60000))
+        });
+      }
+      cur = bjModalNextCallableSlot(new Date(cur.getTime() + 60 * 60000));
+    }
+    return slots;
+  }
+
   function openConsultModal(){
     var prev = document.getElementById('bj-consult-modal');
     if (prev) prev.remove();
@@ -7485,12 +7639,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     modal.id = 'bj-consult-modal';
     modal.className = 'bj-consult-modal-backdrop';
     modal.innerHTML =
-      '<div class="bj-consult-modal-box" role="dialog" aria-label="상담사 배정">' +
+      '<div class="bj-consult-modal-box" role="dialog" aria-label="상담 신청">' +
         '<button type="button" class="bj-consult-modal-close" aria-label="닫기">×</button>' +
         '<div class="bj-consult-modal-body">' +
-          '<div class="bj-consult-title">📞 상담사 배정 중</div>' +
-          '<div class="bj-consult-spinner" aria-hidden="true"></div>' +
-          '<div class="bj-consult-status">상담사를 연결 중입니다...</div>' +
+          '<div class="bj-consult-title">상담 신청</div>' +
+          '<div class="bj-consult-status">휴대폰 번호를 입력하면 통화 안내 코드와 상담사 전화 버튼이 표시됩니다.</div>' +
         '</div>' +
       '</div>';
     document.body.appendChild(modal);
@@ -7500,21 +7653,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (e.target === modal || e.target.classList.contains('bj-consult-modal-close')) close();
     });
     document.addEventListener('keydown', onKey);
-    /* v0.5.72: spinner 지연 200ms → 즉시 fetch 시작 (전체 응답시간 단축) */
-    setTimeout(function(){
-      assignConsultant().then(function(data){
-        if (!modal.parentNode) return;
-        try {
-          renderImmediateCall(modal, data);
-        } catch (renderErr) {
-          try { console.error('[bj-consult] immediate call render failed:', renderErr); } catch(_){}
-          throw renderErr;
-        }
-      }).catch(function(err){
-        if (!modal.parentNode) return;
-        renderAssignError(modal, err);
-      });
-    }, 200);
+    renderConsultApply(modal);
   }
 
   /* v0.5.72: AbortController + 18초 timeout + 1회 retry (cold start 안전망).
@@ -7627,7 +7766,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     return Object.keys(out).length ? out : null;
   }
 
-  function assignConsultant(){
+  function assignConsultant(contact){
     /* v0.5.72: admin2 실 endpoint 호출, mock fallback 폐기. timeout 18s + retry 1회.
        호스트 override: window.__bjConsultApiUrl
        v0.6.5: selection 스냅샷 첨부 — 백엔드 ConsultRequest.selection_snapshot에 저장 */
@@ -7635,6 +7774,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var prodId = (location.pathname.match(/prod_view\/(\d+)/) || [])[1] || null;
     var prodName = (document.querySelector('.prod_name b') || document.querySelector('.prod_name') || {}).textContent;
     var body = { productId: prodId, productName: prodName && prodName.trim() };
+    if (contact && contact.phone) body.customerPhone = contact.phone;
+    if (contact && contact.minutes) {
+      body.callbackMinutes = contact.minutes;
+      body.customerMemo = ['웹사이트 상담신청', '상담 희망 시간대: ' + (contact.label || '')].join('\n');
+    }
     var sel = collectConsultSelection();
     if (sel) body.selection = sel;
     bjConsultExtras(body);   // utm(광고 인구통계 코드) + 고객 페르소나 위저드 답변
@@ -7660,6 +7804,89 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '<span class="bj-consult-call-cta">대표번호로 직접</span>' +
       '</a>';
   }
+  function renderConsultApply(modal){
+    var slots = bjModalReserveSlots24h();
+    var body = modal.querySelector('.bj-consult-modal-body');
+    body.innerHTML =
+      '<div class="bj-consult-title">상담 신청</div>' +
+      '<div class="bj-consult-agent">휴대폰 번호를 입력한 뒤 바로 전화하거나 24시간 이내 통화 가능한 시간대를 예약하세요.</div>' +
+      '<div class="bj-resv-label">휴대폰 번호</div>' +
+      '<input type="tel" class="bj-resv-phone" placeholder="010-1234-5678" maxlength="13" inputmode="numeric" autocomplete="tel">' +
+      '<button type="button" class="bj-resv-submit" data-now="1" disabled>번호를 입력해 주세요</button>' +
+      '<div class="bj-resv-label" style="margin-top:16px">상담 예약</div>' +
+      '<div class="bj-resv-mins">' +
+        (slots.length ? slots.map(function(s, i){
+          return '<button type="button" class="bj-resv-min" data-slot="' + i + '">' + escapeWidgetHtml(s.label) + '</button>';
+        }).join('') : '<div class="bj-consult-status">24시간 이내 선택 가능한 상담 시간대가 없습니다.</div>') +
+      '</div>' +
+      '<button type="button" class="bj-resv-submit" data-reserve="1" disabled>시간대와 번호를 입력해 주세요</button>' +
+      '<div class="bj-resv-err" style="display:none"></div>';
+
+    var phoneEl = body.querySelector('.bj-resv-phone');
+    var nowBtn = body.querySelector('[data-now]');
+    var reserveBtn = body.querySelector('[data-reserve]');
+    var errEl = body.querySelector('.bj-resv-err');
+    var slotBtns = body.querySelectorAll('[data-slot]');
+    var selectedSlot = null;
+
+    function setBusy(label){
+      nowBtn.disabled = true;
+      reserveBtn.disabled = true;
+      nowBtn.textContent = label;
+      reserveBtn.textContent = label;
+    }
+    function phoneValue(){ return bjModalFormatPhone(phoneEl.value); }
+    function update(){
+      var okPhone = bjModalValidPhone(phoneEl.value);
+      nowBtn.disabled = !okPhone;
+      reserveBtn.disabled = !(okPhone && selectedSlot);
+      nowBtn.textContent = okPhone ? '통화 안내 코드 받고 바로 전화' : '번호를 입력해 주세요';
+      reserveBtn.textContent = okPhone && selectedSlot ? selectedSlot.label + ' 예약하기' : '시간대와 번호를 입력해 주세요';
+    }
+    function submit(contact){
+      errEl.style.display = 'none';
+      setBusy('접수 중...');
+      assignConsultant(contact).then(function(data){
+        if (!modal.parentNode) return;
+        if (contact.minutes || data.status === 'scheduled') {
+          renderScheduleConfirm(modal, data, {
+            phone: contact.phone,
+            minutes: contact.minutes,
+            label: contact.label
+          }, data.scheduledAt);
+          return;
+        }
+        renderImmediateCall(modal, data);
+      }).catch(function(err){
+        if (!modal.parentNode) return;
+        errEl.textContent = '접수에 실패했습니다. 잠시 후 다시 시도해 주세요.';
+        errEl.style.display = 'block';
+        update();
+        if (err && err.status === 503) renderAssignError(modal, err);
+      });
+    }
+    phoneEl.addEventListener('input', function(){
+      phoneEl.value = bjModalFormatPhone(phoneEl.value);
+      update();
+    });
+    Array.prototype.forEach.call(slotBtns, function(btn){
+      btn.onclick = function(){
+        Array.prototype.forEach.call(slotBtns, function(x){ x.classList.remove('on'); });
+        btn.classList.add('on');
+        selectedSlot = slots[parseInt(btn.getAttribute('data-slot'), 10)];
+        update();
+      };
+    });
+    nowBtn.onclick = function(){
+      if (!bjModalValidPhone(phoneEl.value)) return;
+      submit({ phone: phoneValue() });
+    };
+    reserveBtn.onclick = function(){
+      if (!bjModalValidPhone(phoneEl.value) || !selectedSlot) return;
+      submit({ phone: phoneValue(), minutes: selectedSlot.minutes, label: selectedSlot.label });
+    };
+    update();
+  }
   /* v0.7.0: 모달 1단계 — [바로 상담] / [상담 예약] 2분기 카드. */
   function renderAssignedConsultant(modal, d){
     var body = modal.querySelector('.bj-consult-modal-body');
@@ -7677,7 +7904,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '<button type="button" class="bj-choice-card bj-choice-resv" data-choice="resv">' +
           '<div class="bj-choice-ic">📅</div>' +
           '<div class="bj-choice-ttl">상담 예약</div>' +
-          '<div class="bj-choice-sub">5분~1시간 후</div>' +
+          '<div class="bj-choice-sub">24시간 이내</div>' +
           '<div class="bj-choice-meta">상담사가 발신</div>' +
         '</button>' +
       '</div>' +
@@ -7795,16 +8022,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
   /* v0.7.0: 모달 2단계 — 상담 예약 화면 (시간 + 폰번호 입력) */
   function renderScheduleForm(modal, d){
+    var slots = bjModalReserveSlots24h();
     modal.querySelector('.bj-consult-modal-body').innerHTML =
       '<button type="button" class="bj-back-btn" data-back="1">← 다시 선택</button>' +
       '<div class="bj-consult-title">📅 상담 예약</div>' +
       '<div class="bj-consult-agent">담당 <strong>' + escapeWidgetHtml(d.agentName || '빌리조 상담팀') + '</strong>님이 약속 시각에 발신해 드립니다</div>' +
-      '<div class="bj-resv-label">언제 통화하실까요?</div>' +
+      '<div class="bj-resv-label">24시간 이내 통화 가능한 시간대</div>' +
       '<div class="bj-resv-mins">' +
-        '<button type="button" class="bj-resv-min" data-min="5">5분</button>' +
-        '<button type="button" class="bj-resv-min" data-min="10">10분</button>' +
-        '<button type="button" class="bj-resv-min" data-min="30">30분</button>' +
-        '<button type="button" class="bj-resv-min" data-min="60">1시간</button>' +
+        (slots.length ? slots.map(function(s, i){
+          return '<button type="button" class="bj-resv-min" data-slot="' + i + '">' + escapeWidgetHtml(s.label) + '</button>';
+        }).join('') : '<div class="bj-consult-status">24시간 이내 선택 가능한 상담 시간대가 없습니다.</div>') +
       '</div>' +
       '<div class="bj-resv-label">콜백 받을 번호</div>' +
       '<input type="tel" class="bj-resv-phone" placeholder="010-1234-5678" maxlength="13" inputmode="numeric" autocomplete="tel">' +
@@ -7815,7 +8042,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var phoneEl = modal.querySelector('.bj-resv-phone');
     var submit = modal.querySelector('.bj-resv-submit');
     var errEl = modal.querySelector('.bj-resv-err');
-    var state = { minutes: null, phone: '' };
+    var state = { minutes: null, phone: '', label: '' };
 
     function fmtPhone(v){
       var digits = String(v || '').replace(/\D/g, '').slice(0, 11);
@@ -7828,10 +8055,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var ok = state.minutes && phoneOk;
       submit.disabled = !ok;
       if (ok) {
-        var t = new Date(Date.now() + state.minutes * 60000);
-        var hh = String(t.getHours()).padStart(2,'0');
-        var mm = String(t.getMinutes()).padStart(2,'0');
-        submit.textContent = hh + ':' + mm + '에 콜백 받기';
+        submit.textContent = state.label + '에 콜백 받기';
       } else if (!state.minutes) {
         submit.textContent = '시간을 선택해 주세요';
       } else {
@@ -7842,7 +8066,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       b.onclick = function(){
         Array.prototype.forEach.call(minBtns, function(x){ x.classList.remove('on'); });
         b.classList.add('on');
-        state.minutes = parseInt(b.dataset.min, 10);
+        var slot = slots[parseInt(b.getAttribute('data-slot'), 10)];
+        state.minutes = slot && slot.minutes;
+        state.label = slot && slot.label || '';
         updateSubmit();
       };
     });
@@ -7891,10 +8117,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var when = scheduledAtIso ? new Date(scheduledAtIso) : new Date(Date.now() + state.minutes * 60000);
     var hh = String(when.getHours()).padStart(2,'0');
     var mm = String(when.getMinutes()).padStart(2,'0');
+    var whenLabel = state && state.label ? state.label : (hh + ':' + mm);
     modal.querySelector('.bj-consult-modal-body').innerHTML =
       '<div class="bj-consult-title bj-consult-title-ok">✓ 예약 완료</div>' +
       '<div class="bj-resv-confirm">' +
-        '<div class="bj-resv-when">' + hh + ':' + mm + '에 콜백</div>' +
+        '<div class="bj-resv-when">' + escapeWidgetHtml(whenLabel) + '에 콜백</div>' +
         '<div class="bj-resv-to">' + escapeWidgetHtml(state.phone) + '로</div>' +
       '</div>' +
       '<div class="bj-consult-agent"><strong>' + escapeWidgetHtml(d.agentName || '상담사') + '</strong>님이 정확한 시간에 발신해 드립니다.</div>' +
