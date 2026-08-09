@@ -163,8 +163,24 @@
     }
     window.addEventListener('scroll', onScroll, { passive: true });
     setTimeout(onScroll, 600);
+    var candidates = Array.prototype.slice.call(document.querySelectorAll('[data-bj-section], section, main > div, body > div, .container, .content, .section, .visual, .main, .service, .review, .faq, .prod_view, .prod_info, .rantal_wrap')).slice(0, 50);
+    function markVisibleSections(){
+      var vh = window.innerHeight || document.documentElement.clientHeight || 0;
+      candidates.forEach(function(el, idx){
+        if (!el || !el.getBoundingClientRect) return;
+        var rect = el.getBoundingClientRect();
+        var height = Math.max(1, rect.height || 1);
+        var visible = Math.max(0, Math.min(rect.bottom, vh) - Math.max(rect.top, 0));
+        if (visible >= Math.min(height * 0.5, vh * 0.45)) {
+          var id = sectionId(el, idx);
+          once('section_' + id, 'section_view', { section_id: id, section_order: idx + 1 });
+        }
+      });
+    }
+    window.addEventListener('scroll', markVisibleSections, { passive: true });
+    setTimeout(markVisibleSections, 900);
+    setTimeout(markVisibleSections, 2500);
     if ('IntersectionObserver' in window) {
-      var candidates = Array.prototype.slice.call(document.querySelectorAll('[data-bj-section], section, main > div, .visual, .main, .service, .review, .faq, .prod_view, .prod_info, .rantal_wrap')).slice(0, 40);
       var io = new IntersectionObserver(function(entries){
         entries.forEach(function(entry){
           if (!entry.isIntersecting || entry.intersectionRatio < 0.5) return;
