@@ -7467,6 +7467,93 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       return Object.keys(o).length ? o : null;
     } catch(_){ return null; }
   }
+  function bjCookie(name){
+    try {
+      var parts = document.cookie ? document.cookie.split('; ') : [];
+      for (var i = 0; i < parts.length; i++) {
+        var p = parts[i].split('=');
+        if (p[0] === name) return decodeURIComponent(p.slice(1).join('='));
+      }
+      return '';
+    } catch(_){ return ''; }
+  }
+  function bjClickIdsFromUrl(url){
+    var out = {};
+    try {
+      var q = new URL(url || location.href, location.href).searchParams;
+      ['fbclid','gclid','gbraid','wbraid','dclid','msclkid','ttclid','kclid','NaPm','n_media','n_query','n_rank','n_ad_group','n_ad','n_campaign_type'].forEach(function(k){
+        var v = q.get(k);
+        if (v) out[k] = String(v).slice(0, 255);
+      });
+    } catch(_){}
+    return out;
+  }
+  function bjPlatformFromClickIds(ids){
+    ids = ids || {};
+    if (ids.fbclid) return 'meta';
+    if (ids.gclid || ids.gbraid || ids.wbraid || ids.dclid) return 'google';
+    if (ids.ttclid) return 'tiktok';
+    if (ids.kclid) return 'kakao';
+    if (ids.NaPm || ids.n_media || ids.n_query) return 'naver';
+    if (ids.msclkid) return 'microsoft';
+    return '';
+  }
+  function bjPlatformFromUtm(utm){
+    var s = String((utm && utm.source) || '').toLowerCase();
+    if (/^(meta|facebook|fb|instagram|ig)$/.test(s)) return 'meta';
+    if (/^(google|gads|youtube)$/.test(s)) return 'google';
+    if (/^(naver|nv)$/.test(s)) return 'naver';
+    if (/^(kakao|kko)$/.test(s)) return 'kakao';
+    if (/^(tiktok|tt)$/.test(s)) return 'tiktok';
+    return '';
+  }
+  function bjFirstLandingUrl(){
+    try {
+      var key = 'bj_first_landing_url';
+      var existing = sessionStorage.getItem(key);
+      if (existing) return existing;
+      sessionStorage.setItem(key, location.href);
+      return location.href;
+    } catch(_){ return location.href; }
+  }
+  function bjLatestAdClickUrl(){
+    try {
+      var key = 'bj_latest_ad_click_url';
+      var ids = bjClickIdsFromUrl(location.href);
+      var utm = bjReadUtm();
+      if (Object.keys(ids).length || (utm && utm.source)) {
+        sessionStorage.setItem(key, location.href);
+        return location.href;
+      }
+      return sessionStorage.getItem(key) || '';
+    } catch(_){ return ''; }
+  }
+  function bjReadAttribution(){
+    var utm = bjReadUtm() || {};
+    var currentIds = bjClickIdsFromUrl(location.href);
+    var landingUrl = bjFirstLandingUrl();
+    var landingIds = bjClickIdsFromUrl(landingUrl);
+    var latestUrl = bjLatestAdClickUrl();
+    var latestIds = bjClickIdsFromUrl(latestUrl);
+    var clickIds = {};
+    Object.keys(landingIds).forEach(function(k){ clickIds[k] = landingIds[k]; });
+    Object.keys(latestIds).forEach(function(k){ clickIds[k] = latestIds[k]; });
+    Object.keys(currentIds).forEach(function(k){ clickIds[k] = currentIds[k]; });
+    var fbp = bjCookie('_fbp'), fbc = bjCookie('_fbc');
+    var platform = bjPlatformFromClickIds(currentIds) || bjPlatformFromClickIds(latestIds) || bjPlatformFromUtm(utm) || bjPlatformFromClickIds(landingIds);
+    var attr = {
+      landingPageUrl: landingUrl,
+      currentPageUrl: location.href,
+      referrerUrl: document.referrer || '',
+      trackingPayload: latestUrl ? { lastClickUrl: latestUrl } : undefined
+    };
+    if (platform) attr.adPlatform = platform;
+    if (fbp) attr.fbp = fbp;
+    if (fbc) attr.fbc = fbc;
+    Object.keys(clickIds).forEach(function(k){ attr[k] = clickIds[k]; });
+    if (Object.keys(clickIds).length) attr.clickIds = clickIds;
+    return attr;
+  }
   function bjGetPersonaInput(){
     if (window.__bjPersonaInput) return window.__bjPersonaInput;
     try { var s = sessionStorage.getItem('bj_persona_input'); if (s){ window.__bjPersonaInput = JSON.parse(s); return window.__bjPersonaInput; } } catch(_){}
@@ -7479,6 +7566,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   /* 두 quick-assign 페이로드에 utm + personaInput 첨부 (있을 때만) */
   function bjConsultExtras(body){
     try { var utm = bjReadUtm(); if (utm) body.utm = utm; } catch(_){}
+    try { body.attribution = Object.assign({}, bjReadAttribution(), body.attribution || {}); } catch(_){}
     try { var pi = bjGetPersonaInput(); if (pi) body.personaInput = pi; } catch(_){}
     return body;
   }
@@ -7711,8 +7799,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           });
         }
         return r.json().then(function(data){
+          var attr = (body && body.attribution) || {};
           _pushCatalogDataLayer('generate_lead', _catalogProductFromBody(body), {
-            lead_id: String(data && (data.requestId || data.code) || '').slice(0, 120)
+            lead_id: String(data && (data.requestId || data.code) || '').slice(0, 120),
+            request_id: data && data.requestId,
+            event_id: data && data.requestId ? ('billyjo_lead_' + data.requestId) : undefined,
+            conversion_platform: attr.adPlatform || '',
+            ad_platform: attr.adPlatform || ''
           });
           return data;
         });
