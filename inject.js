@@ -7800,7 +7800,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         }
         return r.json().then(function(data){
           var attr = (body && body.attribution) || {};
-          _pushCatalogDataLayer('generate_lead', _catalogProductFromBody(body), {
+          _pushLeadDataLayers(_catalogProductFromBody(body), {
             lead_id: String(data && (data.requestId || data.code) || '').slice(0, 120),
             request_id: data && data.requestId,
             event_id: data && data.requestId ? ('billyjo_lead_' + data.requestId) : undefined,
@@ -8086,6 +8086,33 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (extra) Object.keys(extra).forEach(function(k){ payload[k] = extra[k]; });
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push(payload);
+  }
+  function _leadEventNameForPlatform(platform){
+    platform = String(platform || '').toLowerCase();
+    if (/^(meta|facebook|instagram|fb|ig)$/.test(platform)) return 'bj_meta_lead';
+    if (/^(google|gads|youtube)$/.test(platform)) return 'bj_google_lead';
+    if (/^(naver|nv)$/.test(platform)) return 'bj_naver_lead';
+    if (/^(kakao|kko)$/.test(platform)) return 'bj_kakao_lead';
+    if (/^(tiktok|tt)$/.test(platform)) return 'bj_tiktok_lead';
+    if (/^(karrot|daangn|danggeun)$/.test(platform)) return 'bj_karrot_lead';
+    if (/^(microsoft|bing)$/.test(platform)) return 'bj_microsoft_lead';
+    return '';
+  }
+  function _pushLeadDataLayers(product, extra){
+    extra = extra || {};
+    var platform = String(extra.conversion_platform || extra.ad_platform || '').toLowerCase();
+    var base = {};
+    Object.keys(extra).forEach(function(k){ base[k] = extra[k]; });
+    base.canonical_event = 'generate_lead';
+    base.ga_event_name = 'generate_lead';
+    base.lead_attribution_model = 'last_click_only';
+    _pushCatalogDataLayer('bj_lead_created', product, base);
+    var mediaEvent = _leadEventNameForPlatform(platform);
+    if (!mediaEvent) return;
+    var mediaPayload = {};
+    Object.keys(base).forEach(function(k){ mediaPayload[k] = base[k]; });
+    mediaPayload.media_conversion_event = true;
+    _pushCatalogDataLayer(mediaEvent, product, mediaPayload);
   }
 
   function _trackCatalogViewContent(){

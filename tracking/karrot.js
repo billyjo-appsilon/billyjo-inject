@@ -45,6 +45,17 @@
     }
     return false;
   }
+  function requestAttributionPlatform(init) {
+    try {
+      var raw = init && init.body;
+      if (!raw || typeof raw !== 'string') return '';
+      var body = JSON.parse(raw);
+      var platform = body && body.attribution && body.attribution.adPlatform;
+      return String(platform || '').toLowerCase();
+    } catch (err) {
+      return '';
+    }
+  }
 
   w.BillyjoKarrotTrack = w.BillyjoKarrotTrack || track;
 
@@ -74,9 +85,12 @@
       }
       return nativeFetch.apply(this, arguments).then(function (res) {
         if (res && res.ok && /\/v1\/consult\/quick-assign(?:\?|$)/.test(url)) {
+          var platform = requestAttributionPlatform(init);
+          if (!/^(karrot|daangn|danggeun)$/.test(platform)) return res;
           setTimeout(function () {
             w.BillyjoKarrotTrack('CompleteRegistration', {
-              lead_source_event: 'generate_lead',
+              lead_source_event: 'bj_karrot_lead',
+              conversion_platform: platform,
               source: 'billyjo.co.kr',
               value: 1,
               currency: 'KRW'
