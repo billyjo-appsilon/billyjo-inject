@@ -147,10 +147,16 @@
     return items.slice(0, 20);
   }
   function relabelCartLanguage(){
-    Array.prototype.forEach.call(document.querySelectorAll('button,a,span,strong,p,th,h1,h2,h3'), function(el){
+    Array.prototype.forEach.call(document.querySelectorAll('button,a,span,strong,p,th,caption,h1,h2,h3'), function(el){
       if (!el || el.children.length > 2) return;
       var t = text(el);
-      if (t === '장바구니') el.textContent = '견적비교함';
+      var onclick = el.getAttribute && (el.getAttribute('onclick') || '');
+      if (t === '장바구니') el.textContent = /shoporder\(['"]cart['"]\)/.test(onclick) ? '견적비교 담기' : '견적비교함';
+      else if (/^장바구니\s*\d+$/.test(t)) {
+        var count = t.match(/\d+$/);
+        el.innerHTML = '견적비교함' + (count ? '<span class="cart__count">' + count[0] + '</span>' : '');
+      }
+      else if (t === '장바구니 담긴 상품') el.textContent = '견적비교 담긴 상품';
       else if (t === '장바구니 담기') el.textContent = '견적비교 담기';
       else if (t === '선택상품 렌탈') el.textContent = '선택한 상품 견적 신청';
       else if (t === '전체상품 렌탈') el.textContent = '전체 상품 견적 신청';
