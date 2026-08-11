@@ -210,6 +210,31 @@
       continueFn();
     };
   }
+  function showQuoteLoading(count){
+    var old = document.getElementById('bj-quote-auth-modal');
+    if (old) old.remove();
+    var div = document.createElement('div');
+    div.id = 'bj-quote-auth-modal';
+    div.innerHTML =
+      '<div class="bj-qam-card">' +
+        '<button type="button" class="bj-qam-x" aria-label="닫기">×</button>' +
+        '<div class="bj-qam-eyebrow">24시간 혜택 견적</div>' +
+        '<div class="bj-qam-loading">' +
+          '<span class="bj-qam-spin" aria-hidden="true"></span>' +
+          '<div>' +
+            '<div class="bj-qam-title">담은 상품 혜택을 계산하고 있어요</div>' +
+            '<div class="bj-qam-note">최신 조건으로 예상 사은품 혜택을 확인 중입니다.</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="bj-qam-grid">' +
+          '<div><span>계산 상품</span><b>' + Number(count || 0).toLocaleString('ko-KR') + '개</b></div>' +
+          '<div><span>진행 상태</span><b>잠시만 기다려주세요</b></div>' +
+        '</div>' +
+      '</div>';
+    document.body.appendChild(div);
+    div.querySelector('.bj-qam-x').onclick = function(){ div.remove(); };
+    return { remove: function(){ if (div && div.parentNode) div.remove(); } };
+  }
   function injectQuoteStyle(){
     if (document.getElementById('bj-quote-auth-style')) return;
     var st = document.createElement('style');
@@ -221,6 +246,7 @@
       '.bj-qam-eyebrow{font-size:11px;font-weight:900;color:#0838f8;margin-bottom:8px}.bj-qam-title{font-size:19px;font-weight:950;line-height:1.25;margin-right:28px}' +
       '.bj-qam-code{margin:13px 0;padding:10px 12px;border-radius:10px;background:#f4f7ff;color:#0838f8;font-weight:950;letter-spacing:.02em}' +
       '.bj-qam-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bj-qam-grid div{border:1px solid #e5ebf5;border-radius:10px;padding:10px}.bj-qam-grid span{display:block;font-size:11px;color:#6b7485;font-weight:800}.bj-qam-grid b{display:block;margin-top:4px;font-size:15px;color:#172033}' +
+      '.bj-qam-loading{display:flex;gap:12px;align-items:flex-start;margin:8px 28px 14px 0}.bj-qam-spin{width:24px;height:24px;border-radius:50%;border:3px solid #dbe5ff;border-top-color:#0838f8;flex:0 0 auto;animation:bjQamSpin .72s linear infinite}@keyframes bjQamSpin{to{transform:rotate(360deg)}}' +
       '.bj-qam-memo{margin-top:12px;border:1px dashed #cdd8ef;border-radius:10px;background:#fbfcff;padding:10px;font-size:12px;line-height:1.5;color:#3c4658;white-space:pre-wrap}.bj-qam-note{margin-top:10px;font-size:11px;line-height:1.45;color:#737d8e}.bj-qam-go{width:100%;margin-top:14px;border:0;border-radius:11px;background:#0838f8;color:#fff;font-size:14px;font-weight:950;padding:13px;cursor:pointer}';
     document.head.appendChild(st);
   }
@@ -264,6 +290,7 @@
       if ('value' in btn) btn.value = '견적 계산 중...';
       else btn.textContent = '견적 계산 중...';
       btn.disabled = true;
+      var loading = showQuoteLoading(items.length);
       calculateQuote(items, mode === 'selected' ? 'website_cart_selected' : 'website_cart_all').then(function(result){
         showQuote(result, function(){
           btn.setAttribute('data-bj-quote-continue', '1');
@@ -273,6 +300,7 @@
           setTimeout(function(){ btn.click(); }, 20);
         });
       }).catch(function(err){
+        if (loading) loading.remove();
         alert('견적 계산에 실패했습니다. 잠시 후 다시 시도해주세요.\n' + (err && err.message ? err.message : ''));
         btn.disabled = false;
         if ('value' in btn) btn.value = oldLabel;
