@@ -8459,19 +8459,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
   function _pushLeadDataLayers(product, extra){
     extra = extra || {};
-    var platform = String(extra.conversion_platform || extra.ad_platform || '').toLowerCase();
     var base = {};
     Object.keys(extra).forEach(function(k){ base[k] = extra[k]; });
-    base.canonical_event = 'generate_lead';
-    base.ga_event_name = 'generate_lead';
+    base.canonical_event = 'admin2_lead_created';
+    base.ga_event_name = 'admin2_lead_created';
+    base.server_conversion_event = 'CompleteRegistration';
     base.lead_attribution_model = 'last_click_only';
-    _pushCatalogDataLayer('bj_lead_created', product, base);
-    var mediaEvent = _leadEventNameForPlatform(platform);
-    if (!mediaEvent) return;
-    var mediaPayload = {};
-    Object.keys(base).forEach(function(k){ mediaPayload[k] = base[k]; });
-    mediaPayload.media_conversion_event = true;
-    _pushCatalogDataLayer(mediaEvent, product, mediaPayload);
+    // Meta/매체 전환은 Admin2 서버 CAPI가 상담카드 생성 후 1회만 보낸다.
+    // 브라우저 GTM은 감사/GA용 이벤트만 받게 해 픽셀 전환 수가 상담카드 수보다 커지는
+    // 구조를 막는다.
+    _pushCatalogDataLayer('bj_admin2_lead_created', product, base);
   }
 
   function _trackCatalogViewContent(){
