@@ -1267,6 +1267,24 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
+  // === 모바일 고객센터 4개 버튼 정렬 보정 (2026-08-12) ===
+  // 이벤트/기획전 링크만 숨긴 뒤 빈 li가 남아 FAQ/상담신청/가입기준/제휴카드가 밀리는 문제를 막는다.
+  (function fixMobileCustomerGrid() {
+    if (document.getElementById('bj-mobile-customer-grid')) return;
+    var s = document.createElement('style');
+    s.id = 'bj-mobile-customer-grid';
+    s.textContent = [
+      '@media(max-width:767px){',
+      '.m_customer .inline_wrap.col03{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;width:auto!important;margin:0!important;padding:0!important}',
+      '.m_customer .inline_wrap.col03>li{display:block!important;width:auto!important;height:auto!important;margin:0!important;padding:0!important}',
+      '.m_customer .inline_wrap.col03>li:has(>a[href*="/display"]){display:none!important}',
+      '.m_customer .inline_wrap.col03>li>a{display:block!important;width:100%!important;height:auto!important;margin:0!important;padding:0!important}',
+      '.m_customer .inline_wrap.col03>li>a img{display:block!important;width:100%!important;height:auto!important;margin:0!important}',
+      '}'
+    ].join('');
+    (document.head || document.documentElement).appendChild(s);
+  })();
+
   // === 홈 히어로 하단 렌트리형 카테고리 버튼 (2026-08-11) ===
   // 카드, 아이콘 이미지 면, 텍스트 영역의 배경을 같은 색으로 고정해 하나의 버튼처럼 보이게 한다.
   (function injectHomeCategoryQuickLinks() {
