@@ -1282,6 +1282,16 @@
       { name: '비데', reviews: '후기 982개', href: '/html/dh_prod/prod_list/1-9', img: 'images/category-icons/bidet.png' },
       { name: '인터넷+TV', reviews: '후기 231개', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/internet-tv.png' }
     ];
+    var MORE_ITEMS = [
+      { name: '제습기', meta: '후기 2,719개', href: '/html/dh_prod/prod_list/1-203' },
+      { name: '음식물처리기', meta: '후기 1,430개', href: '/html/dh_prod/prod_list/2-19' },
+      { name: '안마의자', meta: '후기 1,126개', href: '/html/dh_prod/prod_list/4-28' },
+      { name: '로봇청소기', meta: '후기 858개', href: '/html/dh_prod/prod_list/1-374' },
+      { name: '냉장고', meta: '후기 473개', href: '/html/dh_prod/prod_list/8-658' },
+      { name: '매트리스', meta: '후기 194개', href: '/html/dh_prod/prod_list/5-561' },
+      { name: '업소용', meta: '사업장 렌탈 비교', href: '/html/dh_prod/prod_list/10-1153' },
+      { name: 'PC·디지털', meta: '노트북·모니터 렌탈 비교', href: '/html/dh_prod/prod_list/6-681' }
+    ];
 
     function isHome() {
       var p = location.pathname || '/';
@@ -1321,9 +1331,21 @@
         '#bj-home-cat-links .bj-hcat-name{display:block;margin:0 0 4px;font-size:18px;font-weight:800;line-height:1.18;letter-spacing:0;color:#0f1f35;white-space:nowrap}',
         '#bj-home-cat-links .bj-hcat-reviews{display:block;margin:0 0 5px;font-size:12px;font-weight:700;line-height:1.2;letter-spacing:0;color:#5d6f86;white-space:nowrap}',
         '#bj-home-cat-links .bj-hcat-action{display:inline-flex;align-items:center;justify-content:center;max-width:100%;padding:4px 8px;border-radius:999px;background:rgba(8,56,248,.07);color:#0838f8;font-size:12px;font-weight:800;line-height:1.2;letter-spacing:0;white-space:nowrap}',
+        '#bj-home-cat-links .bj-hcat-more-wrap{display:flex;justify-content:center;margin:14px 0 0}',
+        '#bj-home-cat-links .bj-hcat-more-btn{display:inline-flex;align-items:center;justify-content:center;min-width:220px;height:42px;padding:0 22px;border:1px solid #b9d2f5;border-radius:999px;background:#fff;color:#0838f8;font-size:14px;font-weight:800;line-height:1;letter-spacing:0;cursor:pointer;box-shadow:0 6px 15px rgba(35,80,130,.08)}',
+        '#bj-home-cat-links .bj-hcat-more-btn:hover{background:#f5f9ff;border-color:#9ec2f2}',
+        '#bj-home-cat-links .bj-hcat-more-btn[aria-expanded="true"] .bj-hcat-more-plus{transform:rotate(45deg)}',
+        '#bj-home-cat-links .bj-hcat-more-plus{display:inline-block;margin-left:8px;font-size:16px;transition:transform .16s ease}',
+        '#bj-home-cat-links .bj-hcat-extra{display:none;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 16px;margin:16px auto 0;max-width:1180px}',
+        '#bj-home-cat-links.bj-hcat-open .bj-hcat-extra{display:grid}',
+        '#bj-home-cat-links .bj-hcat-extra-chip{position:relative;display:block;min-height:64px;padding:12px 44px 12px 18px;border:1px solid #dfeaf6;border-radius:8px;background:#fff;color:#17253a;text-decoration:none;box-shadow:0 7px 16px rgba(35,80,130,.06)}',
+        '#bj-home-cat-links .bj-hcat-extra-chip:hover{border-color:#c9dcf3;background:#fbfdff}',
+        '#bj-home-cat-links .bj-hcat-extra-name{display:block;margin:0 0 5px;font-size:16px;font-weight:800;line-height:1.15;color:#17253a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+        '#bj-home-cat-links .bj-hcat-extra-meta{display:block;font-size:12px;font-weight:700;line-height:1.2;color:#6b7c90;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+        '#bj-home-cat-links .bj-hcat-extra-arrow{position:absolute;right:18px;top:50%;transform:translateY(-50%);color:#0838f8;font-size:20px;font-weight:900;line-height:1}',
         'body.bj-home-cats-ready .new-mc:not(.show-767){display:none!important}',
         '@media(max-width:1024px){#bj-home-cat-links .bj-hcat-inner{padding-left:18px;padding-right:18px}#bj-home-cat-links .bj-hcat-grid{gap:9px}#bj-home-cat-links .bj-hcat-card{min-height:172px;padding:10px 7px 12px}#bj-home-cat-links .bj-hcat-media{height:108px}#bj-home-cat-links .bj-hcat-img{width:132px;height:108px}#bj-home-cat-links .bj-hcat-name{font-size:16px}#bj-home-cat-links .bj-hcat-action{font-size:11px;padding-left:7px;padding-right:7px}}',
-        '@media(max-width:767px){#bj-home-cat-links{padding-bottom:14px}#bj-home-cat-links .bj-hcat-inner{padding:12px 12px 0}#bj-home-cat-links .bj-hcat-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}#bj-home-cat-links .bj-hcat-card{min-height:132px;padding:8px 5px 9px;border-radius:8px;box-shadow:0 7px 16px rgba(35,80,130,.10)}#bj-home-cat-links .bj-hcat-card:nth-child(1),#bj-home-cat-links .bj-hcat-card:nth-child(2){grid-column:span 3}#bj-home-cat-links .bj-hcat-card:nth-child(3),#bj-home-cat-links .bj-hcat-card:nth-child(4),#bj-home-cat-links .bj-hcat-card:nth-child(5){grid-column:span 2;min-height:126px}#bj-home-cat-links .bj-hcat-card:nth-child(6){grid-column:1/-1;min-height:104px;display:grid;grid-template-columns:96px 1fr;align-items:center;text-align:left;padding:10px 18px}#bj-home-cat-links .bj-hcat-card:hover{transform:none}#bj-home-cat-links .bj-hcat-media{height:74px;margin-bottom:5px;border-radius:8px}#bj-home-cat-links .bj-hcat-img{width:96px;height:74px;border-radius:8px}#bj-home-cat-links .bj-hcat-name{font-size:13px;margin-bottom:3px}#bj-home-cat-links .bj-hcat-reviews{font-size:10.5px;margin-bottom:4px}#bj-home-cat-links .bj-hcat-action{font-size:10px;padding:3px 5px;letter-spacing:0}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-media{width:104px;height:88px;margin:0}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-img{width:112px;height:88px}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-text{text-align:left}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-name{font-size:17px}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-reviews{font-size:12px}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-action{font-size:11px}body.bj-home-cats-ready .new-mc:not(.show-767){display:none!important}}',
+        '@media(max-width:767px){#bj-home-cat-links{padding-bottom:14px}#bj-home-cat-links .bj-hcat-inner{padding:12px 12px 0}#bj-home-cat-links .bj-hcat-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}#bj-home-cat-links .bj-hcat-card{min-height:132px;padding:8px 5px 9px;border-radius:8px;box-shadow:0 7px 16px rgba(35,80,130,.10)}#bj-home-cat-links .bj-hcat-card:nth-child(1),#bj-home-cat-links .bj-hcat-card:nth-child(2){grid-column:span 3}#bj-home-cat-links .bj-hcat-card:nth-child(3),#bj-home-cat-links .bj-hcat-card:nth-child(4),#bj-home-cat-links .bj-hcat-card:nth-child(5){grid-column:span 2;min-height:126px}#bj-home-cat-links .bj-hcat-card:nth-child(6){grid-column:1/-1;min-height:104px;display:grid;grid-template-columns:96px 1fr;align-items:center;text-align:left;padding:10px 18px}#bj-home-cat-links .bj-hcat-card:hover{transform:none}#bj-home-cat-links .bj-hcat-media{height:74px;margin-bottom:5px;border-radius:8px}#bj-home-cat-links .bj-hcat-img{width:96px;height:74px;border-radius:8px}#bj-home-cat-links .bj-hcat-name{font-size:13px;margin-bottom:3px}#bj-home-cat-links .bj-hcat-reviews{font-size:10.5px;margin-bottom:4px}#bj-home-cat-links .bj-hcat-action{font-size:10px;padding:3px 5px;letter-spacing:0}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-media{width:104px;height:88px;margin:0}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-img{width:112px;height:88px}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-text{text-align:left}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-name{font-size:17px}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-reviews{font-size:12px}#bj-home-cat-links .bj-hcat-card:nth-child(6) .bj-hcat-action{font-size:11px}#bj-home-cat-links .bj-hcat-more-wrap{margin-top:10px}#bj-home-cat-links .bj-hcat-more-btn{width:min(280px,78vw);height:40px;font-size:13px}#bj-home-cat-links .bj-hcat-extra{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;max-width:none}#bj-home-cat-links .bj-hcat-extra-chip{min-height:54px;padding:10px 30px 10px 12px;border-radius:8px;box-shadow:none}#bj-home-cat-links .bj-hcat-extra-name{font-size:13px;margin-bottom:4px}#bj-home-cat-links .bj-hcat-extra-meta{font-size:10.5px}#bj-home-cat-links .bj-hcat-extra-arrow{right:12px;font-size:16px}body.bj-home-cats-ready .new-mc:not(.show-767){display:none!important}}',
         '@media(max-width:359px){#bj-home-cat-links .bj-hcat-inner{padding-left:8px;padding-right:8px}#bj-home-cat-links .bj-hcat-grid{gap:6px}#bj-home-cat-links .bj-hcat-card{min-height:128px;padding-left:3px;padding-right:3px}#bj-home-cat-links .bj-hcat-name{font-size:12px}#bj-home-cat-links .bj-hcat-reviews{font-size:10px}#bj-home-cat-links .bj-hcat-action{font-size:9.5px;padding-left:4px;padding-right:4px}}'
       ].join('\n');
       (document.head || document.documentElement).appendChild(style);
@@ -1341,8 +1363,25 @@
           + '<span class="bj-hcat-media"><img class="bj-hcat-img" src="' + esc(asset(it.img)) + '" alt="' + esc(it.name) + '" loading="eager"></span>'
           + '<span class="bj-hcat-text"><strong class="bj-hcat-name">' + esc(it.name) + '</strong><span class="bj-hcat-reviews">' + esc(it.reviews) + '</span><span class="bj-hcat-action">최저가 · 지원금 비교</span></span>'
           + '</a>';
+      }).join('') + '</div><div class="bj-hcat-more-wrap"><button type="button" class="bj-hcat-more-btn" aria-expanded="false" aria-controls="bj-hcat-extra">카테고리 더보기<span class="bj-hcat-more-plus" aria-hidden="true">+</span></button></div><div id="bj-hcat-extra" class="bj-hcat-extra" hidden>' + MORE_ITEMS.map(function (it) {
+        return '<a class="bj-hcat-extra-chip" href="' + esc(it.href) + '" aria-label="' + esc(it.name + ' ' + it.meta) + '">'
+          + '<span class="bj-hcat-extra-name">' + esc(it.name) + '</span>'
+          + '<span class="bj-hcat-extra-meta">' + esc(it.meta) + '</span>'
+          + '<span class="bj-hcat-extra-arrow" aria-hidden="true">›</span>'
+          + '</a>';
       }).join('') + '</div></div>';
       hero.parentNode.insertBefore(section, hero.nextSibling);
+      var btn = section.querySelector('.bj-hcat-more-btn');
+      var extra = section.querySelector('.bj-hcat-extra');
+      if (btn && extra) {
+        btn.addEventListener('click', function () {
+          var open = !section.classList.contains('bj-hcat-open');
+          section.classList.toggle('bj-hcat-open', open);
+          btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+          if (open) extra.removeAttribute('hidden');
+          else extra.setAttribute('hidden', '');
+        });
+      }
       document.body.classList.add('bj-home-cats-ready');
     }
     function boot() {
