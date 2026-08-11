@@ -8446,17 +8446,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push(payload);
   }
-  function _leadEventNameForPlatform(platform){
-    platform = String(platform || '').toLowerCase();
-    if (/^(meta|facebook|instagram|fb|ig)$/.test(platform)) return 'bj_meta_lead';
-    if (/^(google|gads|youtube)$/.test(platform)) return 'bj_google_lead';
-    if (/^(naver|nv)$/.test(platform)) return 'bj_naver_lead';
-    if (/^(kakao|kko)$/.test(platform)) return 'bj_kakao_lead';
-    if (/^(tiktok|tt)$/.test(platform)) return 'bj_tiktok_lead';
-    if (/^(karrot|daangn|danggeun)$/.test(platform)) return 'bj_karrot_lead';
-    if (/^(microsoft|bing)$/.test(platform)) return 'bj_microsoft_lead';
-    return '';
-  }
   function _pushLeadDataLayers(product, extra){
     extra = extra || {};
     var base = {};
