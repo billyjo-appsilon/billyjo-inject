@@ -8463,7 +8463,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     Object.keys(extra).forEach(function(k){ base[k] = extra[k]; });
     base.canonical_event = 'admin2_lead_created';
     base.ga_event_name = 'admin2_lead_created';
-    base.server_conversion_event = 'CompleteRegistration';
+    base.server_conversion_event = 'Lead';
     base.lead_attribution_model = 'last_click_only';
     // Meta/매체 전환은 Admin2 서버 CAPI가 상담카드 생성 후 1회만 보낸다.
     // 브라우저 GTM은 감사/GA용 이벤트만 받게 해 픽셀 전환 수가 상담카드 수보다 커지는
