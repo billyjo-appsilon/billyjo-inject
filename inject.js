@@ -7585,6 +7585,28 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '.menu__gsnb a[href*="prod_list/10-1153"],',
     '.aside_sub a[href*="prod_list/10-1153"]{',
     '  display:revert !important; visibility:visible !important;',
+    '}',
+
+    /* === 상세 헤더를 메인 기준으로 통일 (1)(2) ===
+       상세 GNB가 메인보다 89px 넓어서 같은 폭에서도 상세만 먼저 2행으로 꺾이던 문제.
+       (1) 서체 — 메인은 #bj-v5-css가 body에 Pretendard 스택을 깔지만 이 스타일이 상세엔 없어
+           테마 base.css의 "Noto Sans KR"이 그대로 적용됐다. 같은 14px인데 폭이 항목당 3~13px
+           넓어져 합계 +36px. 본문 서체까지 바뀌지 않도록 header.new-header 범위로만 한정한다. */
+    'header.new-header{',
+    '  font-family:"Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont,',
+    '    system-ui, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif !important;',
+    '}',
+    'header.new-header .new-gnb a,',
+    'header.new-header .gnb__right,',
+    'header.new-header .gnb__right *,',
+    'header.new-header .search__wrap input{ font-family:inherit !important; }',
+
+    /* (2) 업소용 — 위 v0.5.20 복원은 모바일 카테고리바(.category__wrap)·사이드 메뉴
+           (.menu__gsnb/.aside_sub/.all__depth1)에만 남기고, PC 상단 GNB에서는 다시 숨긴다.
+           메인 GNB에는 없는 항목이라 상세만 39px + gap 8px = 47px 더 길어지던 원인. */
+    'header.new-header ul.new-gnb li.gnb__menu:has(> a[href*="prod_list/10-1153"]),',
+    'header.new-header ul.new-gnb .gnb__menu a[href*="prod_list/10-1153"]{',
+    '  display:none !important;',
     '}'
   ].join('\n');
 
