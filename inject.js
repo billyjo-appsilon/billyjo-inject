@@ -4785,11 +4785,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (!z.style.order) z.style.order = '1'; // 히어로/기타 = 최상단 유지
     });
 
-    // 신뢰도 트러스트 카드(.hero "설치 케어는 본사에서") → 시안 "믿고 맡길 수 있는 빌리조"로 텍스트 교체 + 후기 다음(order 4) (2026-07-02)
+    // 신뢰도 트러스트 카드(.hero "설치 케어는 본사에서") → 히어로 바로 다음 첫 신뢰 장치로 배치 (2026-08-12)
     if (!document.getElementById('bj-trust-partners-css')) {
       var bjTrustCss = document.createElement('style');
       bjTrustCss.id = 'bj-trust-partners-css';
       bjTrustCss.textContent =
+        '.hero[data-bj-trust="1"]{order:2!important}' +
         '.bj-trust-partners{display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;margin:16px auto 0;max-width:330px}' +
         '.bj-trust-partner{width:148px;height:54px;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid rgba(8,56,248,.12);box-shadow:0 10px 24px rgba(8,28,92,.1);display:flex;align-items:center;justify-content:center;box-sizing:border-box}' +
         '.bj-trust-partner img{display:block;width:100%;height:100%;object-fit:contain}' +
@@ -4801,7 +4802,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var bjTrust = pageEl.querySelector('.hero');
     if (bjTrust && !bjTrust.getAttribute('data-bj-trust')) {
       bjTrust.setAttribute('data-bj-trust', '1');
-      bjTrust.style.order = '4';
+      bjTrust.style.order = '2';
       var bjTh = bjTrust.querySelector('h1');
       if (bjTh && !bjTrust.querySelector('.bj-trust-kicker')) {
         var bjKicker = document.createElement('div');
@@ -4824,25 +4825,27 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         if (bjTp && bjTp.parentNode) bjTp.parentNode.insertBefore(bjTrustPartners, bjTp.nextSibling);
         else bjTrust.appendChild(bjTrustPartners);
       }
+      var bjTrustChips = bjTrust.querySelector('.trust-chips');
+      if (bjTrustChips && !bjTrustChips.textContent.match(/AI\s*큐레이션/)) {
+        var bjAiChip = document.createElement('span');
+        bjAiChip.className = 'trust-chip';
+        bjAiChip.textContent = 'AI 큐레이션 견적비교';
+        bjTrustChips.appendChild(bjAiChip);
+      }
     }
 
-    // 브릿지 캡션 신규 추가 (시안 9:89, 2026-07-02) — 히어로 다음·후기 위(order 2). "오래 사용할 가전인데..."
+    // 기존 브릿지 캡션("오래 사용할 가전인데...")은 신뢰 카드로 대체한다.
     if (!document.getElementById('bj-bridge-css')) {
       var bs = document.createElement('style');
       bs.id = 'bj-bridge-css';
-      bs.textContent = '.bj-bridge{order:2;text-align:center;padding:16px 20px;background:transparent}' +
+      bs.textContent = '.bj-bridge{display:none!important;order:2;text-align:center;padding:16px 20px;background:transparent}' +
         '.bj-bridge .bj-bq{font-size:48px;color:#c2c6d2;font-weight:800;line-height:.7}' +
         '.bj-bridge p{margin:6px 0;font-size:34px;font-weight:800;line-height:1.6;letter-spacing:-.02em;color:#0838f8;word-break:keep-all}' +
         '.bj-bridge p b{color:#0838f8}' +
         '@media(max-width:768px){.bj-bridge{padding:12px 18px}.bj-bridge p{font-size:21px;margin:4px 0}.bj-bridge .bj-bq{font-size:30px}}';
       (document.head || document.documentElement).appendChild(bs);
     }
-    if (!pageEl.querySelector('.bj-bridge')) {
-      var br = document.createElement('div');
-      br.className = 'bj-bridge';
-      br.innerHTML = '<p>오래 사용할 가전인데,<br><b>신중하게 비교하고 골라야 하지 않을까요?</b></p>';
-      pageEl.appendChild(br);
-    }
+    Array.prototype.forEach.call(pageEl.querySelectorAll('.bj-bridge'), function(br){ br.remove(); });
 
     function bjRenameHomeReviewBenefits() {
       Array.prototype.forEach.call(pageEl.querySelectorAll('.rv-gift'), function(el) {
