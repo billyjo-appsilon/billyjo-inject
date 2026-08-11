@@ -1302,6 +1302,100 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
+  // === 햄버거 전체 카테고리 아이콘화 (2026-08-12) ===
+  // 기존 메뉴는 카테고리 대표 상품 썸네일을 30px로 줄여 보여줘서 정보가 흐려진다.
+  // 최상위 카테고리 이미지만 빌리조 블루 라인 아이콘으로 교체하고, 하위 링크 구조는 그대로 둔다.
+  (function replaceAsideCategoryImagesWithIcons() {
+    if (window.__bjAsideCategoryIcons) return;
+    window.__bjAsideCategoryIcons = true;
+
+    var BLUE = '#0838f8';
+    var BG = '#eef4ff';
+    var STROKE = 'stroke="' + BLUE + '" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"';
+    var FILL = 'fill="' + BLUE + '"';
+
+    function svg(inner) {
+      var raw = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">'
+        + '<rect width="40" height="40" rx="12" fill="' + BG + '"/>'
+        + inner
+        + '</svg>';
+      return 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(raw);
+    }
+    var ICONS = {
+      customer: svg('<path ' + STROKE + ' d="M11 23v-4a9 9 0 0 1 18 0v4"/><path ' + STROKE + ' d="M11 23h-2a2 2 0 0 0-2 2v2a2 2 0 0 0 2 2h2v-6zM29 23h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-2v-6zM25 31c-1.3 1.2-3 1.8-5 1.8h-2"/>'),
+      water: svg('<path ' + STROKE + ' d="M14 10h12v20a3 3 0 0 1-3 3h-6a3 3 0 0 1-3-3V10z"/><path ' + STROKE + ' d="M17 14h6M17 24h6M26 17h3M29 17v4"/>'),
+      business: svg('<path ' + STROKE + ' d="M10 32V15h20v17M14 15v-4h12v4M15 21h3M22 21h3M15 26h3M22 26h3"/>'),
+      fridge: svg('<path ' + STROKE + ' d="M13 8h14v24a3 3 0 0 1-3 3h-8a3 3 0 0 1-3-3V8zM13 19h14M17 13v3M17 24v5"/>'),
+      home: svg('<path ' + STROKE + ' d="M10 19 20 10l10 9v13H10V19zM16 32v-8h8v8"/>'),
+      package: svg('<path ' + STROKE + ' d="M9 16 20 10l11 6-11 6-11-6zM9 16v12l11 6 11-6V16M20 22v12"/>'),
+      kitchen: svg('<path ' + STROKE + ' d="M13 9v12M18 9v12M13 15h5M24 10c3 3 4 7 1 11v11M13 21v11M18 21v11"/>'),
+      tv: svg('<rect x="10" y="11" width="20" height="14" rx="2" ' + STROKE + '/><path ' + STROKE + ' d="M16 31h8M20 25v6"/>'),
+      beauty: svg('<path ' + STROKE + ' d="M13 28c0-6 4-11 7-16 3 5 7 10 7 16a7 7 0 0 1-14 0z"/><path ' + STROKE + ' d="M17 28c1 2 4 2 6 0"/>'),
+      bed: svg('<path ' + STROKE + ' d="M9 25h22v7M9 15v17M31 20v12M9 20h22M12 16h8v4"/>'),
+      car: svg('<path ' + STROKE + ' d="M10 25h20l-2-7H12l-2 7zM12 25v4M28 25v4M14 29h0M26 29h0"/><circle cx="14" cy="29" r="1.8" ' + FILL + '/><circle cx="26" cy="29" r="1.8" ' + FILL + '/>'),
+      gift: svg('<path ' + STROKE + ' d="M10 18h20v15H10V18zM8 14h24v4H8zM20 14v19M14 14c-3-3 1-7 6 0M26 14c3-3-1-7-6 0"/>')
+    };
+    function keyFor(label) {
+      if (/고객센터|이벤트/.test(label)) return 'customer';
+      if (/물|공기|청소/.test(label)) return 'water';
+      if (/업소용|창업/.test(label)) return 'business';
+      if (/냉장/.test(label)) return 'fridge';
+      if (/생활/.test(label)) return 'home';
+      if (/패키지/.test(label)) return 'package';
+      if (/주방/.test(label)) return 'kitchen';
+      if (/TV|IT/.test(label)) return 'tv';
+      if (/건강|뷰티/.test(label)) return 'beauty';
+      if (/가구|침구/.test(label)) return 'bed';
+      if (/자동차/.test(label)) return 'car';
+      if (/상조/.test(label)) return 'gift';
+      return '';
+    }
+    function addStyle() {
+      if (document.getElementById('bj-aside-category-icon-style')) return;
+      var s = document.createElement('style');
+      s.id = 'bj-aside-category-icon-style';
+      s.textContent = [
+        '.mobile__aside .aside__menu a>img.bj-aside-cat-icon,.new-gnb .gnb__all .all__menu a>img.bj-aside-cat-icon,.all__menu a>img.bj-aside-cat-icon{width:34px!important;height:34px!important;min-width:34px!important;margin:0 20px 0 35px!important;border-radius:12px!important;object-fit:contain!important;background:' + BG + '!important;box-shadow:none!important;vertical-align:middle!important}',
+        '.mobile__aside .aside__menu a:has(>img.bj-aside-cat-icon){display:flex!important;align-items:center!important;color:#17253a!important;font-weight:700!important;letter-spacing:0!important}',
+        '.mobile__aside .aside__menu a:has(>img.bj-aside-cat-icon):hover{color:' + BLUE + '!important;background:#fbfdff!important}',
+        '.mobile__aside .aside__menu a[style*="ff1818"]:has(>img.bj-aside-cat-icon){color:' + BLUE + '!important}'
+      ].join('\n');
+      (document.head || document.documentElement).appendChild(s);
+    }
+    function applyIcons(root) {
+      addStyle();
+      var scope = root && root.querySelectorAll ? root : document;
+      Array.prototype.forEach.call(scope.querySelectorAll('.mobile__aside .aside__menu a>img, .new-gnb .gnb__all .all__menu a>img, .all__menu a>img'), function(img) {
+        if (img.classList && img.classList.contains('bj-aside-logo-ko')) return;
+        if (img.classList && img.classList.contains('bj-aside-logo-en')) return;
+        var a = img.closest && img.closest('a');
+        if (!a) return;
+        var label = (a.textContent || '').replace(/\s+/g, ' ').trim();
+        var key = keyFor(label);
+        if (!key || !ICONS[key]) return;
+        img.src = ICONS[key];
+        img.removeAttribute('srcset');
+        img.removeAttribute('onerror');
+        img.alt = label || '카테고리';
+        img.classList.add('bj-aside-cat-icon');
+        a.setAttribute('data-bj-aside-cat-icon', key);
+      });
+    }
+    function run() { try { applyIcons(document); } catch (_) {} }
+    run();
+    document.addEventListener('DOMContentLoaded', run);
+    [300, 900, 1800, 3500].forEach(function(delay) { setTimeout(run, delay); });
+    if (window.MutationObserver) {
+      try {
+        new MutationObserver(function(mutations) {
+          for (var i = 0; i < mutations.length; i++) {
+            if (mutations[i].addedNodes && mutations[i].addedNodes.length) { run(); break; }
+          }
+        }).observe(document.documentElement, { childList: true, subtree: true });
+      } catch (_) {}
+    }
+  })();
+
   // === 홈 히어로 하단 렌트리형 카테고리 버튼 (2026-08-11) ===
   // 카드, 아이콘 이미지 면, 텍스트 영역의 배경을 같은 색으로 고정해 하나의 버튼처럼 보이게 한다.
   (function injectHomeCategoryQuickLinks() {
