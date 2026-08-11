@@ -36,6 +36,223 @@
   } catch (_) { }
 })();
 
+/* =========================================================================
+ * 견적비교 장바구니 인증 (2026-08-11)
+ * - shop_cart 의 선택상품/전체상품 렌탈 버튼을 Admin2 견적 계산으로 경유.
+ * - 클라이언트는 상품 식별자만 보낸다. 월렌탈료/본사수수료/사은품 금액은 서버 계산값만 신뢰.
+ * - Meta Lead 는 여기서 절대 보내지 않는다. 실제 정상 카드/직접접수 생성 후 서버 CAPI만 사용.
+ * ========================================================================= */
+(function bjQuoteCompareCart(){
+  var API = 'https://admin2-api.billyjo.co.kr/v1/quote/calculate';
+  var CART_ID_KEY = 'bj_quote_cart_id';
+
+  function isCartPage(){
+    return /\/html\/dh_order\/shop_cart(?:\/|$)/.test(location.pathname || '');
+  }
+  function text(el){ return (el && (el.textContent || el.value || el.getAttribute('title')) || '').replace(/\s+/g, ' ').trim(); }
+  function digits(v){ return String(v || '').replace(/\D+/g, ''); }
+  function won(n){ return '₩' + Number(n || 0).toLocaleString('ko-KR'); }
+  function cartId(){
+    try {
+      var v = localStorage.getItem(CART_ID_KEY);
+      if (!v) {
+        v = 'BJQC-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+        localStorage.setItem(CART_ID_KEY, v);
+      }
+      return v;
+    } catch(_) {
+      return 'BJQC-' + Date.now().toString(36);
+    }
+  }
+  function readField(root, names){
+    for (var i = 0; i < names.length; i++) {
+      var n = names[i];
+      var el = root.querySelector('[name="' + n + '"],[name="' + n + '[]"],[id="' + n + '"]');
+      if (el && (el.value || el.getAttribute('value'))) return el.value || el.getAttribute('value');
+    }
+    return '';
+  }
+  function rowSelected(row){
+    var checked = row.querySelector('input[type="checkbox"]:checked');
+    if (checked) return true;
+    var selected = row.querySelector('[aria-selected="true"],.on,.active,.selected');
+    return !!selected;
+  }
+  function candidateRows(){
+    var rows = Array.prototype.slice.call(document.querySelectorAll('tr, .cart-list li, .cart_list li, .order_list li, .shop_cart li, .cart__item, .item'));
+    return rows.filter(function(row){
+      return row.querySelector('input,select') && (
+        readField(row, ['public_model_no','prod_no','prodNo','prod_model_no','model_no','goods_no'])
+        || /렌탈|월|상품|모델/.test(text(row))
+      );
+    });
+  }
+  function itemFromRow(row){
+    var productId = readField(row, ['public_model_no','prod_no','prodNo','goods_no','product_id']);
+    var model = readField(row, ['prod_model_no','model_no','model','modelCode']);
+    var productName = readField(row, ['prod_name','goods_name','product_name','name']);
+    if (!productName) {
+      var nameEl = row.querySelector('.name,.prod_name,.goods_name,.cart_tit,a[href*="prod_view"],td');
+      productName = text(nameEl).slice(0, 200);
+    }
+    var supplier = readField(row, ['sup_name','supplier','supplierName','company']);
+    var term = readField(row, ['month','contractTerm','term']);
+    var price = readField(row, ['price','monthlyFee','monthly_fee']);
+    if (!productId && !model && !productName) return null;
+    return {
+      productId: productId || undefined,
+      productName: productName || undefined,
+      model: model || undefined,
+      supplier: supplier || undefined,
+      contractTerm: term || undefined,
+      price: price || undefined
+    };
+  }
+  function collectItems(mode){
+    var rows = candidateRows();
+    var selectedOnly = mode === 'selected';
+    var items = [];
+    var seen = {};
+    rows.forEach(function(row){
+      if (selectedOnly && !rowSelected(row)) return;
+      var item = itemFromRow(row);
+      if (!item) return;
+      var key = [item.productId || '', item.model || '', item.productName || '', item.contractTerm || ''].join('|');
+      if (seen[key]) return;
+      seen[key] = true;
+      items.push(item);
+    });
+    if (!items.length && selectedOnly) return collectItems('all');
+    return items.slice(0, 20);
+  }
+  function relabelCartLanguage(){
+    Array.prototype.forEach.call(document.querySelectorAll('button,a,span,strong,p,th,h1,h2,h3'), function(el){
+      if (!el || el.children.length > 2) return;
+      var t = text(el);
+      if (t === '장바구니') el.textContent = '견적비교함';
+      else if (t === '장바구니 담기') el.textContent = '견적비교 담기';
+    });
+    Array.prototype.forEach.call(document.querySelectorAll('.bb-btn-cart,.bj-fb-cart'), function(el){
+      if (/장바구니/.test(text(el))) el.innerHTML = el.innerHTML.replace(/장바구니/g, '견적비교 담기');
+    });
+  }
+  function injectMemo(memo){
+    var fields = document.querySelectorAll('textarea,input[type="text"]');
+    var done = false;
+    Array.prototype.forEach.call(fields, function(el){
+      if (done) return;
+      var name = ((el.name || '') + ' ' + (el.id || '') + ' ' + (el.placeholder || '')).toLowerCase();
+      if (!/(memo|content|remark|etc|note|메모|요청|전달)/.test(name)) return;
+      var current = el.value || '';
+      if (current.indexOf('[빌리조 견적인증:') >= 0) return;
+      el.value = (current ? current.replace(/\s+$/,'') + '\n' : '') + memo;
+      el.dispatchEvent(new Event('input', { bubbles: true }));
+      el.dispatchEvent(new Event('change', { bubbles: true }));
+      done = true;
+    });
+  }
+  function showQuote(result, continueFn){
+    var old = document.getElementById('bj-quote-auth-modal');
+    if (old) old.remove();
+    var memo = result.customerMemo || '';
+    injectMemo(memo);
+    var div = document.createElement('div');
+    div.id = 'bj-quote-auth-modal';
+    div.innerHTML =
+      '<div class="bj-qam-card">' +
+        '<button type="button" class="bj-qam-x" aria-label="닫기">×</button>' +
+        '<div class="bj-qam-eyebrow">빌리조 견적 인증</div>' +
+        '<div class="bj-qam-title">정책서 기준 견적이 생성되었습니다</div>' +
+        '<div class="bj-qam-code">' + (result.quoteTransactionId || '-') + '</div>' +
+        '<div class="bj-qam-grid">' +
+          '<div><span>사은품 지급 기준액</span><b>' + won(result.gift && result.gift.finalAmount) + '</b></div>' +
+          '<div><span>유효기한</span><b>' + (result.expiresAt || '-').replace('T',' ').slice(0,16) + '</b></div>' +
+        '</div>' +
+        '<div class="bj-qam-memo">' + memo.replace(/</g,'&lt;') + '</div>' +
+        '<div class="bj-qam-note">실제 지급은 설치 완료 및 최종 상품 확정 후 Admin2 견적 스냅샷 기준으로 검증됩니다.</div>' +
+        '<button type="button" class="bj-qam-go">견적 확인 후 신청 계속</button>' +
+      '</div>';
+    document.body.appendChild(div);
+    div.querySelector('.bj-qam-x').onclick = function(){ div.remove(); };
+    div.addEventListener('click', function(e){ if (e.target === div) div.remove(); });
+    div.querySelector('.bj-qam-go').onclick = function(){
+      injectMemo(memo);
+      div.remove();
+      continueFn();
+    };
+  }
+  function injectQuoteStyle(){
+    if (document.getElementById('bj-quote-auth-style')) return;
+    var st = document.createElement('style');
+    st.id = 'bj-quote-auth-style';
+    st.textContent =
+      '#bj-quote-auth-modal{position:fixed;inset:0;z-index:100002;background:rgba(12,18,32,.62);display:flex;align-items:center;justify-content:center;padding:18px;font-family:Pretendard,Arial,sans-serif}' +
+      '.bj-qam-card{width:100%;max-width:430px;background:#fff;border-radius:16px;padding:20px;box-shadow:0 24px 80px rgba(0,0,0,.28);position:relative;color:#172033}' +
+      '.bj-qam-x{position:absolute;right:12px;top:12px;width:32px;height:32px;border:0;border-radius:50%;background:#eef3ff;color:#0838f8;font-size:22px;line-height:28px}' +
+      '.bj-qam-eyebrow{font-size:11px;font-weight:900;color:#0838f8;margin-bottom:8px}.bj-qam-title{font-size:19px;font-weight:950;line-height:1.25;margin-right:28px}' +
+      '.bj-qam-code{margin:13px 0;padding:10px 12px;border-radius:10px;background:#f4f7ff;color:#0838f8;font-weight:950;letter-spacing:.02em}' +
+      '.bj-qam-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bj-qam-grid div{border:1px solid #e5ebf5;border-radius:10px;padding:10px}.bj-qam-grid span{display:block;font-size:11px;color:#6b7485;font-weight:800}.bj-qam-grid b{display:block;margin-top:4px;font-size:15px;color:#172033}' +
+      '.bj-qam-memo{margin-top:12px;border:1px dashed #cdd8ef;border-radius:10px;background:#fbfcff;padding:10px;font-size:12px;line-height:1.5;color:#3c4658;white-space:pre-wrap}.bj-qam-note{margin-top:10px;font-size:11px;line-height:1.45;color:#737d8e}.bj-qam-go{width:100%;margin-top:14px;border:0;border-radius:11px;background:#0838f8;color:#fff;font-size:14px;font-weight:950;padding:13px;cursor:pointer}';
+    document.head.appendChild(st);
+  }
+  function calculateQuote(items, source){
+    return fetch(API, {
+      method: 'POST',
+      credentials: 'omit',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ quoteCartId: cartId(), source: source || 'website_cart', items: items, applyDirectCoupon: false })
+    }).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(b){
+        if (!r.ok || !b.ok) throw new Error((b.detail && b.detail.message) || b.message || ('quote HTTP ' + r.status));
+        return b;
+      });
+    });
+  }
+  function wireRentalButtons(){
+    if (!isCartPage()) return;
+    injectQuoteStyle();
+    relabelCartLanguage();
+    document.addEventListener('click', function(e){
+      var btn = e.target && e.target.closest ? e.target.closest('button,a,input[type="button"],input[type="submit"]') : null;
+      if (!btn) return;
+      var label = text(btn);
+      if (!/(선택상품|전체상품|렌탈)/.test(label)) return;
+      if (!/(렌탈|신청|주문)/.test(label)) return;
+      if (btn.getAttribute('data-bj-quote-continue') === '1') {
+        btn.removeAttribute('data-bj-quote-continue');
+        return;
+      }
+      var mode = /선택상품/.test(label) ? 'selected' : 'all';
+      var items = collectItems(mode);
+      if (!items.length) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      var oldLabel = btn.value || btn.textContent;
+      if ('value' in btn) btn.value = '견적 계산 중...';
+      else btn.textContent = '견적 계산 중...';
+      btn.disabled = true;
+      calculateQuote(items, mode === 'selected' ? 'website_cart_selected' : 'website_cart_all').then(function(result){
+        showQuote(result, function(){
+          btn.setAttribute('data-bj-quote-continue', '1');
+          btn.disabled = false;
+          if ('value' in btn) btn.value = oldLabel;
+          else btn.textContent = oldLabel;
+          setTimeout(function(){ btn.click(); }, 20);
+        });
+      }).catch(function(err){
+        alert('견적 계산에 실패했습니다. 잠시 후 다시 시도해주세요.\n' + (err && err.message ? err.message : ''));
+        btn.disabled = false;
+        if ('value' in btn) btn.value = oldLabel;
+        else btn.textContent = oldLabel;
+      });
+    }, true);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireRentalButtons);
+  else wireRentalButtons();
+  setTimeout(relabelCartLanguage, 800);
+})();
+
 ;(function billyjoJourneyAnalyticsGlobal(){
   if (window.__bjJourneyAnalyticsSetup) return;
   window.__bjJourneyAnalyticsSetup = true;
@@ -576,7 +793,7 @@
       '[빌리조 복수제품 혜택 설계]',
       '확인번호: ' + state.offerId,
       '생성시각: ' + fmtDate(new Date()),
-      '혜택구간: ' + ((state.cfg.directOffer.countdownMinutes || 15)) + '분 내 신청 기준',
+      '혜택구간: 견적 생성 후 24시간 내 신청 기준',
       '고객 안내 예상 지원금: 최대 ' + won(calcTotal())
     ];
     list.forEach(function(p, i){
@@ -738,7 +955,7 @@
             '<div id="bj-do-total"><div class="bj-do-total-k">AI 예상 지원금 합계</div><div class="bj-do-total-v">0원</div><div class="bj-do-total-sub">선택한 제품 구성 기준으로 산출한 예상 혜택입니다. 실제 지급액은 상담 후 확정됩니다.</div></div>' +
             '<textarea class="bj-do-memo" readonly></textarea>' +
             '<button type="button" class="bj-do-copy">AI 견적신청하기</button>' +
-            '<div class="bj-do-note">선택 상품은 장바구니에 담긴 뒤 예상 견적/신청 단계로 이동합니다.</div>' +
+            '<div class="bj-do-note">선택 상품은 견적비교함에 담긴 뒤 24시간 견적 인증/신청 단계로 이동합니다.</div>' +
           '</div>' +
         '</div>' +
       '</div>';
@@ -3740,7 +3957,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           '<div class="bb-right">' +
             '<div class="bb-right-top">' +
               optionHtml +
-              '<button type="button" class="bb-btn bb-btn-cart" onclick="shoporder(\'cart\')">장바구니</button>' +
+            '<button type="button" class="bb-btn bb-btn-cart" onclick="shoporder(\'cart\')">견적비교 담기</button>' +
               '<button type="button" class="bb-btn bb-btn-rent" onclick="shoporder(\'rent\')">' +
                 '<svg viewBox="0 0 24 24"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>' +
                 '렌탈 신청' +
@@ -5875,7 +6092,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-label{display:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-badge{display:none!important;position:absolute!important;right:-6px!important;top:-6px!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;background:#0838f8!important;color:#fff!important;border:2px solid #fff!important;align-items:center!important;justify-content:center!important;font:900 10px/1 Pretendard,Arial,sans-serif!important;box-shadow:0 2px 7px rgba(8,56,248,.28)!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick.has-count .bj-ai-quote-badge{display:flex!important}' +
-      '.new-qb .quick .link .bj-ai-quote-quick a:after{content:"AI 견적함";position:absolute;right:62px;top:50%;transform:translateY(-50%);background:#172033;color:#fff;border-radius:8px;padding:7px 9px;font:800 12px/1 Pretendard,Arial,sans-serif;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;box-shadow:0 8px 20px rgba(0,0,0,.18)}' +
+      '.new-qb .quick .link .bj-ai-quote-quick a:after{content:"견적비교함";position:absolute;right:62px;top:50%;transform:translateY(-50%);background:#172033;color:#fff;border-radius:8px;padding:7px 9px;font:800 12px/1 Pretendard,Arial,sans-serif;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;box-shadow:0 8px 20px rgba(0,0,0,.18)}' +
       '.new-qb .quick .link .bj-ai-quote-quick a:hover:after{opacity:1;transform:translateY(-50%) translateX(-3px)}' +
       '@media(max-width:767px){.new-qb .quick .link .bj-ai-quote-quick a:after{display:none!important}}';
     (document.head || document.documentElement).appendChild(st);
@@ -5914,12 +6131,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     p.className = 'org clearfix bj-ai-quote-quick';
     var a = document.createElement('a');
     a.href = '/html/dh_order/shop_cart';
-    a.setAttribute('title', 'AI 견적함');
-    a.setAttribute('aria-label', 'AI 견적함으로 이동');
+    a.setAttribute('title', '견적비교함');
+    a.setAttribute('aria-label', '견적비교함으로 이동');
     var iconUrl = quoteIconUrl();
     a.innerHTML =
       '<img class="bj-ai-quote-icon" src="' + iconUrl + '" alt="" width="34" height="34" loading="lazy" decoding="async">' +
-      '<span class="bj-ai-quote-label">AI 견적함</span>' +
+      '<span class="bj-ai-quote-label">견적비교함</span>' +
       '<span class="bj-ai-quote-badge" aria-hidden="true"></span>';
     p.appendChild(a);
     link.insertBefore(p, link.firstChild);
@@ -8797,7 +9014,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
               else window.location.href = '/html/dh_order/shop_cart';
             });
           }
-          cartBtn.innerHTML = SVG_CART + '장바구니';
+          cartBtn.innerHTML = SVG_CART + '견적비교 담기';
           rightTop.insertBefore(cartBtn, rightTop.firstChild);
         }
         /* 상담신청 — 중복 방지 */
@@ -8817,7 +9034,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       fb.innerHTML =
         '<div class="bj-fb-selector"></div>' +  /* v0.5.6: 렌탈사·약정 selector mount */
         '<div class="bj-fb-btns">' +
-          '<button type="button" class="bb-btn bb-btn-cart bj-fb-cart">' + SVG_CART + '장바구니</button>' +
+          '<button type="button" class="bb-btn bb-btn-cart bj-fb-cart">' + SVG_CART + '견적비교 담기</button>' +
           '<button type="button" class="bb-btn bb-btn-rent bj-btn-rent-gift bj-fb-rent">' + SVG_GIFT + '렌탈+사은품 신청</button>' +
           '<button type="button" class="bb-btn bj-btn-consult bj-fb-consult">' + SVG_PHONE + '상담신청</button>' +
         '</div>';
