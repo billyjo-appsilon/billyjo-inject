@@ -1267,6 +1267,96 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
+  // === 홈 히어로 하단 렌트리형 카테고리 버튼 (2026-08-11) ===
+  // 카드, 아이콘 이미지 면, 텍스트 영역의 배경을 같은 색으로 고정해 하나의 버튼처럼 보이게 한다.
+  (function injectHomeCategoryQuickLinks() {
+    if (window.__bjHomeCategoryQuickLinks) return;
+    window.__bjHomeCategoryQuickLinks = true;
+
+    var CARD_BG = '#fbfdff';
+    var ITEMS = [
+      { name: '정수기', reviews: '후기 8,000개+', href: '/html/dh_prod/prod_list/1-8', img: 'images/category-icons/water-purifier.png' },
+      { name: '공기청정기', reviews: '후기 2,000개+', href: '/html/dh_prod/prod_list/1-6', img: 'images/category-icons/air-purifier.png' },
+      { name: '에어컨', reviews: '후기 1,400개+', href: '/html/dh_prod/prod_list/1-87', img: 'images/category-icons/air-conditioner.png' },
+      { name: '세탁건조기', reviews: '후기 1,100개+', href: '/html/dh_prod/prod_list/3-25', img: 'images/category-icons/washer-dryer.png' },
+      { name: '비데', reviews: '후기 900개+', href: '/html/dh_prod/prod_list/1-9', img: 'images/category-icons/bidet.png' },
+      { name: '인터넷+TV', reviews: '후기 200개+', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/internet-tv.png' }
+    ];
+
+    function isHome() {
+      var p = location.pathname || '/';
+      return p === '/' || p === '/index.php' || p === '/index.html';
+    }
+    function esc(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+    function asset(path) {
+      try {
+        var scripts = document.getElementsByTagName('script');
+        for (var i = scripts.length - 1; i >= 0; i--) {
+          var src = scripts[i].src || '';
+          var m = src.match(/^(https?:\/\/(?:cdn|fastly)\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/)/);
+          if (m) return m[1] + path.replace(/^\/+/, '');
+        }
+      } catch (e) {}
+      return 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/' + path.replace(/^\/+/, '');
+    }
+    function addStyle() {
+      if (document.getElementById('bj-home-cat-style')) return;
+      var style = document.createElement('style');
+      style.id = 'bj-home-cat-style';
+      style.textContent = [
+        ':root{--bj-home-cat-bg:' + CARD_BG + '}',
+        '#bj-home-cat-links{display:block;background:#fff;margin:0;padding:0 0 22px;font-family:inherit}',
+        '#bj-home-cat-links *{box-sizing:border-box}',
+        '#bj-home-cat-links .bj-hcat-inner{max-width:1280px;margin:0 auto;padding:18px 32px 0}',
+        '#bj-home-cat-links .bj-hcat-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}',
+        '#bj-home-cat-links .bj-hcat-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:188px;padding:13px 10px 14px;border:1px solid #dfeaf6;border-radius:8px;background:var(--bj-home-cat-bg)!important;color:#17253a;text-decoration:none;box-shadow:0 10px 24px rgba(35,80,130,.10);overflow:hidden;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}',
+        '#bj-home-cat-links .bj-hcat-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(35,80,130,.16);border-color:#c9dcf3}',
+        '#bj-home-cat-links .bj-hcat-media{display:flex;align-items:center;justify-content:center;width:100%;height:108px;margin:0 0 8px;background:var(--bj-home-cat-bg)!important;border-radius:8px;overflow:hidden}',
+        '#bj-home-cat-links .bj-hcat-img{display:block;width:132px;height:108px;object-fit:cover;background:var(--bj-home-cat-bg)!important;border:0;border-radius:8px;mix-blend-mode:normal}',
+        '#bj-home-cat-links .bj-hcat-text{width:100%;background:var(--bj-home-cat-bg)!important;text-align:center}',
+        '#bj-home-cat-links .bj-hcat-name{display:block;margin:0 0 4px;font-size:18px;font-weight:800;line-height:1.18;letter-spacing:0;color:#0f1f35;white-space:nowrap}',
+        '#bj-home-cat-links .bj-hcat-reviews{display:block;margin:0 0 5px;font-size:12px;font-weight:700;line-height:1.2;letter-spacing:0;color:#5d6f86;white-space:nowrap}',
+        '#bj-home-cat-links .bj-hcat-action{display:inline-flex;align-items:center;justify-content:center;max-width:100%;padding:4px 8px;border-radius:999px;background:rgba(8,56,248,.07);color:#0838f8;font-size:12px;font-weight:800;line-height:1.2;letter-spacing:0;white-space:nowrap}',
+        'body.bj-home-cats-ready .new-mc:not(.show-767){display:none!important}',
+        '@media(max-width:1024px){#bj-home-cat-links .bj-hcat-inner{padding-left:18px;padding-right:18px}#bj-home-cat-links .bj-hcat-grid{gap:9px}#bj-home-cat-links .bj-hcat-card{min-height:172px;padding:10px 7px 12px}#bj-home-cat-links .bj-hcat-media{height:96px}#bj-home-cat-links .bj-hcat-img{width:116px;height:96px}#bj-home-cat-links .bj-hcat-name{font-size:16px}#bj-home-cat-links .bj-hcat-action{font-size:11px;padding-left:7px;padding-right:7px}}',
+        '@media(max-width:767px){#bj-home-cat-links{padding-bottom:14px}#bj-home-cat-links .bj-hcat-inner{padding:12px 12px 0}#bj-home-cat-links .bj-hcat-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}#bj-home-cat-links .bj-hcat-card{min-height:132px;padding:8px 5px 9px;border-radius:8px;box-shadow:0 7px 16px rgba(35,80,130,.10)}#bj-home-cat-links .bj-hcat-card:hover{transform:none}#bj-home-cat-links .bj-hcat-media{height:62px;margin-bottom:5px;border-radius:8px}#bj-home-cat-links .bj-hcat-img{width:74px;height:62px;border-radius:8px}#bj-home-cat-links .bj-hcat-name{font-size:13px;margin-bottom:3px}#bj-home-cat-links .bj-hcat-reviews{font-size:10.5px;margin-bottom:4px}#bj-home-cat-links .bj-hcat-action{font-size:10px;padding:3px 5px;letter-spacing:0}body.bj-home-cats-ready .new-mc:not(.show-767){display:none!important}}',
+        '@media(max-width:359px){#bj-home-cat-links .bj-hcat-inner{padding-left:8px;padding-right:8px}#bj-home-cat-links .bj-hcat-grid{gap:6px}#bj-home-cat-links .bj-hcat-card{min-height:128px;padding-left:3px;padding-right:3px}#bj-home-cat-links .bj-hcat-name{font-size:12px}#bj-home-cat-links .bj-hcat-reviews{font-size:10px}#bj-home-cat-links .bj-hcat-action{font-size:9.5px;padding-left:4px;padding-right:4px}}'
+      ].join('\n');
+      (document.head || document.documentElement).appendChild(style);
+    }
+    function build() {
+      if (!isHome() || document.getElementById('bj-home-cat-links')) return;
+      var hero = document.querySelector('.new-mv_wrap') || document.querySelector('.new-mv') || document.querySelector('.main_visual') || document.querySelector('.visual');
+      if (!hero || !hero.parentNode) return;
+      addStyle();
+      var section = document.createElement('section');
+      section.id = 'bj-home-cat-links';
+      section.setAttribute('aria-label', '렌탈 카테고리 빠른 비교');
+      section.innerHTML = '<div class="bj-hcat-inner"><div class="bj-hcat-grid">' + ITEMS.map(function (it) {
+        return '<a class="bj-hcat-card" href="' + esc(it.href) + '" aria-label="' + esc(it.name + ' ' + it.reviews + ' 최저가 지원금 비교') + '">'
+          + '<span class="bj-hcat-media"><img class="bj-hcat-img" src="' + esc(asset(it.img)) + '" alt="' + esc(it.name) + '" loading="eager"></span>'
+          + '<span class="bj-hcat-text"><strong class="bj-hcat-name">' + esc(it.name) + '</strong><span class="bj-hcat-reviews">' + esc(it.reviews) + '</span><span class="bj-hcat-action">최저가 · 지원금 비교</span></span>'
+          + '</a>';
+      }).join('') + '</div></div>';
+      hero.parentNode.insertBefore(section, hero.nextSibling);
+      document.body.classList.add('bj-home-cats-ready');
+    }
+    function boot() {
+      build();
+      var tries = 0;
+      var timer = setInterval(function () {
+        if (document.getElementById('bj-home-cat-links') || ++tries > 20) clearInterval(timer);
+        else build();
+      }, 250);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot);
+    else boot();
+  })();
+
   // === 모바일 카테고리 탭 + 상품 그리드 (스와이프·실상품·배너캐러셀) (2026-07-06) ===
   //   모바일: 사은품총합(#bj-v5-injected) 아래에 [배너 캐러셀 #bjct-banners]+[탭/그리드 #bjct-sec] 삽입, 추천제품·원본배너(.new-mb_m) 숨김. bjct- 네임스페이스.
 /* ===== 빌리조 모바일 카테고리 탭 + 상품 그리드(스와이프) — bjct- 네임스페이스 ===== */
