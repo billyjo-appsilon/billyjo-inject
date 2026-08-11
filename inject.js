@@ -72,6 +72,23 @@
     }
     return '';
   }
+  function readAttr(root, attrs){
+    for (var i = 0; i < attrs.length; i++) {
+      var v = root.getAttribute(attrs[i]);
+      if (v) return v;
+      var el = root.querySelector('[' + attrs[i] + ']');
+      if (el && el.getAttribute(attrs[i])) return el.getAttribute(attrs[i]);
+    }
+    return '';
+  }
+  function pickText(root, selectors){
+    for (var i = 0; i < selectors.length; i++) {
+      var el = root.querySelector(selectors[i]);
+      var v = text(el);
+      if (v) return v;
+    }
+    return '';
+  }
   function rowSelected(row){
     var checked = row.querySelector('input[type="checkbox"]:checked');
     if (checked) return true;
@@ -92,12 +109,15 @@
     var model = readField(row, ['prod_model_no','model_no','model','modelCode']);
     var productName = readField(row, ['prod_name','goods_name','product_name','name']);
     if (!productName) {
-      var nameEl = row.querySelector('.name,.prod_name,.goods_name,.cart_tit,a[href*="prod_view"],td');
-      productName = text(nameEl).slice(0, 200);
+      productName = pickText(row, ['.name', '.prod_name', '.goods_name', '.cart_tit', 'a[href*="prod_view"]']).slice(0, 200);
     }
-    var supplier = readField(row, ['sup_name','supplier','supplierName','company']);
-    var term = readField(row, ['month','contractTerm','term']);
-    var price = readField(row, ['price','monthlyFee','monthly_fee']);
+    if (!model && productName) {
+      var mm = productName.match(/\(([A-Z0-9][A-Z0-9._/-]{2,})\)/i) || productName.match(/\b([A-Z]{1,6}[-_][A-Z0-9._/-]{3,})\b/i);
+      if (mm) model = mm[1];
+    }
+    var supplier = readField(row, ['sup_name','supplier','supplierName','company']) || pickText(row, ['.brand', '.supplier', '.company']);
+    var term = readField(row, ['month','contractTerm','term']) || pickText(row, ['.month36', '.month-etc', '[class*="month"]']);
+    var price = readField(row, ['price','monthlyFee','monthly_fee']) || readAttr(row, ['mprice', 'data-price', 'data-monthly-fee']);
     if (!productId && !model && !productName) return null;
     return {
       productId: productId || undefined,
@@ -105,7 +125,8 @@
       model: model || undefined,
       supplier: supplier || undefined,
       contractTerm: term || undefined,
-      price: price || undefined
+      price: price || undefined,
+      monthlyFee: price || undefined
     };
   }
   function collectItems(mode){
@@ -226,10 +247,13 @@
       }
       var mode = /(선택상품|선택한 상품)/.test(label) ? 'selected' : 'all';
       var items = collectItems(mode);
-      if (!items.length) return;
       e.preventDefault();
       e.stopPropagation();
       if (e.stopImmediatePropagation) e.stopImmediatePropagation();
+      if (!items.length) {
+        alert('견적을 계산할 상품을 찾지 못했습니다. 상품을 선택하거나 견적비교함에 다시 담아주세요.');
+        return;
+      }
       var oldLabel = btn.value || btn.textContent;
       if ('value' in btn) btn.value = '견적 계산 중...';
       else btn.textContent = '견적 계산 중...';
