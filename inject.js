@@ -2562,7 +2562,9 @@ function bjHeaderMainInit() {
       leftGroup.style.cssText = 'display:flex;align-items:flex-end;flex:1;min-width:0;';
 
       // Move logo
-      dLogo.style.cssText += 'margin:0 30px 0 0 !important;float:none !important;flex-shrink:0 !important;';
+      // margin-right 30→20: ≥1501px 1행 헤더의 가용폭이 13px 부족해 GNB 마지막 항목이
+      // rightGroup(고객센터) 위로 넘치던 문제. 아래 rightGroup/gnb__right gap 축소와 합쳐 24px 회수.
+      dLogo.style.cssText += 'margin:0 20px 0 0 !important;float:none !important;flex-shrink:0 !important;';
       var logoImg = dLogo.querySelector('img');
       if (logoImg) logoImg.style.cssText = 'height:36px !important;width:auto !important;';
       leftGroup.appendChild(dLogo);
@@ -2609,10 +2611,11 @@ function bjHeaderMainInit() {
       // Right group: move .gnb__right (고객센터+장바구니) + search
       var rightGroup = document.createElement('div');
       rightGroup.className = 'bj-inj-right';
-      rightGroup.style.cssText = 'display:flex;align-items:flex-end;gap:24px;flex-shrink:0;white-space:nowrap;margin-left:auto;';
+      /* gap 24→16, gnb__right 20→14: 로고 margin 30→20과 합쳐 24px 회수 → ≥1501px 1행 유지 */
+      rightGroup.style.cssText = 'display:flex;align-items:flex-end;gap:16px;flex-shrink:0;white-space:nowrap;margin-left:auto;';
       var gnbRight = dTopRight.querySelector('.gnb__right');
       if (gnbRight) {
-        gnbRight.style.cssText = 'display:flex !important;align-items:center !important;gap:20px !important;position:relative !important;top:8px !important;';
+        gnbRight.style.cssText = 'display:flex !important;align-items:center !important;gap:14px !important;position:relative !important;top:8px !important;';
         // Hide event button inside gnb__right
         gnbRight.querySelectorAll('a.right__event').forEach(function(a) {
           if (a.textContent.includes('이벤트')) a.style.display = 'none';
@@ -2638,13 +2641,14 @@ function bjHeaderMainInit() {
         +   'header.new-header .bj-inj-right .gnb__right{ position:static !important; top:0 !important; gap:14px !important; }'
         +   'header.new-header .bj-inj-right .search__wrap{ max-width:280px }'
         + '}'
-        /* 넓은 PC(≥1501px) 헤더 보호 — 위 ≤1500 룰의 상한 때문에 1501px↑에서만
-           보호가 빠져 있던 버그. .bj-inj-row는 max-width:1500 + padding 40 → 가용 1420px인데
-           rightGroup(400px, flex-shrink:0)을 빼면 leftGroup은 1020px.
-           prod_view에선 v0.5.20 업소용(10-1153) 복원으로 GNB가 890px라 로고 포함 1033px가 필요 →
-           .new-gnb__wrap이 flex-shrink:0이라 13px이 그대로 넘쳐 '모바일'이 '고객센터' 위에 겹쳐 그려짐.
-           padding은 넓은 화면 값(28px 40px 22px) 그대로 두고 wrap만 허용 → rightGroup이 2행으로 내려감.
-           flex-wrap은 실제 넘칠 때만 동작하므로 여유 있는 페이지(메인·목록)는 1행 유지. */
+        /* 넓은 PC(≥1501px) 헤더 안전망 — 위 ≤1500 룰의 상한 때문에 1501px↑엔 보호가 없던 버그.
+           .bj-inj-row는 max-width:1500(하단 sticky bar와 동일 폭) + padding 40 → 가용 1420px.
+           rightGroup(flex-shrink:0)을 빼면 leftGroup 몫이 남는데, prod_view에선 v0.5.20
+           업소용(10-1153) 복원으로 GNB가 890px까지 커져 13px이 부족했고, .new-gnb__wrap이
+           flex-shrink:0이라 그대로 넘쳐 '모바일'이 '고객센터' 위에 겹쳐 그려졌다.
+           1차 대응은 위 로고 margin(30→20)·gap(24→16, 20→14) 24px 회수로 1행을 유지하는 것이고,
+           이 블록은 그래도 넘칠 때 겹치는 대신 줄바꿈시키는 안전망이다(메뉴 추가 시 재발 방지).
+           flex-wrap은 실제 넘칠 때만 동작하므로 여유가 있으면 1행 그대로. padding은 넓은 화면 값 유지. */
         + '@media(min-width:1501px){'
         +   'header.new-header > .bj-inj-row{ flex-wrap:wrap !important; row-gap:10px !important; }'
         +   'header.new-header > .bj-inj-row > .bj-inj-left{ flex:1 1 auto !important; min-width:0 !important; }'
