@@ -131,6 +131,8 @@
       var t = text(el);
       if (t === '장바구니') el.textContent = '견적비교함';
       else if (t === '장바구니 담기') el.textContent = '견적비교 담기';
+      else if (t === '선택상품 렌탈') el.textContent = '선택한 상품 견적 신청';
+      else if (t === '전체상품 렌탈') el.textContent = '전체 상품 견적 신청';
     });
     Array.prototype.forEach.call(document.querySelectorAll('.bb-btn-cart,.bj-fb-cart'), function(el){
       if (/장바구니/.test(text(el))) el.innerHTML = el.innerHTML.replace(/장바구니/g, '견적비교 담기');
@@ -144,7 +146,7 @@
       var name = ((el.name || '') + ' ' + (el.id || '') + ' ' + (el.placeholder || '')).toLowerCase();
       if (!/(memo|content|remark|etc|note|메모|요청|전달)/.test(name)) return;
       var current = el.value || '';
-      if (current.indexOf('[빌리조 견적인증:') >= 0) return;
+      if (current.indexOf('[빌리조 24시간 혜택 보장번호:') >= 0 || current.indexOf('[빌리조 견적인증:') >= 0) return;
       el.value = (current ? current.replace(/\s+$/,'') + '\n' : '') + memo;
       el.dispatchEvent(new Event('input', { bubbles: true }));
       el.dispatchEvent(new Event('change', { bubbles: true }));
@@ -161,16 +163,16 @@
     div.innerHTML =
       '<div class="bj-qam-card">' +
         '<button type="button" class="bj-qam-x" aria-label="닫기">×</button>' +
-        '<div class="bj-qam-eyebrow">빌리조 견적 인증</div>' +
-        '<div class="bj-qam-title">정책서 기준 견적이 생성되었습니다</div>' +
+        '<div class="bj-qam-eyebrow">24시간 혜택 견적</div>' +
+        '<div class="bj-qam-title">담은 상품 기준 혜택을 확인했어요</div>' +
         '<div class="bj-qam-code">' + (result.quoteTransactionId || '-') + '</div>' +
         '<div class="bj-qam-grid">' +
-          '<div><span>사은품 지급 기준액</span><b>' + won(result.gift && result.gift.finalAmount) + '</b></div>' +
+          '<div><span>예상 사은품 혜택</span><b>' + won(result.gift && result.gift.finalAmount) + '</b></div>' +
           '<div><span>유효기한</span><b>' + (result.expiresAt || '-').replace('T',' ').slice(0,16) + '</b></div>' +
         '</div>' +
         '<div class="bj-qam-memo">' + memo.replace(/</g,'&lt;') + '</div>' +
-        '<div class="bj-qam-note">실제 지급은 설치 완료 및 최종 상품 확정 후 Admin2 견적 스냅샷 기준으로 검증됩니다.</div>' +
-        '<button type="button" class="bj-qam-go">견적 확인 후 신청 계속</button>' +
+        '<div class="bj-qam-note">표시된 금액은 고객 혜택 기준입니다. 최종 지급은 설치 완료 및 상품 조건 확인 후 확정됩니다.</div>' +
+        '<button type="button" class="bj-qam-go">신청 계속하기</button>' +
       '</div>';
     document.body.appendChild(div);
     div.querySelector('.bj-qam-x').onclick = function(){ div.remove(); };
@@ -216,13 +218,13 @@
       var btn = e.target && e.target.closest ? e.target.closest('button,a,input[type="button"],input[type="submit"]') : null;
       if (!btn) return;
       var label = text(btn);
-      if (!/(선택상품|전체상품|렌탈)/.test(label)) return;
+      if (!/(선택상품|선택한 상품|전체상품|전체 상품|렌탈)/.test(label)) return;
       if (!/(렌탈|신청|주문)/.test(label)) return;
       if (btn.getAttribute('data-bj-quote-continue') === '1') {
         btn.removeAttribute('data-bj-quote-continue');
         return;
       }
-      var mode = /선택상품/.test(label) ? 'selected' : 'all';
+      var mode = /(선택상품|선택한 상품)/.test(label) ? 'selected' : 'all';
       var items = collectItems(mode);
       if (!items.length) return;
       e.preventDefault();
