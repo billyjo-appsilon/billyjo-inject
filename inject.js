@@ -2638,6 +2638,17 @@ function bjHeaderMainInit() {
         +   'header.new-header .bj-inj-right .gnb__right{ position:static !important; top:0 !important; gap:14px !important; }'
         +   'header.new-header .bj-inj-right .search__wrap{ max-width:280px }'
         + '}'
+        /* 넓은 PC(≥1501px) 헤더 보호 — 위 ≤1500 룰의 상한 때문에 1501px↑에서만
+           보호가 빠져 있던 버그. .bj-inj-row는 max-width:1500 + padding 40 → 가용 1420px인데
+           rightGroup(400px, flex-shrink:0)을 빼면 leftGroup은 1020px.
+           prod_view에선 v0.5.20 업소용(10-1153) 복원으로 GNB가 890px라 로고 포함 1033px가 필요 →
+           .new-gnb__wrap이 flex-shrink:0이라 13px이 그대로 넘쳐 '모바일'이 '고객센터' 위에 겹쳐 그려짐.
+           padding은 넓은 화면 값(28px 40px 22px) 그대로 두고 wrap만 허용 → rightGroup이 2행으로 내려감.
+           flex-wrap은 실제 넘칠 때만 동작하므로 여유 있는 페이지(메인·목록)는 1행 유지. */
+        + '@media(min-width:1501px){'
+        +   'header.new-header > .bj-inj-row{ flex-wrap:wrap !important; row-gap:10px !important; }'
+        +   'header.new-header > .bj-inj-row > .bj-inj-left{ flex:1 1 auto !important; min-width:0 !important; }'
+        + '}'
         /* ≤1024px: rightGroup을 아예 별도 행으로 분리 */
         + '@media(max-width:1024px){'
         +   'header.new-header > .bj-inj-row{ flex-direction:column !important; align-items:stretch !important; }'
