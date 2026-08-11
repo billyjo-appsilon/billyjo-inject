@@ -1275,12 +1275,12 @@
 
     var CARD_BG = '#fbfdff';
     var ITEMS = [
-      { name: '정수기', reviews: '후기 8,000개+', href: '/html/dh_prod/prod_list/1-8', img: 'images/category-icons/water-purifier.png' },
-      { name: '공기청정기', reviews: '후기 2,000개+', href: '/html/dh_prod/prod_list/1-6', img: 'images/category-icons/air-purifier.png' },
-      { name: '에어컨', reviews: '후기 1,400개+', href: '/html/dh_prod/prod_list/1-87', img: 'images/category-icons/air-conditioner.png' },
-      { name: '세탁건조기', reviews: '후기 1,100개+', href: '/html/dh_prod/prod_list/3-25', img: 'images/category-icons/washer-dryer.png' },
-      { name: '비데', reviews: '후기 900개+', href: '/html/dh_prod/prod_list/1-9', img: 'images/category-icons/bidet.png' },
-      { name: '인터넷+TV', reviews: '후기 200개+', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/internet-tv.png' }
+      { name: '정수기', reviews: '후기 8,119개', href: '/html/dh_prod/prod_list/1-8', img: 'images/category-icons/water-purifier.png' },
+      { name: '공기청정기', reviews: '후기 2,274개', href: '/html/dh_prod/prod_list/1-6', img: 'images/category-icons/air-purifier.png' },
+      { name: '에어컨', reviews: '후기 1,426개', href: '/html/dh_prod/prod_list/1-87', img: 'images/category-icons/air-conditioner.png' },
+      { name: '세탁건조기', reviews: '후기 1,189개', href: '/html/dh_prod/prod_list/3-25', img: 'images/category-icons/washer-dryer.png' },
+      { name: '비데', reviews: '후기 982개', href: '/html/dh_prod/prod_list/1-9', img: 'images/category-icons/bidet.png' },
+      { name: '인터넷+TV', reviews: '후기 231개', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/internet-tv.png' }
     ];
 
     function isHome() {
