@@ -1207,6 +1207,19 @@
   style.textContent = css;
   document.head.appendChild(style);
 
+  var bjHeaderCartHide = document.createElement("style");
+  bjHeaderCartHide.id = "bj-header-cart-hide";
+  bjHeaderCartHide.textContent = [
+    'header.new-header a[href*="/html/order/cart"]{display:none!important}',
+    'header.new-header a[href*="/html/dh_order/shop_cart"]{display:none!important}',
+    'header.new-header a:has(img[src*="cart_icon"]){display:none!important}',
+    'header.new-header a:has(.bj-hdr-cart-gif){display:none!important}',
+    '#bj-scroll-header a[href*="/html/order/cart"]{display:none!important}',
+    '#bj-scroll-header a[href*="/html/dh_order/shop_cart"]{display:none!important}',
+    '#bj-scroll-header a:has(.bj-hdr-cart-gif){display:none!important}'
+  ].join('\n');
+  document.head.appendChild(bjHeaderCartHide);
+
   /* === 고객센터 zone(.new-cs) 색상 테마 통일 (2026-07-30) ===
      홈은 다크 푸터로 대체돼 이 영역이 숨지만(.new-cs{display:none}), 상품목록·상세·게시판에는
      원본이 그대로 노출된다. 그쪽 색이 테마와 어긋나 통일감이 없었다 — 실측:
@@ -2811,8 +2824,13 @@ function bjHeaderMainInit() {
       if (eventLink && eventLink.textContent.indexOf('이벤트') !== -1) {
         eventLi.remove();
       }
+      iconList.querySelectorAll('li').forEach(function(li) {
+        var cartLink = li.querySelector('a[href*="/html/order/cart"],a[href*="/html/dh_order/shop_cart"]');
+        var cartImg = li.querySelector('img[src*="cart_icon"],.bj-hdr-cart-gif');
+        if (cartLink || cartImg) li.remove();
+      });
 
-      // 2. Move remaining icons (search, cart) into header__top
+      // 2. Move remaining icon (search) into header__top
       var headerTop = document.querySelector('.header__top');
       if (headerTop) {
         iconList.id = 'bj-header-icons';
@@ -2894,12 +2912,9 @@ function bjHeaderMainInit() {
     // Logo row
     var shLogo = document.createElement('div');
     shLogo.className = 'bj-sh-logo';
-    var shCartIcon = window.__bjTrolleyPlusIconUrl
-      ? window.__bjTrolleyPlusIconUrl()
-      : 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/icons/trolley-plus-transparent.gif';
     shLogo.innerHTML = '<img class="bj-sh-hamburger" src="https://billyjo.kr/image/common/m_menu.png">'
       + '<img class="bj-sh-logo-img" src="' + (document.querySelector('a.logo img') ? document.querySelector('a.logo img').src : '') + '">'
-      + '<div class="bj-sh-icons"><a href="javascript:void(0)"><img src="https://billyjo.kr/image/common/search_icon.png"></a><a href="/html/order/cart"><img class="bj-hdr-cart-gif" src="' + shCartIcon + '" alt="장바구니" style="width:28px!important;height:28px!important;object-fit:contain!important;display:block!important"></a></div>';
+      + '<div class="bj-sh-icons"><a href="javascript:void(0)"><img src="https://billyjo.kr/image/common/search_icon.png"></a></div>';
     shLogo.querySelector('.bj-sh-hamburger').addEventListener('click', function() {
       var orig = document.querySelector('.gnb__hamburger');
       if (orig) orig.click();
