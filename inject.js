@@ -1271,10 +1271,14 @@
   // 이벤트/기획전 링크만 숨긴 뒤 빈 li가 남아 FAQ/상담신청/가입기준/제휴카드가 밀리는 문제를 막는다.
   (function fixMobileCustomerGrid() {
     if (document.getElementById('bj-mobile-customer-grid')) return;
+    if ((location.pathname || '').indexOf('/html/dh/counsel') === 0) {
+      (document.documentElement || document.body).classList.add('bj-counsel-page');
+    }
     var s = document.createElement('style');
     s.id = 'bj-mobile-customer-grid';
     s.textContent = [
       '@media(max-width:767px){',
+      'html.bj-counsel-page .new-qb{display:none!important}',
       '.m_customer .inline_wrap.col03{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;width:auto!important;margin:0!important;padding:0!important}',
       '.m_customer .inline_wrap.col03>li{display:block!important;width:auto!important;height:auto!important;margin:0!important;padding:0!important}',
       '.m_customer .inline_wrap.col03>li:has(>a[href*="/display"]){display:none!important}',
