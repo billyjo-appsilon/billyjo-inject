@@ -837,6 +837,7 @@
     var tokens = lpTokens();
     if (!tokens.length) return;
     var products = allProducts();
+    var firstLp = null;
     tokens.forEach(function(token, idx){
       var nt = norm(token);
       var found = products.filter(function(p){
@@ -859,9 +860,9 @@
         };
       }
       if (found && found.model) state.selected[found.model] = found;
+      if (!firstLp && found) firstLp = found;
     });
-    var list = selectedList();
-    if (list[0]) state.current = list[0];
+    if (firstLp) state.current = firstLp;
   }
   function selectedList(){
     return Object.keys(state.selected).map(function(k){ return state.selected[k]; }).filter(Boolean);
