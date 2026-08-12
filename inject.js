@@ -6357,10 +6357,14 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       return false;
     }
     if (nameInput) {
+      nameInput.addEventListener('input', function(){ if (err) err.textContent = ''; });
       setTimeout(function(){ try { nameInput.focus(); } catch(_){} }, 80);
     }
     if (input) {
-      input.addEventListener('input', function(){ input.value = normalizePhoneInput(input.value); });
+      input.addEventListener('input', function(){
+        input.value = normalizePhoneInput(input.value);
+        if (err) err.textContent = '';
+      });
     }
     var nowBtn = wrap.querySelector('#bj-apply-now');
     if (nowBtn) nowBtn.addEventListener('click', function(){
