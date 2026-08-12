@@ -1421,6 +1421,7 @@
     window.__bjHomeCategoryQuickLinks = true;
 
     var CARD_BG = '#fbfdff';
+    var CARD_BORDER = '#dfeaf6';
     var ITEMS = [
       { key: 'water', name: '정수기', reviews: '후기 8,119개', href: '/html/dh_prod/prod_list/1-8', img: 'images/category-icons/water-purifier.png' },
       { key: 'air', name: '공기청정기', reviews: '후기 2,274개', href: '/html/dh_prod/prod_list/1-6', img: 'images/category-icons/air-purifier.png' },
@@ -1471,11 +1472,11 @@
         '#bj-home-cat-links *{box-sizing:border-box}',
         '#bj-home-cat-links .bj-hcat-inner{max-width:1280px;margin:0 auto;padding:18px 32px 0}',
         '#bj-home-cat-links .bj-hcat-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:12px}',
-        '#bj-home-cat-links .bj-hcat-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:188px;padding:13px 10px 14px;border:1px solid #dfeaf6;border-radius:8px;background:var(--bj-home-cat-bg)!important;color:#17253a;text-decoration:none;box-shadow:0 10px 24px rgba(35,80,130,.10);overflow:hidden;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}',
+        '#bj-home-cat-links .bj-hcat-card{display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:188px;padding:13px 10px 14px;border:1px solid ' + CARD_BORDER + '!important;border-radius:8px;background:var(--bj-home-cat-bg)!important;background-color:var(--bj-home-cat-bg)!important;background-clip:padding-box;color:#17253a;text-decoration:none;box-shadow:0 10px 24px rgba(35,80,130,.10);overflow:hidden;transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}',
         '#bj-home-cat-links .bj-hcat-card:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(35,80,130,.16);border-color:#c9dcf3}',
-        '#bj-home-cat-links .bj-hcat-media{display:flex;align-items:center;justify-content:center;width:100%;height:120px;margin:0 0 8px;background:var(--bj-home-cat-bg)!important;border-radius:8px;overflow:hidden}',
-        '#bj-home-cat-links .bj-hcat-img{display:block;width:150px;height:120px;object-fit:contain;background:var(--bj-home-cat-bg)!important;border:0;border-radius:8px;mix-blend-mode:normal}',
-        '#bj-home-cat-links .bj-hcat-text{width:100%;background:var(--bj-home-cat-bg)!important;text-align:center}',
+        '#bj-home-cat-links .bj-hcat-media{display:flex;align-items:center;justify-content:center;width:100%;height:120px;margin:0 0 8px;background:var(--bj-home-cat-bg)!important;background-color:var(--bj-home-cat-bg)!important;border-radius:8px;overflow:hidden}',
+        '#bj-home-cat-links .bj-hcat-img{display:block;width:150px;height:120px;object-fit:contain;background:var(--bj-home-cat-bg)!important;background-color:var(--bj-home-cat-bg)!important;border:0;border-radius:8px;mix-blend-mode:normal}',
+        '#bj-home-cat-links .bj-hcat-text{width:100%;background:var(--bj-home-cat-bg)!important;background-color:var(--bj-home-cat-bg)!important;text-align:center}',
         '#bj-home-cat-links .bj-hcat-name{display:block;margin:0 0 4px;font-size:18px;font-weight:800;line-height:1.18;letter-spacing:0;color:#0f1f35;white-space:nowrap}',
         '#bj-home-cat-links .bj-hcat-reviews{display:block;margin:0 0 5px;font-size:12px;font-weight:700;line-height:1.2;letter-spacing:0;color:#5d6f86;white-space:nowrap}',
         '#bj-home-cat-links .bj-hcat-action{display:inline-flex;align-items:center;justify-content:center;max-width:100%;padding:4px 8px;border-radius:999px;background:rgba(8,56,248,.07);color:#0838f8;font-size:12px;font-weight:800;line-height:1.2;letter-spacing:0;white-space:nowrap}',
