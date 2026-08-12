@@ -525,6 +525,14 @@
       return false;
     }
   }
+  function shouldOpenDirectApplyOffer(){
+    try {
+      var q = new URLSearchParams(location.search || '');
+      return q.get('bj_direct_apply') === '1' && /\/html\/dh_prod\/prod_view(?:\/|$)/.test(location.pathname || '');
+    } catch (_) {
+      return false;
+    }
+  }
 
   function openSecretPackage(){
     var opts = {
@@ -555,6 +563,20 @@
 
   window.bjOpenSecretPackage = openSecretPackage;
 
+  function openDirectApplyOffer(){
+    var tries = 0;
+    var t = setInterval(function(){
+      tries += 1;
+      if (window.__bjDirectOfferOpen) {
+        clearInterval(t);
+        window.__bjDirectOfferOpen();
+      } else if (tries > 50) {
+        clearInterval(t);
+        openSecretPackage();
+      }
+    }, 120);
+  }
+
   function init(){
     if (!shouldOpenSecretPackage()) return;
     var key = 'bj_secret_persona_auto_open:' + location.pathname + location.search;
@@ -562,7 +584,7 @@
       if (sessionStorage.getItem(key)) return;
       sessionStorage.setItem(key, '1');
     } catch (_) {}
-    setTimeout(openSecretPackage, 500);
+    setTimeout(shouldOpenDirectApplyOffer() ? openDirectApplyOffer : openSecretPackage, 500);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
