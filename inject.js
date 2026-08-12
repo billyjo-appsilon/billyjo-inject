@@ -567,9 +567,8 @@
     var tries = 0;
     var t = setInterval(function(){
       tries += 1;
-      if (window.__bjDirectOfferOpen) {
+      if (window.__bjDirectOfferOpen && window.__bjDirectOfferOpen()) {
         clearInterval(t);
-        window.__bjDirectOfferOpen();
       } else if (tries > 50) {
         clearInterval(t);
         openSecretPackage();
