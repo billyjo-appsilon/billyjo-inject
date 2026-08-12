@@ -4759,14 +4759,14 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "@media(min-width:768px){#bj-v5-injected .bj-trust-sub{font-size:24px !important;margin:30px auto 16px !important}}";
       (document.head || document.documentElement).appendChild(bjRf);
     }
-    // 시안 순서: 히어로 → 브릿지캡션(order 2, 아래서 생성) → 후기 → 신뢰도 → 서비스 → 큐레이션 → 신청방법 → 가격비교 → FAQ
+    // 그로스 흐름: 신뢰 → 후기 → 혜택 비교 증거 → 직계약 보장 → 큐레이션 → 서비스/혜택. (2026-08-12)
     var ORDER = [
       ['실제 고객 후기', 3],
+      ['같은 가격, 더 풍성한 혜택', 4],
       ['부담없이 시작하세요', 5],
-      ['본사보다 빌리조가 좋은', 6],
-      ['빌리조만의 컨설팅', 7],
-      ['렌탈 신청 방법', 8],
-      ['같은 가격, 더 풍성한 혜택', 10],
+      ['빌리조만의 컨설팅', 6],
+      ['본사보다 빌리조가 좋은', 7],
+      ['렌탈 신청 방법', 9],
       ['자주 묻는 질문', 11]
     ];
     // 시안에 없는 섹션 = 숨김 (이사·신혼 / 광고전화없음(개인정보로 통합) / 위약금 중도해지 / 제휴카드 추가혜택)
@@ -4796,6 +4796,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '.bj-trust-partner img{display:block;width:100%;height:100%;object-fit:contain}' +
         '.bj-trust-kicker{font-size:18px;line-height:1.25;font-weight:900;color:#fff;letter-spacing:0;margin:0 auto 5px;text-align:center}' +
         '.bj-trust-kicker .yellow{color:#ffd000;font-size:inherit;line-height:inherit}' +
+        '.bj-trust-actions{display:flex;justify-content:center;margin:18px auto 0}' +
+        '.bj-trust-cta{appearance:none;border:0;border-radius:999px;background:#fff;color:#0838f8;font-size:15px;font-weight:900;line-height:1;padding:13px 20px;box-shadow:0 12px 28px rgba(0,0,0,.16);cursor:pointer;letter-spacing:0}' +
+        '.bj-trust-cta:active{transform:translateY(1px)}' +
         '@media(max-width:420px){.hero[data-bj-trust="1"] h1{font-size:24px!important;line-height:1.24!important}.bj-trust-partners{gap:8px;margin-top:14px;max-width:100%}.bj-trust-partner{width:min(43vw,148px);height:50px;padding:9px 11px}}';
       (document.head || document.documentElement).appendChild(bjTrustCss);
     }
@@ -4831,6 +4834,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         bjAiChip.className = 'trust-chip';
         bjAiChip.textContent = 'AI 큐레이션 견적비교';
         bjTrustChips.appendChild(bjAiChip);
+      }
+      if (!bjTrust.querySelector('.bj-trust-actions')) {
+        var bjTrustActions = document.createElement('div');
+        bjTrustActions.className = 'bj-trust-actions';
+        bjTrustActions.innerHTML = '<button type="button" class="bj-trust-cta" data-bj-consult>무료 견적 비교하기</button>';
+        if (bjTrustChips && bjTrustChips.parentNode) bjTrustChips.parentNode.insertBefore(bjTrustActions, bjTrustChips.nextSibling);
+        else bjTrust.appendChild(bjTrustActions);
       }
     }
 
@@ -4899,7 +4909,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (!pageEl.querySelector('.bj-ben-zone')) {
       var bjBenZone = document.createElement('div');
       bjBenZone.className = 'zone bj-ben-zone';
-      bjBenZone.style.order = '9';
+      bjBenZone.style.order = '8';
       var bjBen = [
         { no: '01', lb: '지원금', ic: '#i-gift', t: '최대 지원금<br>+ 사은품 제공' },
         { no: '02', lb: '할인', ic: '#i-ticket', t: '최대 15개월반값<br>or 최대 50% 할인' },
