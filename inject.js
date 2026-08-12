@@ -4994,6 +4994,48 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       pageEl.appendChild(bjBenZone);
     }
 
+    // live/meta 랜딩과 같은 톤의 밝은 FAQ 섹션을 메인 하단에도 추가한다. (2026-08-12)
+    if (!document.getElementById('bj-home-faq-css')) {
+      var bjFaqCss = document.createElement('style');
+      bjFaqCss.id = 'bj-home-faq-css';
+      bjFaqCss.textContent =
+        '#bj-v5-injected .bj-home-faq-zone{order:10;background:#f7faff!important}' +
+        '#bj-v5-injected .bj-home-faq-zone section{padding:56px 20px!important}' +
+        '#bj-v5-injected .bj-home-faq-head{text-align:center;margin:0 auto 24px}' +
+        '#bj-v5-injected .bj-home-faq-eye{margin:0 0 7px;color:#0838f8;font-size:13px;font-weight:900;letter-spacing:.08em}' +
+        '#bj-v5-injected .bj-home-faq-title{margin:0;color:#111827;font-size:28px;font-weight:900;line-height:1.28;letter-spacing:0}' +
+        '#bj-v5-injected .bj-home-faq-list{display:grid;gap:9px;max-width:740px;margin:0 auto}' +
+        '#bj-v5-injected .bj-home-faq-item{border:1px solid #dfeaf6;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 8px 22px rgba(21,64,120,.07)}' +
+        '#bj-v5-injected .bj-home-faq-item[open]{border-color:#bfd3ff;box-shadow:0 12px 28px rgba(21,64,120,.1)}' +
+        '#bj-v5-injected .bj-home-faq-item summary{position:relative;display:block;list-style:none;cursor:pointer;padding:17px 50px 17px 18px;color:#17253a;font-size:16px;font-weight:900;line-height:1.35;letter-spacing:0;word-break:keep-all}' +
+        '#bj-v5-injected .bj-home-faq-item summary::-webkit-details-marker{display:none}' +
+        '#bj-v5-injected .bj-home-faq-item summary:after{content:"";position:absolute;right:20px;top:50%;width:9px;height:9px;border-right:2px solid #7d8da3;border-bottom:2px solid #7d8da3;transform:translateY(-70%) rotate(45deg);transition:transform .2s ease,border-color .2s ease}' +
+        '#bj-v5-injected .bj-home-faq-item[open] summary:after{border-color:#0838f8;transform:translateY(-25%) rotate(-135deg)}' +
+        '#bj-v5-injected .bj-home-faq-answer{padding:0 18px 17px;color:#526174;font-size:14px;line-height:1.7;word-break:keep-all}' +
+        '#bj-v5-injected .bj-home-faq-answer b{color:#17253a}' +
+        '#bj-v5-injected .bj-home-faq-note{margin-top:10px;padding:10px 12px;border-radius:10px;background:#eef4ff;color:#17253a;font-weight:800;font-variant-numeric:tabular-nums}' +
+        '#bj-v5-injected .bj-home-faq-steps{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}' +
+        '#bj-v5-injected .bj-home-faq-steps span{display:inline-flex;align-items:center;border-radius:999px;background:#eef4ff;color:#0838f8;padding:6px 11px;font-size:12px;font-weight:900}' +
+        '@media(max-width:767px){#bj-v5-injected .bj-home-faq-zone section{padding:44px 12px!important}#bj-v5-injected .bj-home-faq-title{font-size:22px}#bj-v5-injected .bj-home-faq-item summary{padding:15px 44px 15px 15px;font-size:14px}#bj-v5-injected .bj-home-faq-item summary:after{right:17px}#bj-v5-injected .bj-home-faq-answer{padding:0 15px 15px;font-size:13.5px}}';
+      (document.head || document.documentElement).appendChild(bjFaqCss);
+    }
+    if (!pageEl.querySelector('.bj-home-faq-zone')) {
+      var bjHomeFaqZone = document.createElement('div');
+      bjHomeFaqZone.className = 'zone bj-home-faq-zone';
+      bjHomeFaqZone.style.order = '10';
+      bjHomeFaqZone.innerHTML = '<section>' +
+        '<div class="bj-home-faq-head"><div class="bj-home-faq-eye">FAQ</div><h2 class="bj-home-faq-title">많이 묻는 질문</h2></div>' +
+        '<div class="bj-home-faq-list">' +
+        '<details class="bj-home-faq-item" open><summary>본사에서 신청하는 것보다 비싼가요?</summary><div class="bj-home-faq-answer">아닙니다. <b>월 렌탈료는 제조사가 정한 금액</b>이라 어디에서 신청하셔도 약정별 요금은 같습니다. 제품·품질·설치·A/S 모두 본사를 통해 동일하게 진행됩니다. 차이가 나는 건 <b>가입 시 받는 혜택</b>뿐입니다.</div></details>' +
+        '<details class="bj-home-faq-item"><summary>중도 해지하면 위약금이 얼마인가요?</summary><div class="bj-home-faq-answer">의무사용기간 내 해지 시 아래 기준으로 발생합니다. 브랜드마다 차이가 있어, 상담 시 해당 제품의 정확한 금액을 먼저 알려드린 뒤 진행합니다.<div class="bj-home-faq-note">잔여 렌탈료의 10% + 면제받은 등록비·설치비</div></div></details>' +
+        '<details class="bj-home-faq-item"><summary>약정이 끝나면 제품은 제 것이 되나요?</summary><div class="bj-home-faq-answer">인수형 렌탈은 약정 종료 후 추가 비용 없이 소유권이 이전됩니다. 다만 <b>소유권 이전 전에 해지</b>하면 위약금이 없더라도 철거 비용이 발생할 수 있습니다. 소유권 이전형이 아닌 상품도 있어 상담 시 구분해 안내드립니다.</div></details>' +
+        '<details class="bj-home-faq-item"><summary>제휴카드는 꼭 만들어야 하나요?</summary><div class="bj-home-faq-answer">아닙니다. 제휴카드 없이도 가입할 수 있으며 이 경우 정상 렌탈료가 적용됩니다. 카드 할인은 <b>전월 실적 조건</b>이 있어 실적 미달 시 할인 폭이 줄어듭니다.</div></details>' +
+        '<details class="bj-home-faq-item"><summary>신용조회를 하나요?</summary><div class="bj-home-faq-answer">렌탈은 할부금융 형태라 가입 시 신용 확인이 필요합니다. 만 19세 이상·정상 신용 고객 대상이며, 조회 전 반드시 사전 동의를 받습니다.</div></details>' +
+        '<details class="bj-home-faq-item"><summary>신청하면 어떻게 진행되나요?</summary><div class="bj-home-faq-answer">상담에서 제품과 약정을 확정한 뒤 설치 일정을 잡습니다. 재고·지역에 따라 당일~3일 내 설치가 가능합니다.<div class="bj-home-faq-steps"><span>1 상담</span><span>2 제품·약정 선택</span><span>3 신청서 작성</span><span>4 설치</span></div></div></details>' +
+        '</div></section>';
+      pageEl.appendChild(bjHomeFaqZone);
+    }
+
     // 배경 전체 화이트 통일 (하늘색·회색 제거, Jun 요청) — .hero(파란 트러스트 카드)만 제외 (2026-07-03)
     var bjSecs = Array.prototype.slice.call(pageEl.children).filter(function(z) {
       return z.style.display !== 'none' && (z.classList.contains('zone') || z.classList.contains('bj-bridge'));
