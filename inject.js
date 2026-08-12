@@ -10455,7 +10455,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '#bj-detail-benefit-bundle{font-family:Pretendard,Arial,sans-serif;margin:18px auto 18px;max-width:760px;padding:0 12px;clear:both}',
         '#bj-detail-benefit-bundle .bj-dbb-img{display:block;width:100%;height:auto;border-radius:24px;box-shadow:0 10px 28px rgba(12,24,68,.08);background:#fff}',
         '#bj-detail-benefit-bundle .bj-dbb-note{margin-top:8px;text-align:center;font-size:11px;line-height:1.45;color:#9aa3b2;letter-spacing:-.2px}',
-        '@media(max-width:768px){#bj-detail-benefit-bundle{margin:12px auto 14px;padding:0 10px}#bj-detail-benefit-bundle .bj-dbb-img{border-radius:18px;box-shadow:0 7px 20px rgba(12,24,68,.07)}#bj-detail-benefit-bundle .bj-dbb-note{font-size:9.5px}}'
+        '@media(max-width:768px){#bj-detail-benefit-bundle{max-width:calc(100% - 74px);margin:12px auto 14px 10px;padding:0}#bj-detail-benefit-bundle .bj-dbb-img{border-radius:18px;box-shadow:0 7px 20px rgba(12,24,68,.07)}#bj-detail-benefit-bundle .bj-dbb-note{font-size:9.5px}}'
       ].join('');
       (document.head || document.documentElement).appendChild(st);
     }
