@@ -739,6 +739,10 @@
     } catch(_) { return []; }
   }
   function norm(s){ return String(s || '').toLowerCase().replace(/\s+/g, '').replace(/[()·_\-]/g, ''); }
+  function isDirectApplyQuery(){
+    try { return new URLSearchParams(location.search || '').get('bj_direct_apply') === '1'; }
+    catch(_) { return false; }
+  }
   function inferCategory(name){
     name = String(name || '');
     var pairs = [
@@ -1233,6 +1237,9 @@
         if (state.pendingOpen) {
           state.pendingOpen = false;
           openModal(state.pendingProceed);
+        }
+        if (isDirectApplyQuery()) {
+          setTimeout(function(){ if (!state.opened) openModal(state.pendingProceed); }, 450);
         }
         if (state.cfg.directOffer.autoOpen) {
           setTimeout(openModal, ((state.cfg.directOffer.openDelaySeconds || 2) * 1000));
