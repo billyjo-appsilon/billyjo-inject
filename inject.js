@@ -10441,35 +10441,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
 
   // ─────────────────────────────────────────────────────────────────────────
-  // 2.x.1) 상세 상단 혜택 이미지 — 제품 정보 직후에 혜택 핵심을 한 번 더 각인
-  //   레퍼런스형 그래픽이지만 한글/금액 오타 방지를 위해 SVG 텍스트로 관리한다.
-  // ─────────────────────────────────────────────────────────────────────────
-  function injectDetailBenefitBundle(){
-    if (document.getElementById('bj-detail-benefit-bundle')) return;
-    var topEl = document.querySelector('.prod_view_top');
-    if (!topEl || !topEl.parentNode) return;
-    if (document.getElementById('bj-detail-benefit-bundle-style') === null) {
-      var st = document.createElement('style');
-      st.id = 'bj-detail-benefit-bundle-style';
-      st.textContent = [
-        '#bj-detail-benefit-bundle{font-family:Pretendard,Arial,sans-serif;margin:18px auto 18px;max-width:760px;padding:0 12px;clear:both}',
-        '#bj-detail-benefit-bundle .bj-dbb-img{display:block;width:100%;height:auto;border-radius:24px;box-shadow:0 10px 28px rgba(12,24,68,.08);background:#fff}',
-        '#bj-detail-benefit-bundle .bj-dbb-note{margin-top:8px;text-align:center;font-size:11px;line-height:1.45;color:#9aa3b2;letter-spacing:-.2px}',
-        '@media(max-width:768px){#bj-detail-benefit-bundle{max-width:calc(100% - 74px);margin:12px auto 14px 10px;padding:0}#bj-detail-benefit-bundle .bj-dbb-img{border-radius:18px;box-shadow:0 7px 20px rgba(12,24,68,.07)}#bj-detail-benefit-bundle .bj-dbb-note{font-size:9.5px}}'
-      ].join('');
-      (document.head || document.documentElement).appendChild(st);
-    }
-    var commit = getOwnCommitHash();
-    var root = document.createElement('section');
-    root.id = 'bj-detail-benefit-bundle';
-    root.setAttribute('aria-label', '빌리조 상세 혜택 안내');
-    root.innerHTML =
-      '<img class="bj-dbb-img" loading="lazy" src="https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@' + commit + '/images/detail-benefit-bundle.svg" alt="인터넷 TV 53만원, 정수기 렌탈 30만원, 당일가입 선물, 혜택 비교 보장">' +
-      '<div class="bj-dbb-note">* 상품·통신사·가입 조건에 따라 실제 혜택은 달라질 수 있으며 상담 시 최종 확인됩니다.</div>';
-    topEl.parentNode.insertBefore(root, topEl.nextSibling);
-  }
-
-  // ─────────────────────────────────────────────────────────────────────────
   // 2.y) 고객 후기 섹션 — .prod_view_top 바로 다음에 삽입 (이미지+가격 → 후기 → AI 카드)
   //   데이터: admin2 /v1/reviews?brand=&category= (CORS *). brand/category는 페이지에서 추출.
   //   디자인: 사진 있는 후기 우선 + 포토 갤러리 + PC 한 줄에 1건 + 페르소나 칩 + 아이디 마스킹.
@@ -11636,7 +11607,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     personalizePersonaIcons(); /* v0.5.59: 페르소나 카드 아이콘 (현재 1인·신혼 샘플) */
     arrangePersonaLevelMobile(); /* v0.5.61: 모바일에서 추천강도 라벨을 페르소나명 옆으로 */
     fetchAndInjectAICard();
-    injectDetailBenefitBundle(); /* 상세 상단 혜택 이미지 — 인터넷 TV 53만원 / 정수기 30만원 / 당일가입 선물 */
     moveGiftBeforePersona();   /* v0.6.5: 지원금 섹션을 페르소나 섹션 앞으로 (24578 미리보기) */
     applyAiCardExampleA();     /* v0.6.8: [예시 A] 섹션 헤더 아이콘 + 페르소나 SVG 아이콘 */
     applyTextClamp();          /* v0.6.9: [다음단계] 긴 문장 2줄 클램프+더보기 (24578 테스트) */
