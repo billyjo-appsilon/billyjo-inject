@@ -4847,6 +4847,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     }
     Array.prototype.forEach.call(pageEl.querySelectorAll('.bj-bridge'), function(br){ br.remove(); });
 
+    // 신뢰 카드 아래 "부담없이 시작하세요" 첫 문구/칩은 하단 보장 내용과 중복이라 제거한다. (2026-08-12)
+    Array.prototype.forEach.call(pageEl.querySelectorAll('.zone section'), function(sec) {
+      if (sec.getAttribute('data-bj-afford-removed')) return;
+      var text = sec.textContent || '';
+      if (text.indexOf('다양한 가전 제품') !== -1 && text.indexOf('최대 72개월') !== -1 && sec.querySelector('.badge-list')) {
+        sec.setAttribute('data-bj-afford-removed', '1');
+        sec.remove();
+      }
+    });
+
     function bjRenameHomeReviewBenefits() {
       Array.prototype.forEach.call(pageEl.querySelectorAll('.rv-gift'), function(el) {
         var t = el.textContent || '';
