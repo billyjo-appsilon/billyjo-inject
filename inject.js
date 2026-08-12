@@ -528,7 +528,8 @@
   function shouldOpenDirectApplyOffer(){
     try {
       var q = new URLSearchParams(location.search || '');
-      return q.get('bj_direct_apply') === '1' && /\/html\/dh_prod\/prod_view(?:\/|$)/.test(location.pathname || '');
+      return q.get('bj_direct_apply') === '1' &&
+        (/\/html\/dh_prod\/prod_view(?:\/|$)/.test(location.pathname || '') || !!q.get('bj_lp_products'));
     } catch (_) {
       return false;
     }
@@ -728,6 +729,13 @@
               document.querySelector('meta[property="og:image"]');
     return img ? (img.getAttribute('content') || img.getAttribute('src')) : '';
   }
+  function lpTokens(){
+    try {
+      var raw = new URLSearchParams(location.search || '').get('bj_lp_products') || '';
+      return raw.split(',').map(function(s){ return decodeURIComponent(String(s || '').replace(/\+/g, ' ')).trim(); }).filter(Boolean).slice(0, 8);
+    } catch(_) { return []; }
+  }
+  function norm(s){ return String(s || '').toLowerCase().replace(/\s+/g, '').replace(/[()·_\-]/g, ''); }
   function inferCategory(name){
     name = String(name || '');
     var pairs = [
@@ -817,6 +825,38 @@
   function ensureCurrentSelected(apiProduct){
     state.current = findCurrent(apiProduct);
     if (state.current && state.current.model) state.selected[state.current.model] = state.current;
+  }
+  function ensureLpSelected(){
+    var tokens = lpTokens();
+    if (!tokens.length) return;
+    var products = allProducts();
+    tokens.forEach(function(token, idx){
+      var nt = norm(token);
+      var found = products.filter(function(p){
+        return String(p.prodNo || '') === token ||
+          norm(p.name).indexOf(nt) >= 0 || nt.indexOf(norm(p.name)) >= 0 ||
+          norm(p.model).indexOf(nt) >= 0 || nt.indexOf(norm(p.model)) >= 0;
+      })[0];
+      if (!found) {
+        found = {
+          model: 'lp-direct-' + idx + '-' + nt.slice(0, 24),
+          prodNo: '',
+          name: token,
+          brand: '',
+          category: inferCategory(token),
+          image: '',
+          maxGift: 0,
+          reviewCount: 0,
+          avgStars: null,
+          detailUrl: ''
+        };
+      }
+      if (found && found.model) state.selected[found.model] = found;
+    });
+    if (!state.current) {
+      var list = selectedList();
+      if (list[0]) state.current = list[0];
+    }
   }
   function selectedList(){
     return Object.keys(state.selected).map(function(k){ return state.selected[k]; }).filter(Boolean);
@@ -1175,7 +1215,7 @@
   }
   function init(){
     var path = location.pathname || '';
-    if (!/(prod_view|dh_order\/rental\/d)/.test(path)) return;
+    if (!/(prod_view|dh_order\/rental\/d)/.test(path) && !lpTokens().length) return;
     loadCfg().then(function(cfg){
       if (!cfg) { state.active = false; return; }
       state.cfg = cfg;
@@ -1183,6 +1223,7 @@
       Promise.all([loadProducts(), loadCurrentProduct()]).then(function(r){
         state.cats = r[0] || [];
         ensureCurrentSelected(r[1]);
+        ensureLpSelected();
         if (!state.current) { state.active = false; return; }
         state.active = true;
         mountTopBar();
