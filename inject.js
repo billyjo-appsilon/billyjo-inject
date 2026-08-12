@@ -1429,7 +1429,7 @@
       { key: 'wash', name: '세탁건조기', reviews: '후기 1,189개', href: '/html/dh_prod/prod_list/3-25', img: 'images/category-icons/washer-dryer.png' },
       { key: '', name: '비데', reviews: '후기 982개', href: '/html/dh_prod/prod_list/1-9', img: 'images/category-icons/bidet.png' },
       { name: '인터넷+TV', reviews: '후기 231개', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/internet-tv.png' },
-      { name: '휴대폰', reviews: '결합 혜택 상담', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/mobile-phone.png' }
+      { name: '휴대폰', reviews: '결합 혜택 상담', href: 'https://premiumm.ptalk.co.kr/73728', img: 'images/category-icons/mobile-phone.png' }
     ];
     var MORE_ITEMS = [
       { name: '제습기', meta: '후기 2,719개', href: '/html/dh_prod/prod_list/1-203' },
