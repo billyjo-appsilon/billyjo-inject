@@ -1422,11 +1422,11 @@
 
     var CARD_BG = '#fbfdff';
     var ITEMS = [
-      { name: '정수기', reviews: '후기 8,119개', href: '/html/dh_prod/prod_list/1-8', img: 'images/category-icons/water-purifier.png' },
-      { name: '공기청정기', reviews: '후기 2,274개', href: '/html/dh_prod/prod_list/1-6', img: 'images/category-icons/air-purifier.png' },
-      { name: '에어컨', reviews: '후기 1,426개', href: '/html/dh_prod/prod_list/1-87', img: 'images/category-icons/air-conditioner.png' },
-      { name: '세탁건조기', reviews: '후기 1,189개', href: '/html/dh_prod/prod_list/3-25', img: 'images/category-icons/washer-dryer.png' },
-      { name: '비데', reviews: '후기 982개', href: '/html/dh_prod/prod_list/1-9', img: 'images/category-icons/bidet.png' },
+      { key: 'water', name: '정수기', reviews: '후기 8,119개', href: '/html/dh_prod/prod_list/1-8', img: 'images/category-icons/water-purifier.png' },
+      { key: 'air', name: '공기청정기', reviews: '후기 2,274개', href: '/html/dh_prod/prod_list/1-6', img: 'images/category-icons/air-purifier.png' },
+      { key: 'aircon', name: '에어컨', reviews: '후기 1,426개', href: '/html/dh_prod/prod_list/1-87', img: 'images/category-icons/air-conditioner.png' },
+      { key: 'wash', name: '세탁건조기', reviews: '후기 1,189개', href: '/html/dh_prod/prod_list/3-25', img: 'images/category-icons/washer-dryer.png' },
+      { key: '', name: '비데', reviews: '후기 982개', href: '/html/dh_prod/prod_list/1-9', img: 'images/category-icons/bidet.png' },
       { name: '인터넷+TV', reviews: '후기 231개', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/internet-tv.png' },
       { name: '휴대폰', reviews: '결합 혜택 상담', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/mobile-phone.png' }
     ];
@@ -1508,7 +1508,7 @@
       section.id = 'bj-home-cat-links';
       section.setAttribute('aria-label', '렌탈 카테고리 빠른 비교');
       section.innerHTML = '<div class="bj-hcat-inner"><div class="bj-hcat-grid">' + ITEMS.map(function (it) {
-        return '<a class="bj-hcat-card" href="' + esc(it.href) + '" aria-label="' + esc(it.name + ' ' + it.reviews + ' 최저가 지원금 비교') + '">'
+        return '<a class="bj-hcat-card" href="' + esc(it.href) + '" data-bjct-key="' + esc(it.key || '') + '" aria-label="' + esc(it.name + ' ' + it.reviews + ' 최저가 지원금 비교') + '">'
           + '<span class="bj-hcat-media"><img class="bj-hcat-img" src="' + esc(asset(it.img)) + '" alt="' + esc(it.name) + '" loading="eager"></span>'
           + '<span class="bj-hcat-text"><strong class="bj-hcat-name">' + esc(it.name) + '</strong><span class="bj-hcat-reviews">' + esc(it.reviews) + '</span><span class="bj-hcat-action">최저가 · 지원금 비교</span></span>'
           + '</a>';
@@ -1520,6 +1520,22 @@
           + '</a>';
       }).join('') + '</div></div>';
       hero.parentNode.insertBefore(section, hero.nextSibling);
+      section.addEventListener('click', function(e) {
+        var a = e.target && e.target.closest && e.target.closest('.bj-hcat-card[data-bjct-key]');
+        if (!a || !section.contains(a)) return;
+        var key = a.getAttribute('data-bjct-key') || '';
+        if (!key) return;
+        e.preventDefault();
+        window.__bjctPendingCategory = key;
+        window.__bjctPendingScroll = true;
+        if (typeof window.__bjctShowCategory === 'function') {
+          window.__bjctShowCategory(key, true);
+        } else {
+          setTimeout(function() {
+            if (typeof window.__bjctShowCategory === 'function') window.__bjctShowCategory(key, true);
+          }, 400);
+        }
+      });
       var btn = section.querySelector('.bj-hcat-more-btn');
       var extra = section.querySelector('.bj-hcat-extra');
       if (btn && extra) {
@@ -2335,7 +2351,9 @@
 
   var CSS = [
     '#bjct-sec{display:none;background:#fff;font-family:inherit;-webkit-tap-highlight-color:transparent}',
-    '@media(max-width:767px){#bjct-sec{display:block}#bjct-banners{display:block !important}.new-mc:not(.show-767){display:none !important}.new-mb_m{display:none !important}.wide-inner.pad>#bj-v5-injected~*:not(#bjct-sec):not(#bjct-banners){display:none !important}.prodList_wrap{display:none !important}}',
+    '#bjct-sec.bjct-user-open{display:block}',
+    '#bjct-sec .bjct-tabwrap,#bjct-sec .bjct-count{display:none}',
+    '@media(max-width:767px){#bjct-sec.bjct-user-open{display:block}#bjct-banners{display:none !important}.new-mc:not(.show-767){display:none !important}.new-mb_m{display:none !important}.wide-inner.pad>#bj-v5-injected~*:not(#bjct-sec):not(#bjct-banners){display:none !important}.prodList_wrap{display:none !important}}',
     '#bjct-sec *{box-sizing:border-box}',
     '#bjct-sec .bjct-head{padding:18px 18px 4px}',
     '#bjct-sec .bjct-kick{font-size:12px;font-weight:800;color:#0838f8;letter-spacing:.02em}',
@@ -2382,7 +2400,9 @@
     '#bjct-banners .bjct-ban-slide img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}',
     '#bjct-banners .bjct-ban-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}',
     '#bjct-banners .bjct-ban-dot{width:6px;height:6px;border-radius:50%;background:#d5d8df;transition:width .2s,background .2s;cursor:pointer}',
-    '#bjct-banners .bjct-ban-dot.on{width:18px;border-radius:3px;background:#0838f8}'
+    '#bjct-banners .bjct-ban-dot.on{width:18px;border-radius:3px;background:#0838f8}',
+    '@media(min-width:768px){#bjct-sec{max-width:1280px;margin:0 auto 22px;padding:0 32px}#bjct-sec .bjct-head{padding:20px 0 10px}#bjct-sec .bjct-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:4px 0 26px}#bjct-sec .bjct-card{border-radius:8px;box-shadow:0 8px 20px rgba(35,80,130,.08)}#bjct-sec .bjct-thumb{aspect-ratio:1/.72}#bjct-sec .bjct-name{font-size:13px}}',
+    '@media(min-width:1280px){#bjct-sec{padding-left:0;padding-right:0}}'
   ].join('');
 
   function cardHTML(p) {
@@ -2451,20 +2471,20 @@
     var sec = document.createElement('section');
     sec.id = 'bjct-sec';
     sec.innerHTML =
-      '<div class="bjct-head"><div class="bjct-kick">CATEGORY</div><div class="bjct-h2">카테고리별 인기 렌탈</div><div class="bjct-sub">원하는 가전을 골라 최저가로 비교하세요</div></div>'
+      '<div class="bjct-head"><div class="bjct-kick">BEST</div><div class="bjct-h2"><span id="bjct-title">카테고리별 베스트</span></div><div class="bjct-sub">선택한 카테고리의 인기 상품을 바로 비교하세요</div></div>'
       + '<div class="bjct-tabwrap"><nav class="bjct-tabs" id="bjct-tabs"><span class="bjct-ind" id="bjct-ind"></span></nav></div>'
       + '<div class="bjct-count"><div class="bjct-n"><b id="bjct-cnt">0</b>개의 상품</div><div class="bjct-sort">인기순 ▾</div></div>'
       + '<div class="bjct-pager" id="bjct-pager"></div>';
-    var banners = buildBanners();
-    var ref = anchor.nextSibling;
-    if (banners) { anchor.parentNode.insertBefore(banners, ref); ref = banners.nextSibling; }
-    anchor.parentNode.insertBefore(sec, ref);
-    if (banners) wireBanners(banners);
+    var hcat = document.getElementById('bj-home-cat-links');
+    var parent = (hcat && hcat.parentNode) || anchor.parentNode;
+    var ref = hcat ? hcat.nextSibling : anchor.nextSibling;
+    parent.insertBefore(sec, ref);
 
     var tabbar = sec.querySelector('#bjct-tabs');
     var ind = sec.querySelector('#bjct-ind');
     var pager = sec.querySelector('#bjct-pager');
     var cntEl = sec.querySelector('#bjct-cnt');
+    var titleEl = sec.querySelector('#bjct-title');
 
     CAT_META.forEach(function (c, i) {
       var b = document.createElement('button');
@@ -2510,6 +2530,7 @@
     function go(i, animate) {
       i = Math.max(0, Math.min(CAT_META.length - 1, i)); idx = i;
       tabs.forEach(function (t, j) { t.classList.toggle('on', j === i); });
+      if (titleEl) titleEl.textContent = CAT_META[i].key === 'all' ? '카테고리별 베스트' : CAT_META[i].name + ' 베스트';
       moveInd(tabs[i]);
       centerTab(tabs[i], animate);
       cntEl.textContent = listFor(CAT_META[i].key).length;
@@ -2550,6 +2571,24 @@
     pager.addEventListener('pointercancel', endDrag);
 
     go(0, false);
+    window.__bjctShowCategory = function(key, scroll) {
+      var target = 0;
+      for (var i = 0; i < CAT_META.length; i++) {
+        if (CAT_META[i].key === key) { target = i; break; }
+      }
+      sec.classList.add('bjct-user-open');
+      go(target, true);
+      if (scroll) {
+        setTimeout(function() {
+          try { sec.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+          catch (_) { location.hash = 'bjct-sec'; }
+        }, 30);
+      }
+    };
+    if (window.__bjctPendingCategory) {
+      window.__bjctShowCategory(window.__bjctPendingCategory, !!window.__bjctPendingScroll);
+      window.__bjctPendingScroll = false;
+    }
     window.addEventListener('resize', function () { measureW(); place(0, 0); pager.style.height = panelH(idx) + 'px'; moveInd(tabs[idx]); });
     // 이미지 로드 후 높이 재보정
     setTimeout(function () { pager.style.height = panelH(idx) + 'px'; }, 1200);
