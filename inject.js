@@ -569,7 +569,7 @@
       tries += 1;
       if (window.__bjDirectOfferOpen && window.__bjDirectOfferOpen()) {
         clearInterval(t);
-      } else if (tries > 50) {
+      } else if (tries > 180) {
         clearInterval(t);
         openSecretPackage();
       }
