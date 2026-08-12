@@ -1,0 +1,63 @@
+<svg width="760" height="340" viewBox="0 0 760 340" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <filter id="cardShadow" x="-20%" y="-30%" width="140%" height="170%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="9" stdDeviation="7" flood-color="#0F1F55" flood-opacity="0.12"/>
+    </filter>
+    <filter id="bagShadow" x="-30%" y="-30%" width="160%" height="170%" color-interpolation-filters="sRGB">
+      <feDropShadow dx="0" dy="18" stdDeviation="13" flood-color="#0838F8" flood-opacity="0.20"/>
+    </filter>
+    <linearGradient id="bag" x1="512" y1="70" x2="656" y2="258" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#5278FF"/>
+      <stop offset="0.52" stop-color="#0838F8"/>
+      <stop offset="1" stop-color="#0627B2"/>
+    </linearGradient>
+    <linearGradient id="bagTop" x1="526" y1="48" x2="638" y2="96" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6F91FF"/>
+      <stop offset="1" stop-color="#0838F8"/>
+    </linearGradient>
+    <linearGradient id="textBlue" x1="80" y1="74" x2="369" y2="230" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2493FF"/>
+      <stop offset="1" stop-color="#0838F8"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="760" height="340" rx="28" fill="#FFFFFF"/>
+  <circle cx="617" cy="167" r="112" fill="#F0F4FF"/>
+  <circle cx="592" cy="153" r="72" fill="#E7EEFF"/>
+
+  <g filter="url(#cardShadow)">
+    <rect x="63" y="35" width="322" height="66" rx="17" transform="rotate(-6 63 35)" fill="white"/>
+    <rect x="64" y="36" width="320" height="64" rx="16" transform="rotate(-6 64 36)" stroke="#E7EAF2" stroke-width="2"/>
+    <text x="98" y="82" transform="rotate(-6 98 82)" fill="url(#textBlue)" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="30" font-weight="900" letter-spacing="-1.2">인터넷 TV 53만원</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="136" y="112" width="329" height="66" rx="17" transform="rotate(2.5 136 112)" fill="white"/>
+    <rect x="137" y="113" width="327" height="64" rx="16" transform="rotate(2.5 137 113)" stroke="#E7EAF2" stroke-width="2"/>
+    <text x="171" y="155" transform="rotate(2.5 171 155)" fill="url(#textBlue)" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="29" font-weight="900" letter-spacing="-1.2">정수기 렌탈 30만원</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="74" y="192" width="262" height="62" rx="16" transform="rotate(-8 74 192)" fill="white"/>
+    <rect x="75" y="193" width="260" height="60" rx="15" transform="rotate(-8 75 193)" stroke="#E7EAF2" stroke-width="2"/>
+    <text x="105" y="232" transform="rotate(-8 105 232)" fill="url(#textBlue)" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="27" font-weight="900" letter-spacing="-1.1">당일가입 선물</text>
+  </g>
+
+  <g filter="url(#cardShadow)">
+    <rect x="184" y="259" width="234" height="56" rx="15" transform="rotate(4 184 259)" fill="white"/>
+    <rect x="185" y="260" width="232" height="54" rx="14" transform="rotate(4 185 260)" stroke="#E7EAF2" stroke-width="2"/>
+    <text x="215" y="296" transform="rotate(4 215 296)" fill="url(#textBlue)" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="24" font-weight="900" letter-spacing="-1">혜택 비교 보장</text>
+  </g>
+
+  <g filter="url(#bagShadow)">
+    <path d="M552 83C541 63 543 42 557 34C574 25 592 44 604 67C616 44 638 31 652 42C664 52 659 73 644 92C668 112 686 149 683 193C679 246 642 281 591 281C539 281 501 246 499 194C497 146 522 105 552 83Z" fill="url(#bag)"/>
+    <path d="M536 73C564 51 617 50 653 72C638 89 624 98 595 98C568 98 548 90 536 73Z" fill="url(#bagTop)"/>
+    <path d="M528 92C552 106 636 108 661 93" stroke="#DDE7FF" stroke-width="12" stroke-linecap="round"/>
+    <path d="M528 92C552 106 636 108 661 93" stroke="#FFFFFF" stroke-width="7" stroke-linecap="round"/>
+    <path d="M551 165L569 213L594 154L619 213L637 165" stroke="white" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M546 186H642" stroke="white" stroke-width="8" stroke-linecap="round"/>
+    <ellipse cx="592" cy="281" rx="86" ry="13" fill="#E7ECF8"/>
+  </g>
+
+  <text x="604" y="313" text-anchor="middle" fill="#6B7488" font-family="Pretendard, Apple SD Gothic Neo, Noto Sans KR, sans-serif" font-size="15" font-weight="700" letter-spacing="-0.4">빌리조 혜택 상담 기준</text>
+</svg>
