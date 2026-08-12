@@ -5968,6 +5968,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 #bj-consult-modal .bj-code-label small { font-size: 10px; font-weight: 600; opacity: 0.82; margin-left: 4px; }\
 #bj-consult-modal .bj-code { font-family: monospace; font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #fff; }\
 #bj-consult-modal .bj-phone-label { font-size: 13px; font-weight: 700; color: #333; margin: 14px 0 6px; }\
+#bj-consult-modal .bj-name-input { width: 100%; padding: 14px; border: 1.5px solid #d0d8ff; border-radius: 10px; font-size: 17px; text-align: center; outline: none; box-sizing: border-box; }\
+#bj-consult-modal .bj-name-input:focus { border-color: #0838f8; }\
 #bj-consult-modal .bj-phone-input { width: 100%; padding: 14px; border: 1.5px solid #d0d8ff; border-radius: 10px; font-size: 18px; text-align: center; letter-spacing: 2px; outline: none; }\
 #bj-consult-modal .bj-phone-input:focus { border-color: #0838f8; }\
 #bj-consult-modal .bj-phone-err { font-size: 12px; color: #ff3737; margin-top: 6px; min-height: 16px; text-align: center; }\
@@ -6095,6 +6097,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var digits = String(v || '').replace(/[^\d]/g, '');
     return digits.indexOf('01') === 0 && (digits.length === 10 || digits.length === 11);
   }
+  function validCustomerName(v){
+    return String(v || '').trim().length >= 1;
+  }
   function callableSlot(d){
     var day = d.getDay(); // 0 Sunday, 6 Saturday
     return day !== 6 && d.getHours() >= 10 && d.getHours() < 19;
@@ -6178,11 +6183,20 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     return genReserveSlots24h();
   }
   function fmtSlot(d) {
-    var mmdd = ('0' + (d.getMonth() + 1)).slice(-2) + '.' + ('0' + d.getDate()).slice(-2);
+    var dayLabel = relativeDayLabel(d);
     var h = d.getHours(), m = d.getMinutes();
     var ap = h < 12 ? '오전' : '오후';
     var h12 = h % 12; if (h12 === 0) h12 = 12;
-    return mmdd + ' ' + ap + ' ' + h12 + ':' + (m < 10 ? '0' + m : m);
+    return dayLabel + ' ' + ap + ' ' + h12 + ':' + (m < 10 ? '0' + m : m);
+  }
+  function relativeDayLabel(d) {
+    var today = new Date();
+    var base = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    var target = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    var diff = Math.round((target - base) / 86400000);
+    if (diff === 0) return '(오늘)';
+    if (diff === 1) return '(내일)';
+    return ('0' + (d.getMonth() + 1)).slice(-2) + '.' + ('0' + d.getDate()).slice(-2);
   }
 
   function showReservation(data) {
@@ -6308,7 +6322,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       : '<div class="bj-reserve-empty">24시간 이내 예약 가능한 시간이 없습니다.<br>바로 통화 신청을 이용해 주세요.</div>';
     var wrap = buildModal(
       '<div class="bj-reserve-head"><div class="bj-reserve-title">상담 신청</div></div>' +
-      '<div class="bj-reserve-sub">휴대폰 번호를 입력해야 통화 안내 코드와 상담사 전화 버튼이 표시됩니다.</div>' +
+      '<div class="bj-reserve-sub">성함과 휴대폰 번호를 입력해야 통화 안내 코드와 상담사 전화 버튼이 표시됩니다.</div>' +
+      '<div class="bj-phone-label">이름</div>' +
+      '<input type="text" class="bj-name-input" id="bj-apply-name" placeholder="홍길동" maxlength="20" autocomplete="name">' +
       '<div class="bj-phone-label">휴대폰 번호</div>' +
       '<input type="tel" class="bj-phone-input" id="bj-apply-phone" placeholder="010-0000-0000" maxlength="13" autocomplete="tel" inputmode="tel">' +
       '<div class="bj-phone-err" id="bj-apply-err"></div>' +
@@ -6317,12 +6333,21 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '<div class="bj-reserve-sub" style="margin-bottom:10px">24시간 이내 통화 가능한 시간대만 선택할 수 있습니다.</div>' +
       slotButtons
     );
+    var nameInput = wrap.querySelector('#bj-apply-name');
     var input = wrap.querySelector('#bj-apply-phone');
     var err = wrap.querySelector('#bj-apply-err');
+    function name(){
+      return nameInput ? String(nameInput.value || '').trim() : '';
+    }
     function phone(){
       return input ? input.value : '';
     }
-    function requirePhone(){
+    function requireContact(){
+      if (!validCustomerName(name())) {
+        if (err) err.textContent = '이름을 입력해 주세요.';
+        if (nameInput) nameInput.focus();
+        return false;
+      }
       if (validPhone(phone())) {
         if (err) err.textContent = '';
         return true;
@@ -6331,21 +6356,23 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (input) input.focus();
       return false;
     }
+    if (nameInput) {
+      setTimeout(function(){ try { nameInput.focus(); } catch(_){} }, 80);
+    }
     if (input) {
       input.addEventListener('input', function(){ input.value = normalizePhoneInput(input.value); });
-      setTimeout(function(){ try { input.focus(); } catch(_){} }, 80);
     }
     var nowBtn = wrap.querySelector('#bj-apply-now');
     if (nowBtn) nowBtn.addEventListener('click', function(){
-      if (!requirePhone()) return;
-      requestConsultWithPhone({ phone: phone(), slot: null });
+      if (!requireContact()) return;
+      requestConsultWithPhone({ name: name(), phone: phone(), slot: null });
     });
     Array.prototype.forEach.call(wrap.querySelectorAll('[data-slot]'), function(btn){
       btn.addEventListener('click', function(){
-        if (!requirePhone()) return;
+        if (!requireContact()) return;
         var slot = slots[Number(btn.getAttribute('data-slot'))];
         if (!slot) return;
-        requestConsultWithPhone({ phone: phone(), slot: slot, label: fmtSlot(slot) });
+        requestConsultWithPhone({ name: name(), phone: phone(), slot: slot, label: fmtSlot(slot) });
       });
     });
   }
@@ -6360,6 +6387,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       productId: (oCtx && oCtx.productId) || ctx.productId,
       productName: (oCtx && oCtx.productName) || ctx.productName
     };
+    if (contact.name) payload.customerName = contact.name;
     payload.customerPhone = contact.phone;
     if (contact.slot) {
       payload.callbackMinutes = Math.max(5, Math.round((contact.slot.getTime() - Date.now()) / 60000));
@@ -7278,6 +7306,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '.bj-resv-min{ padding:10px 4px; border:1.5px solid #e0e8ff; background:#fff; border-radius:10px; cursor:pointer; font-size:14px; font-weight:700; color:#0838F8; font-family:inherit; transition:all .15s }',
     '.bj-resv-min:hover{ background:#f5f8ff }',
     '.bj-resv-min.on{ background:#0838F8; color:#fff; border-color:#0838F8 }',
+    '.bj-resv-name{ width:100%; padding:14px 16px; border:1.5px solid #e0e8ff; border-radius:10px; font-size:16px; font-family:inherit; outline:none; box-sizing:border-box }',
+    '.bj-resv-name:focus{ border-color:#0838F8; box-shadow:0 0 0 3px rgba(8,56,248,0.1) }',
     '.bj-resv-phone{ width:100%; padding:14px 16px; border:1.5px solid #e0e8ff; border-radius:10px; font-size:16px; font-family:inherit; outline:none; box-sizing:border-box }',
     '.bj-resv-phone:focus{ border-color:#0838F8; box-shadow:0 0 0 3px rgba(8,56,248,0.1) }',
     '.bj-resv-submit{ width:100%; padding:16px; margin-top:14px; background:#0838F8; color:#fff; border:0; border-radius:12px; font-size:15px; font-weight:800; cursor:pointer; font-family:inherit; transition:all .15s }',
@@ -8609,6 +8639,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var d = bjModalPhoneDigits(raw);
     return (d.length === 10 || d.length === 11) && d.indexOf('01') === 0;
   }
+  function bjModalValidName(raw){
+    return String(raw || '').trim().length >= 1;
+  }
   function bjModalCallableSlot(d){
     var day = d.getDay();
     return day !== 6 && d.getHours() >= 10 && d.getHours() < 19;
@@ -8629,8 +8662,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     return null;
   }
   function bjModalSlotLabel(d){
-    var mmdd = String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
-    return mmdd + ' ' + String(d.getHours()).padStart(2, '0') + ':00~' + String(d.getHours() + 1).padStart(2, '0') + ':00';
+    return bjModalRelativeDayLabel(d) + ' ' + String(d.getHours()).padStart(2, '0') + ':00~' + String(d.getHours() + 1).padStart(2, '0') + ':00';
+  }
+  function bjModalRelativeDayLabel(d){
+    var now = new Date();
+    var base = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+    var target = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    var diff = Math.round((target - base) / 86400000);
+    if (diff === 0) return '(오늘)';
+    if (diff === 1) return '(내일)';
+    return String(d.getMonth() + 1).padStart(2, '0') + '.' + String(d.getDate()).padStart(2, '0');
   }
   function bjModalReserveSlots24h(){
     var now = new Date();
@@ -8833,6 +8874,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var prodId = (location.pathname.match(/prod_view\/(\d+)/) || [])[1] || null;
     var prodName = (document.querySelector('.prod_name b') || document.querySelector('.prod_name') || {}).textContent;
     var body = { productId: prodId, productName: prodName && prodName.trim() };
+    if (contact && contact.name) body.customerName = contact.name;
     if (contact && contact.phone) body.customerPhone = contact.phone;
     if (contact && contact.minutes) {
       body.callbackMinutes = contact.minutes;
@@ -8868,7 +8910,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var body = modal.querySelector('.bj-consult-modal-body');
     body.innerHTML =
       '<div class="bj-consult-title">상담 신청</div>' +
-      '<div class="bj-consult-agent">휴대폰 번호를 입력한 뒤 바로 전화하거나 24시간 이내 통화 가능한 시간대를 예약하세요.</div>' +
+      '<div class="bj-consult-agent">성함과 휴대폰 번호를 입력한 뒤 바로 전화하거나 24시간 이내 통화 가능한 시간대를 예약하세요.</div>' +
+      '<div class="bj-resv-label">이름</div>' +
+      '<input type="text" class="bj-resv-name" placeholder="홍길동" maxlength="20" autocomplete="name">' +
       '<div class="bj-resv-label">휴대폰 번호</div>' +
       '<input type="tel" class="bj-resv-phone" placeholder="010-1234-5678" maxlength="13" inputmode="numeric" autocomplete="tel">' +
       '<button type="button" class="bj-resv-submit" data-now="1" disabled>번호를 입력해 주세요</button>' +
@@ -8881,6 +8925,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '<button type="button" class="bj-resv-submit" data-reserve="1" disabled>시간대와 번호를 입력해 주세요</button>' +
       '<div class="bj-resv-err" style="display:none"></div>';
 
+    var nameEl = body.querySelector('.bj-resv-name');
     var phoneEl = body.querySelector('.bj-resv-phone');
     var nowBtn = body.querySelector('[data-now]');
     var reserveBtn = body.querySelector('[data-reserve]');
@@ -8895,12 +8940,14 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       reserveBtn.textContent = label;
     }
     function phoneValue(){ return bjModalFormatPhone(phoneEl.value); }
+    function nameValue(){ return String(nameEl && nameEl.value || '').trim(); }
     function update(){
+      var okName = bjModalValidName(nameValue());
       var okPhone = bjModalValidPhone(phoneEl.value);
-      nowBtn.disabled = !okPhone;
-      reserveBtn.disabled = !(okPhone && selectedSlot);
-      nowBtn.textContent = okPhone ? '지금 견적받기' : '번호를 입력해 주세요';
-      reserveBtn.textContent = okPhone && selectedSlot ? selectedSlot.label + ' 예약하기' : '시간대와 번호를 입력해 주세요';
+      nowBtn.disabled = !(okName && okPhone);
+      reserveBtn.disabled = !(okName && okPhone && selectedSlot);
+      nowBtn.textContent = okName && okPhone ? '지금 견적받기' : '이름과 번호를 입력해 주세요';
+      reserveBtn.textContent = okName && okPhone && selectedSlot ? selectedSlot.label + ' 예약하기' : '시간대와 이름/번호를 입력해 주세요';
     }
     function submit(contact){
       errEl.style.display = 'none';
@@ -8936,6 +8983,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       phoneEl.value = bjModalFormatPhone(phoneEl.value);
       update();
     });
+    if (nameEl) nameEl.addEventListener('input', update);
     Array.prototype.forEach.call(slotBtns, function(btn){
       btn.onclick = function(){
         Array.prototype.forEach.call(slotBtns, function(x){ x.classList.remove('on'); });
@@ -8945,12 +8993,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       };
     });
     nowBtn.onclick = function(){
-      if (!bjModalValidPhone(phoneEl.value)) return;
-      submit({ phone: phoneValue() });
+      if (!bjModalValidName(nameValue()) || !bjModalValidPhone(phoneEl.value)) return;
+      submit({ name: nameValue(), phone: phoneValue() });
     };
     reserveBtn.onclick = function(){
-      if (!bjModalValidPhone(phoneEl.value) || !selectedSlot) return;
-      submit({ phone: phoneValue(), minutes: selectedSlot.minutes, label: selectedSlot.label });
+      if (!bjModalValidName(nameValue()) || !bjModalValidPhone(phoneEl.value) || !selectedSlot) return;
+      submit({ name: nameValue(), phone: phoneValue(), minutes: selectedSlot.minutes, label: selectedSlot.label });
     };
     update();
   }
