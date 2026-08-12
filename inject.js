@@ -248,6 +248,23 @@
       '.bj-qam-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bj-qam-grid div{border:1px solid #e5ebf5;border-radius:10px;padding:10px}.bj-qam-grid span{display:block;font-size:11px;color:#6b7485;font-weight:800}.bj-qam-grid b{display:block;margin-top:4px;font-size:15px;color:#172033}' +
       '.bj-qam-loading{display:flex;gap:12px;align-items:flex-start;margin:8px 28px 14px 0}.bj-qam-spin{width:24px;height:24px;border-radius:50%;border:3px solid #dbe5ff;border-top-color:#0838f8;flex:0 0 auto;animation:bjQamSpin .72s linear infinite}@keyframes bjQamSpin{to{transform:rotate(360deg)}}' +
       '.bj-qam-memo{margin-top:12px;border:1px dashed #cdd8ef;border-radius:10px;background:#fbfcff;padding:10px;font-size:12px;line-height:1.5;color:#3c4658;white-space:pre-wrap}.bj-qam-note{margin-top:10px;font-size:11px;line-height:1.45;color:#737d8e}.bj-qam-go{width:100%;margin-top:14px;border:0;border-radius:11px;background:#0838f8;color:#fff;font-size:14px;font-weight:950;padding:13px;cursor:pointer}';
+    st.textContent +=
+      'body.bj-quote-cart-page .cart-list,body.bj-quote-cart-page table.order-field.cart-list,body.bj-quote-cart-page .shop_cart table,body.bj-quote-cart-page .cart_list{border-top-color:#0838f8!important}' +
+      'body.bj-quote-cart-page .cart-list thead th,body.bj-quote-cart-page table.order-field.cart-list thead th{border-top-color:#0838f8!important}' +
+      'body.bj-quote-cart-page [style*="#ff1818"],body.bj-quote-cart-page [style*="#FF1818"],body.bj-quote-cart-page [style*="dd5119"],body.bj-quote-cart-page [style*="DD5119"]{color:#0838f8!important;border-color:#0838f8!important}' +
+      'body.bj-quote-cart-page .new-cs{display:block!important;padding:26px 0!important;background:#f7f9ff!important}' +
+      'body.bj-quote-cart-page .new-cs .inner{max-width:960px!important}' +
+      'body.bj-quote-cart-page .new-cs .cs__top{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important;margin:0!important}' +
+      'body.bj-quote-cart-page .new-cs .cs__top>li{min-height:88px!important;padding:16px 18px!important;border-radius:12px!important;background:#fff!important;border:1px solid #dfe7f5!important;box-shadow:0 8px 20px rgba(8,56,248,.07)!important}' +
+      'body.bj-quote-cart-page .new-cs .cs__top .top__param01{font-size:12px!important;color:#647084!important}' +
+      'body.bj-quote-cart-page .new-cs .cs__top .top__param02,body.bj-quote-cart-page .new-cs .cs__top .top__param03{font-size:19px!important;color:#0838f8!important;line-height:1.2!important}' +
+      'body.bj-quote-cart-page .new-cs .cs__benefit{display:none!important}' +
+      'body.bj-quote-cart-page .bj-fsupport{padding:22px 20px 18px!important}' +
+      'body.bj-quote-cart-page .bj-fs-ic{width:42px!important;height:42px!important;margin:0 auto 8px!important;background:#0838f8!important;border-radius:12px!important;display:flex!important;align-items:center!important;justify-content:center!important}' +
+      'body.bj-quote-cart-page .bj-fs-ic .ico{width:21px!important;height:21px!important;color:#fff!important;stroke:#fff!important}' +
+      'body.bj-quote-cart-page .bj-fs-tel{font-size:22px!important;margin:6px 0 4px!important;color:#fff!important}' +
+      'body.bj-quote-cart-page .bj-fs-sub{font-size:12px!important;line-height:1.45!important;margin:0 auto!important;max-width:420px!important;color:#c8d0e4!important}' +
+      '@media(max-width:768px){body.bj-quote-cart-page .new-cs{padding:18px 12px!important}body.bj-quote-cart-page .new-cs .cs__top{grid-template-columns:1fr!important}body.bj-quote-cart-page .new-cs .cs__top>li{min-height:72px!important;padding:13px 15px!important}body.bj-quote-cart-page .bj-fsupport{padding:18px 14px 15px!important}body.bj-quote-cart-page .bj-fs-tel{font-size:20px!important}}';
     document.head.appendChild(st);
   }
   function calculateQuote(items, source){
@@ -265,6 +282,7 @@
   }
   function wireRentalButtons(){
     if (!isCartPage()) return;
+    document.body.classList.add('bj-quote-cart-page');
     injectQuoteStyle();
     relabelCartLanguage();
     document.addEventListener('click', function(e){
@@ -800,7 +818,7 @@
       '#bj-do-head{padding:20px 22px 16px;background:linear-gradient(135deg,#0838f8 0%,#1b55ff 100%);position:relative;color:#fff}.bj-do-badge{font-size:11px;font-weight:900;color:'+BLUE+';background:#fff;border-radius:999px;padding:5px 10px;display:inline-block;box-shadow:0 6px 16px rgba(0,0,0,.12)}.bj-do-h{font-size:24px;font-weight:950;line-height:1.14;margin:12px 42px 7px 0;white-space:pre-line;letter-spacing:0}.bj-do-sub{max-width:560px;font-size:13px;color:rgba(255,255,255,.9);line-height:1.45}.bj-do-x{position:absolute;right:14px;top:14px;width:34px;height:34px;border:0;background:rgba(255,255,255,.92);color:'+BLUE+';font-size:22px;line-height:30px;border-radius:50%;cursor:pointer}' +
       '#bj-do-body{padding:0;overflow:auto}.bj-do-layout{display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:0;min-height:0}.bj-do-main{padding:16px 16px 18px}.bj-do-side{padding:16px;background:#f7f9ff;border-left:1px solid #e2e8f7}.bj-do-sec{margin-top:16px}.bj-do-sec:first-child{margin-top:0}.bj-do-sec h3{font-size:13px;margin:0 0 9px;font-weight:950;color:#263248}.bj-do-cats{display:flex;gap:7px;overflow:auto;padding-bottom:2px}.bj-do-chip{border:1px solid #d8e1f2;background:#fff;color:#445065;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:900;white-space:nowrap}.bj-do-chip.on{border-color:'+BLUE+';background:#eef3ff;color:'+BLUE+'}.bj-do-group{display:flex;align-items:center;gap:8px;margin:12px 0 8px;font-size:12px;font-weight:950;color:#263248}.bj-do-group:after{content:"";height:1px;background:#e8edf7;flex:1}' +
       '.bj-do-card{border:1px solid #e1e7f2;border-radius:12px;padding:10px;margin-bottom:9px;display:grid;grid-template-columns:68px minmax(0,1fr) 58px;gap:11px;align-items:center;background:#fff;box-shadow:0 6px 18px rgba(19,32,58,.05);transition:border-color .14s,box-shadow .14s,transform .14s}.bj-do-card.on{border-color:'+BLUE+';box-shadow:0 0 0 2px rgba(8,56,248,.08),0 8px 22px rgba(8,56,248,.11)}.bj-do-card img{width:68px;height:68px;object-fit:contain;border-radius:10px;background:#f4f7fc}.bj-do-info{min-width:0}.bj-do-pname{font-size:13px;font-weight:950;line-height:1.28;color:#182236;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.bj-do-meta{font-size:11px;color:#7b8596;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-do-gift{font-size:12.5px;font-weight:950;color:'+BLUE+';margin-top:5px}.bj-do-review{font-size:11.5px;color:#606b7c;line-height:1.35;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.bj-do-add{border:0;border-radius:999px;padding:8px 0;background:#eef3ff;color:'+BLUE+';font-size:11px;font-weight:950;cursor:pointer;min-width:54px}.bj-do-card.on .bj-do-add{background:'+BLUE+';color:#fff}' +
-      '#bj-do-total{background:#fff;border:1px solid #dbe5ff;border-radius:14px;padding:14px;box-shadow:0 8px 24px rgba(8,56,248,.08)}.bj-do-total-k{font-size:11px;color:#647084;font-weight:800}.bj-do-total-v{font-size:26px;font-weight:950;color:'+BLUE+';line-height:1.1;margin-top:5px}.bj-do-total-sub{font-size:11px;color:#7b8596;line-height:1.4;margin-top:6px}.bj-do-memo{display:none}.bj-do-copy{width:100%;border:0;border-radius:12px;background:'+BLUE+';color:#fff;font-size:14px;font-weight:950;padding:13px;margin-top:10px;cursor:pointer;box-shadow:0 10px 24px rgba(8,56,248,.23)}.bj-do-note{font-size:10.5px;color:#8b95a7;line-height:1.45;margin-top:9px}.bj-do-loading{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(255,255,255,.96);text-align:center;padding:22px}.bj-do-loading img{width:150px;height:150px;object-fit:contain}.bj-do-loading-title{font-size:18px;font-weight:950;color:#172033}.bj-do-loading-sub{font-size:12.5px;color:#647084;line-height:1.45}' +
+      '#bj-do-total{background:#fff;border:1px solid #dbe5ff;border-radius:14px;padding:14px;box-shadow:0 8px 24px rgba(8,56,248,.08)}.bj-do-total-k{font-size:11px;color:#647084;font-weight:800}.bj-do-total-v{font-size:26px;font-weight:950;color:'+BLUE+';line-height:1.1;margin-top:5px}.bj-do-total-sub{font-size:11px;color:#7b8596;line-height:1.4;margin-top:6px}.bj-do-memo{display:none}.bj-do-copy{width:100%;border:0;border-radius:12px;background:'+BLUE+';color:#fff;font-size:14px;font-weight:950;padding:13px;margin-top:10px;cursor:pointer;box-shadow:0 10px 24px rgba(8,56,248,.23)}.bj-do-note{font-size:10.5px;color:#8b95a7;line-height:1.45;margin-top:9px}.bj-do-loading{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(255,255,255,.96);text-align:center;padding:22px}.bj-do-loading img{width:75px;height:75px;object-fit:contain}.bj-do-loading-title{font-size:18px;font-weight:950;color:#172033}.bj-do-loading-sub{font-size:12.5px;color:#647084;line-height:1.45}' +
       '#bj-do-toast{position:fixed;left:50%;top:42px;transform:translateX(-50%);z-index:100000;background:#fff;border:1px solid #dfe6f4;border-radius:999px;padding:9px 13px;box-shadow:0 12px 34px rgba(0,0,0,.18);font:800 12px Pretendard,Arial,sans-serif;color:#263248;opacity:0;pointer-events:none;transition:opacity .22s, transform .22s;white-space:nowrap}#bj-do-toast.show{opacity:1;transform:translateX(-50%) translateY(8px)}' +
       '@media(max-width:720px){#bj-do-back{align-items:flex-end;padding:0;background:rgba(10,16,30,.55)}#bj-do-box{max-width:none;max-height:92vh;border-radius:18px 18px 0 0}.bj-do-layout{display:block}.bj-do-main{padding:14px}.bj-do-side{padding:12px 14px 16px;border-left:0;border-top:1px solid #e2e8f7}.bj-do-h{font-size:21px;margin-right:36px}.bj-do-head{padding:18px 18px 14px;background:linear-gradient(135deg,#0838f8,#1b55ff)}.bj-do-card{grid-template-columns:58px minmax(0,1fr) 52px;gap:9px}.bj-do-card img{width:58px;height:58px}.bj-do-review{display:none}.bj-do-memo{min-height:96px}.bj-do-total-v{font-size:24px}}' +
       '@media(max-width:560px){#bj-do-topbar .bj-do-topin{justify-content:flex-start;overflow-x:auto}.bj-do-fab{right:12px;bottom:82px;padding:12px 15px}.bj-do-card{grid-template-columns:54px minmax(0,1fr) 48px}.bj-do-card img{width:54px;height:54px}.bj-do-add{font-size:10.5px;min-width:46px}.bj-do-pname{font-size:12.5px}.bj-do-meta{font-size:10.5px}.bj-do-gift{font-size:12px}}';
@@ -809,7 +827,7 @@
   function mountTopBar(){
     if (!state.cfg.directOffer.showTopBar || document.getElementById('bj-do-topbar')) return;
     var bar = document.createElement('div'); bar.id = 'bj-do-topbar';
-    bar.innerHTML = '<div class="bj-do-topin"><span><b id="bj-do-clock">15:00</b> 동안 이 화면 조건 유지</span><span><span class="bj-do-dot"></span>지금 이 조건 확인 중 <b id="bj-do-viewers">14</b>명</span><span>오늘 복수제품 설계 <b id="bj-do-count">37</b>건</span><span id="bj-do-recent">최근 정수기 + 제습기 신청</span></div>';
+    bar.innerHTML = '<div class="bj-do-topin"><span><b id="bj-do-clock">15:00</b> 동안 이 화면 조건 유지</span><span><span class="bj-do-dot"></span>지금 이 조건 확인 중 <b id="bj-do-viewers">14</b>명</span><span>오늘 결합 상품 추가 <b id="bj-do-count">37</b>건</span><span id="bj-do-recent">최근 정수기 + 제습기 신청</span></div>';
     document.body.insertBefore(bar, document.body.firstChild);
     state.countdownUntil = Date.now() + ((state.cfg.directOffer.countdownMinutes || 15) * 60000);
     setInterval(function(){
@@ -821,7 +839,7 @@
   }
   function mountFab(){
     if (document.getElementById('bj-do-fab')) return;
-    var b = document.createElement('button'); b.id = 'bj-do-fab'; b.type = 'button'; b.textContent = '복수제품 혜택 설계';
+    var b = document.createElement('button'); b.id = 'bj-do-fab'; b.type = 'button'; b.textContent = '결합 상품 추가';
     b.onclick = openModal;
     document.body.appendChild(b);
   }
@@ -850,7 +868,7 @@
     if (!state.offerId) state.offerId = createOfferId();
     var list = selectedList();
     var lines = [
-      '[빌리조 복수제품 혜택 설계]',
+      '[빌리조 결합 상품 추가]',
       '확인번호: ' + state.offerId,
       '생성시각: ' + fmtDate(new Date()),
       '혜택구간: 견적 생성 후 24시간 내 신청 기준',
@@ -953,7 +971,7 @@
     var div = document.createElement('div');
     div.className = 'bj-do-loading';
     div.innerHTML =
-      '<img class="bjpw-search-gif" src="https://admin2.billyjo.co.kr/billymag-down.gif" alt="" width="150" height="150" decoding="async">' +
+      '<img class="bjpw-search-gif" src="https://admin2.billyjo.co.kr/billymag-down.gif" alt="" width="75" height="75" decoding="async">' +
       '<div class="bj-do-loading-title">Billy가 찾는 중입니다...</div>' +
       '<div class="bj-do-loading-sub">선택한 제품 구성에 맞춰 AI 예상 견적을 준비하고 있습니다.</div>';
     box.appendChild(div);
@@ -1001,7 +1019,7 @@
     var hero = state.cfg.hero || {};
     box.innerHTML =
       '<div id="bj-do-head"><button type="button" class="bj-do-x" aria-label="닫기">×</button>' +
-        '<span class="bj-do-badge">' + esc(hero.badge || '복수제품 설계') + '</span>' +
+        '<span class="bj-do-badge">' + esc(String(hero.badge || '결합 상품 추가').replace(/복수제품 설계/g, '결합 상품 추가')) + '</span>' +
         '<div class="bj-do-h">' + esc(hero.headline || '지금 고른 상품 기준\\n추가 혜택까지 한 번에') + '</div>' +
         '<div class="bj-do-sub">' + esc(hero.subcopy || '현재 보고 있는 제품은 자동 포함하고, 함께 많이 신청한 제품을 더해 예상 지원금을 계산합니다.') + '</div>' +
       '</div>' +
@@ -1410,7 +1428,7 @@
       { name: '세탁건조기', reviews: '후기 1,189개', href: '/html/dh_prod/prod_list/3-25', img: 'images/category-icons/washer-dryer.png' },
       { name: '비데', reviews: '후기 982개', href: '/html/dh_prod/prod_list/1-9', img: 'images/category-icons/bidet.png' },
       { name: '인터넷+TV', reviews: '후기 231개', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/internet-tv.png' },
-      { name: '휴대폰', reviews: '결합 혜택 상담', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/mobile-phone.svg' }
+      { name: '휴대폰', reviews: '결합 혜택 상담', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/mobile-phone.png' }
     ];
     var MORE_ITEMS = [
       { name: '제습기', meta: '후기 2,719개', href: '/html/dh_prod/prod_list/1-203' },
