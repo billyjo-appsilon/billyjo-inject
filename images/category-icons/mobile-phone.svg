@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 140" role="img" aria-label="휴대폰">
+  <defs>
+    <linearGradient id="phoneBody" x1="44" y1="16" x2="126" y2="124" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#eff5ff"/>
+      <stop offset="1" stop-color="#cbdcff"/>
+    </linearGradient>
+    <linearGradient id="phoneScreen" x1="56" y1="30" x2="120" y2="112" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#eaf1ff"/>
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="12" stdDeviation="10" flood-color="#7f9fd2" flood-opacity=".22"/>
+    </filter>
+  </defs>
+  <ellipse cx="90" cy="124" rx="54" ry="9" fill="#dbe7fb" opacity=".72"/>
+  <g filter="url(#softShadow)">
+    <rect x="53" y="16" width="74" height="108" rx="17" fill="url(#phoneBody)" stroke="#d8e7ff" stroke-width="3"/>
+    <rect x="61" y="30" width="58" height="80" rx="10" fill="url(#phoneScreen)"/>
+    <rect x="78" y="23" width="24" height="4" rx="2" fill="#9ab4e8"/>
+    <circle cx="90" cy="117" r="4" fill="#9ab4e8"/>
+  </g>
+  <path d="M72 58h36M72 72h28M72 86h36" fill="none" stroke="#9ab4e8" stroke-width="5" stroke-linecap="round"/>
+  <path d="M121 40c9 4 15 12 17 22M133 28c15 8 26 22 29 39" fill="none" stroke="#b9ccf3" stroke-width="6" stroke-linecap="round"/>
+  <path d="M46 44c-7 5-12 13-13 22M34 32C21 42 13 57 12 73" fill="none" stroke="#d1def7" stroke-width="6" stroke-linecap="round"/>
+</svg>
