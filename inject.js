@@ -579,12 +579,15 @@
 
   function init(){
     if (!shouldOpenSecretPackage()) return;
-    var key = 'bj_secret_persona_auto_open:' + location.pathname + location.search;
-    try {
-      if (sessionStorage.getItem(key)) return;
-      sessionStorage.setItem(key, '1');
-    } catch (_) {}
-    setTimeout(shouldOpenDirectApplyOffer() ? openDirectApplyOffer : openSecretPackage, 500);
+    var direct = shouldOpenDirectApplyOffer();
+    if (!direct) {
+      var key = 'bj_secret_persona_auto_open:' + location.pathname + location.search;
+      try {
+        if (sessionStorage.getItem(key)) return;
+        sessionStorage.setItem(key, '1');
+      } catch (_) {}
+    }
+    setTimeout(direct ? openDirectApplyOffer : openSecretPackage, 500);
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
@@ -853,10 +856,8 @@
       }
       if (found && found.model) state.selected[found.model] = found;
     });
-    if (!state.current) {
-      var list = selectedList();
-      if (list[0]) state.current = list[0];
-    }
+    var list = selectedList();
+    if (list[0]) state.current = list[0];
   }
   function selectedList(){
     return Object.keys(state.selected).map(function(k){ return state.selected[k]; }).filter(Boolean);
