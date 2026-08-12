@@ -1473,11 +1473,10 @@
         '#bj-home-cat-links .bj-hcat-extra-name{display:block;margin:0 0 5px;font-size:16px;font-weight:800;line-height:1.15;color:#17253a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
         '#bj-home-cat-links .bj-hcat-extra-meta{display:block;font-size:12px;font-weight:700;line-height:1.2;color:#6b7c90;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
         '#bj-home-cat-links .bj-hcat-extra-arrow{position:absolute;right:18px;top:50%;transform:translateY(-50%);color:#0838f8;font-size:20px;font-weight:900;line-height:1}',
-        'body:has(#bj-home-cat-links.bj-hcat-open) .new-qb{display:none!important}',
         'body.bj-home-cats-ready .new-mc:not(.show-767){display:none!important}',
         '@media(min-width:1280px){#bj-home-cat-links .bj-hcat-inner{padding-left:0;padding-right:0}}',
         '@media(max-width:1024px){#bj-home-cat-links .bj-hcat-inner{padding-left:18px;padding-right:18px}#bj-home-cat-links .bj-hcat-grid{gap:9px}#bj-home-cat-links .bj-hcat-card{min-height:172px;padding:10px 7px 12px}#bj-home-cat-links .bj-hcat-media{height:108px}#bj-home-cat-links .bj-hcat-img{width:132px;height:108px}#bj-home-cat-links .bj-hcat-name{font-size:16px}#bj-home-cat-links .bj-hcat-action{font-size:11px;padding-left:7px;padding-right:7px}}',
-        '@media(max-width:767px){#bj-home-cat-links{padding-bottom:14px}#bj-home-cat-links .bj-hcat-inner{padding:12px 12px 0}#bj-home-cat-links .bj-hcat-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}#bj-home-cat-links .bj-hcat-card{min-height:132px;padding:8px 5px 9px;border-radius:8px;box-shadow:0 7px 16px rgba(35,80,130,.10)}#bj-home-cat-links .bj-hcat-card:nth-child(1),#bj-home-cat-links .bj-hcat-card:nth-child(2){grid-column:span 3}#bj-home-cat-links .bj-hcat-card:nth-child(3),#bj-home-cat-links .bj-hcat-card:nth-child(4),#bj-home-cat-links .bj-hcat-card:nth-child(5){grid-column:span 2;min-height:126px}#bj-home-cat-links .bj-hcat-card:nth-child(6),#bj-home-cat-links .bj-hcat-card:nth-child(7){grid-column:span 3}#bj-home-cat-links .bj-hcat-card:hover{transform:none}#bj-home-cat-links .bj-hcat-media{height:74px;margin-bottom:5px;border-radius:8px}#bj-home-cat-links .bj-hcat-img{width:96px;height:74px;border-radius:8px}#bj-home-cat-links .bj-hcat-name{font-size:13px;margin-bottom:3px}#bj-home-cat-links .bj-hcat-reviews{font-size:10.5px;margin-bottom:4px}#bj-home-cat-links .bj-hcat-action{font-size:10px;padding:3px 5px;letter-spacing:0}#bj-home-cat-links .bj-hcat-more-wrap{margin-top:8px}#bj-home-cat-links .bj-hcat-more-btn{width:100%;height:34px;font-size:12.5px;border-radius:8px;box-shadow:none}#bj-home-cat-links .bj-hcat-extra{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;max-width:none}#bj-home-cat-links .bj-hcat-extra-chip{min-height:54px;padding:10px 30px 10px 12px;border-radius:8px;box-shadow:none}#bj-home-cat-links .bj-hcat-extra-name{font-size:13px;margin-bottom:4px}#bj-home-cat-links .bj-hcat-extra-meta{font-size:10.5px}#bj-home-cat-links .bj-hcat-extra-arrow{right:12px;font-size:16px}body.bj-home-cats-ready .new-mc:not(.show-767),body.bj-home-cats-ready .new-qb{display:none!important}}',
+        '@media(max-width:767px){#bj-home-cat-links{padding-bottom:14px}#bj-home-cat-links .bj-hcat-inner{padding:12px 12px 0}#bj-home-cat-links .bj-hcat-grid{grid-template-columns:repeat(6,minmax(0,1fr));gap:8px}#bj-home-cat-links .bj-hcat-card{min-height:132px;padding:8px 5px 9px;border-radius:8px;box-shadow:0 7px 16px rgba(35,80,130,.10)}#bj-home-cat-links .bj-hcat-card:nth-child(1),#bj-home-cat-links .bj-hcat-card:nth-child(2){grid-column:span 3}#bj-home-cat-links .bj-hcat-card:nth-child(3),#bj-home-cat-links .bj-hcat-card:nth-child(4),#bj-home-cat-links .bj-hcat-card:nth-child(5){grid-column:span 2;min-height:126px}#bj-home-cat-links .bj-hcat-card:nth-child(6),#bj-home-cat-links .bj-hcat-card:nth-child(7){grid-column:span 3}#bj-home-cat-links .bj-hcat-card:hover{transform:none}#bj-home-cat-links .bj-hcat-media{height:74px;margin-bottom:5px;border-radius:8px}#bj-home-cat-links .bj-hcat-img{width:96px;height:74px;border-radius:8px}#bj-home-cat-links .bj-hcat-name{font-size:13px;margin-bottom:3px}#bj-home-cat-links .bj-hcat-reviews{font-size:10.5px;margin-bottom:4px}#bj-home-cat-links .bj-hcat-action{font-size:10px;padding:3px 5px;letter-spacing:0}#bj-home-cat-links .bj-hcat-more-wrap{margin-top:8px}#bj-home-cat-links .bj-hcat-more-btn{width:100%;height:34px;font-size:12.5px;border-radius:8px;box-shadow:none}#bj-home-cat-links .bj-hcat-extra{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:12px;max-width:none}#bj-home-cat-links .bj-hcat-extra-chip{min-height:54px;padding:10px 30px 10px 12px;border-radius:8px;box-shadow:none}#bj-home-cat-links .bj-hcat-extra-name{font-size:13px;margin-bottom:4px}#bj-home-cat-links .bj-hcat-extra-meta{font-size:10.5px}#bj-home-cat-links .bj-hcat-extra-arrow{right:12px;font-size:16px}body.bj-home-cats-ready .new-mc:not(.show-767){display:none!important}}',
         '@media(max-width:359px){#bj-home-cat-links .bj-hcat-inner{padding-left:8px;padding-right:8px}#bj-home-cat-links .bj-hcat-grid{gap:6px}#bj-home-cat-links .bj-hcat-card{min-height:128px;padding-left:3px;padding-right:3px}#bj-home-cat-links .bj-hcat-name{font-size:12px}#bj-home-cat-links .bj-hcat-reviews{font-size:10px}#bj-home-cat-links .bj-hcat-action{font-size:9.5px;padding-left:4px;padding-right:4px}}'
       ].join('\n');
       (document.head || document.documentElement).appendChild(style);
@@ -8995,7 +8994,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var price = Number(product.price || 0) || 0;
     var payload = {
       event: eventName,
-      meta_event_name: eventName === 'view_item' ? 'ViewContent' : 'Lead',
       content_ids: [product.id],
       content_type: 'product',
       contents: [{ id: product.id, quantity: 1 }],
@@ -9007,6 +9005,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       payload.value = price;
       payload.contents[0].item_price = price;
     }
+    if (eventName === 'view_item') payload.meta_event_name = 'ViewContent';
     if (extra) Object.keys(extra).forEach(function(k){ payload[k] = extra[k]; });
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push(payload);
@@ -9017,7 +9016,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     Object.keys(extra).forEach(function(k){ base[k] = extra[k]; });
     base.canonical_event = 'admin2_lead_created';
     base.ga_event_name = 'admin2_lead_created';
-    base.server_conversion_event = 'Lead';
+    base.conversion_audit_event = 'admin2_lead_created';
     base.lead_attribution_model = 'last_click_only';
     // Meta/매체 전환은 Admin2 서버 CAPI가 상담카드 생성 후 1회만 보낸다.
     // 브라우저 GTM은 감사/GA용 이벤트만 받게 해 픽셀 전환 수가 상담카드 수보다 커지는
