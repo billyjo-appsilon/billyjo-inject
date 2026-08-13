@@ -9229,7 +9229,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '<button type="button" class="bjpw-go">상담 연결</button></div>';
     box.innerHTML = html; back.appendChild(box); document.body.appendChild(back);
 
-    function finish(answers){ try { back.remove(); } catch(_){} done(answers); }
+    var allowClose = false;
+    function finish(answers){ allowClose = true; try { back.remove(); } catch(_){} done(answers); }
     box.querySelector('.bjpw-x').addEventListener('click', function(){ finish(null); });
     box.querySelector('.bjpw-skip').addEventListener('click', function(){ finish(null); });
     /* 시크릿 1:1 패키지는 실수로 바깥을 눌러도 닫히지 않게 한다.
@@ -9244,6 +9245,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       back.addEventListener(type, keepOutsideClick, true);
       box.addEventListener(type, function(e){ e.stopPropagation(); }, true);
     });
+    var keepOpenObserver = new MutationObserver(function(){
+      if (!allowClose && !back.isConnected) document.body.appendChild(back);
+      if (allowClose) {
+        try { keepOpenObserver.disconnect(); } catch(_) {}
+      }
+    });
+    try { keepOpenObserver.observe(document.body, { childList: true }); } catch(_) {}
 
     // 칩 선택 (single=단일, multi=복수)
     Array.prototype.forEach.call(box.querySelectorAll('.bjpw-f'), function(fEl){
