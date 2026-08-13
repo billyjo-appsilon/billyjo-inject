@@ -719,6 +719,7 @@
   function getProdNo(){
     var m = location.pathname.match(/(?:prod_view|rental\/d)\/(\d+)/);
     if (m) return m[1];
+    if (isDirectApplyQuery()) return null;
     var link = document.querySelector('a[href*="prod_view/"]');
     var lm = link && link.href && link.href.match(/prod_view\/(\d+)/);
     return lm ? lm[1] : null;
@@ -769,6 +770,47 @@
     x9: 'LG 휘센 오브제컬렉션 제습기 20L DQ205PEGA',
     x10: '코웨이 인버터 제습기 23L AD-2325C'
   };
+  var LP_MODEL_PRODUCTS = {
+    'CP-AQS100EWH': '32918',
+    'WPUIAC606': '33728',
+    'CHPI-7400N': '24578',
+    'CHPI-620L': '1792',
+    'WI-36C90620N': '15644',
+    'CHPI-5801L': '3209',
+    'CHP-6340L': '16116',
+    'CHP-7212N': '27062',
+    'WU923A': '18055',
+    'WP-30S50010N': '11303',
+    'WPU-B610F': '3061',
+    'WD724R': '35200',
+    'RWP54220BF': '14413',
+    'WPU-IC110F': '33070',
+    'P-6320L': '4358',
+    'CP-W602HW': '10042',
+    'AS480BWFA': '5685',
+    'AP-3021D': '7606',
+    'AP-40H8220': '26871',
+    'AP90H10163EDD': '32272',
+    'BAS51-A': '32985',
+    'BM750': '24063',
+    'BID096': '1400',
+    'CBT-QSB1041W': '20404',
+    'DQ205PEGA': '32923',
+    'AD-2325C': '27792'
+  };
+  function lpModelCode(text){
+    var m = String(text || '').match(/[A-Z0-9][A-Z0-9()\/-]{3,}$/);
+    return m ? m[0] : '';
+  }
+  function hydrateLpProduct(product, token){
+    if (!product) return product;
+    var model = lpModelCode(product.model) || lpModelCode(product.name) || lpModelCode(token);
+    var prodNo = model && LP_MODEL_PRODUCTS[model];
+    if (prodNo && !product.prodNo) product.prodNo = prodNo;
+    if (prodNo && !product.detailUrl) product.detailUrl = STORE_DETAIL.replace('{pid}', prodNo);
+    if (model && (!product.model || /^lp-direct-/.test(String(product.model)))) product.model = model;
+    return product;
+  }
   function lpTokens(){
     try {
       var raw = new URLSearchParams(location.search || '').get('bj_lp_products') || '';
@@ -907,6 +949,7 @@
           detailUrl: ''
         };
       }
+      found = hydrateLpProduct(found, token);
       if (found && found.model) state.selected[found.model] = found;
       if (!firstLp && found) firstLp = found;
     });
@@ -1094,10 +1137,12 @@
   function addSelectedToCart(){
     var seen = {};
     var list = selectedList().filter(function(p){
+      p = hydrateLpProduct(p, p && (p.name || p.model));
       if (!p || !p.prodNo || seen[p.prodNo]) return false;
       seen[p.prodNo] = true;
       return true;
     });
+    if (!list.length && selectedList().length) return Promise.reject(new Error('no cartable selected products'));
     return list.reduce(function(chain, p){
       return chain.then(function(){ return addProductToCart(p); });
     }, Promise.resolve(true));

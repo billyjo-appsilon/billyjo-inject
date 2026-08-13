@@ -117,6 +117,12 @@ async function newMockedPage(browser, { enabled }) {
   await page.route('https://billyjo.co.kr/html/dh_prod/prod_view/123', async (route) => {
     await route.fulfill({ contentType: 'text/html', body: productHtml('123', '코웨이 정수기', 'WP-123') });
   });
+  await page.route('https://billyjo.co.kr/?**', async (route) => {
+    await route.fulfill({ contentType: 'text/html', body: '<!doctype html><html><body><main>home</main></body></html>' });
+  });
+  await page.route('https://billyjo.co.kr/html/dh_prod/prod_view/1792', async (route) => {
+    await route.fulfill({ contentType: 'text/html', body: productHtml('1792', '코웨이 얼음냉온정수기 CHPI-620L', 'CHPI-620L') });
+  });
 
   return { context, page, cartPosts };
 }
@@ -156,11 +162,28 @@ async function testOnQuoteCartFlow(browser) {
   await context.close();
 }
 
+async function testLpDirectOnlySelectedProduct(browser) {
+  const { context, page, cartPosts } = await newMockedPage(browser, { enabled: true });
+  await page.goto('https://billyjo.co.kr/?bj_direct_apply=1&bj_lp_products=CHPI-620L', { waitUntil: 'domcontentloaded' });
+  await page.addScriptTag({ path: injectPath });
+  await page.waitForSelector('#bj-do-back', { timeout: 5000 });
+  await page.waitForFunction(() => !document.querySelector('.bj-do-intro'), null, { timeout: 8000 });
+  assert.ok(await page.locator('.bj-do-card', { hasText: 'CHPI-620L' }).count(), 'LP selected product should be visible');
+
+  await page.click('.bj-do-copy');
+  await page.waitForURL('**/html/dh_order/shop_cart', { timeout: 8000 });
+
+  assert.strictEqual(cartPosts.length, 1, 'LP selected product without addons should be posted to cart');
+  assert.ok(cartPosts[0].includes('public_model_no=1792'), 'LP selected product should resolve to a cartable prodNo');
+  await context.close();
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     await testOffIsInert(browser);
     await testOnQuoteCartFlow(browser);
+    await testLpDirectOnlySelectedProduct(browser);
   } finally {
     await browser.close();
   }
