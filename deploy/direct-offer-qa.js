@@ -216,6 +216,8 @@ async function testLpSelectedProductsUseProductThumbs(browser) {
     .evaluateAll((cards) => cards.slice(0, 2).map((card) => card.querySelector('img')?.src || ''));
 
   assert.strictEqual(srcs.length, 2, 'LP selected products should render two current product cards');
+  assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 노블 공기청정기 AP-3021D' }).count(), 'LP model token should hydrate to the full product name');
+  assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 더 매너 비데 플러스 BAS51-A' }).count(), 'LP model token should hydrate to the full bidet product name');
   assert.ok(srcs[0].includes('/images/'), 'First LP selected card should use the LP product thumbnail');
   assert.ok(srcs[0].includes('AP-3021D'), 'First LP selected card should use AP-3021D thumbnail');
   assert.ok(srcs[1].includes('/images/'), 'Second LP selected card should use the LP product thumbnail');

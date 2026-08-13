@@ -838,6 +838,34 @@
     'DQ205PEGA': 'images/제습기/DQ205PEGA/1.png',
     'AD-2325C': 'images/제습기/AD-2325C/1.jpg'
   };
+  var LP_MODEL_NAMES = {
+    'CP-AQS100EWH': '쿠쿠 얼음냉온정수기 CP-AQS100EWH',
+    'WPUIAC606': 'SK MEGA ICE 얼음정수기 WPUIAC606',
+    'CHPI-7400N': '코웨이 얼음냉온정수기 CHPI-7400N',
+    'CHPI-620L': '코웨이 얼음냉온정수기 CHPI-620L',
+    'WI-36C90620N': '청호나이스 얼음냉온정수기 WI-36C90620N',
+    'CHPI-5801L': '코웨이 얼음냉온정수기 CHPI-5801L',
+    'CHP-6340L': '코웨이 냉온정수기 CHP-6340L',
+    'CHP-7212N': '코웨이 냉온정수기 CHP-7212N',
+    'WU923A': 'LG 냉온정수기 WU923A',
+    'WP-30S50010N': '청호나이스 냉온정수기 WP-30S50010N',
+    'WPU-B610F': 'SK매직 냉온정수기 WPU-B610F',
+    'WD724R': 'LG 퓨리케어 AI 오브제컬렉션 냉동얼음정수기 WD724R',
+    'RWP54220BF': '삼성 냉정수기 RWP54220BF',
+    'WPU-IC110F': 'SK매직 얼음냉온정수기 WPU-IC110F',
+    'P-6320L': '코웨이 정수전용 P-6320L',
+    'CP-W602HW': '쿠쿠 냉온정수기 CP-W602HW',
+    'AS480BWFA': 'LG 공기청정기 48평형 AS480BWFA',
+    'AP-3021D': '코웨이 노블 공기청정기 AP-3021D',
+    'AP-40H8220': '청호나이스 하이마운틴 공기청정기 AP-40H8220',
+    'AP90H10163EDD': '삼성 공기청정기 30평형 AP90H10163EDD',
+    'BAS51-A': '코웨이 더 매너 비데 플러스 BAS51-A',
+    'BM750': '웰스 자동살균 비데 BM750',
+    'BID096': 'SK매직 항균 비데 BID096',
+    'CBT-QSB1041W': '쿠쿠 트리플케어8 비데 CBT-QSB1041W',
+    'DQ205PEGA': 'LG 휘센 오브제컬렉션 제습기 20L DQ205PEGA',
+    'AD-2325C': '코웨이 인버터 제습기 23L AD-2325C'
+  };
   function lpImageUrl(model){
     var path = model && LP_MODEL_IMAGES[model];
     return path ? encodeURI(LP_IMAGE_BASE + path) : '';
@@ -852,6 +880,8 @@
     var prodNo = model && LP_MODEL_PRODUCTS[model];
     if (prodNo && !product.prodNo) product.prodNo = prodNo;
     if (prodNo && !product.detailUrl) product.detailUrl = STORE_DETAIL.replace('{pid}', prodNo);
+    if (model && LP_MODEL_NAMES[model] && (!product.name || product.name === token || product.name === model)) product.name = LP_MODEL_NAMES[model];
+    if (model && LP_MODEL_NAMES[model] && (!product.category || product.category === '현재 상품')) product.category = inferCategory(LP_MODEL_NAMES[model]);
     if (model && LP_MODEL_IMAGES[model]) product.image = lpImageUrl(model);
     if (model && (!product.model || /^lp-direct-/.test(String(product.model)))) product.model = model;
     return product;
