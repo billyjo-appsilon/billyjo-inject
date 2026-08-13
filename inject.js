@@ -910,9 +910,9 @@
   function fallbackCfg(){
     return {
       hero: {
-        badge: '결합 상품 추가',
-        headline: '선택 상품 기준\\n추가 혜택을 준비 중입니다',
-        subcopy: '선택한 제품은 자동 포함하고, 함께 신청할 상품을 불러오는 중입니다.'
+        badge: '다이렉트 쿠폰',
+        headline: '다이렉트 10,000쿠폰 발급 중',
+        subcopy: '같이 결합하면 추가 혜택! 추천제품도 확인하세요'
       },
       personaSection: { title: '1. 필요한 제품을 고르세요' },
       productsSection: { title: '2. 함께 많이 신청한 BEST' },
@@ -936,7 +936,7 @@
   function mountTopBar(){
     if (!state.cfg.directOffer.showTopBar || document.getElementById('bj-do-topbar')) return;
     var bar = document.createElement('div'); bar.id = 'bj-do-topbar';
-    bar.innerHTML = '<div class="bj-do-topin"><span><b id="bj-do-clock">15:00</b> 동안 이 화면 조건 유지</span><span><span class="bj-do-dot"></span>지금 이 조건 확인 중 <b id="bj-do-viewers">14</b>명</span><span>오늘 결합 상품 추가 <b id="bj-do-count">37</b>건</span><span id="bj-do-recent">최근 정수기 + 제습기 신청</span></div>';
+    bar.innerHTML = '<div class="bj-do-topin"><span><b id="bj-do-clock">15:00</b> 동안 이 화면 조건 유지</span><span><span class="bj-do-dot"></span>지금 이 조건 확인 중 <b id="bj-do-viewers">14</b>명</span><span>오늘 다이렉트 쿠폰 <b id="bj-do-count">37</b>건</span><span id="bj-do-recent">최근 정수기 + 제습기 신청</span></div>';
     document.body.insertBefore(bar, document.body.firstChild);
     state.countdownUntil = Date.now() + ((state.cfg.directOffer.countdownMinutes || 15) * 60000);
     setInterval(function(){
@@ -948,7 +948,7 @@
   }
   function mountFab(){
     if (document.getElementById('bj-do-fab')) return;
-    var b = document.createElement('button'); b.id = 'bj-do-fab'; b.type = 'button'; b.textContent = '결합 상품 추가';
+    var b = document.createElement('button'); b.id = 'bj-do-fab'; b.type = 'button'; b.textContent = '다이렉트 쿠폰';
     b.onclick = openModal;
     document.body.appendChild(b);
   }
@@ -1130,9 +1130,9 @@
     var hero = cfg.hero || {};
     box.innerHTML =
       '<div id="bj-do-head"><button type="button" class="bj-do-x" aria-label="닫기">×</button>' +
-        '<span class="bj-do-badge">' + esc(String(hero.badge || '결합 상품 추가').replace(/복수제품 설계/g, '결합 상품 추가')) + '</span>' +
-        '<div class="bj-do-h">' + esc(hero.headline || '지금 고른 상품 기준\\n추가 혜택까지 한 번에') + '</div>' +
-        '<div class="bj-do-sub">' + esc(hero.subcopy || '현재 보고 있는 제품은 자동 포함하고, 함께 많이 신청한 제품을 더해 예상 지원금을 계산합니다.') + '</div>' +
+        '<span class="bj-do-badge">' + esc(String(hero.badge || '다이렉트 쿠폰').replace(/복수제품 설계/g, '다이렉트 쿠폰').replace(/결합 상품 추가/g, '다이렉트 쿠폰')) + '</span>' +
+        '<div class="bj-do-h">' + esc(String(hero.headline || '다이렉트 10,000쿠폰 발급 중').replace(/선택 상품 기준\\n추가 혜택을 준비 중입니다/g, '다이렉트 10,000쿠폰 발급 중').replace(/선택 상품 기준\n추가 혜택을 준비 중입니다/g, '다이렉트 10,000쿠폰 발급 중').replace(/결합 상품 추가/g, '다이렉트 10,000쿠폰 발급 중')) + '</div>' +
+        '<div class="bj-do-sub">' + esc(String(hero.subcopy || '같이 결합하면 추가 혜택! 추천제품도 확인하세요').replace(/선택한 제품은 자동 포함하고, 함께 신청할 상품을 불러오는 중입니다\./g, '같이 결합하면 추가 혜택! 추천제품도 확인하세요').replace(/선택한 제품 기준으로 함께 신청할 상품을 불러오는 중입니다/g, '같이 결합하면 추가 혜택! 추천제품도 확인하세요')) + '</div>' +
       '</div>' +
       '<div id="bj-do-body">' +
         '<div class="bj-do-layout">' +
@@ -1197,8 +1197,8 @@
     overlay.className = 'bj-do-intro';
     overlay.innerHTML =
       '<div class="bj-do-intro-ring"><span class="bj-do-intro-num">0</span></div>' +
-      '<div class="bj-do-intro-title">결합 상품 추가</div>' +
-      '<div class="bj-do-intro-sub">선택한 제품 기준으로 함께 신청할 상품을 불러오는 중입니다</div>';
+      '<div class="bj-do-intro-title">다이렉트 10,000쿠폰 발급 중</div>' +
+      '<div class="bj-do-intro-sub">같이 결합하면 추가 혜택! 추천제품도 확인하세요</div>';
     box.appendChild(overlay);
     var ring = overlay.querySelector('.bj-do-intro-ring');
     var num = overlay.querySelector('.bj-do-intro-num');
