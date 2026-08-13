@@ -123,6 +123,9 @@ async function newMockedPage(browser, { enabled }) {
   await page.route('https://billyjo.co.kr/html/dh_prod/prod_view/1792', async (route) => {
     await route.fulfill({ contentType: 'text/html', body: productHtml('1792', '코웨이 얼음냉온정수기 CHPI-620L', 'CHPI-620L') });
   });
+  await page.route('https://billyjo.co.kr/html/dh_prod/prod_view/35200', async (route) => {
+    await route.fulfill({ contentType: 'text/html', body: productHtml('35200', 'LG 퓨리케어 AI 오브제컬렉션 냉동얼음정수기 WD724R', 'WD724R') });
+  });
 
   return { context, page, cartPosts };
 }
@@ -164,17 +167,20 @@ async function testOnQuoteCartFlow(browser) {
 
 async function testLpDirectOnlySelectedProduct(browser) {
   const { context, page, cartPosts } = await newMockedPage(browser, { enabled: true });
-  await page.goto('https://billyjo.co.kr/?bj_direct_apply=1&bj_lp_products=CHPI-620L', { waitUntil: 'domcontentloaded' });
+  await page.goto('https://billyjo.co.kr/?bj_direct_apply=1&bj_lp_products=CHPI-620L,WD724R', { waitUntil: 'domcontentloaded' });
   await page.addScriptTag({ path: injectPath });
   await page.waitForSelector('#bj-do-back', { timeout: 5000 });
   await page.waitForFunction(() => !document.querySelector('.bj-do-intro'), null, { timeout: 8000 });
-  assert.ok(await page.locator('.bj-do-card', { hasText: 'CHPI-620L' }).count(), 'LP selected product should be visible');
+  assert.ok((await page.locator('.bj-do-h').innerHTML()).includes('bj-do-h-sub'), 'Parenthetical title copy should be styled separately');
+  assert.ok(await page.locator('.bj-do-card', { hasText: 'CHPI-620L' }).count(), 'First LP selected product should be visible');
+  assert.ok(await page.locator('.bj-do-card', { hasText: 'WD724R' }).count(), 'Second LP selected product should be visible');
 
   await page.click('.bj-do-copy');
   await page.waitForURL('**/html/dh_order/shop_cart', { timeout: 8000 });
 
-  assert.strictEqual(cartPosts.length, 1, 'LP selected product without addons should be posted to cart');
-  assert.ok(cartPosts[0].includes('public_model_no=1792'), 'LP selected product should resolve to a cartable prodNo');
+  assert.strictEqual(cartPosts.length, 2, 'LP selected products without addons should be posted to cart');
+  assert.ok(cartPosts.some((body) => body.includes('public_model_no=1792')), 'First LP selected product should resolve to a cartable prodNo');
+  assert.ok(cartPosts.some((body) => body.includes('public_model_no=35200')), 'Second LP selected product should resolve to a cartable prodNo');
   await context.close();
 }
 
