@@ -66,16 +66,33 @@ async function newMockedPage(browser, { enabled }) {
             category: '공기청정기',
             products: [
               {
-                model: 'AP-456',
-                prodNo: '456',
-                name: '코웨이 공기청정기',
+                model: 'AP-3021D',
+                prodNo: '7606',
+                name: '코웨이 노블 공기청정기 AP-3021D',
                 category: '공기청정기',
-                image: '/goodsImages/456.jpg',
+                image: 'https://billyjo.co.kr/logo.png',
                 maxGift: 300000,
                 term: '36개월',
                 reviewCount: 128,
                 avgStars: 4.8,
-                detailUrl: 'https://billyjo.co.kr/html/dh_prod/prod_view/456',
+                detailUrl: 'https://billyjo.co.kr/html/dh_prod/prod_view/7606',
+              },
+            ],
+          },
+          {
+            category: '비데',
+            products: [
+              {
+                model: 'BAS51-A',
+                prodNo: '32985',
+                name: '코웨이 더 매너 비데 플러스 BAS51-A',
+                category: '비데',
+                image: 'https://billyjo.co.kr/logo.png',
+                maxGift: 200000,
+                term: '36개월',
+                reviewCount: 71,
+                avgStars: 4.7,
+                detailUrl: 'https://billyjo.co.kr/html/dh_prod/prod_view/32985',
               },
             ],
           },
@@ -106,8 +123,11 @@ async function newMockedPage(browser, { enabled }) {
   await page.route('https://admin2-api.billyjo.co.kr/v1/reviews**', async (route) => {
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, items: [{ text: '설치가 빨랐어요.' }] }) });
   });
-  await page.route('https://billyjo.co.kr/html/dh_prod/prod_view/456', async (route) => {
-    await route.fulfill({ contentType: 'text/html', body: productHtml('456', '코웨이 공기청정기', 'AP-456') });
+  await page.route('https://billyjo.co.kr/html/dh_prod/prod_view/7606', async (route) => {
+    await route.fulfill({ contentType: 'text/html', body: productHtml('7606', '코웨이 노블 공기청정기 AP-3021D', 'AP-3021D') });
+  });
+  await page.route('https://billyjo.co.kr/html/dh_prod/prod_view/32985', async (route) => {
+    await route.fulfill({ contentType: 'text/html', body: productHtml('32985', '코웨이 더 매너 비데 플러스 BAS51-A', 'BAS51-A') });
   });
   await page.route('https://billyjo.co.kr/html/dh_order/shop_cart', async (route) => {
     const request = route.request();
@@ -118,7 +138,7 @@ async function newMockedPage(browser, { enabled }) {
     await route.fulfill({ contentType: 'text/html', body: productHtml('123', '코웨이 정수기', 'WP-123') });
   });
   await page.route('https://billyjo.co.kr/?**', async (route) => {
-    await route.fulfill({ contentType: 'text/html', body: '<!doctype html><html><body><main>home</main></body></html>' });
+    await route.fulfill({ contentType: 'text/html', body: '<!doctype html><html><head><meta property="og:image" content="https://billyjo.co.kr/logo.png"></head><body><main>home</main></body></html>' });
   });
   await page.route('https://billyjo.co.kr/html/dh_prod/prod_view/1792', async (route) => {
     await route.fulfill({ contentType: 'text/html', body: productHtml('1792', '코웨이 얼음냉온정수기 CHPI-620L', 'CHPI-620L') });
@@ -153,15 +173,15 @@ async function testOnQuoteCartFlow(browser) {
   assert.strictEqual(await page.evaluate(() => window.rentClicked || 0), 0, 'ON should intercept rent click and open popup first');
   assert.ok((await page.locator('.bj-do-copy').innerText()).includes('AI 견적신청하기'), 'CTA should be quote-oriented');
   assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 정수기' }).count(), 'Current real product should be included');
-  assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 공기청정기' }).count(), 'Recommended real product should be shown');
+  assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 노블 공기청정기 AP-3021D' }).count(), 'Recommended real product should be shown');
 
-  await page.locator('.bj-do-card', { hasText: '코웨이 공기청정기' }).click();
+  await page.locator('.bj-do-card', { hasText: '코웨이 노블 공기청정기 AP-3021D' }).click();
   await page.click('.bj-do-copy');
   await page.waitForURL('**/html/dh_order/shop_cart', { timeout: 8000 });
 
   assert.strictEqual(cartPosts.length, 2, 'Selected current + additional products should both post to cart');
   assert.ok(cartPosts.some((body) => body.includes('public_model_no=123')), 'Current product should be posted to cart');
-  assert.ok(cartPosts.some((body) => body.includes('public_model_no=456')), 'Additional selected product should be posted to cart');
+  assert.ok(cartPosts.some((body) => body.includes('public_model_no=7606')), 'Additional selected product should be posted to cart');
   await context.close();
 }
 
@@ -184,12 +204,33 @@ async function testLpDirectOnlySelectedProduct(browser) {
   await context.close();
 }
 
+async function testLpSelectedProductsUseProductThumbs(browser) {
+  const { context, page } = await newMockedPage(browser, { enabled: true });
+  await page.goto('https://billyjo.co.kr/?bj_direct_apply=1&bj_lp_products=AP-3021D,BAS51-A', { waitUntil: 'domcontentloaded' });
+  await page.addScriptTag({ path: injectPath });
+  await page.waitForSelector('#bj-do-back', { timeout: 5000 });
+  await page.waitForFunction(() => !document.querySelector('.bj-do-intro'), null, { timeout: 8000 });
+
+  const srcs = await page.locator('.bj-do-group', { hasText: '현재 보고 있는 상품' })
+    .locator('xpath=following-sibling::div[contains(@class,"bj-do-card")]')
+    .evaluateAll((cards) => cards.slice(0, 2).map((card) => card.querySelector('img')?.src || ''));
+
+  assert.strictEqual(srcs.length, 2, 'LP selected products should render two current product cards');
+  assert.ok(srcs[0].includes('/images/'), 'First LP selected card should use the LP product thumbnail');
+  assert.ok(srcs[0].includes('AP-3021D'), 'First LP selected card should use AP-3021D thumbnail');
+  assert.ok(srcs[1].includes('/images/'), 'Second LP selected card should use the LP product thumbnail');
+  assert.ok(srcs[1].includes('BAS51-A'), 'Second LP selected card should use BAS51-A thumbnail');
+  assert.ok(srcs.every((src) => !src.includes('/logo.png')), 'LP selected cards must not fall back to the BillyJo logo image');
+  await context.close();
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
     await testOffIsInert(browser);
     await testOnQuoteCartFlow(browser);
     await testLpDirectOnlySelectedProduct(browser);
+    await testLpSelectedProductsUseProductThumbs(browser);
   } finally {
     await browser.close();
   }

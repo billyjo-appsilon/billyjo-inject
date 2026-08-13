@@ -695,6 +695,7 @@
   var PAGE_KEY = 'direct_offer';
   var BLUE = '#0838f8';
   var STORE_DETAIL = 'https://billyjo.co.kr/html/dh_prod/prod_view/{pid}';
+  var LP_IMAGE_BASE = 'https://live.billyjo.co.kr/';
   var DIRECT_COUPON_TITLE = '다이렉트 10,000pt 추가 쿠폰 발급 완료(지금 신청 시 적용)';
   var state = {
     cfg: null,
@@ -809,6 +810,38 @@
     'DQ205PEGA': '32923',
     'AD-2325C': '27792'
   };
+  var LP_MODEL_IMAGES = {
+    'CP-AQS100EWH': 'images/정수기/CP-AQS100EWH/1.png',
+    'WPUIAC606': 'images/정수기/WPUIAC606/1.gif',
+    'CHPI-7400N': 'images/정수기/CHPI-7400N/1.png',
+    'CHPI-620L': 'images/정수기/CHPI-620L/1.jpg',
+    'WI-36C90620N': 'images/정수기/WI-36C90620N/1.png',
+    'CHPI-5801L': 'images/정수기/CHPI-5801L/1.jpg',
+    'CHP-6340L': 'images/정수기/CHP-6340L/1.png',
+    'CHP-7212N': 'images/정수기/CHP-7212N/1.png',
+    'WU923A': 'images/정수기/WU923A/1.png',
+    'WP-30S50010N': 'images/정수기/WP-30S50010N/1.jpg',
+    'WPU-B610F': 'images/정수기/WPU-B610F/1.jpg',
+    'WD724R': 'images/정수기/WD724R/1.gif',
+    'RWP54220BF': 'images/정수기/RWP54220BF/1.png',
+    'WPU-IC110F': 'images/정수기/WPU-IC110F/1.png',
+    'P-6320L': 'images/정수기/P-6320L/1.jpg',
+    'CP-W602HW': 'images/정수기/CP-W602HW/1.png',
+    'AS480BWFA': 'images/공기청정기/AS480BWFA/1.jpg',
+    'AP-3021D': 'images/공기청정기/AP-3021D/1.jpg',
+    'AP-40H8220': 'images/공기청정기/AP-40H8220/1.png',
+    'AP90H10163EDD': 'images/공기청정기/AP90H10163EDD/1.png',
+    'BAS51-A': 'images/비데/BAS51-A/1.png',
+    'BM750': 'images/비데/BM750/1.png',
+    'BID096': 'images/비데/BID096/1.jpg',
+    'CBT-QSB1041W': 'images/비데/CBT-QSB1041W/1.jpg',
+    'DQ205PEGA': 'images/제습기/DQ205PEGA/1.png',
+    'AD-2325C': 'images/제습기/AD-2325C/1.jpg'
+  };
+  function lpImageUrl(model){
+    var path = model && LP_MODEL_IMAGES[model];
+    return path ? encodeURI(LP_IMAGE_BASE + path) : '';
+  }
   function lpModelCode(text){
     var m = String(text || '').match(/[A-Z0-9][A-Z0-9()\/-]{3,}$/);
     return m ? m[0] : '';
@@ -819,6 +852,7 @@
     var prodNo = model && LP_MODEL_PRODUCTS[model];
     if (prodNo && !product.prodNo) product.prodNo = prodNo;
     if (prodNo && !product.detailUrl) product.detailUrl = STORE_DETAIL.replace('{pid}', prodNo);
+    if (model && LP_MODEL_IMAGES[model]) product.image = lpImageUrl(model);
     if (model && (!product.model || /^lp-direct-/.test(String(product.model)))) product.model = model;
     return product;
   }
@@ -1043,11 +1077,12 @@
     return (state.cats || []).filter(function(c){ return c.products && c.products.length && c.category !== currCat; }).slice(0, 5);
   }
   function renderProductCard(p, current){
+    p = hydrateLpProduct(p, p && (p.name || p.model));
     var on = !!state.selected[p.model];
     var rv = state.reviews[p.model] || '';
     var stars = p.avgStars ? ('★ ' + Number(p.avgStars).toFixed(1)) : '후기';
     return '<div class="bj-do-card ' + (on ? 'on' : '') + '" data-model="' + esc(p.model) + '">' +
-      '<img src="' + esc(p.image || pageProductImage() || '') + '" alt="">' +
+      '<img src="' + esc(p.image || (current && !isDirectApplyQuery() ? pageProductImage() : '') || '') + '" alt="">' +
       '<div class="bj-do-info"><div class="bj-do-pname">' + esc(p.name || p.model) + '</div>' +
         '<div class="bj-do-meta">' + esc(p.category || '') + (p.reviewCount ? ' · ' + stars + ' · 리뷰 ' + p.reviewCount.toLocaleString('ko-KR') + '개' : '') + '</div>' +
         '<div class="bj-do-gift">예상 지원금 ' + (p.maxGift ? won(money70(p)) : '상담 시 확인') + '</div>' +
