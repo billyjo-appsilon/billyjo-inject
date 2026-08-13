@@ -13,10 +13,20 @@
     (d.head || d.documentElement).appendChild(s);
   }
 
+  function normalizeKarrotEvent(eventName) {
+    if (eventName === 'CompleteRegistration') return 'Lead';
+    return eventName || 'ViewPage';
+  }
+
+  function isLeadEvent(eventName) {
+    return eventName === 'Lead' || eventName === 'GenerateLead';
+  }
+
   function pushDataLayer(eventName, params) {
+    eventName = normalizeKarrotEvent(eventName);
     w.dataLayer = w.dataLayer || [];
     var payload = Object.assign({
-      event: eventName === 'CompleteRegistration' ? 'bj_karrot_complete_registration' : 'bj_karrot_view_page',
+      event: isLeadEvent(eventName) ? 'bj_karrot_lead_form' : 'bj_karrot_view_page',
       karrot_event: eventName,
       karrot_pixel_id: PIXEL_ID,
       page_location: location.href,
@@ -25,13 +35,14 @@
     // Params may include a marketing event label, but it must not replace the
     // GTM trigger name. Otherwise a Karrot event can be mistaken for a generic
     // generate_lead event and repeatedly fire unrelated tags.
-    payload.event = eventName === 'CompleteRegistration' ? 'bj_karrot_complete_registration' : 'bj_karrot_view_page';
+    payload.event = isLeadEvent(eventName) ? 'bj_karrot_lead_form' : 'bj_karrot_view_page';
+    payload.karrot_event = eventName;
     w.dataLayer.push(payload);
   }
 
   function track(eventName, params) {
-    eventName = eventName || 'ViewPage';
-    var key = eventName === 'CompleteRegistration' ? 'lead' : eventName;
+    eventName = normalizeKarrotEvent(eventName);
+    var key = isLeadEvent(eventName) ? 'lead' : eventName;
     if (w.__billyjoKarrotTracked[key]) return false;
     w.__billyjoKarrotTracked[key] = true;
     pushDataLayer(eventName, params);
@@ -88,8 +99,9 @@
           var platform = requestAttributionPlatform(init);
           if (!/^(karrot|daangn|danggeun)$/.test(platform)) return res;
           setTimeout(function () {
-            w.BillyjoKarrotTrack('CompleteRegistration', {
-              lead_source_event: 'bj_karrot_lead',
+            w.BillyjoKarrotTrack('Lead', {
+              lead_source_event: 'bj_karrot_lead_form',
+              conversion_name: '리드폼 잠재고객 수집',
               conversion_platform: platform,
               source: 'billyjo.co.kr',
               value: 1,
