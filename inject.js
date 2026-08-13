@@ -1579,17 +1579,17 @@
       { key: 'water', name: '정수기', reviews: '후기 8,119개', href: '/html/dh_prod/prod_list/1-8', img: 'images/category-icons/water-purifier.png' },
       { key: 'air', name: '공기청정기', reviews: '후기 2,274개', href: '/html/dh_prod/prod_list/1-6', img: 'images/category-icons/air-purifier.png' },
       { key: 'aircon', name: '에어컨', reviews: '후기 1,426개', href: '/html/dh_prod/prod_list/1-87', img: 'images/category-icons/air-conditioner.png' },
-      { key: 'wash', name: '세탁건조기', reviews: '후기 1,189개', href: '/html/dh_prod/prod_list/3-25', img: 'images/category-icons/washer-dryer.png' },
-      { key: '', name: '비데', reviews: '후기 982개', href: '/html/dh_prod/prod_list/1-9', img: 'images/category-icons/bidet.png' },
-      { name: '인터넷+TV', reviews: '후기 231개', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/internet-tv.png' },
+      { key: 'wash', name: '세탁기·건조기', reviews: '후기 1,189개', href: '/html/dh_prod/prod_list/3-25', img: 'images/category-icons/washer-dryer.png' },
+      { key: 'bidet', name: '비데', reviews: '후기 982개', href: '/html/dh_prod/prod_list/1-9', img: 'images/category-icons/bidet.png' },
+      { key: 'internet', name: '인터넷+TV', reviews: '후기 231개', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/internet-tv.png' },
       { name: '휴대폰', reviews: '결합 혜택 상담', href: 'https://premiumm.ptalk.co.kr/73728', img: 'images/category-icons/mobile-phone.png' }
     ];
     var MORE_ITEMS = [
-      { name: '제습기', meta: '후기 2,719개', href: '/html/dh_prod/prod_list/1-203' },
+      { key: 'dehumidifier', name: '제습기', meta: '후기 2,719개', href: '/html/dh_prod/prod_list/1-203' },
       { name: '음식물처리기', meta: '후기 1,430개', href: '/html/dh_prod/prod_list/2-19' },
       { name: '안마의자', meta: '후기 1,126개', href: '/html/dh_prod/prod_list/4-28' },
-      { name: '로봇청소기', meta: '후기 858개', href: '/html/dh_prod/prod_list/1-374' },
-      { name: '냉장고', meta: '후기 473개', href: '/html/dh_prod/prod_list/8-658' },
+      { key: 'robot', name: '로봇청소기', meta: '후기 858개', href: '/html/dh_prod/prod_list/1-374' },
+      { key: 'fridge', name: '냉장고', meta: '후기 473개', href: '/html/dh_prod/prod_list/8-658' },
       { name: '매트리스', meta: '후기 194개', href: '/html/dh_prod/prod_list/5-561' },
       { name: '업소용', meta: '사업장 렌탈 비교', href: '/html/dh_prod/prod_list/10-1153' },
       { name: 'PC·디지털', meta: '노트북·모니터 렌탈 비교', href: '/html/dh_prod/prod_list/6-681' }
@@ -1667,7 +1667,7 @@
           + '<span class="bj-hcat-text"><strong class="bj-hcat-name">' + esc(it.name) + '</strong><span class="bj-hcat-reviews">' + esc(it.reviews) + '</span><span class="bj-hcat-action">최저가 · 지원금 비교</span></span>'
           + '</a>';
       }).join('') + '</div><div class="bj-hcat-more-wrap"><button type="button" class="bj-hcat-more-btn" aria-expanded="false" aria-controls="bj-hcat-extra">카테고리 더보기<span class="bj-hcat-more-plus" aria-hidden="true">+</span></button></div><div id="bj-hcat-extra" class="bj-hcat-extra" hidden>' + MORE_ITEMS.map(function (it) {
-        return '<a class="bj-hcat-extra-chip" href="' + esc(it.href) + '" aria-label="' + esc(it.name + ' ' + it.meta) + '">'
+        return '<a class="bj-hcat-extra-chip" href="' + esc(it.href) + '" data-bjct-key="' + esc(it.key || '') + '" aria-label="' + esc(it.name + ' ' + it.meta) + '">'
           + '<span class="bj-hcat-extra-name">' + esc(it.name) + '</span>'
           + '<span class="bj-hcat-extra-meta">' + esc(it.meta) + '</span>'
           + '<span class="bj-hcat-extra-arrow" aria-hidden="true">›</span>'
@@ -1675,7 +1675,7 @@
       }).join('') + '</div></div>';
       hero.parentNode.insertBefore(section, hero.nextSibling);
       section.addEventListener('click', function(e) {
-        var a = e.target && e.target.closest && e.target.closest('.bj-hcat-card[data-bjct-key]');
+        var a = e.target && e.target.closest && e.target.closest('[data-bjct-key]');
         if (!a || !section.contains(a)) return;
         var key = a.getAttribute('data-bjct-key') || '';
         if (!key) return;
@@ -2477,13 +2477,25 @@
   }
 };
   var CAT_META = [
-    { key: 'all', name: '전체' },
-    { key: 'water', name: '정수기' }, { key: 'air', name: '공기청정기' },
-    { key: 'aircon', name: '에어컨' }, { key: 'fridge', name: '냉장고' },
-    { key: 'wash', name: '세탁기' }, { key: 'tv', name: 'TV' },
-    { key: 'heat', name: '냉난방기' }, { key: 'dry', name: '건조기' }
+    { key: 'all', name: '전체', url: '' },
+    { key: 'water', name: '정수기', url: '/html/dh_prod/prod_list/1-8' },
+    { key: 'air', name: '공기청정기', url: '/html/dh_prod/prod_list/1-6' },
+    { key: 'aircon', name: '에어컨', url: '/html/dh_prod/prod_list/1-87' },
+    { key: 'wash', name: '세탁기·건조기', url: '/html/dh_prod/prod_list/3-25' },
+    { key: 'bidet', name: '비데', url: '/html/dh_prod/prod_list/1-9' },
+    { key: 'internet', name: '인터넷+TV', url: '/html/dh_prod/prod_list/6-1198' },
+    { key: 'dehumidifier', name: '제습기', url: '/html/dh_prod/prod_list/1-203' },
+    { key: 'robot', name: '로봇청소기', url: '/html/dh_prod/prod_list/1-374' },
+    { key: 'fridge', name: '냉장고', url: '/html/dh_prod/prod_list/8-658' },
+    { key: 'tv', name: 'TV', url: '/html/dh_prod/prod_list/6-678' }
   ];
-  var ICON = { water: '💧', air: '🍃', aircon: '❄️', fridge: '🧊', wash: '🫧', tv: '📺', heat: '♨️', dry: '💨' };
+  var ICON = { water: '💧', air: '🍃', aircon: '❄️', wash: '🫧', bidet: '🚽', internet: '📡', dehumidifier: '💦', robot: '🤖', fridge: '🧊', tv: '📺' };
+  var LP_MODEL_ORDER = {
+    water: ['CP-AQS100EWH', 'WPUIAC606', 'CHPI-7400N', 'CHPI-620L', 'WI-36C90620N', 'CHPI-5801L', 'CHP-6340L', 'CHP-7212N', 'WU923A', 'WP-30S50010N', 'WPU-B610F', 'WD724R', 'RWP54220BF', 'WPU-IC110F', 'P-6320L', 'CP-W602HW', 'CHPI-7430N'],
+    air: ['AS480BWFA', 'AP-3021D', 'AP-40H8220', 'AP90H10163EDD'],
+    bidet: ['BAS51-A', 'BM750', 'BID096', 'CBT-QSB1041W'],
+    dehumidifier: ['DQ205PEGA', 'AD-2325C']
+  };
   var won = function (n) { return (n || 0).toLocaleString('ko-KR'); };
 
   function proc(p, i) {
@@ -2528,6 +2540,10 @@
     '#bjct-sec .bjct-panel{position:absolute;top:0;left:0;width:100%;transition:transform .3s cubic-bezier(.4,0,.2,1)}',
     '#bjct-sec.bjct-noanim .bjct-pager,#bjct-sec.bjct-noanim .bjct-panel{transition:none}',
     '#bjct-sec .bjct-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:2px 12px 22px}',
+    '#bjct-sec .bjct-native-grid{align-items:stretch}',
+    '#bjct-sec .bjct-native-grid .item{float:none!important;width:auto!important;max-width:none!important;margin:0!important;padding:0!important;display:block!important}',
+    '#bjct-sec .bjct-native-grid .item .box{height:100%!important;margin:0!important}',
+    '#bjct-sec .bjct-native-grid .item .box>a{height:100%!important}',
     '#bjct-sec .bjct-card{background:#fff;border-radius:14px;overflow:hidden;border:1px solid #f0f1f4;display:flex;flex-direction:column;text-decoration:none;color:inherit}',
     '#bjct-sec .bjct-thumb{aspect-ratio:1/.88;background:#f6f7f9;display:flex;align-items:center;justify-content:center;position:relative;padding:12px}',
     '#bjct-sec .bjct-thumb img{max-width:100%;max-height:100%;object-fit:contain;mix-blend-mode:multiply;pointer-events:none}',
@@ -2555,7 +2571,7 @@
     '#bjct-banners .bjct-ban-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}',
     '#bjct-banners .bjct-ban-dot{width:6px;height:6px;border-radius:50%;background:#d5d8df;transition:width .2s,background .2s;cursor:pointer}',
     '#bjct-banners .bjct-ban-dot.on{width:18px;border-radius:3px;background:#0838f8}',
-    '@media(min-width:768px){#bjct-sec{max-width:1280px;margin:0 auto 22px;padding:0 32px}#bjct-sec .bjct-head{padding:20px 0 10px}#bjct-sec .bjct-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:4px 0 26px}#bjct-sec .bjct-card{border-radius:8px;box-shadow:0 8px 20px rgba(35,80,130,.08)}#bjct-sec .bjct-thumb{aspect-ratio:1/.72}#bjct-sec .bjct-name{font-size:13px}}',
+    '@media(min-width:768px){#bjct-sec{max-width:1280px;margin:0 auto 22px;padding:0 32px;overflow:hidden}#bjct-sec .bjct-head{padding:20px 0 10px}#bjct-sec .bjct-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;padding:4px 0 26px}#bjct-sec .bjct-card{border-radius:8px;box-shadow:0 8px 20px rgba(35,80,130,.08)}#bjct-sec .bjct-thumb{aspect-ratio:1/.72}#bjct-sec .bjct-name{font-size:13px}#bjct-sec .bjct-panel:not(.is-active){visibility:hidden!important;pointer-events:none!important}}',
     '@media(min-width:1280px){#bjct-sec{padding-left:0;padding-right:0}}'
   ].join('');
 
@@ -2681,13 +2697,87 @@
         p.style.transform = 'translate3d(' + x + 'px,0,0)';
       });
     }
+    function productKey(el) {
+      return ((el && el.textContent) || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+    }
+    function rankNativeCards(key, cards) {
+      var order = LP_MODEL_ORDER[key] || [];
+      if (!order.length) return cards;
+      return cards.slice().sort(function(a, b) {
+        var ak = productKey(a), bk = productKey(b);
+        var ai = 999, bi = 999;
+        for (var i = 0; i < order.length; i++) {
+          var needle = order[i].toUpperCase().replace(/[^A-Z0-9]/g, '');
+          if (ai === 999 && ak.indexOf(needle) !== -1) ai = i;
+          if (bi === 999 && bk.indexOf(needle) !== -1) bi = i;
+        }
+        return ai - bi;
+      });
+    }
+    function absolutizeNativeCard(card) {
+      card.classList.add('bjct-native-item');
+      card.removeAttribute('style');
+      Array.prototype.forEach.call(card.querySelectorAll('[id]'), function(el) { el.removeAttribute('id'); });
+      Array.prototype.forEach.call(card.querySelectorAll('a[href]'), function(a) {
+        var href = a.getAttribute('href') || '';
+        try { a.setAttribute('href', new URL(href, location.origin).pathname + new URL(href, location.origin).search); } catch (_) {}
+        a.removeAttribute('target');
+      });
+      Array.prototype.forEach.call(card.querySelectorAll('img'), function(img) {
+        var src = img.getAttribute('src') || img.getAttribute('ec-data-src') || img.getAttribute('data-src') || '';
+        if (src) {
+          try { img.setAttribute('src', new URL(src, location.origin).href); } catch (_) {}
+        }
+        img.setAttribute('loading', 'lazy');
+      });
+      return card;
+    }
+    function loadNativePanel(i) {
+      var c = CAT_META[i], panel = panels[i];
+      if (!c || !c.url || panel.getAttribute('data-native-loaded')) return;
+      panel.setAttribute('data-native-loaded', 'loading');
+      fetch(c.url, { credentials: 'same-origin' })
+        .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
+        .then(function(html) {
+          var doc = new DOMParser().parseFromString(html, 'text/html');
+          var cards = Array.prototype.slice.call(doc.querySelectorAll('.prod_list .item')).slice(0, 24);
+          cards = rankNativeCards(c.key, cards).slice(0, 8).map(absolutizeNativeCard);
+          if (!cards.length) throw new Error('empty native cards');
+          var grid = document.createElement('div');
+          grid.className = 'bjct-grid bjct-native-grid prod_list';
+          cards.forEach(function(card, idx) {
+            if (idx === 0 && !card.querySelector('.best-pill')) {
+              var thumb = card.querySelector('.thumb');
+              if (thumb) {
+                var pill = document.createElement('span');
+                pill.className = 'best-pill';
+                pill.textContent = 'BEST';
+                thumb.insertBefore(pill, thumb.firstChild);
+              }
+            }
+            grid.appendChild(card);
+          });
+          panel.innerHTML = '';
+          panel.appendChild(grid);
+          panel.setAttribute('data-native-loaded', '1');
+          if (i === idx) {
+            cntEl.textContent = cards.length;
+            pager.style.height = panelH(i) + 'px';
+          }
+          try { document.dispatchEvent(new Event('bj:native-cards-inserted')); } catch (_) {}
+          setTimeout(function() { if (i === idx) pager.style.height = panelH(i) + 'px'; }, 600);
+        })
+        .catch(function() { panel.setAttribute('data-native-loaded', 'fallback'); });
+    }
     function go(i, animate) {
       i = Math.max(0, Math.min(CAT_META.length - 1, i)); idx = i;
       tabs.forEach(function (t, j) { t.classList.toggle('on', j === i); });
+      panels.forEach(function (p, j) { p.classList.toggle('is-active', j === i); });
       if (titleEl) titleEl.textContent = CAT_META[i].key === 'all' ? '카테고리별 베스트' : CAT_META[i].name + ' 베스트';
       moveInd(tabs[i]);
       centerTab(tabs[i], animate);
       cntEl.textContent = listFor(CAT_META[i].key).length;
+      loadNativePanel(i);
       measureW();
       if (!animate) sec.classList.add('bjct-noanim');
       place(0, 0);
