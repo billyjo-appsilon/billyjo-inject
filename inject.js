@@ -566,15 +566,22 @@
 
   function openDirectApplyOffer(){
     var tries = 0;
-    var t = setInterval(function(){
+    var done = false;
+    function tick(){
+      if (done) return;
       tries += 1;
       if (window.__bjDirectOfferOpen && window.__bjDirectOfferOpen()) {
+        done = true;
         clearInterval(t);
       } else if (tries > 180) {
+        done = true;
         clearInterval(t);
         openSecretPackage();
       }
-    }, 120);
+    }
+    var t = setInterval(tick, 40);
+    tick();
+    if (done) clearInterval(t);
   }
 
   function init(){
@@ -587,10 +594,11 @@
         sessionStorage.setItem(key, '1');
       } catch (_) {}
     }
-    setTimeout(direct ? openDirectApplyOffer : openSecretPackage, 500);
+    setTimeout(direct ? openDirectApplyOffer : openSecretPackage, direct ? 0 : 500);
   }
 
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
+  if (shouldOpenDirectApplyOffer()) init();
+  else if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);
   else init();
 })();
 
@@ -840,7 +848,15 @@
     var firstLp = null;
     tokens.forEach(function(token, idx){
       var nt = norm(token);
-      var found = products.filter(function(p){
+      var found = null;
+      if (state.current && (
+        String(state.current.prodNo || '') === token ||
+        norm(state.current.name).indexOf(nt) >= 0 || nt.indexOf(norm(state.current.name)) >= 0 ||
+        norm(state.current.model).indexOf(nt) >= 0 || nt.indexOf(norm(state.current.model)) >= 0
+      )) {
+        found = state.current;
+      }
+      found = found || products.filter(function(p){
         return String(p.prodNo || '') === token ||
           norm(p.name).indexOf(nt) >= 0 || nt.indexOf(norm(p.name)) >= 0 ||
           norm(p.model).indexOf(nt) >= 0 || nt.indexOf(norm(p.model)) >= 0;
@@ -890,6 +906,32 @@
       '@media(max-width:720px){#bj-do-back{align-items:flex-end;padding:0;background:rgba(10,16,30,.55)}#bj-do-box{max-width:none;max-height:92vh;border-radius:18px 18px 0 0}.bj-do-layout{display:block}.bj-do-main{padding:14px}.bj-do-side{padding:12px 14px 16px;border-left:0;border-top:1px solid #e2e8f7}.bj-do-h{font-size:21px;margin-right:36px}.bj-do-head{padding:18px 18px 14px;background:linear-gradient(135deg,#0838f8,#1b55ff)}.bj-do-card{grid-template-columns:58px minmax(0,1fr) 52px;gap:9px}.bj-do-card img{width:58px;height:58px}.bj-do-review{display:none}.bj-do-memo{min-height:96px}.bj-do-total-v{font-size:24px}}' +
       '@media(max-width:560px){#bj-do-topbar .bj-do-topin{justify-content:flex-start;overflow-x:auto}.bj-do-fab{right:12px;bottom:82px;padding:12px 15px}.bj-do-card{grid-template-columns:54px minmax(0,1fr) 48px}.bj-do-card img{width:54px;height:54px}.bj-do-add{font-size:10.5px;min-width:46px}.bj-do-pname{font-size:12.5px}.bj-do-meta{font-size:10.5px}.bj-do-gift{font-size:12px}}';
     document.head.appendChild(s);
+  }
+  function fallbackCfg(){
+    return {
+      hero: {
+        badge: '결합 상품 추가',
+        headline: '선택 상품 기준\\n추가 혜택을 준비 중입니다',
+        subcopy: '선택한 제품은 자동 포함하고, 함께 신청할 상품을 불러오는 중입니다.'
+      },
+      personaSection: { title: '1. 필요한 제품을 고르세요' },
+      productsSection: { title: '2. 함께 많이 신청한 BEST' },
+      ctaLabel: 'AI 견적신청하기',
+      maxSelect: 5,
+      perCategory: 3,
+      directOffer: {
+        enabled: true,
+        showTopBar: false,
+        showActivity: false,
+        countdownMinutes: 15,
+        activityMinSeconds: 40,
+        activityMaxSeconds: 70,
+        activityLookbackHours: 48,
+        customerGiftRate: 0.7,
+        autoOpen: false,
+        openDelaySeconds: 2
+      }
+    };
   }
   function mountTopBar(){
     if (!state.cfg.directOffer.showTopBar || document.getElementById('bj-do-topbar')) return;
@@ -1074,16 +1116,18 @@
       };
     });
   }
-  function openModal(proceed){
+  function openModal(proceed, opts){
+    opts = opts || {};
     if (proceed) state.pendingProceed = proceed;
-    if (!state.cfg || !state.current) return false;
+    if ((!state.cfg || !state.current) && !opts.allowShell) return false;
     if (state.opened) return true;
     state.opened = true;
     state.offerId = state.offerId || createOfferId();
     injectStyles();
     var back = document.createElement('div'); back.id = 'bj-do-back';
     var box = document.createElement('div'); box.id = 'bj-do-box';
-    var hero = state.cfg.hero || {};
+    var cfg = state.cfg || fallbackCfg();
+    var hero = cfg.hero || {};
     box.innerHTML =
       '<div id="bj-do-head"><button type="button" class="bj-do-x" aria-label="닫기">×</button>' +
         '<span class="bj-do-badge">' + esc(String(hero.badge || '결합 상품 추가').replace(/복수제품 설계/g, '결합 상품 추가')) + '</span>' +
@@ -1093,8 +1137,8 @@
       '<div id="bj-do-body">' +
         '<div class="bj-do-layout">' +
           '<div class="bj-do-main">' +
-            '<div class="bj-do-sec"><h3>' + esc((state.cfg.personaSection && state.cfg.personaSection.title) || '1. 필요한 제품을 고르세요') + '</h3><div class="bj-do-cats"></div></div>' +
-            '<div class="bj-do-sec"><h3>' + esc((state.cfg.productsSection && state.cfg.productsSection.title) || '2. 함께 많이 신청한 BEST') + '</h3><div class="bj-do-products"></div></div>' +
+            '<div class="bj-do-sec"><h3>' + esc((cfg.personaSection && cfg.personaSection.title) || '1. 필요한 제품을 고르세요') + '</h3><div class="bj-do-cats"></div></div>' +
+            '<div class="bj-do-sec"><h3>' + esc((cfg.productsSection && cfg.productsSection.title) || '2. 함께 많이 신청한 BEST') + '</h3><div class="bj-do-products"></div></div>' +
           '</div>' +
           '<div class="bj-do-side">' +
             '<div id="bj-do-total"><div class="bj-do-total-k">AI 예상 지원금 합계</div><div class="bj-do-total-v">0원</div><div class="bj-do-total-sub">선택한 제품 구성 기준으로 산출한 예상 혜택입니다. 실제 지급액은 상담 후 확정됩니다.</div></div>' +
@@ -1105,7 +1149,7 @@
         '</div>' +
       '</div>';
     back.appendChild(box); document.body.appendChild(back);
-    if (isDirectApplyQuery()) showIntroLoading(box);
+    if (isDirectApplyQuery()) showIntroLoading(box, !!opts.keepIntro);
     function close(){ state.opened = false; try { back.remove(); } catch(_){} }
     box.querySelector('.bj-do-x').onclick = close;
     back.addEventListener('click', function(e){ if (e.target === back) close(); });
@@ -1141,13 +1185,14 @@
       }
       setTimeout(function(){ var b = box.querySelector('.bj-do-copy'); if (b) b.textContent = state.cfg.ctaLabel || 'AI 견적신청하기'; }, 1400);
     };
-    refreshModal(box);
+    if (state.cfg && state.current) refreshModal(box);
     selectedList().concat(allProducts().slice(0, 8)).forEach(function(p){
       loadOneReview(p).then(function(){ if (document.body.contains(box)) refreshModal(box); });
     });
     return true;
   }
-  function showIntroLoading(box){
+  function showIntroLoading(box, keepUntilReady){
+    if (box.querySelector('.bj-do-intro')) return;
     var overlay = document.createElement('div');
     overlay.className = 'bj-do-intro';
     overlay.innerHTML =
@@ -1167,20 +1212,26 @@
       ring.style.setProperty('--p', v);
       num.textContent = String(v);
       if (k < 1) requestAnimationFrame(tick);
-      else setTimeout(function(){ try { overlay.remove(); } catch(_){} }, 180);
+      else if (!keepUntilReady) setTimeout(function(){ try { overlay.remove(); } catch(_){} }, 180);
     })();
   }
+  function hideIntroLoading(){
+    var overlay = document.querySelector('#bj-do-box .bj-do-intro');
+    if (!overlay) return;
+    setTimeout(function(){ try { overlay.remove(); } catch(_){} }, 180);
+  }
   window.__bjDirectOfferOpen = function(proceed){
-    if (!state.active) return false;
     if (!state.cfg || !state.current) {
+      if (!state.active && !isDirectApplyQuery()) return false;
       if (proceed) state.pendingProceed = proceed;
       state.pendingOpen = true;
+      if (isDirectApplyQuery()) openModal(proceed, { allowShell: true, keepIntro: true });
       setTimeout(function(){
         if (!state.pendingOpen || (state.cfg && state.current)) return;
         var next = state.pendingProceed;
         state.pendingOpen = false;
         state.pendingProceed = null;
-        if (next) next();
+          if (next) next();
       }, 15000);
       return true;
     }
@@ -1259,7 +1310,14 @@
         mountTopBar();
         mountFab();
         scheduleActivity(true);
-        if (state.pendingOpen) {
+        if (state.opened) {
+          var box = document.getElementById('bj-do-box');
+          if (box) {
+            refreshModal(box);
+            hideIntroLoading();
+          }
+          state.pendingOpen = false;
+        } else if (state.pendingOpen) {
           state.pendingOpen = false;
           openModal(state.pendingProceed);
         }
