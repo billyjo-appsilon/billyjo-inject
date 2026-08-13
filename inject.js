@@ -9234,13 +9234,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     box.querySelector('.bjpw-skip').addEventListener('click', function(){ finish(null); });
     /* 시크릿 1:1 패키지는 실수로 바깥을 눌러도 닫히지 않게 한다.
        닫기는 X 또는 건너뛰기처럼 명확한 버튼으로만 허용. */
-    back.addEventListener('click', function(e){
+    function keepOutsideClick(e){
       if (e.target === back) {
         e.preventDefault();
         e.stopPropagation();
       }
-    }, true);
-    box.addEventListener('click', function(e){ e.stopPropagation(); });
+    }
+    ['pointerdown','mousedown','mouseup','click','touchstart','touchend'].forEach(function(type){
+      back.addEventListener(type, keepOutsideClick, true);
+      box.addEventListener(type, function(e){ e.stopPropagation(); }, true);
+    });
 
     // 칩 선택 (single=단일, multi=복수)
     Array.prototype.forEach.call(box.querySelectorAll('.bjpw-f'), function(fEl){
