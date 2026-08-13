@@ -12474,3 +12474,109 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   setTimeout(scan, 1500);
   setTimeout(scan, 4000);
 })();
+
+/* CHPI-7430N 자가관리 공개 경로 보강
+   렌탈샵 상품 마스터에는 방문관리 2종만 노출되어 있어, 자가관리 정책 노출용
+   lightweight variant를 기존 상세 URL 위에 붙인다. */
+(function(){
+  var SELF_URL = '/html/dh_prod/prod_view/28310?bj_variant=self';
+  var SELF_NAME = '코웨이 아이콘얼음미니 얼음냉온정수기';
+  var SELF_MODEL = 'CHPI-7430N 셀프 반값할인';
+  var SELF_IMG = 'https://rentalshop.site/_data/file/goodsImages/10380ecfbc54b43ec88f5adf8e7658e8.png';
+  var SELF_ROWS = [
+    ['자가관리', '5년의무', '12개월 필터발송', '반값할인', '44,900원', '22,450원'],
+    ['자가관리', '6년의무', '12개월 필터발송', '반값할인', '42,900원', '21,450원'],
+    ['자가관리', '7년의무', '12개월 필터발송', '반값할인', '40,900원', '20,450원'],
+    ['자가관리', '3년의무', '12개월 필터발송', '반값할인', '47,900원', '23,950원']
+  ];
+  function ready(fn){ if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
+  function isSelfDetail(){
+    return /\/html\/dh_prod\/prod_view\/28310/.test(location.pathname) &&
+      new URLSearchParams(location.search || '').get('bj_variant') === 'self';
+  }
+  function replaceText(root){
+    if (!root) return;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, null);
+    var nodes = [], n;
+    while ((n = walker.nextNode())) nodes.push(n);
+    nodes.forEach(function(node){
+      var v = node.nodeValue || '';
+      v = v.replace(/CHPI-7430N\s*4개월관리\s*반값할인/g, SELF_MODEL)
+           .replace(/CHPI-7430N\s*2개월관리\s*반값할인/g, SELF_MODEL)
+           .replace(/4개월\s*방문관리/g, '자가관리')
+           .replace(/2개월\s*방문관리/g, '자가관리');
+      node.nodeValue = v;
+    });
+  }
+  function selfPriceTable(){
+    var wrap = document.createElement('div');
+    wrap.id = 'bj-chpi7430-self-table';
+    wrap.innerHTML =
+      '<div style="max-width:1100px;margin:20px auto;background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.08);font-family:Pretendard,Arial,sans-serif">' +
+      '<div style="background:#0838f8;color:#fff;text-align:center;padding:14px 20px;font-size:15px;font-weight:700">자가관리 가격표<br><span style="font-size:12px;opacity:.86">' + SELF_MODEL + '</span></div>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr>' +
+      ['관리유형','약정기간','관리주기','프로모션','이달의 할인가','최종 할인가'].map(function(h){return '<th style="background:#0838f8;color:#fff;padding:12px 8px;text-align:center;font-weight:600;border-right:1px solid #eee">'+h+'</th>';}).join('') +
+      '</tr></thead><tbody>' +
+      SELF_ROWS.map(function(r){return '<tr>' + r.map(function(c,i){return '<td style="padding:10px 8px;text-align:center;vertical-align:middle;border-bottom:1px solid #eee;border-right:1px solid #eee;' + (i===5?'color:#0838f8;font-weight:700;font-size:15px':'') + (i===4?'color:#e53935;font-weight:700;font-size:14px':'') + '">' + c + '</td>';}).join('') + '</tr>';}).join('') +
+      '</tbody></table></div>';
+    return wrap;
+  }
+  function applySelfDetail(){
+    if (!isSelfDetail()) return;
+    document.title = SELF_NAME + ' 자가관리 - 정수기렌탈·가전렌탈 가격비교 - 빌리조 | BILLYJO';
+    replaceText(document.body);
+    var model = document.querySelector('.model_name small');
+    if (model) model.textContent = SELF_MODEL;
+    var prodName = document.querySelector('.prod_name b');
+    if (prodName) prodName.textContent = SELF_NAME + ' 자가관리';
+    var orange = document.querySelector('.prod_name .dh_orange');
+    if (orange) orange.textContent = '렌탈(소유권이전) · 자가관리';
+    var nativeTable = document.querySelector('#livePriceTable');
+    if (nativeTable) nativeTable.style.display = 'none';
+    if (!document.getElementById('bj-chpi7430-self-table')) {
+      var anchor = nativeTable || document.querySelector('.img_wrap') || document.querySelector('.prod_view_bot') || document.body.firstChild;
+      var table = selfPriceTable();
+      if (anchor && anchor.parentNode) anchor.parentNode.insertBefore(table, anchor);
+      else document.body.appendChild(table);
+    }
+    var selfTable = document.querySelector('#bj-chpi7430-self-table table');
+    if (selfTable) {
+      selfTable.style.setProperty('display', 'table', 'important');
+      delete selfTable.dataset.bjLptDupHidden;
+    }
+  }
+  function cardHtml(){
+    return '<div class="item bj-chpi7430-self-card"><div class="box"><a href="'+SELF_URL+'" target="_self">' +
+      '<div class="thumb"><img src="'+SELF_IMG+'" alt="'+SELF_NAME+' 자가관리"></div>' +
+      '<div class="txt"><div class="txt__cate"><p style="display:none;">&nbsp;</p><p style="display:none;">&nbsp;</p><p style="display:none;">&nbsp;</p></div>' +
+      '<p class="brand">'+SELF_MODEL+'</p><p class="name">'+SELF_NAME+' 자가관리</p></div>' +
+      '<div class="fee"><span class="label">월 렌탈료</span><p class="price sale"><strong>44,900</strong>원</p></div>' +
+      '<div class="fee2"><span class="label">제휴카드 할인</span><p class="price sale"><strong>22,450</strong>원</p></div>' +
+      '</a></div></div>';
+  }
+  function ensureSelfCard(){
+    if (!/CHPI-7430N|7430|아이콘/.test(decodeURIComponent(location.href))) return;
+    if (document.querySelector('.bj-chpi7430-self-card, a[href*="bj_variant=self"]')) return;
+    var list = document.querySelector('.prod_list');
+    if (!list) return;
+    var base = list.querySelector('a[href*="/prod_view/28310"], a[href*="/prod_view/28309"]');
+    if (!base) return;
+    var tmp = document.createElement('div');
+    tmp.innerHTML = cardHtml();
+    var card = tmp.firstChild;
+    var baseItem = base.closest('.item');
+    if (baseItem && baseItem.parentNode) baseItem.parentNode.insertBefore(card, baseItem);
+    else list.insertBefore(card, list.firstChild);
+  }
+  ready(function(){
+    applySelfDetail();
+    ensureSelfCard();
+    var tries = 0;
+    var iv = setInterval(function(){
+      applySelfDetail();
+      ensureSelfCard();
+      tries += 1;
+      if (tries > 20) clearInterval(iv);
+    }, 500);
+  });
+})();
