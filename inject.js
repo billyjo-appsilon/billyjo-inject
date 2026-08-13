@@ -740,10 +740,41 @@
               document.querySelector('meta[property="og:image"]');
     return img ? (img.getAttribute('content') || img.getAttribute('src')) : '';
   }
+  var LP_TOKEN_NAMES = {
+    p1: '쿠쿠 얼음냉온정수기 CP-AQS100EWH',
+    p2: 'SK MEGA ICE 얼음정수기 WPUIAC606',
+    p3: '코웨이 얼음냉온정수기 CHPI-7400N',
+    p4: '코웨이 얼음냉온정수기 CHPI-620L',
+    p5: '청호나이스 얼음냉온정수기 WI-36C90620N',
+    p6: '코웨이 얼음냉온정수기 CHPI-5801L',
+    p7: '코웨이 냉온정수기 CHP-6340L',
+    p8: '코웨이 냉온정수기 CHP-7212N',
+    p9: 'LG 냉온정수기 WU923A',
+    p10: '청호나이스 냉온정수기 WP-30S50010N',
+    p11: 'SK매직 냉온정수기 WPU-B610F',
+    p12: 'LG 퓨리케어 AI 오브제컬렉션 냉동얼음정수기 WD724R',
+    p13: '삼성 냉정수기 RWP54220BF',
+    p14: 'SK매직 얼음냉온정수기 WPU-IC110F',
+    p15: '코웨이 정수전용 P-6320L',
+    p16: '쿠쿠 냉온정수기 CP-W602HW',
+    x1: 'LG 공기청정기 48평형 AS480BWFA',
+    x2: '코웨이 노블 공기청정기 AP-3021D',
+    x3: '청호나이스 하이마운틴 공기청정기 AP-40H8220',
+    x4: '삼성 공기청정기 30평형 AP90H10163EDD',
+    x5: '코웨이 더 매너 비데 플러스 BAS51-A',
+    x6: '웰스 자동살균 비데 BM750',
+    x7: 'SK매직 항균 비데 BID096',
+    x8: '쿠쿠 트리플케어8 비데 CBT-QSB1041W',
+    x9: 'LG 휘센 오브제컬렉션 제습기 20L DQ205PEGA',
+    x10: '코웨이 인버터 제습기 23L AD-2325C'
+  };
   function lpTokens(){
     try {
       var raw = new URLSearchParams(location.search || '').get('bj_lp_products') || '';
-      return raw.split(',').map(function(s){ return decodeURIComponent(String(s || '').replace(/\+/g, ' ')).trim(); }).filter(Boolean).slice(0, 8);
+      return raw.split(',').map(function(s){
+        var token = decodeURIComponent(String(s || '').replace(/\+/g, ' ')).trim();
+        return LP_TOKEN_NAMES[token] || token;
+      }).filter(Boolean).slice(0, 8);
     } catch(_) { return []; }
   }
   function norm(s){ return String(s || '').toLowerCase().replace(/\s+/g, '').replace(/[()·_\-]/g, ''); }
