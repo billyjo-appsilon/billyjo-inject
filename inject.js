@@ -706,7 +706,8 @@
     pendingProceed: null,
     pendingOpen: false,
     countdownUntil: null,
-    active: false
+    active: false,
+    ready: false
   };
 
   function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
@@ -1226,6 +1227,7 @@
     if (box.querySelector('.bj-do-intro')) return;
     var overlay = document.createElement('div');
     overlay.className = 'bj-do-intro';
+    overlay.setAttribute('data-keep-until-ready', keepUntilReady ? '1' : '0');
     overlay.innerHTML =
       '<div class="bj-do-intro-ring"><span class="bj-do-intro-num">0</span></div>' +
       '<div class="bj-do-intro-title">다이렉트 10,000쿠폰 발급 중</div>' +
@@ -1239,17 +1241,31 @@
       if (!document.body.contains(overlay)) return;
       var k = Math.min(1, (Date.now() - start) / dur);
       var eased = 1 - Math.pow(1 - k, 3);
-      var v = Math.round(eased * 100);
+      var v = Math.round(eased * (keepUntilReady ? 95 : 100));
       ring.style.setProperty('--p', v);
       num.textContent = String(v);
-      if (k < 1) requestAnimationFrame(tick);
+      if (overlay.getAttribute('data-ready') === '1') return;
+      if (k < 1 || keepUntilReady) requestAnimationFrame(tick);
       else if (!keepUntilReady) setTimeout(function(){ try { overlay.remove(); } catch(_){} }, 180);
     })();
   }
   function hideIntroLoading(){
     var overlay = document.querySelector('#bj-do-box .bj-do-intro');
     if (!overlay) return;
-    setTimeout(function(){ try { overlay.remove(); } catch(_){} }, 180);
+    overlay.setAttribute('data-ready', '1');
+    var ring = overlay.querySelector('.bj-do-intro-ring');
+    var num = overlay.querySelector('.bj-do-intro-num');
+    var start = Date.now();
+    var dur = 240;
+    (function finish(){
+      if (!document.body.contains(overlay)) return;
+      var k = Math.min(1, (Date.now() - start) / dur);
+      var v = Math.round(95 + (5 * k));
+      if (ring) ring.style.setProperty('--p', v);
+      if (num) num.textContent = String(v);
+      if (k < 1) requestAnimationFrame(finish);
+      else setTimeout(function(){ try { overlay.remove(); } catch(_){} }, 120);
+    })();
   }
   window.__bjDirectOfferOpen = function(proceed){
     if (!state.cfg || !state.current) {
@@ -1267,7 +1283,7 @@
       return true;
     }
     state.pendingOpen = false;
-    return openModal(proceed);
+    return openModal(proceed, { keepIntro: isDirectApplyQuery() && !state.ready });
   };
   document.addEventListener('click', function(e){
     var t = e.target;
@@ -1331,6 +1347,7 @@
     loadCfg().then(function(cfg){
       if (!cfg) { state.active = false; return; }
       state.cfg = cfg;
+      state.ready = false;
       injectStyles();
       Promise.all([loadProducts(), loadCurrentProduct()]).then(function(r){
         state.cats = r[0] || [];
@@ -1338,6 +1355,7 @@
         ensureLpSelected();
         if (!state.current) { state.active = false; return; }
         state.active = true;
+        state.ready = true;
         mountTopBar();
         mountFab();
         scheduleActivity(true);
