@@ -12555,16 +12555,17 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '</a></div></div>';
   }
   function ensureSelfCard(){
-    if (!/CHPI-7430N|7430|아이콘/.test(decodeURIComponent(location.href))) return;
+    var waterList = location.pathname.indexOf('/html/dh_prod/prod_list/1-8') !== -1;
+    if (!waterList && !/CHPI-7430N|7430|아이콘/.test(decodeURIComponent(location.href))) return;
     if (document.querySelector('.bj-chpi7430-self-card, a[href*="bj_variant=self"]')) return;
     var list = document.querySelector('.prod_list');
     if (!list) return;
     var base = list.querySelector('a[href*="/prod_view/28310"], a[href*="/prod_view/28309"]');
-    if (!base) return;
+    if (!base && !waterList) return;
     var tmp = document.createElement('div');
     tmp.innerHTML = cardHtml();
     var card = tmp.firstChild;
-    var baseItem = base.closest('.item');
+    var baseItem = base && base.closest('.item');
     if (baseItem && baseItem.parentNode) baseItem.parentNode.insertBefore(card, baseItem);
     else list.insertBefore(card, list.firstChild);
   }
