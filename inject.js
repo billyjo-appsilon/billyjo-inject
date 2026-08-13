@@ -7142,6 +7142,86 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   [400, 1200, 3000].forEach(function(d){ setTimeout(apply, d); });
 })();
 
+/* =============================================================================
+ * 홈 모바일 CTA + 혜택 금액 강조 (2026-08-14)
+ *   - 카카오 플로팅 재도입 없이 무료상담/시크릿 패키지 접근성만 보강
+ *   - 58만원 상당 같은 전환 훅은 텍스트 노드 기준으로 안전하게 강조
+ * ========================================================================== */
+(function billyjoHomeConversionNudge(){
+  function isHome(){
+    var p = (location.pathname || '/').replace(/\/+$/, '') || '/';
+    return p === '/' || p === '/index.html';
+  }
+  function ensureStyle(){
+    if (document.getElementById('bj-home-conversion-nudge-css')) return;
+    var s = document.createElement('style');
+    s.id = 'bj-home-conversion-nudge-css';
+    s.textContent =
+      '.bj-benefit-amount{display:inline-block;color:#0838f8!important;font-weight:950!important;font-size:1.22em!important;line-height:1.05!important;letter-spacing:0!important;text-shadow:0 5px 15px rgba(8,56,248,.14)}' +
+      '#bj-home-mobile-cta{position:fixed;left:10px;right:10px;bottom:10px;z-index:99998;display:none;grid-template-columns:1fr 1fr;gap:8px;padding:8px;border:1px solid rgba(8,56,248,.16);border-radius:16px;background:rgba(255,255,255,.96);box-shadow:0 16px 36px rgba(15,23,42,.18);backdrop-filter:blur(14px);font-family:Pretendard,Arial,sans-serif}' +
+      '#bj-home-mobile-cta button{appearance:none;border:0;border-radius:12px;min-height:46px;padding:9px 10px;font:900 13px/1.18 Pretendard,Arial,sans-serif;letter-spacing:0;cursor:pointer;word-break:keep-all}' +
+      '#bj-home-mobile-cta .bj-home-cta-consult{background:#0838f8;color:#fff;box-shadow:0 8px 18px rgba(8,56,248,.24)}' +
+      '#bj-home-mobile-cta .bj-home-cta-secret{background:#fff7d6;color:#3b2a00;border:1px solid #ffe27a}' +
+      '@media(max-width:767px){body.bj-home-cta-on{padding-bottom:78px!important}#bj-home-mobile-cta{display:grid}#bj-v5-injected .lead{font-size:20px!important;line-height:1.45!important;word-break:keep-all}#bj-v5-injected .diff-card .t{font-size:15px!important;line-height:1.45!important;font-weight:800!important}#bj-v5-injected .diff-card .d,#bj-v5-injected .review-item p,#bj-v5-injected .highlight-bar,#bj-v5-injected .bj-home-faq-answer{font-size:14px!important;line-height:1.62!important}#bj-v5-injected .bj-trust-cta{font-size:15px!important;min-height:50px!important}.bj-benefit-amount{font-size:1.34em!important}}' +
+      '@media(min-width:768px){#bj-v5-injected .bj-trust-cta{font-size:16px!important;min-height:50px!important}}';
+    (document.head || document.documentElement).appendChild(s);
+  }
+  function openSecret(){
+    if (typeof window.bjOpenSecretPackage === 'function') window.bjOpenSecretPackage();
+    else if (window.bjPersona) window.bjPersona.open({ style:'curation', origin:'시크릿 1:1 패키지' });
+  }
+  function mountCta(){
+    if (!isHome() || document.getElementById('bj-home-mobile-cta')) return;
+    var bar = document.createElement('div');
+    bar.id = 'bj-home-mobile-cta';
+    bar.setAttribute('aria-label', '빠른 상담 신청');
+    bar.innerHTML =
+      '<button type="button" class="bj-home-cta-secret">시크릿 1:1 패키지</button>' +
+      '<button type="button" class="bj-home-cta-consult" data-bj-consult>무료 상담 신청</button>';
+    document.body.appendChild(bar);
+    document.body.classList.add('bj-home-cta-on');
+    var secret = bar.querySelector('.bj-home-cta-secret');
+    if (secret) secret.addEventListener('click', function(e){ e.preventDefault(); openSecret(); });
+  }
+  function highlightAmounts(){
+    if (!isHome()) return;
+    var root = document.getElementById('bj-v5-injected') || document.body;
+    if (!root || root.getAttribute('data-bj-benefit-highlighted')) return;
+    root.setAttribute('data-bj-benefit-highlighted', '1');
+    var re = /(58\s*만원(?:\s*상당)?|580,?000\s*원?)/g;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function(node){
+        var p = node.parentNode;
+        if (!p || (p.closest && p.closest('script,style,.bj-benefit-amount'))) return NodeFilter.FILTER_REJECT;
+        re.lastIndex = 0;
+        return re.test(node.nodeValue || '') ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+      }
+    });
+    var nodes = [];
+    while (walker.nextNode()) nodes.push(walker.currentNode);
+    nodes.forEach(function(node){
+      var text = node.nodeValue || '';
+      re.lastIndex = 0;
+      var frag = document.createDocumentFragment();
+      var last = 0, m;
+      while ((m = re.exec(text))) {
+        if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+        var span = document.createElement('span');
+        span.className = 'bj-benefit-amount';
+        span.textContent = m[0];
+        frag.appendChild(span);
+        last = m.index + m[0].length;
+      }
+      if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+      node.parentNode.replaceChild(frag, node);
+    });
+  }
+  function run(){ ensureStyle(); mountCta(); highlightAmounts(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+  [500, 1500, 3500].forEach(function(d){ setTimeout(run, d); });
+})();
+
 })();
 
 
@@ -9151,7 +9231,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     function finish(answers){ try { back.remove(); } catch(_){} done(answers); }
     box.querySelector('.bjpw-x').addEventListener('click', function(){ finish(null); });
     box.querySelector('.bjpw-skip').addEventListener('click', function(){ finish(null); });
-    back.addEventListener('click', function(e){ if (e.target === back) finish(null); });
+    /* 시크릿 1:1 패키지는 실수로 바깥을 눌러도 닫히지 않게 한다.
+       닫기는 X 또는 건너뛰기처럼 명확한 버튼으로만 허용. */
 
     // 칩 선택 (single=단일, multi=복수)
     Array.prototype.forEach.call(box.querySelectorAll('.bjpw-f'), function(fEl){
