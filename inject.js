@@ -7187,7 +7187,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (!isHome()) return;
     var root = document.getElementById('bj-v5-injected') || document.body;
     if (!root || root.getAttribute('data-bj-benefit-highlighted')) return;
-    root.setAttribute('data-bj-benefit-highlighted', '1');
     var re = /(58\s*만원(?:\s*상당)?|580,?000\s*원?)/g;
     var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
       acceptNode: function(node){
@@ -7199,6 +7198,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     });
     var nodes = [];
     while (walker.nextNode()) nodes.push(walker.currentNode);
+    if (!nodes.length) return;
+    root.setAttribute('data-bj-benefit-highlighted', '1');
     nodes.forEach(function(node){
       var text = node.nodeValue || '';
       re.lastIndex = 0;
