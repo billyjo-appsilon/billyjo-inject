@@ -7479,7 +7479,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '    -webkit-overflow-scrolling:touch;',
       '    scrollbar-width:none; -ms-overflow-style:none;',
       '    justify-content:flex-start !important; align-items:center !important;',
-      '    padding:4px 16px 8px !important; gap:18px !important;',
+      '    padding:3px 16px 6px !important; gap:18px !important;',
       '    white-space:nowrap !important; line-height:normal !important;',
       '    height:auto !important; max-height:none !important;',
       '    text-align:left !important;',
@@ -7510,7 +7510,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       // (2) 헤더 햄버거 + 로고 정렬 (룰북 #21) — specificity 강화
       '  header.new-header .header__top, header .header__top.header__top, body .header__top{',
       '    display:flex !important; align-items:center !important;',
-      '    padding:8px 12px !important; gap:0 !important;',
+      '    height:auto !important; min-height:0 !important;',
+      '    padding:5px 12px !important; gap:0 !important;',
       '    overflow:hidden !important;',
       '  }',
       '  header .gnb__hamburger.gnb__hamburger, body .gnb__hamburger{',
@@ -7541,7 +7542,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '    box-shadow:-18px 0 0 0 #fff !important;', /* 좌측 패딩에 카테고리 글자 비침 방지 */
       '  }',
       '  header .logo.logo, body .logo{ flex:0 1 auto !important; max-width:38vw !important; overflow:hidden !important; }',
-      '  header .logo img{ max-width:100% !important; height:26px !important; object-fit:contain !important; }',
+      '  header .logo img{ max-width:100% !important; height:24px !important; object-fit:contain !important; }',
       // (3) PC GNB 우측(.bj-inj-right) 모바일·태블릿 hide — 이벤트·고객센터·장바구니·search
       //     이미 위 헤더에 #bj-header-icons로 동일 기능 제공됨. 고객센터는 하단 상담버튼.
       '  .bj-inj-right, header .bj-inj-right, header.new-header .bj-inj-right{',
@@ -7552,7 +7553,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       // 협소(≤400px)
       '  @media (max-width:400px){',
       '    .logo{ max-width:32vw !important }',
-      '    .logo img{ height:24px !important }',
+      '    .logo img{ height:23px !important }',
       '  }',
       '}',
     ].join('\n');
@@ -7563,7 +7564,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (document.querySelector('#bj-mobile-cat-style')) return;
     var s2 = document.createElement('style');
     s2.id = 'bj-mobile-cat-style';
-    s2.textContent = '@media (max-width:768px){.mobile__gnb .gnb__cateogry .category__wrap,.category__wrap{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;justify-content:flex-start !important;align-items:center !important;padding:10px 16px 12px !important;gap:18px !important;white-space:nowrap !important;height:auto !important}.category__wrap > *{flex:0 0 auto !important}}';
+    s2.textContent = '@media (max-width:768px){.mobile__gnb .gnb__cateogry .category__wrap,.category__wrap{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;justify-content:flex-start !important;align-items:center !important;padding:3px 16px 6px !important;gap:18px !important;white-space:nowrap !important;height:auto !important}.category__wrap > *{flex:0 0 auto !important}}';
     document.head.appendChild(s2);
   });
 
@@ -7657,7 +7658,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '  }',
     '  header.new-header .header__top{',
     '    display:flex !important; align-items:center !important;',
-    '    gap:0 !important; padding:8px 12px !important;',
+    '    gap:0 !important; height:auto !important; min-height:0 !important;',
+    '    padding:5px 12px !important;',
     '    flex-wrap:nowrap !important; background:#fff !important;',
     '    border-bottom:1px solid #eee !important; position:relative !important;',
     '    min-width:0 !important; overflow:hidden;',
@@ -7673,7 +7675,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '    overflow:hidden !important;',
     '  }',
     '  header.new-header .header__top .logo img{',
-    '    height:26px !important; width:auto !important; max-width:100% !important;',
+    '    height:24px !important; width:auto !important; max-width:100% !important;',
     '    display:block !important; object-fit:contain;',
     '  }',
     '  header.new-header .header__top .top__right{ display:none !important }',
@@ -7704,7 +7706,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '    -webkit-overflow-scrolling:touch;',
     '    scrollbar-width:none; -ms-overflow-style:none;',
     '    justify-content:flex-start !important; align-items:center !important;',
-    '    padding:10px 16px 12px !important; gap:18px !important;',
+    '    padding:3px 16px 6px !important; gap:18px !important;',
     '    white-space:nowrap !important; line-height:normal !important;',
     '    height:auto !important; max-height:none !important;',
     '    text-align:left !important;',
@@ -7790,10 +7792,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '    max-width:28vw;',
     '  }',
     '  header.new-header .header__top .logo{ max-width:32vw !important }',
-    '  header.new-header .header__top .logo img{ height:24px !important }',
+    '  header.new-header .header__top .logo img{ height:23px !important }',
     '}',
     '@media (max-width:360px){',
-    '  header.new-header .header__top{ padding:8px 10px !important }',
+    '  header.new-header .header__top{ padding:5px 10px !important }',
     '  header.new-header ul#bj-header-icons{ gap:5px !important }',
     '  header.new-header ul#bj-header-icons li a[style*="ff3700"]{ max-width:90px }',
     '  header.new-header ul#bj-header-icons li img{ height:18px !important }',
