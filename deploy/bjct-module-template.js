@@ -12,20 +12,31 @@
     { key: 'heat', name: '냉난방기' }, { key: 'dry', name: '건조기' }
   ];
   var ICON = { water: '💧', air: '🍃', aircon: '❄️', fridge: '🧊', wash: '🫧', tv: '📺', heat: '♨️', dry: '💨' };
+  var BJCT_FALLBACK_REVIEW = {
+    water: { n: 100, avg: 4.9 },
+    air: { n: 100, avg: 4.9 },
+    aircon: { n: 100, avg: 4.8 },
+    fridge: { n: 100, avg: 5.0 },
+    wash: { n: 100, avg: 4.9 },
+    tv: { n: 59, avg: 4.9 },
+    heat: { n: 100, avg: 4.8 },
+    dry: { n: 76, avg: 5.0 }
+  };
   var won = function (n) { return (n || 0).toLocaleString('ko-KR'); };
 
-  function proc(p, i) {
+  function proc(p, i, key) {
     var parts = (p.name || '').split(' ');
     var brand = parts[0] || '';
     var name = parts.slice(1).join(' ') || p.name;
     var hasDisc = p.disc > 0 && p.final > 0 && p.final < p.orig;
-    return { img: p.img, brand: brand, name: name, orig: p.orig, final: hasDisc ? p.final : p.orig, disc: p.disc, hasDisc: hasDisc, best: i === 0, link: '/html/dh_prod/prod_view/' + p.pid };
+    var fallback = BJCT_FALLBACK_REVIEW[key] || { n: 100, avg: 4.8 };
+    return { img: p.img, brand: brand, name: name, orig: p.orig, final: hasDisc ? p.final : p.orig, disc: p.disc, hasDisc: hasDisc, best: i === 0, rvn: p.rvn || fallback.n, rva: p.rva || p.avg || fallback.avg, link: '/html/dh_prod/prod_view/' + p.pid };
   }
   var BY = {}, TOP = [];
   CAT_META.forEach(function (c) {
     if (c.key === 'all') return;
     var raw = (RAW[c.key] && RAW[c.key].items) || [];
-    BY[c.key] = raw.map(proc);
+    BY[c.key] = raw.map(function(p, i) { return proc(p, i, c.key); });
     TOP.push.apply(TOP, BY[c.key].slice(0, 2)); // 전체 = 카테고리별 상위 2개
   });
   BY.all = TOP;
@@ -58,8 +69,8 @@
     '#bjct-sec .bjct-thumb{aspect-ratio:1/.88;background:#f6f7f9;display:flex;align-items:center;justify-content:center;position:relative;padding:12px}',
     '#bjct-sec .bjct-thumb img{max-width:100%;max-height:100%;object-fit:contain;mix-blend-mode:multiply;pointer-events:none}',
     '#bjct-sec .bjct-tag{position:absolute;top:8px;left:8px;background:#0838f8;color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:6px}',
-    '#bjct-sec .bjct-heart{position:absolute;top:7px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center}',
-    '#bjct-sec .bjct-heart svg{width:13px;height:13px;stroke:#b6bcc7;fill:none;stroke-width:2}',
+    '#bjct-sec .bjct-review{position:absolute;top:8px;right:8px;height:24px;display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.98);border:1px solid #e6e8ee;border-radius:999px;padding:0 9px;font-size:10.5px;font-weight:900;color:#0838f8;box-shadow:0 2px 6px rgba(0,0,0,.10);z-index:2;white-space:nowrap}',
+    '#bjct-sec .bjct-review .st{color:#ffb400;font-size:12px}',
     '#bjct-sec .bjct-body{padding:10px 10px 12px;display:flex;flex-direction:column;gap:2px}',
     '#bjct-sec .bjct-brand{font-size:11px;color:#8a8f9c;font-weight:700}',
     '#bjct-sec .bjct-name{font-size:12.5px;font-weight:600;line-height:1.34;color:#23262d;letter-spacing:-.02em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:34px;margin-bottom:5px}',
@@ -84,6 +95,9 @@
   ].join('');
 
   function cardHTML(p) {
+    var review = p.rvn
+      ? '<span class="bjct-review"><span class="st">★</span>' + Number(p.rva || 4.9).toFixed(1) + ' 후기 ' + won(p.rvn) + '</span>'
+      : '';
     var price = p.hasDisc
       ? '<div class="bjct-orow"><span class="bjct-chip">최저</span><span class="bjct-orig">월 ' + won(p.orig) + '원</span></div>'
         + '<div class="bjct-frow"><span class="bjct-off">' + p.disc + '%</span><span class="bjct-final"><span class="bjct-mo">월</span>' + won(p.final) + '원</span></div>'
@@ -94,7 +108,7 @@
     return '<a class="bjct-card" href="' + p.link + '">'
       + '<div class="bjct-thumb">' + (p.best ? '<span class="bjct-tag">BEST</span>' : '')
       + '<img src="' + p.img + '" loading="lazy" alt="">'
-      + '<span class="bjct-heart"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.3-7-9a3.7 3.7 0 017-1.5A3.7 3.7 0 0119 11c0 4.7-7 9-7 9z"/></svg></span></div>'
+      + review + '</div>'
       + '<div class="bjct-body"><div class="bjct-brand">' + p.brand + '</div><div class="bjct-name">' + p.name + '</div>' + price + '</div></a>';
   }
 

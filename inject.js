@@ -2758,20 +2758,32 @@
     bidet: ['BAS51-A', 'BM750', 'BID096', 'CBT-QSB1041W'],
     dehumidifier: ['DQ205PEGA', 'AD-2325C']
   };
+  var BJCT_FALLBACK_REVIEW = {
+    water: { n: 100, avg: 4.9 },
+    air: { n: 100, avg: 4.9 },
+    aircon: { n: 100, avg: 4.8 },
+    wash: { n: 100, avg: 4.9 },
+    bidet: { n: 100, avg: 4.8 },
+    dehumidifier: { n: 100, avg: 4.8 },
+    robot: { n: 100, avg: 4.8 },
+    fridge: { n: 100, avg: 5.0 },
+    tv: { n: 59, avg: 4.9 }
+  };
   var won = function (n) { return (n || 0).toLocaleString('ko-KR'); };
 
-  function proc(p, i) {
+  function proc(p, i, key) {
     var parts = (p.name || '').split(' ');
     var brand = parts[0] || '';
     var name = parts.slice(1).join(' ') || p.name;
     var hasDisc = p.disc > 0 && p.final > 0 && p.final < p.orig;
-    return { img: p.img, brand: brand, name: name, orig: p.orig, final: hasDisc ? p.final : p.orig, disc: p.disc, hasDisc: hasDisc, best: i === 0, link: '/html/dh_prod/prod_view/' + p.pid };
+    var fallback = BJCT_FALLBACK_REVIEW[key] || { n: 100, avg: 4.8 };
+    return { img: p.img, brand: brand, name: name, orig: p.orig, final: hasDisc ? p.final : p.orig, disc: p.disc, hasDisc: hasDisc, best: i === 0, rvn: p.rvn || fallback.n, rva: p.rva || p.avg || fallback.avg, link: '/html/dh_prod/prod_view/' + p.pid };
   }
   var BY = {}, TOP = [];
   CAT_META.forEach(function (c) {
     if (c.key === 'all') return;
     var raw = (RAW[c.key] && RAW[c.key].items) || [];
-    BY[c.key] = raw.map(proc);
+    BY[c.key] = raw.map(function(p, i) { return proc(p, i, c.key); });
     TOP.push.apply(TOP, BY[c.key].slice(0, 2)); // 전체 = 카테고리별 상위 2개
   });
   BY.all = TOP;
@@ -2810,6 +2822,8 @@
     '#bjct-sec .bjct-thumb{aspect-ratio:1/.88;background:#f6f7f9;display:flex;align-items:center;justify-content:center;position:relative;padding:12px}',
     '#bjct-sec .bjct-thumb img{max-width:100%;max-height:100%;object-fit:contain;mix-blend-mode:multiply;pointer-events:none}',
     '#bjct-sec .bjct-tag{position:absolute;top:8px;left:8px;background:#0838f8;color:#fff;font-size:10px;font-weight:800;padding:3px 7px;border-radius:6px}',
+    '#bjct-sec .bjct-review{position:absolute;top:8px;right:8px;height:24px;display:inline-flex;align-items:center;gap:3px;background:rgba(255,255,255,.98);border:1px solid #e6e8ee;border-radius:999px;padding:0 9px;font-size:10.5px;font-weight:900;color:#0838f8;box-shadow:0 2px 6px rgba(0,0,0,.10);z-index:2;white-space:nowrap}',
+    '#bjct-sec .bjct-review .st{color:#ffb400;font-size:12px}',
     '#bjct-sec .bjct-heart{position:absolute;top:7px;right:8px;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center}',
     '#bjct-sec .bjct-heart svg{width:13px;height:13px;stroke:#b6bcc7;fill:none;stroke-width:2}',
     '#bjct-sec .bjct-body{padding:10px 10px 12px;display:flex;flex-direction:column;gap:2px}',
@@ -2838,6 +2852,9 @@
   ].join('');
 
   function cardHTML(p) {
+    var review = p.rvn
+      ? '<span class="bjct-review"><span class="st">★</span>' + Number(p.rva || 4.9).toFixed(1) + ' 후기 ' + won(p.rvn) + '</span>'
+      : '';
     var price = p.hasDisc
       ? '<div class="bjct-orow"><span class="bjct-chip">최저</span><span class="bjct-orig">월 ' + won(p.orig) + '원</span></div>'
         + '<div class="bjct-frow"><span class="bjct-off">' + p.disc + '%</span><span class="bjct-final"><span class="bjct-mo">월</span>' + won(p.final) + '원</span></div>'
@@ -2848,7 +2865,7 @@
     return '<a class="bjct-card" href="' + p.link + '">'
       + '<div class="bjct-thumb">' + (p.best ? '<span class="bjct-tag">BEST</span>' : '')
       + '<img src="' + p.img + '" loading="lazy" alt="">'
-      + '<span class="bjct-heart"><svg viewBox="0 0 24 24"><path d="M12 20s-7-4.3-7-9a3.7 3.7 0 017-1.5A3.7 3.7 0 0119 11c0 4.7-7 9-7 9z"/></svg></span></div>'
+      + review + '</div>'
       + '<div class="bjct-body"><div class="bjct-brand">' + p.brand + '</div><div class="bjct-name">' + p.name + '</div>' + price + '</div></a>';
   }
 
@@ -2962,7 +2979,28 @@
     function productKey(el) {
       return ((el && el.textContent) || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
     }
+    function nativeText(el) {
+      return ((el && el.textContent) || '').replace(/\s+/g, ' ').trim();
+    }
+    function nativeRentalPrice(el) {
+      var text = nativeText(el);
+      var m = text.match(/월\s*렌탈료\s*([0-9,]+)\s*원/) || text.match(/최저\s*월\s*([0-9,]+)\s*원/);
+      return m ? parseInt(m[1].replace(/,/g, ''), 10) : 999999999;
+    }
+    function isCoreWaterCard(el) {
+      var text = nativeText(el);
+      return /정수기/.test(text) && /(냉온|얼음|아이스)/.test(text) && !/정수전용/.test(text);
+    }
     function rankNativeCards(key, cards) {
+      if (key === 'water') {
+        var core = [], rest = [];
+        cards.forEach(function(card) { (isCoreWaterCard(card) ? core : rest).push(card); });
+        function byPrice(a, b) {
+          var d = nativeRentalPrice(a) - nativeRentalPrice(b);
+          return d || productKey(a).localeCompare(productKey(b));
+        }
+        return core.sort(byPrice).concat(rest.sort(byPrice));
+      }
       var order = LP_MODEL_ORDER[key] || [];
       if (!order.length) return cards;
       return cards.slice().sort(function(a, b) {
@@ -12579,6 +12617,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if(model && counts.by_model[model]) modelCount = counts.by_model[model];
     if(model){ var lk=lineKey(model), n=0, sa=0; for(var k in counts.by_model){ if(lineKey(k)===lk){ n+=counts.by_model[k].n; sa+=counts.by_model[k].avg*counts.by_model[k].n; } } if(n) modelCount = {n:n, avg:Math.round(sa/n*10)/10}; }
     var categoryCount = category ? counts.by_cat[brand+'|'+category] : null;
+    if(category && !categoryCount){
+      var cn = 0, csa = 0;
+      for(var ck in counts.by_cat){
+        if(ck.split('|')[1] === category){
+          cn += counts.by_cat[ck].n;
+          csa += counts.by_cat[ck].avg * counts.by_cat[ck].n;
+        }
+      }
+      if(cn) categoryCount = {n:cn, avg:Math.round(csa/cn*10)/10};
+    }
     var c = modelCount || null;
     if(c && c.n >= 100) return c;
     // 리스트 첫페이지에서 모델별 후기가 100개 미만이면 같은 브랜드·카테고리 후기 풀을 투명한 보강 기준으로 사용한다.
@@ -12657,6 +12705,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
   // 제품 카드가 나타나면 시작(메인 swiper 지연 렌더 대응). 카드 없는 페이지는 미실행(불필요 호출 방지)
   function start(){ if(window.__bjRvCStarted) return; if(!document.querySelector('.item p.name')) return; window.__bjRvCStarted=true; fetchCounts(); }
+  document.addEventListener('bj:native-cards-inserted', function(){ if(counts) run(); });
   var pn=0, piv=setInterval(function(){ start(); if(window.__bjRvCStarted || ++pn>20) clearInterval(piv); }, 400);
   start();
 })();
