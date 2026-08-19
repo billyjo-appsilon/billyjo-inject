@@ -10517,13 +10517,14 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var boxes = Array.from(li.querySelectorAll('.month_box'));
       var terms = boxes.map(function(b){
         var price = b.dataset.price || ((b.querySelector('.fz16')||{}).textContent || '').replace(/[^\d,]/g,'');
-        var dcprice = b.dataset.dcprice || '0';  /* 카드할인 적용 후 금액 (있으면) */
+        var hasCardPrice = b.hasAttribute('data-dcprice') && String(b.dataset.card_dis || '').trim() !== 'N';
+        var dcprice = b.dataset.dcprice || '0';  /* 카드할인 적용 후 금액 (0원도 유효) */
         var cardDis = b.dataset.card_dis || '0';  /* 카드할인 액수 */
         var priceNum = digits(price);
         var dcNum = digits(dcprice);
         var cardDisNum = digits(cardDis);
-        /* 최종 월 부담액: dcprice가 있고 0보다 크면 그것, 아니면 price - cardDis 추정, 아니면 price */
-        var effective = dcNum > 0 ? dcNum :
+        /* 최종 월 부담액: 명시적 dcprice가 있으면 0원도 그대로 쓴다. */
+        var effective = hasCardPrice ? dcNum :
                         (cardDisNum > 0 && cardDisNum < priceNum) ? (priceNum - cardDisNum) :
                         priceNum;
         return {
@@ -10536,6 +10537,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           dcNum: dcNum,
           cardDis: cardDis,
           cardDisNum: cardDisNum,
+          hasCardPrice: hasCardPrice,
           effective: effective,    /* 가성비 비교의 기준 — 카드할인 적용 후 월 부담액 */
           supname: b.dataset.supname,
           supcode: b.dataset.supcode,
@@ -10590,7 +10592,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
               dcNum: dcNum,
               cardDis: '0',
               cardDisNum: 0,
-              effective: dcNum > 0 ? dcNum : priceNum,
+              hasCardPrice: dcNum >= 0 && !!r.dcPrice,
+              effective: (dcNum >= 0 && !!r.dcPrice) ? dcNum : priceNum,
               supname: sup.name,
               supcode: null,
               isWarrantyTransfer: true,
@@ -10605,7 +10608,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var bestSupIdx = 0, bestTermIdx = 0, bestEff = Infinity, bestMonths = Infinity;
     suppliers.forEach(function(s, si){
       s.terms.forEach(function(t, ti){
-        if (t.effective <= 0) return;
+        if (t.effective < 0 || (!t.hasCardPrice && t.effective === 0)) return;
         /* underlying 없는 약정(타사보상)은 기본 선택에서 제외 — 주문폼에 실을 수 없어
            "화면 가격 ≠ 접수 가격"이 된다. pill 로는 계속 보여주되 기본값은 주문 가능한 것만. */
         if (!t.el) return;
@@ -10670,7 +10673,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
                1행: 최저가 배지 + 약정 기간
                2행: 카드할인 있으면 [카드 N · 정가 M(strike)], 없으면 [정가 N]
                기존 색상만으로 구분이 어려웠던 문제 해소. */
-            var hasCardDc = t.effective > 0 && t.effective < t.priceNum;
+            var hasCardDc = t.hasCardPrice && t.effective < t.priceNum;
             var bestBadge = t.isBest ? '<span class="bj-ws-best-badge">최저가</span>' : '';
             var priceRow;
             if (hasCardDc) {
@@ -10698,7 +10701,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       /* v0.5.64: 카드할인 있는 약정이 하나라도 있으면 약정 pill 아래 카드 안내 chip 표시.
          v0.5.65: chip href에 현재 active 렌탈사명 ?bj= param 추가 → 이동 페이지에서 해당
          렌탈사 카드 섹션을 맨 위에 강조 표시 (highlightPartnershipCardForProduct). */
-      var hasAnyCardDc = sup.terms.some(function(t){ return t.effective > 0 && t.effective < t.priceNum; });
+      var hasAnyCardDc = sup.terms.some(function(t){ return t.hasCardPrice && t.effective < t.priceNum; });
       var supParam = sup.name ? '?bj=' + encodeURIComponent(sup.name) : '';
       var cardNotice = hasAnyCardDc ?
         '<a href="/html/dh/partnership_card' + supParam + '" class="bj-card-info-chip" target="_blank" rel="noopener">' +
@@ -10733,7 +10736,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
        native 는 상단을 "정가 최저 약정"으로, 위젯은 "카드 적용 후 최저(effective)" 약정으로 잡아
        기준이 서로 달랐다 — 웰스 미미(WP610NWA)에서 상단 17,900 vs 하단 21,900 으로 갈렸다.
        기준은 하단 위젯이다: 고객이 실제로 고르고 주문에 실리는 약정이 거기 있다.
-       카드할인가 칩은 실제 할인이 있을 때만(0 은 음수 잘림이라 숨김 — hideZeroCardPriceChip 과 같은 규칙). */
+       카드할인가 칩은 원천 data-dcprice가 있으면 0원도 실제 할인가로 노출한다. */
     function syncTopChips(term){
       if (!term) return;
       /* 타사보상 약정(term.el === null)도 상단에 그대로 반영한다 — 기준은 위젯이다.
@@ -10745,7 +10748,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         var el = document.querySelector(sel);
         if (el && priceHtml) el.innerHTML = priceHtml;
       });
-      var showCard = term.effective > 0 && term.effective < term.priceNum;
+      var showCard = term.hasCardPrice && term.effective < term.priceNum;
       ['.top_min_price_minus_card', '.top_min_price_minus_card_m'].forEach(function(sel){
         var el = document.querySelector(sel);
         if (!el) return;
@@ -11723,18 +11726,24 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     // (4) PC 가격박스 .fix_price.hide-767 → .prod_name 다음으로 이동
     reorderFixPriceAfterProdName();
 
-    // (5) 상단 "카드할인가 0원" 칩 제거 — 화면마다 값이 갈리던 걸 통일한다
-    hideZeroCardPriceChip();
+    // (5) 상단 카드할인가 0원 보정 — 실제 제휴카드 적용 0원 상품은 숨기지 않는다.
+    normalizeZeroCardPriceChip();
   }
 
-  /* 상단 가격박스의 "카드할인가 0원" 칩을 숨긴다.
-     native prod_view 스크립트가 `$(".org").show(); $(".top_min_price_minus_card").html("0원")` 로
-     dcprice 를 그대로 찍는데, 그 0 은 max(0, 월렌탈료 − 카드최대할인) 의 **음수 잘림**이다
-     (웰스 미미 WP610NWA 17,900 − 20,000 → 0. 같은 제품 21,900 약정은 1,900 으로 정상 게시).
-     같은 제품인데 화면마다 달랐다 — PC 상단만 0원, 목록은 정상가(bj-pz), 모바일 상단은 미노출,
-     광고 랜딩(live·meta)도 정상 렌탈료. PC 상단만 튀는 걸 나머지에 맞춘다.
-     ※ 0 이 아닌 카드할인가(900·2,900·15,400…)는 실제 게시값이므로 그대로 둔다. */
-  function hideZeroCardPriceChip(){
+  /* 상세 상단 가격박스의 카드할인가 0원 처리.
+     2026-08-19 상담/목록 기준: 쿠쿠 CP-WS601HW처럼 제휴카드 적용 시 실제 0원으로
+     안내해야 하는 상품이 있다. 이전에는 0원을 음수 잘림 가능성으로 보고 숨겼지만,
+     month_box 원천 데이터에 data-dcprice="0" + data-card_dis!="N" 이 있으면 유효한 카드
+     적용가로 본다. 이 경우 상세 상단/모바일 상단에서도 0원을 노출한다. */
+  function normalizeZeroCardPriceChip(){
+    var hasValidZeroCardPrice = Array.prototype.some.call(
+      document.querySelectorAll('.month_box[data-dcprice]'),
+      function(a){
+        var dc = parseInt(String(a.getAttribute('data-dcprice') || '').replace(/[^\d]/g, ''), 10);
+        var cardDis = String(a.getAttribute('data-card_dis') || '').trim();
+        return dc === 0 && cardDis !== 'N';
+      }
+    );
     ['.top_min_price_minus_card', '.top_min_price_minus_card_m'].forEach(function(sel){
       var el = document.querySelector(sel);
       if (!el) return;
@@ -11744,6 +11753,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       // 아직 native 스크립트가 값을 안 채웠으면(빈 문자열) 건드리지 않는다 — 다음 tick 에 다시 본다
       if (!/\d/.test(el.textContent || '')) return;
       if (n > 0) { box.removeAttribute('data-bj-zero-card'); return; }
+      if (hasValidZeroCardPrice) {
+        box.style.setProperty('display', 'block', 'important');
+        box.removeAttribute('data-bj-zero-card');
+        return;
+      }
       box.style.setProperty('display', 'none', 'important');
       box.setAttribute('data-bj-zero-card', '1');
     });
