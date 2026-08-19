@@ -2001,15 +2001,40 @@
         "rvn": 429
       },
       {
-        "pid": "18639",
-        "name": "쿠쿠 냉온정수기",
-        "brand": "CP-F603",
-        "img": "https://rentalshop.site/_data/file/goodsImages/748a3f1b124708ebb348d7be86f7541e.png",
-        "orig": 15900,
+        "pid": "18931",
+        "name": "쿠쿠 인스퓨어 냉온정수기 데스크",
+        "brand": "CP-WS601HW",
+        "img": "https://rentalshop.site/_data/file/goodsImages/394d60c2d3888a595a2759ee5f1f98e2.png",
+        "orig": 20900,
         "final": 0,
-        "disc": 0,
+        "disc": 100,
+        "hasCard": true,
         "best": true,
         "rvn": 0
+      },
+      {
+        "pid": "15644",
+        "name": "청호나이스 얼음냉온정수기",
+        "brand": "WI-36C90620N",
+        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/WI-36C90620N/1.png",
+        "orig": 45900,
+        "final": 15900,
+        "disc": 65,
+        "hasCard": true,
+        "best": false,
+        "rvn": 100
+      },
+      {
+        "pid": "33070",
+        "name": "SK매직 얼음냉온정수기",
+        "brand": "WPU-IC110F",
+        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/WPU-IC110F/1.png",
+        "orig": 55900,
+        "final": 30900,
+        "disc": 45,
+        "hasCard": true,
+        "best": false,
+        "rvn": 100
       },
       {
         "pid": "10914",
@@ -2017,43 +2042,34 @@
         "brand": "EWBD351_4개월",
         "img": "https://rentalshop.site/_data/file/goodsImages/8ec4c558dee2a71c8c22bda7ada8bdde.png",
         "orig": 17900,
-        "final": 0,
-        "disc": 0,
-        "best": true,
-        "rvn": 0
-      },
-      {
-        "pid": "10913",
-        "name": "스마트핏 스탠드형 THE슬림 냉온정수기",
-        "brand": "EWBS351_4개월",
-        "img": "https://rentalshop.site/_data/file/goodsImages/20d37208b22c9e0a249ae9e1baf07c5f.png",
-        "orig": 17900,
-        "final": 0,
+        "final": 17900,
         "disc": 0,
         "best": false,
         "rvn": 0
       },
       {
-        "pid": "12955",
-        "name": "코웨이 나노직수 정수기 미니 정수전용",
-        "brand": "P-350N_자가관리",
-        "img": "https://rentalshop.site/_data/file/goodsImages/2d52a5d077ffc3cc6df8a3c0df030eec.png",
-        "orig": 15900,
+        "pid": "27062",
+        "name": "코웨이 아이콘 프로 2.0 냉온정수기",
+        "brand": "CHP-7212N",
+        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/CHP-7212N/1.png",
+        "orig": 29900,
         "final": 0,
-        "disc": 0,
+        "disc": 100,
+        "hasCard": true,
         "best": false,
-        "rvn": 1981
+        "rvn": 100
       },
       {
-        "pid": "18931",
-        "name": "쿠쿠 인스퓨어 냉온정수기 데스크",
-        "brand": "CP-WS601HW",
-        "img": "https://rentalshop.site/_data/file/goodsImages/394d60c2d3888a595a2759ee5f1f98e2.png",
-        "orig": 20900,
-        "final": 0,
-        "disc": 0,
+        "pid": "3061",
+        "name": "SK매직 직수 냉온정수기",
+        "brand": "WPU-B610F",
+        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/WPU-B610F/1.jpg",
+        "orig": 34900,
+        "final": 9900,
+        "disc": 72,
+        "hasCard": true,
         "best": false,
-        "rvn": 0
+        "rvn": 100
       },
       {
         "pid": "20276",
@@ -2063,19 +2079,9 @@
         "orig": 42900,
         "final": 12900,
         "disc": 70,
+        "hasCard": true,
         "best": false,
         "rvn": 0
-      },
-      {
-        "pid": "24579",
-        "name": "코웨이 아이콘 V2 얼음냉온정수기",
-        "brand": "CHPI-7400N_V2 2개월관리 반값할인",
-        "img": "https://rentalshop.site/_data/file/goodsImages/3f2bd3ca3d4473719e559881d6dfcff1.png",
-        "orig": 48400,
-        "final": 18400,
-        "disc": 62,
-        "best": false,
-        "rvn": 429
       }
     ]
   },
@@ -2775,9 +2781,12 @@
     var parts = (p.name || '').split(' ');
     var brand = parts[0] || '';
     var name = parts.slice(1).join(' ') || p.name;
-    var hasDisc = p.disc > 0 && p.final > 0 && p.final < p.orig;
+    var finalPrice = Number(p.final);
+    var origPrice = Number(p.orig);
+    var hasExplicitFinal = Number.isFinite(finalPrice) && finalPrice >= 0;
+    var hasDisc = (p.hasCard === true || Number(p.disc || 0) > 0) && hasExplicitFinal && finalPrice < origPrice;
     var fallback = BJCT_FALLBACK_REVIEW[key] || { n: 100, avg: 4.8 };
-    return { img: p.img, brand: brand, name: name, orig: p.orig, final: hasDisc ? p.final : p.orig, disc: p.disc, hasDisc: hasDisc, best: i === 0, rvn: p.rvn || fallback.n, rva: p.rva || p.avg || fallback.avg, link: '/html/dh_prod/prod_view/' + p.pid };
+    return { img: p.img, brand: brand, name: name, orig: p.orig, final: hasDisc ? finalPrice : p.orig, disc: p.disc, hasDisc: hasDisc, best: i === 0, rvn: p.rvn || fallback.n, rva: p.rva || p.avg || fallback.avg, link: '/html/dh_prod/prod_view/' + p.pid };
   }
   var BY = {}, TOP = [];
   CAT_META.forEach(function (c) {
@@ -3035,6 +3044,10 @@
     function loadNativePanel(i) {
       var c = CAT_META[i], panel = panels[i];
       if (!c || !c.url || panel.getAttribute('data-native-loaded')) return;
+      if (c.key === 'water') {
+        panel.setAttribute('data-native-loaded', 'curated');
+        return;
+      }
       panel.setAttribute('data-native-loaded', 'loading');
       fetch(c.url, { credentials: 'same-origin' })
         .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.text(); })
@@ -4144,6 +4157,18 @@ function bjHeaderMainInit() {
     var BJ_LIST_PRICE_OVERRIDES = {
       // 상세 LPT 기준 보강: 운영 리스트 원본 fee2가 0원으로 내려와 할인 라인이 숨는 핵심 정수기.
       // card = 제휴카드 적용 최종 월액, reward = 타사보상+카드 적용 최종 월액.
+      '18931': { card: 0 },
+      '18639': { card: 0 },
+      '15644': { card: 15900, reward: 29900 },
+      '33070': { card: 30900 },
+      '3061': { card: 9900 },
+      '20276': { card: 12900, reward: 25010 },
+      '24578': { card: 15400, reward: 30860 },
+      '1792': { card: 18900, reward: 34010 },
+      '11303': { card: 0 },
+      '18055': { card: 0, reward: 22900 },
+      '35200': { card: 1900 },
+      '16116': { card: 900, reward: 17810 },
       '27061': { card: 2900, reward: 19610 },
       '27062': { card: 0, reward: 16910 },
       '32099': { card: 1900, reward: 18710 },
@@ -7468,7 +7493,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         /* 다른 카테고리 항목(.category__wrap a = 14px / line-height:1.5 / padding:0)과
            동일한 박스 모델로 맞춰 수직 정렬. 기존 13px·padding:2px·line-height:1.4 차이로
            형제 항목보다 위로 떠 보이던 문제 해소. 브랜드 파랑(#0838F8)만 강조 유지. */
-        link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:1px 8px;margin:0;font:800 14px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:rgba(8,56,248,.055);border:0;border-radius:999px;box-shadow:0 0 0 1px rgba(8,56,248,.12),0 0 13px rgba(8,56,248,.15);white-space:nowrap;cursor:pointer;line-height:1.5';
+        link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:0;margin:0;font:800 14px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:transparent;border:0;border-radius:0;box-shadow:none;white-space:nowrap;cursor:pointer;line-height:1.5';
         link.onclick = function(e){
           e.preventDefault();
           function openWiz(){ if (window.bjPersona) window.bjPersona.open({ style: 'curation', origin: '시크릿 1:1 패키지' }); }
@@ -12082,7 +12107,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     link.className = 'bj-newlywed-cat';
     link.href = '#';
     link.innerHTML = '<span style="margin-right:3px">🎯</span>시크릿 1:1 패키지';
-    link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:1px 8px;font:800 13px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:rgba(8,56,248,.055);border:0;border-radius:999px;box-shadow:0 0 0 1px rgba(8,56,248,.12),0 0 13px rgba(8,56,248,.15);white-space:nowrap;cursor:pointer;line-height:1.4';
+    link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:0;font:800 14px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:transparent;border:0;border-radius:0;box-shadow:none;white-space:nowrap;cursor:pointer;line-height:1.5';
     link.onclick = function(e){
       e.preventDefault();
       function openWiz(){ if (window.bjPersona) window.bjPersona.open({ style: 'curation', origin: '시크릿 1:1 패키지' }); }

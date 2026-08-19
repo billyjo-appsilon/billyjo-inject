@@ -15,15 +15,40 @@
         "rvn": 429
       },
       {
-        "pid": "18639",
-        "name": "쿠쿠 냉온정수기",
-        "brand": "CP-F603",
-        "img": "https://rentalshop.site/_data/file/goodsImages/748a3f1b124708ebb348d7be86f7541e.png",
-        "orig": 15900,
+        "pid": "18931",
+        "name": "쿠쿠 인스퓨어 냉온정수기 데스크",
+        "brand": "CP-WS601HW",
+        "img": "https://rentalshop.site/_data/file/goodsImages/394d60c2d3888a595a2759ee5f1f98e2.png",
+        "orig": 20900,
         "final": 0,
-        "disc": 0,
+        "disc": 100,
+        "hasCard": true,
         "best": true,
         "rvn": 0
+      },
+      {
+        "pid": "15644",
+        "name": "청호나이스 얼음냉온정수기",
+        "brand": "WI-36C90620N",
+        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/WI-36C90620N/1.png",
+        "orig": 45900,
+        "final": 15900,
+        "disc": 65,
+        "hasCard": true,
+        "best": false,
+        "rvn": 100
+      },
+      {
+        "pid": "33070",
+        "name": "SK매직 얼음냉온정수기",
+        "brand": "WPU-IC110F",
+        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/WPU-IC110F/1.png",
+        "orig": 55900,
+        "final": 30900,
+        "disc": 45,
+        "hasCard": true,
+        "best": false,
+        "rvn": 100
       },
       {
         "pid": "10914",
@@ -31,43 +56,34 @@
         "brand": "EWBD351_4개월",
         "img": "https://rentalshop.site/_data/file/goodsImages/8ec4c558dee2a71c8c22bda7ada8bdde.png",
         "orig": 17900,
-        "final": 0,
-        "disc": 0,
-        "best": true,
-        "rvn": 0
-      },
-      {
-        "pid": "10913",
-        "name": "스마트핏 스탠드형 THE슬림 냉온정수기",
-        "brand": "EWBS351_4개월",
-        "img": "https://rentalshop.site/_data/file/goodsImages/20d37208b22c9e0a249ae9e1baf07c5f.png",
-        "orig": 17900,
-        "final": 0,
+        "final": 17900,
         "disc": 0,
         "best": false,
         "rvn": 0
       },
       {
-        "pid": "12955",
-        "name": "코웨이 나노직수 정수기 미니 정수전용",
-        "brand": "P-350N_자가관리",
-        "img": "https://rentalshop.site/_data/file/goodsImages/2d52a5d077ffc3cc6df8a3c0df030eec.png",
-        "orig": 15900,
+        "pid": "27062",
+        "name": "코웨이 아이콘 프로 2.0 냉온정수기",
+        "brand": "CHP-7212N",
+        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/CHP-7212N/1.png",
+        "orig": 29900,
         "final": 0,
-        "disc": 0,
+        "disc": 100,
+        "hasCard": true,
         "best": false,
-        "rvn": 1981
+        "rvn": 100
       },
       {
-        "pid": "18931",
-        "name": "쿠쿠 인스퓨어 냉온정수기 데스크",
-        "brand": "CP-WS601HW",
-        "img": "https://rentalshop.site/_data/file/goodsImages/394d60c2d3888a595a2759ee5f1f98e2.png",
-        "orig": 20900,
-        "final": 0,
-        "disc": 0,
+        "pid": "3061",
+        "name": "SK매직 직수 냉온정수기",
+        "brand": "WPU-B610F",
+        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/WPU-B610F/1.jpg",
+        "orig": 34900,
+        "final": 9900,
+        "disc": 72,
+        "hasCard": true,
         "best": false,
-        "rvn": 0
+        "rvn": 100
       },
       {
         "pid": "20276",
@@ -77,19 +93,9 @@
         "orig": 42900,
         "final": 12900,
         "disc": 70,
+        "hasCard": true,
         "best": false,
         "rvn": 0
-      },
-      {
-        "pid": "24579",
-        "name": "코웨이 아이콘 V2 얼음냉온정수기",
-        "brand": "CHPI-7400N_V2 2개월관리 반값할인",
-        "img": "https://rentalshop.site/_data/file/goodsImages/3f2bd3ca3d4473719e559881d6dfcff1.png",
-        "orig": 48400,
-        "final": 18400,
-        "disc": 62,
-        "best": false,
-        "rvn": 429
       }
     ]
   },
