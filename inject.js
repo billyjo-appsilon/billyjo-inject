@@ -2013,10 +2013,22 @@
         "rvn": 0
       },
       {
+        "pid": "32098",
+        "name": "코웨이 아이콘3 냉온정수기",
+        "brand": "CHP-7220N 자가관리 반값할인",
+        "img": "https://rentalshop.site/_data/file/goodsImages/5631010cfd5be3f421ba2bb7dcf63cf3.gif",
+        "orig": 28900,
+        "final": 4900,
+        "disc": 83,
+        "hasCard": true,
+        "best": true,
+        "rvn": 438
+      },
+      {
         "pid": "15644",
         "name": "청호나이스 얼음냉온정수기",
         "brand": "WI-36C90620N",
-        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/WI-36C90620N/1.png",
+        "img": "https://rentalshop.site/_data/file/goodsImages/77c0fe643277106ad5f9e18c9b80b380.png",
         "orig": 45900,
         "final": 15900,
         "disc": 65,
@@ -2028,7 +2040,7 @@
         "pid": "33070",
         "name": "SK매직 얼음냉온정수기",
         "brand": "WPU-IC110F",
-        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/WPU-IC110F/1.png",
+        "img": "https://rentalshop.site/_data/file/goodsImages/edd2bef6f7bdaeabd7689a38fa808b49.png",
         "orig": 55900,
         "final": 30900,
         "disc": 45,
@@ -2051,7 +2063,7 @@
         "pid": "27062",
         "name": "코웨이 아이콘 프로 2.0 냉온정수기",
         "brand": "CHP-7212N",
-        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/CHP-7212N/1.png",
+        "img": "https://rentalshop.site/_data/file/goodsImages/464683547adc8e03255984b9c53d71ed_1.gif",
         "orig": 29900,
         "final": 0,
         "disc": 100,
@@ -2063,7 +2075,7 @@
         "pid": "3061",
         "name": "SK매직 직수 냉온정수기",
         "brand": "WPU-B610F",
-        "img": "https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-lp@main/images/%EC%A0%95%EC%88%98%EA%B8%B0/WPU-B610F/1.jpg",
+        "img": "https://rentalshop.site/_data/file/goodsImages/0155637760aeb3def976ce9397d26d41.jpg",
         "orig": 34900,
         "final": 9900,
         "disc": 72,
@@ -2873,7 +2885,7 @@
         + '<div class="bjct-note" style="visibility:hidden"><b>제휴카드</b> 추가 할인</div>';
     return '<a class="bjct-card" href="' + p.link + '">'
       + '<div class="bjct-thumb">' + (p.best ? '<span class="bjct-tag">BEST</span>' : '')
-      + '<img src="' + p.img + '" loading="lazy" alt="">'
+      + '<img src="' + p.img + '" loading="eager" decoding="async" alt="" onerror="this.onerror=null;this.src=&quot;https://rentalshop.site/image/noimg.jpg&quot;">'
       + review + '</div>'
       + '<div class="bjct-body"><div class="bjct-brand">' + p.brand + '</div><div class="bjct-name">' + p.name + '</div>' + price + '</div></a>';
   }

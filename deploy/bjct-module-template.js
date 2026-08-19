@@ -107,7 +107,7 @@
         + '<div class="bjct-note" style="visibility:hidden"><b>제휴카드</b> 추가 할인</div>';
     return '<a class="bjct-card" href="' + p.link + '">'
       + '<div class="bjct-thumb">' + (p.best ? '<span class="bjct-tag">BEST</span>' : '')
-      + '<img src="' + p.img + '" loading="lazy" alt="">'
+      + '<img src="' + p.img + '" loading="eager" decoding="async" alt="" onerror="this.onerror=null;this.src=&quot;https://rentalshop.site/image/noimg.jpg&quot;">'
       + review + '</div>'
       + '<div class="bjct-body"><div class="bjct-brand">' + p.brand + '</div><div class="bjct-name">' + p.name + '</div>' + price + '</div></a>';
   }
