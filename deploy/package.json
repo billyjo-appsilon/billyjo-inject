@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "check:bottom-widget": "node bottom-widget-check.js",
+    "check:bottom-widget:local": "node bottom-widget-check.js --local",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
