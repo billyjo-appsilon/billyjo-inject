@@ -11093,8 +11093,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     /* v0.5.24: #billyjo-bottom-bar는 우리가 DOM 삭제하므로 .prod_view_bot.card.mt40만 사용 */
     var wrapper = document.querySelector('.prod_view_bot.card.mt40');
     if (!wrapper) return;
-    var aiCard = document.querySelector('#ai-card-root');
-    if (!aiCard) return;
+    var triggerEl = document.querySelector('#ai-card-root') ||
+                    document.querySelector('.prod_view_detail') ||
+                    document.querySelector('.prod_view_top') ||
+                    wrapper;
 
     window.__bjBarVisibilitySetup = true;
     if (!wrapper.dataset.bjBarTransition) {
@@ -11117,7 +11119,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
        trigger 천이까지 사용자 결정이 유지됨. 사용자 명시적 dismiss는 핸들 ≥120px 드래그. */
     var lastTriggerState = null; /* 'oov' | 'inview' | null */
     function evalScroll(){
-      var r = aiCard.getBoundingClientRect();
+      var r = triggerEl.getBoundingClientRect();
       var cardOutOfView = r.bottom < 80;
       var cardInView = r.bottom > 200;
       var newTrigger = null;
@@ -12558,8 +12560,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       }
       var r = w.getBoundingClientRect();
       var cs = getComputedStyle(w);
+      var inViewport = r.bottom > 0 && r.top < (window.innerHeight || document.documentElement.clientHeight || 0);
       var ok = w.querySelector('.bj-bar-handle') && cs.display !== 'none' &&
-               cs.visibility !== 'hidden' && r.height > 10;
+               cs.visibility !== 'hidden' && r.height > 10 && inViewport;
       if (ok) return;
       /* 최후 폴백: native sticky bar 복원 + runAll의 재숨김 차단 플래그 */
       window.__bjWidgetFailOpen = true;
