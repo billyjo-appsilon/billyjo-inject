@@ -45,6 +45,8 @@
 (function bjQuoteCompareCart(){
   var API = 'https://admin2-api.billyjo.co.kr/v1/quote/calculate';
   var CART_ID_KEY = 'bj_quote_cart_id';
+  var PENDING_MEMO_KEY = 'bj_quote_pending_customer_memo';
+  var DIRECT_COUPON_KEY = 'bj_direct_offer_quote_context';
 
   function isCartPage(){
     return /\/html\/dh_order\/shop_cart(?:\/|$)/.test(location.pathname || '');
@@ -242,10 +244,26 @@
       done = true;
     });
   }
+  function savePendingMemo(memo){
+    if (!memo) return;
+    try { sessionStorage.setItem(PENDING_MEMO_KEY, memo); } catch(_) {}
+  }
+  function injectPendingMemo(){
+    try {
+      var memo = sessionStorage.getItem(PENDING_MEMO_KEY);
+      if (!memo) return;
+      injectMemo(memo);
+      if (/\/html\/dh_order\/rental(?:\/|$)/.test(location.pathname || '')) {
+        setTimeout(function(){ injectMemo(memo); }, 500);
+        setTimeout(function(){ injectMemo(memo); }, 1600);
+      }
+    } catch(_) {}
+  }
   function showQuote(result, continueFn){
     var old = document.getElementById('bj-quote-auth-modal');
     if (old) old.remove();
     var memo = result.customerMemo || '';
+    savePendingMemo(memo);
     injectMemo(memo);
     var div = document.createElement('div');
     div.id = 'bj-quote-auth-modal';
@@ -267,6 +285,7 @@
     div.querySelector('.bj-qam-x').onclick = function(){ div.remove(); };
     div.addEventListener('click', function(e){ if (e.target === div) div.remove(); });
     div.querySelector('.bj-qam-go').onclick = function(){
+      savePendingMemo(memo);
       injectMemo(memo);
       div.remove();
       continueFn();
@@ -343,11 +362,22 @@
     document.head.appendChild(st);
   }
   function calculateQuote(items, source){
+    var directContext = null;
+    try {
+      var rawDirect = sessionStorage.getItem(DIRECT_COUPON_KEY);
+      if (rawDirect) directContext = JSON.parse(rawDirect);
+    } catch(_) { directContext = null; }
     return fetch(API, {
       method: 'POST',
       credentials: 'omit',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ quoteCartId: cartId(), source: source || 'website_cart', items: items, applyDirectCoupon: false })
+      body: JSON.stringify({
+        quoteCartId: cartId(),
+        source: source || 'website_cart',
+        items: items,
+        applyDirectCoupon: !!directContext,
+        directOffer: directContext || undefined
+      })
     }).then(function(r){
       return r.json().catch(function(){ return {}; }).then(function(b){
         if (!r.ok || !b.ok) throw new Error((b.detail && b.detail.message) || b.message || ('quote HTTP ' + r.status));
@@ -412,6 +442,10 @@
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', wireRentalButtons);
   else wireRentalButtons();
   setTimeout(relabelCartLanguage, 800);
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', injectPendingMemo);
+  else injectPendingMemo();
+  setTimeout(injectPendingMemo, 800);
+  setTimeout(injectPendingMemo, 2200);
 })();
 
 ;(function billyjoJourneyAnalyticsGlobal(){
@@ -782,6 +816,7 @@
   var STORE_DETAIL = 'https://billyjo.co.kr/html/dh_prod/prod_view/{pid}';
   var LP_IMAGE_BASE = 'https://live.billyjo.co.kr/';
   var DIRECT_COUPON_TITLE = '다이렉트 10,000pt 추가 쿠폰 발급 완료(지금 신청 시 적용)';
+  var DIRECT_QUOTE_CONTEXT_KEY = 'bj_direct_offer_quote_context';
   var state = {
     cfg: null,
     cats: [],
@@ -1211,7 +1246,9 @@
   }
   function makeMemo(){
     if (!state.offerId) state.offerId = createOfferId();
-    var list = selectedList();
+    var list = selectedList().map(function(p){
+      return applyCurrentWidgetSelection(hydrateLpProduct(p, p && (p.name || p.model)));
+    });
     var lines = [
       '[빌리조 결합 상품 추가]',
       '확인번호: ' + state.offerId,
@@ -1224,6 +1261,77 @@
     });
     lines.push('※ 실제 지급액은 본사 조건 및 최종 승인 후 확정');
     return lines.join('\n');
+  }
+  function currentWidgetSelection(){
+    var out = {};
+    try {
+      var activeTerm = document.querySelector('.bj-ws-term-pill.active') ||
+                       document.querySelector('.bb-month-pill.active') ||
+                       document.querySelector('.month_box.layer_price.on');
+      if (activeTerm) {
+        var termEl = activeTerm.querySelector('.bj-ws-term-period') ||
+                     activeTerm.querySelector('.bb-month-period');
+        var termText = (termEl && termEl.textContent) || activeTerm.getAttribute('data-month') || '';
+        termText = termText.replace(/\s+/g, ' ').trim();
+        if (termText) {
+          out.term = termText;
+          out.contractTerm = termText;
+          var ym = termText.match(/(\d+)\s*년/);
+          var mm = termText.match(/(\d+)\s*개월/);
+          if (ym) out.contractTermMonths = parseInt(ym[1], 10) * 12;
+          else if (mm) out.contractTermMonths = parseInt(mm[1], 10);
+        }
+        var priceEl = activeTerm.querySelector('.bj-ws-term-price') ||
+                      activeTerm.querySelector('.bb-month-price');
+        var priceText = (priceEl && priceEl.textContent) || activeTerm.getAttribute('data-price') || '';
+        var priceNum = parseInt(String(priceText).replace(/[^\d]/g, ''), 10) || 0;
+        if (priceNum) out.monthlyFee = priceNum;
+        var supEl = document.querySelector('.bj-ws-sup-tab.active') ||
+                    document.querySelector('.bb-sup-tab.active');
+        var supText = (supEl && supEl.textContent) || activeTerm.getAttribute('data-supname') || '';
+        supText = supText.replace(/\s+/g, ' ').replace(/최저가/g, '').trim();
+        if (supText) out.supplier = supText;
+      }
+    } catch(_) {}
+    return Object.keys(out).length ? out : null;
+  }
+  function applyCurrentWidgetSelection(product){
+    if (!product) return product;
+    var prodNo = getProdNo();
+    if (!prodNo || String(product.prodNo || '') !== String(prodNo)) return product;
+    var sel = currentWidgetSelection();
+    if (!sel) return product;
+    var copy = Object.assign({}, product);
+    if (sel.term) copy.term = sel.term;
+    if (sel.contractTerm) copy.contractTerm = sel.contractTerm;
+    if (sel.contractTermMonths) copy.contractTermMonths = sel.contractTermMonths;
+    if (sel.monthlyFee) copy.monthlyFee = sel.monthlyFee;
+    if (sel.supplier) copy.supplier = sel.supplier;
+    return copy;
+  }
+  function saveDirectQuoteContext(){
+    try {
+      var memo = makeMemo();
+      var ctx = {
+        offerId: state.offerId || createOfferId(),
+        memo: memo,
+        expectedGiftAmount: calcTotal(),
+        issuedAt: new Date().toISOString(),
+        selectedProducts: selectedList().map(function(p){
+          var x = applyCurrentWidgetSelection(hydrateLpProduct(p, p && (p.name || p.model)));
+          return {
+            prodNo: x && x.prodNo,
+            model: x && x.model,
+            name: x && x.name,
+            term: x && (x.term || x.contractTerm),
+            monthlyFee: x && x.monthlyFee,
+            supplier: x && x.supplier,
+            expectedGiftAmount: x && x.maxGift ? money70(x) : 0
+          };
+        })
+      };
+      sessionStorage.setItem(DIRECT_QUOTE_CONTEXT_KEY, JSON.stringify(ctx));
+    } catch(_) {}
   }
   function readInput(form, name){
     var el = form && form.querySelector('[name="' + name + '"]');
@@ -1302,6 +1410,8 @@
       if (!p || !p.prodNo || seen[p.prodNo]) return false;
       seen[p.prodNo] = true;
       return true;
+    }).map(function(p){
+      return applyCurrentWidgetSelection(hydrateLpProduct(p, p && (p.name || p.model)));
     });
     if (!list.length && selectedList().length) return Promise.reject(new Error('no cartable selected products'));
     return list.reduce(function(chain, p){
@@ -1400,6 +1510,7 @@
     back.addEventListener('click', function(e){ if (e.target === back) close(); });
     box.querySelector('.bj-do-copy').onclick = function(){
       var memo = makeMemo();
+      saveDirectQuoteContext();
       box.querySelector('.bj-do-memo').value = memo;
       try {
         var clip = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(memo) : null;
