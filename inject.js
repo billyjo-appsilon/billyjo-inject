@@ -13288,6 +13288,44 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   setTimeout(scan, 4000);
 })();
 
+/* 제휴카드 안내 페이지 모바일 가독성 보강
+   네이티브 마크업은 이미지와 상세 테이블이 좁은 폭에 그대로 눌려 보인다. */
+(function(){
+  function ready(fn){ if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
+  function isPartnershipCardPage(){
+    return /\/html\/dh\/partnership_card/.test(location.pathname || '');
+  }
+  function injectPartnershipCardStyle(){
+    if (!isPartnershipCardPage() || document.getElementById('bj-partnership-card-style')) return;
+    var css = [
+      'body.bj-card-page{background:#f6f8fc!important}',
+      '.bj-card-page .board__data>li{max-width:980px!important;margin:0 auto 22px!important;padding:0 16px 20px!important;background:#fff!important;border:1px solid #e7ebf3!important;border-radius:18px!important;box-shadow:0 10px 30px rgba(15,23,42,.08)!important;overflow:hidden!important}',
+      '.bj-card-page .board__data>li>p:first-child{display:flex!important;align-items:center!important;gap:8px!important;margin:0 -16px 16px!important;padding:16px 18px!important;background:linear-gradient(135deg,#eef4ff,#fff)!important;color:#0838f8!important;font-size:20px!important;font-weight:900!important;letter-spacing:0!important}',
+      '.bj-card-page .board__data>li>p:first-child:before{content:"";display:inline-block;width:6px;height:22px;border-radius:999px;background:#0838f8}',
+      '.bj-card-page .board__data>li>p:nth-child(2){margin:0 0 18px!important;color:#526071!important;font-size:14px!important;font-weight:700!important}',
+      '.bj-card-page .card--article{display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;gap:24px!important;align-items:center!important;padding:22px 0!important;border-top:1px solid #edf0f5!important;background:#fff!important}',
+      '.bj-card-page .card--article:first-of-type{border-top:0!important}',
+      '.bj-card-page .card__img{display:flex!important;align-items:center!important;justify-content:center!important;min-height:132px!important;padding:16px!important;background:#f8fafc!important;border:1px solid #eef2f7!important;border-radius:16px!important}',
+      '.bj-card-page .card__img img{display:block!important;max-width:180px!important;max-height:116px!important;width:auto!important;height:auto!important;object-fit:contain!important}',
+      '.bj-card-page .card__info{min-width:0!important}',
+      '.bj-card-page .info__tit{margin:0!important;color:#172033!important;font-size:18px!important;font-weight:900!important;line-height:1.32!important}',
+      '.bj-card-page .info__stit{margin:6px 0 14px!important;color:#667085!important;font-size:14px!important;font-weight:700!important;line-height:1.45!important}',
+      '.bj-card-page .info__stit b{color:#0838f8!important}',
+      '.bj-card-page .info__detail{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;margin:0!important;padding:0!important;list-style:none!important}',
+      '.bj-card-page .info__detail li{display:grid!important;grid-template-columns:86px minmax(0,1fr)!important;gap:12px!important;margin:0!important;padding:12px!important;background:#f8fafc!important;border:1px solid #edf1f7!important;border-radius:12px!important;color:#2b3445!important;font-size:13px!important;line-height:1.55!important}',
+      '.bj-card-page .info__detail li>p{margin:0!important;word-break:keep-all!important;overflow-wrap:anywhere!important}',
+      '.bj-card-page .info__detail li>p:first-child{color:#667085!important;font-size:12px!important;font-weight:900!important}',
+      '@media(max-width:768px){.bj-card-page .contents,.bj-card-page .sub_content,.bj-card-page .inner{padding-left:14px!important;padding-right:14px!important}.bj-card-page .board__data>li{margin:0 0 18px!important;padding:0 14px 16px!important;border-radius:16px!important}.bj-card-page .board__data>li>p:first-child{margin:0 -14px 14px!important;padding:15px 16px!important;font-size:19px!important}.bj-card-page .card--article{display:block!important;padding:18px 0!important}.bj-card-page .card__img{min-height:118px!important;margin-bottom:14px!important}.bj-card-page .card__img img{max-width:176px!important;max-height:108px!important}.bj-card-page .info__tit{font-size:17px!important}.bj-card-page .info__detail li{grid-template-columns:1fr!important;gap:5px!important;padding:11px 12px!important;font-size:13px!important}.bj-card-page .info__detail li>p:first-child{font-size:12px!important;color:#0838f8!important}.bj-card-page .quick_list{right:10px!important}.bj-card-page .quick_list a,.bj-card-page .quick_list button{width:44px!important;height:44px!important}}'
+    ].join('\n');
+    var style = document.createElement('style');
+    style.id = 'bj-partnership-card-style';
+    style.textContent = css;
+    document.head.appendChild(style);
+    document.body.classList.add('bj-card-page');
+  }
+  ready(injectPartnershipCardStyle);
+})();
+
 /* CHPI-7430N 자가관리 공개 경로 보강
    렌탈샵 상품 마스터에는 방문관리 2종만 노출되어 있어, 자가관리 정책 노출용
    lightweight variant를 기존 상세 URL 위에 붙인다. */
