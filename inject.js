@@ -4464,6 +4464,98 @@ function bjHeaderMainInit() {
     setTimeout(function(){ clearInterval(bjWaterAttach); }, 20000);
   }
 
+  // === 검색 결과 보강: 아이콘3/CP-7220N 키워드가 네이티브 검색에서 누락될 때 핵심 상품 노출 ===
+  // 빌리조 원본 검색은 displayName/AI 카드 alias 일부를 검색 인덱스로 보지 못해,
+  // 실제 판매 가능한 코웨이 아이콘3 CP/CHP-7220N 상품이 "아이콘3" 검색에서 빠질 수 있다.
+  if (location.pathname.indexOf('/html/dh/search_result') !== -1) {
+    var bjIcon3SearchQuery = (function() {
+      try {
+        return (new URLSearchParams(location.search || '')).get('search_value') || '';
+      } catch (e) {
+        var m = (location.search || '').match(/[?&]search_value=([^&]+)/);
+        return m ? decodeURIComponent(m[1].replace(/\+/g, ' ')) : '';
+      }
+    })();
+    var bjIcon3Needle = String(bjIcon3SearchQuery || '').toUpperCase().replace(/\s+/g, '');
+    var bjIsIcon3Search = /아이콘3|아이콘3\.0|ICON3|ICON3\.0|CP-?7220N?|CHP-?7220N?/.test(bjIcon3Needle);
+    var bjIcon3Products = [
+      {
+        no:'32097',
+        brand:'CP-7220N 방문관리 반값할인',
+        name:'코웨이 아이콘3 아이콘 3.0 냉정수기',
+        img:'https://rentalshop.site/_data/file/goodsImages/ab9345e2cea9608a46ad0538a6370329.png',
+        fee:'31,900',
+        cardFee:'0'
+      },
+      {
+        no:'32096',
+        brand:'CP-7220N 자가관리 반값할인',
+        name:'코웨이 아이콘3 아이콘 3.0 냉정수기',
+        img:'https://rentalshop.site/_data/file/goodsImages/ab9345e2cea9608a46ad0538a6370329.png',
+        fee:'30,900',
+        cardFee:'0'
+      },
+      {
+        no:'32099',
+        brand:'CHP-7220N 방문관리 반값할인',
+        name:'코웨이 아이콘3 아이콘 3.0 냉온정수기',
+        img:'https://rentalshop.site/_data/file/goodsImages/ab9345e2cea9608a46ad0538a6370329.png',
+        fee:'31,900',
+        cardFee:'1,900'
+      },
+      {
+        no:'32098',
+        brand:'CHP-7220N 자가관리 반값할인',
+        name:'코웨이 아이콘3 아이콘 3.0 냉온정수기',
+        img:'https://rentalshop.site/_data/file/goodsImages/5631010cfd5be3f421ba2bb7dcf63cf3.gif',
+        fee:'30,900',
+        cardFee:'0'
+      }
+    ];
+    var bjIcon3Card = function(d) {
+      var item = document.createElement('div');
+      item.className = 'item bj-search-icon3-card';
+      item.innerHTML =
+        '<div class="box"><a href="/html/dh_prod/prod_view/'+d.no+'" target="_self">' +
+        '<div class="thumb"><img src="'+d.img+'" alt="'+d.name+'"></div>' +
+        '<div class="txt"><div class="txt__cate"><p style="display:none;">&nbsp;</p><p style="display:none;">&nbsp;</p><p style="display:none;">&nbsp;</p></div>' +
+        '<p class="brand">'+d.brand+'</p><p class="name">'+d.name+'</p></div>' +
+        '<div class="fee"><span class="label">월 렌탈료</span><p class="price sale"><strong>'+d.fee+'</strong>원</p></div>' +
+        '<div class="fee2"><span class="label">제휴카드 할인</span><p class="price sale"><strong>'+d.cardFee+'</strong>원</p></div>' +
+        '</a></div>';
+      return item;
+    };
+    var bjIcon3EnsureList = function() {
+      var list = document.querySelector('.prod_list');
+      if (list) return list;
+      var host = document.querySelector('.prod_list_wrap') || document.querySelector('.sub_content') || document.querySelector('#container .wide-inner') || document.querySelector('#container') || document.body;
+      if (!host) return null;
+      list = document.createElement('div');
+      list.className = 'prod_list bj-search-icon3-list';
+      host.appendChild(list);
+      return list;
+    };
+    var bjIcon3SearchFix = function() {
+      if (!bjIsIcon3Search) return;
+      var list = bjIcon3EnsureList();
+      if (!list) return;
+      var inserted = false;
+      for (var i = bjIcon3Products.length - 1; i >= 0; i--) {
+        var d = bjIcon3Products[i];
+        if (list.querySelector('a[href*="/prod_view/'+d.no+'"]')) continue;
+        list.insertBefore(bjIcon3Card(d), list.firstChild);
+        inserted = true;
+      }
+      if (inserted) {
+        list.setAttribute('data-bj-icon3-search-fixed', '1');
+        document.dispatchEvent(new CustomEvent('bj:native-cards-inserted'));
+      }
+    };
+    bjIcon3SearchFix();
+    var bjIcon3Iv = setInterval(bjIcon3SearchFix, 500);
+    setTimeout(function(){ clearInterval(bjIcon3Iv); }, 12000);
+  }
+
   // === 카테고리 탭(.prod_list__cate) 순서 재배치 ===
   // 목표: 정수기·에어컨 유지 + 제습기/가습기·로봇청소기·비데를 공기청정기 뒤로 전진. 나머지는 원래 상대순서 유지.
   if (location.pathname.indexOf('prod_list') !== -1) {
