@@ -815,7 +815,7 @@
   var BLUE = '#0838f8';
   var STORE_DETAIL = 'https://billyjo.co.kr/html/dh_prod/prod_view/{pid}';
   var LP_IMAGE_BASE = 'https://live.billyjo.co.kr/';
-  var DIRECT_COUPON_TITLE = '다이렉트 10,000pt 추가 쿠폰 발급 완료(지금 신청 시 적용)';
+  var DIRECT_COUPON_TITLE = '다이렉트 15,000pt 추가 쿠폰 발급 완료(지금 신청 시 적용)';
   var DIRECT_QUOTE_CONTEXT_KEY = 'bj_direct_offer_quote_context';
   var DIRECT_FAB_CLOSED_KEY = 'bj_direct_offer_fab_closed';
   var state = {
@@ -837,6 +837,7 @@
   function directCouponTitleHtml(text){
     var value = String(text || DIRECT_COUPON_TITLE)
       .replace(/다이렉트 10,000쿠폰 발급 중/g, DIRECT_COUPON_TITLE)
+      .replace(/다이렉트 10,000pt 추가 쿠폰 발급 완료\(지금 신청 시 적용\)/g, DIRECT_COUPON_TITLE)
       .replace(/결합 상품 추가/g, DIRECT_COUPON_TITLE)
       .replace(/선택 상품 기준\\n추가 혜택을 준비 중입니다/g, DIRECT_COUPON_TITLE)
       .replace(/선택 상품 기준\n추가 혜택을 준비 중입니다/g, DIRECT_COUPON_TITLE);
