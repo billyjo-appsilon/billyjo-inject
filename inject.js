@@ -817,6 +817,7 @@
   var LP_IMAGE_BASE = 'https://live.billyjo.co.kr/';
   var DIRECT_COUPON_TITLE = '다이렉트 10,000pt 추가 쿠폰 발급 완료(지금 신청 시 적용)';
   var DIRECT_QUOTE_CONTEXT_KEY = 'bj_direct_offer_quote_context';
+  var DIRECT_FAB_CLOSED_KEY = 'bj_direct_offer_fab_closed';
   var state = {
     cfg: null,
     cats: [],
@@ -1165,7 +1166,8 @@
       '#bj-do-topbar{position:sticky;top:0;z-index:99998;background:'+BLUE+';color:#fff;font-family:Pretendard,Arial,sans-serif;font-size:12px;line-height:1.2;box-shadow:0 2px 10px rgba(0,0,0,.16)}' +
       '#bj-do-topbar .bj-do-topin{max-width:1180px;margin:0 auto;padding:8px 14px;display:flex;gap:12px;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}' +
       '#bj-do-topbar b{font-weight:900}.bj-do-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18),0 0 13px rgba(34,197,94,.9);display:inline-block;margin-right:6px;vertical-align:-1px}' +
-      '#bj-do-fab{position:fixed;right:18px;bottom:92px;z-index:99998;border:0;border-radius:999px;background:'+BLUE+';color:#fff;font:900 13px Pretendard,Arial,sans-serif;padding:13px 17px;box-shadow:0 14px 30px rgba(8,56,248,.32);cursor:pointer}' +
+      '#bj-do-fab{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:99998;border:1.5px solid rgba(8,56,248,.72);border-radius:999px;background:#fff;color:'+BLUE+';font:900 12.5px Pretendard,Arial,sans-serif;padding:10px 38px 10px 12px;box-shadow:0 0 0 5px rgba(8,56,248,.08),0 0 24px rgba(8,56,248,.28),0 12px 30px rgba(15,32,70,.13);cursor:pointer;display:inline-flex;align-items:center;gap:7px;max-width:154px;line-height:1.15;text-align:left;white-space:normal}' +
+      '#bj-do-fab .bj-do-fab-ic{width:28px;height:28px;border-radius:999px;background:'+BLUE+';color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 7px 18px rgba(8,56,248,.28)}#bj-do-fab .bj-do-fab-ic svg{width:17px;height:17px;display:block;fill:currentColor}#bj-do-fab .bj-do-fab-t{display:inline-block;word-break:keep-all}#bj-do-fab .bj-do-fab-x{position:absolute;right:7px;top:7px;width:22px;height:22px;border:0;border-radius:999px;background:#eef3ff;color:'+BLUE+';font:900 15px/20px Arial,sans-serif;padding:0;cursor:pointer}' +
       '#bj-do-back{position:fixed;inset:0;background:rgba(10,16,30,.62);z-index:100001;display:flex;align-items:center;justify-content:center;padding:18px;font-family:Pretendard,Arial,sans-serif}' +
       '#bj-do-box{width:100%;max-width:760px;max-height:90vh;overflow:hidden;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.32);color:#172033;display:flex;flex-direction:column;position:relative}' +
       '#bj-do-head{padding:20px 22px 16px;background:linear-gradient(135deg,#0838f8 0%,#1b55ff 100%);position:relative;color:#fff}.bj-do-badge{font-size:11px;font-weight:900;color:'+BLUE+';background:#fff;border-radius:999px;padding:5px 10px;display:inline-block;box-shadow:0 6px 16px rgba(0,0,0,.12)}.bj-do-h{font-size:24px;font-weight:950;line-height:1.14;margin:12px 42px 7px 0;white-space:pre-line;letter-spacing:0}.bj-do-h-sub{display:inline-block;font-size:calc(1em - 1px);font-weight:900;margin-left:2px}.bj-do-sub{max-width:560px;font-size:13px;color:rgba(255,255,255,.9);line-height:1.45}.bj-do-x{position:absolute;right:14px;top:14px;width:34px;height:34px;border:0;background:rgba(255,255,255,.92);color:'+BLUE+';font-size:22px;line-height:30px;border-radius:50%;cursor:pointer}' +
@@ -1174,7 +1176,7 @@
       '#bj-do-total{background:#fff;border:1px solid #dbe5ff;border-radius:14px;padding:14px;box-shadow:0 8px 24px rgba(8,56,248,.08)}.bj-do-total-k{font-size:11px;color:#647084;font-weight:800}.bj-do-total-v{font-size:26px;font-weight:950;color:'+BLUE+';line-height:1.1;margin-top:5px}.bj-do-total-sub{font-size:11px;color:#7b8596;line-height:1.4;margin-top:6px}.bj-do-memo{display:none}.bj-do-copy{width:100%;border:0;border-radius:12px;background:'+BLUE+';color:#fff;font-size:14px;font-weight:950;padding:13px;margin-top:10px;cursor:pointer;box-shadow:0 10px 24px rgba(8,56,248,.23)}.bj-do-note{font-size:10.5px;color:#8b95a7;line-height:1.45;margin-top:9px}.bj-do-loading{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(255,255,255,.96);text-align:center;padding:22px}.bj-do-loading img{width:75px;height:75px;object-fit:contain}.bj-do-loading-title{font-size:18px;font-weight:950;color:#172033}.bj-do-loading-sub{font-size:12.5px;color:#647084;line-height:1.45}.bj-do-intro{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(255,255,255,.985);text-align:center;padding:26px}.bj-do-intro-ring{--p:0;position:relative;width:104px;height:104px;border-radius:50%;background:conic-gradient('+BLUE+' calc(var(--p)*1%),#e6ecff 0);display:grid;place-items:center;box-shadow:0 14px 32px rgba(8,56,248,.18)}.bj-do-intro-ring:before{content:"";position:absolute;width:78px;height:78px;border-radius:50%;background:#fff}.bj-do-intro-num{position:relative;z-index:1;font-size:28px;font-weight:950;color:'+BLUE+';font-variant-numeric:tabular-nums}.bj-do-intro-title{font-size:19px;font-weight:950;color:#172033}.bj-do-intro-sub{font-size:12.5px;color:#647084;line-height:1.45}' +
       '#bj-do-toast{position:fixed;left:50%;top:42px;transform:translateX(-50%);z-index:100000;background:#fff;border:1px solid #dfe6f4;border-radius:999px;padding:9px 13px;box-shadow:0 12px 34px rgba(0,0,0,.18);font:800 12px Pretendard,Arial,sans-serif;color:#263248;opacity:0;pointer-events:none;transition:opacity .22s, transform .22s;white-space:nowrap}#bj-do-toast.show{opacity:1;transform:translateX(-50%) translateY(8px)}' +
       '@media(max-width:720px){#bj-do-back{align-items:flex-end;padding:0;background:rgba(10,16,30,.55)}#bj-do-box{max-width:none;max-height:92vh;border-radius:18px 18px 0 0}.bj-do-layout{display:block}.bj-do-main{padding:14px}.bj-do-side{padding:12px 14px 16px;border-left:0;border-top:1px solid #e2e8f7}.bj-do-h{font-size:21px;margin-right:36px}.bj-do-head{padding:18px 18px 14px;background:linear-gradient(135deg,#0838f8,#1b55ff)}.bj-do-card{grid-template-columns:58px minmax(0,1fr) 52px;gap:9px}.bj-do-card img{width:58px;height:58px}.bj-do-review{display:none}.bj-do-memo{min-height:96px}.bj-do-total-v{font-size:24px}}' +
-      '@media(max-width:560px){#bj-do-topbar .bj-do-topin{justify-content:flex-start;overflow-x:auto}.bj-do-fab{right:12px;bottom:82px;padding:12px 15px}.bj-do-card{grid-template-columns:54px minmax(0,1fr) 48px}.bj-do-card img{width:54px;height:54px}.bj-do-add{font-size:10.5px;min-width:46px}.bj-do-pname{font-size:12.5px}.bj-do-meta{font-size:10.5px}.bj-do-gift{font-size:12px}}';
+      '@media(max-width:560px){#bj-do-topbar .bj-do-topin{justify-content:flex-start;overflow-x:auto}#bj-do-fab{left:12px;top:50%;padding:9px 34px 9px 10px;max-width:142px;font-size:12px}#bj-do-fab .bj-do-fab-ic{width:26px;height:26px}.bj-do-card{grid-template-columns:54px minmax(0,1fr) 48px}.bj-do-card img{width:54px;height:54px}.bj-do-add{font-size:10.5px;min-width:46px}.bj-do-pname{font-size:12.5px}.bj-do-meta{font-size:10.5px}.bj-do-gift{font-size:12px}}';
     document.head.appendChild(s);
   }
   function fallbackCfg(){
@@ -1217,9 +1219,21 @@
     }, 1000);
   }
   function mountFab(){
+    try { if (sessionStorage.getItem(DIRECT_FAB_CLOSED_KEY) === '1') return; } catch(_){}
     if (document.getElementById('bj-do-fab')) return;
-    var b = document.createElement('button'); b.id = 'bj-do-fab'; b.type = 'button'; b.textContent = '다이렉트 쿠폰';
-    b.onclick = openModal;
+    var b = document.createElement('button'); b.id = 'bj-do-fab'; b.type = 'button';
+    b.innerHTML = '<span class="bj-do-fab-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 12v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-8h16ZM6 10a3 3 0 1 1 3-3c0 .34-.06.68-.17 1H11V5h2v3h2.17A3 3 0 1 1 18 10h2a1 1 0 0 1 1 1v1H3v-1a1 1 0 0 1 1-1h2Zm3-4a1 1 0 1 0 0 2h1.13A2.4 2.4 0 0 0 9 6Zm6 2a1 1 0 1 0 0-2 2.4 2.4 0 0 0-1.13 2H15Z"/></svg></span><span class="bj-do-fab-t">다이렉트<br>쿠폰</span><span class="bj-do-fab-x" aria-label="닫기">×</span>';
+    b.onclick = function(e){
+      var x = e && e.target && e.target.closest && e.target.closest('.bj-do-fab-x');
+      if (x) {
+        try { sessionStorage.setItem(DIRECT_FAB_CLOSED_KEY, '1'); } catch(_){}
+        try { b.remove(); } catch(_){}
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      openModal();
+    };
     document.body.appendChild(b);
   }
   function visibleCategories(){
@@ -8943,12 +8957,45 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     /* v0.5.42: 빌리조 quick-call/top floating 버튼(.new-qb, .goTop)을 위젯과 겹치지 않게
        위로 올림. :has()로 wrapper 상태 추적해서 collapsed/expanded/dismiss 자동 조정. */
     '.new-qb, .goTop{',
-    '  bottom:60px !important;',  /* collapsed 48px + 12px 여백 */
-    '  transition:bottom 0.32s cubic-bezier(0.4, 0, 0.2, 1) !important;',
+      '  bottom:60px !important;',  /* collapsed 48px + 12px 여백 */
+      '  transition:bottom 0.32s cubic-bezier(0.4, 0, 0.2, 1) !important;',
     '}',
+    'body:has(.prod_view_bot.card.mt40) .new-qb{',
+      '  right:14px !important; z-index:99997 !important;',
+    '}',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick{ background:transparent !important; box-shadow:none !important }',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick .link{',
+      '  display:flex !important; flex-direction:column !important; align-items:center !important; gap:7px !important;',
+      '  padding:7px 5px !important; background:#fff !important; border:1px solid #e1e7f2 !important;',
+      '  border-radius:18px !important; box-shadow:0 8px 24px rgba(15,32,70,.14) !important;',
+    '}',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick .link>p{',
+      '  display:block !important; position:relative !important; width:42px !important; height:42px !important;',
+      '  margin:0 !important; padding:0 !important; float:none !important; clear:none !important;',
+    '}',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick .link>p.show-767,',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick_list,',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .goTop{ display:none !important }',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick .link>p>a,',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick .link .bj-ai-quote-quick a{',
+      '  width:42px !important; height:42px !important; border-radius:999px !important; box-sizing:border-box !important;',
+      '  display:flex !important; align-items:center !important; justify-content:center !important;',
+      '  background:#f7f9ff !important; border:1px solid #dfe7fb !important; color:#0838f8 !important;',
+      '  box-shadow:none !important; padding:0 !important;',
+    '}',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick .link>p>a:hover,',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick .link .bj-ai-quote-quick a:hover{ background:#eef3ff !important }',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick .link>p>a>img,',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{',
+      '  width:25px !important; height:25px !important; max-width:25px !important; max-height:25px !important;',
+      '  position:absolute !important; left:50% !important; top:50% !important; transform:translate(-50%,-50%) !important;',
+      '  display:block !important; object-fit:contain !important; margin:0 !important; pointer-events:none !important;',
+    '}',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick .link>p>a>span{ display:none !important }',
+    'body:has(.prod_view_bot.card.mt40) .new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-label{ display:none !important }',
     'body:has(.prod_view_bot.card.mt40.bj-bar-expanded) .new-qb,',
     'body:has(.prod_view_bot.card.mt40.bj-bar-expanded) .goTop{',
-    '  bottom:calc(min(440px, 75vh) + 12px) !important;',  /* expanded max-height + 여백 */
+      '  bottom:calc(min(440px, 75vh) + 12px) !important;',  /* expanded max-height + 여백 */
     '}',
     'body:has(.prod_view_bot.card.mt40.bj-bar-slide-hidden) .new-qb,',
     'body:has(.prod_view_bot.card.mt40.bj-bar-slide-hidden) .goTop{',
@@ -8957,11 +9004,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
     /* 모바일 컴팩트 */
     '@media (max-width:600px){',
-    '  body{ padding-bottom:64px !important }',
-    /* v0.5.42: 모바일 collapsed 44px + 12px 여백 */
-    '  .new-qb, .goTop{ bottom:56px !important }',
-    /* v0.5.37: 모바일 핸들도 위아래 padding 축소 */
-    '  .bj-bar-handle{ padding:11px 14px 5px }',
+      '  body{ padding-bottom:64px !important }',
+      /* v0.5.42: 모바일 collapsed 44px + 12px 여백 */
+      '  .new-qb, .goTop{ bottom:56px !important }',
+      '  body:has(.prod_view_bot.card.mt40) .new-qb{ right:10px !important }',
+      '  body:has(.prod_view_bot.card.mt40) .new-qb .quick .link{ gap:6px !important; padding:6px 4px !important }',
+      '  body:has(.prod_view_bot.card.mt40) .new-qb .quick .link>p{ width:40px !important; height:40px !important }',
+      '  body:has(.prod_view_bot.card.mt40) .new-qb .quick .link>p>a,',
+      '  body:has(.prod_view_bot.card.mt40) .new-qb .quick .link .bj-ai-quote-quick a{ width:40px !important; height:40px !important }',
+      /* v0.5.37: 모바일 핸들도 위아래 padding 축소 */
+      '  .bj-bar-handle{ padding:11px 14px 5px }',
     '  .bj-bar-handle-text{ font-size:12px }',
     '  .bj-bar-handle-price{ font-size:13px }',
     '  .bj-bar-handle-option{ font-size:11px !important; padding:2px 8px !important; max-width:90px; margin-left:6px !important }',
@@ -9057,11 +9109,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '#ai-card-root .bj-more{ display:inline-block; margin-top:3px; background:none; border:0; padding:0; color:#0838f8; font-weight:700; font-size:12px; cursor:pointer; font-family:Pretendard,sans-serif }',
 
     /* === v0.6.2: 글씨 크기 조절 컨트롤 — 우측 퀵버튼(.link) 묶음 위에 세로 스타일로 배치 === */
-    '.new-qb .quick .link #bj-fs-ctrl{ display:flex; justify-content:center; margin:0 0 8px 0 }',
-    '#bj-fs-ctrl .bj-fs-inner{ display:flex; flex-direction:column; align-items:center; gap:5px; background:#fff; border:1px solid #e6e8ee; border-radius:16px; padding:7px 5px; box-shadow:0 2px 8px rgba(0,0,0,.12) }',
+    '.new-qb .quick .link #bj-fs-ctrl{ display:flex; justify-content:center; margin:0 }',
+    '#bj-fs-ctrl .bj-fs-inner{ display:flex; flex-direction:column; align-items:center; gap:4px; background:#fff; border:1px solid #e6e8ee; border-radius:14px; padding:5px 4px; box-shadow:none }',
     '#bj-fs-ctrl .bj-fs-lab{ font-size:10px; font-weight:700; color:#8a909a; line-height:1; letter-spacing:-0.3px }',
-    '#bj-fs-ctrl .bj-fs-btn{ display:inline-flex; align-items:center; justify-content:center; width:34px; height:34px; padding:0; border:0; background:#f2f5ff; color:#0838f8; cursor:pointer; border-radius:50%; line-height:1; transition:background .12s, transform .1s }',
-    '#bj-fs-ctrl .bj-fs-btn svg{ width:21px; height:21px; display:block }',
+    '#bj-fs-ctrl .bj-fs-btn{ display:inline-flex; align-items:center; justify-content:center; width:31px; height:31px; padding:0; border:0; background:#f2f5ff; color:#0838f8; cursor:pointer; border-radius:50%; line-height:1; transition:background .12s, transform .1s }',
+    '#bj-fs-ctrl .bj-fs-btn svg{ width:19px; height:19px; display:block }',
     '#bj-fs-ctrl .bj-fs-btn:hover{ background:#e0e8ff }',
     '#bj-fs-ctrl .bj-fs-btn:active{ transform:scale(.9) }',
     '#bj-fs-ctrl .bj-fs-btn[disabled]{ color:#cfd3db; background:#f5f6f8; cursor:default }',
@@ -10120,7 +10172,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
 
   function _trackCatalogViewContent(){
-    if (!IS_PROD_VIEW || window.__bjMetaCatalogViewTracked) return;
+    var isProdView = /\/prod_view\/\d+/.test(location.pathname || '');
+    if (!isProdView || window.__bjMetaCatalogViewTracked) return;
     var prodNo = (location.pathname.match(/prod_view\/(\d+)/) || [])[1] || '';
     var id = _metaCatalogId(prodNo);
     if (!id) return;
