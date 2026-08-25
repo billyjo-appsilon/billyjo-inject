@@ -13438,6 +13438,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '.bj-card-page .bj-card-benefit-max{margin-left:4px!important;color:#0838f8!important;font-size:14px!important;font-weight:800!important}',
       '.bj-card-page .bj-card-amt{color:#172033!important;font-weight:800!important;white-space:nowrap!important}',
       '.bj-card-page .bj-card-threshold{color:#172033!important;font-weight:800!important;white-space:nowrap!important}',
+      '.bj-card-page .bj-card-detail-head{display:block!important;margin:0 0 6px!important;color:#526071!important;font-size:13px!important;font-weight:500!important;line-height:1.5!important}',
+      '.bj-card-page .bj-card-detail-tier{display:block!important;margin:5px 0 0!important;color:#243044!important;font-size:13px!important;font-weight:400!important;line-height:1.55!important}',
+      '.bj-card-page .bj-card-detail-note{display:block!important;margin:8px 0 0!important;color:#667085!important;font-size:12px!important;font-weight:400!important;line-height:1.55!important}',
       '.bj-card-page .info__detail{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;margin:0!important;padding:0!important;list-style:none!important}',
       '.bj-card-page .info__detail li{display:grid!important;grid-template-columns:86px minmax(0,1fr)!important;gap:12px!important;margin:0!important;padding:12px!important;background:#fafbfc!important;border:1px solid #edf0f4!important;border-radius:8px!important;color:#2b3445!important;font-size:13px!important;line-height:1.55!important}',
       '.bj-card-page .info__detail li>p{margin:0!important;word-break:keep-all!important;overflow-wrap:anywhere!important}',
@@ -13525,13 +13528,43 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     for (var i = 0; i < nodes.length; i++) {
       var node = nodes[i];
       if (node.querySelector('a, button, input, select, textarea')) continue;
-      var html = escHtml(node.textContent || '');
-      html = html
-        .replace(/(\d{2,3}\s*만\s*원?\s*(?:이상|구간|시))/g, '<strong class="bj-card-threshold">$1</strong>')
-        .replace(/((?:월\s*)?(?:\d[\d,]*\s*원|\d+\s*만\s*(?:\d+\s*천)?\s*원?|\d+\s*천\s*원?)\s*(?:청구)?(?:할인|추가\s*프로모션|추가\s*할인)?)/g, '<strong class="bj-card-amt">$1</strong>');
-      node.innerHTML = html;
+      node.innerHTML = formatPartnershipDetailHtml(node.textContent || '');
     }
     article.setAttribute('data-bj-benefit-highlighted', 'true');
+  }
+  function formatPartnershipDetailHtml(text){
+    var raw = String(text || '')
+      .replace(/\r/g, '')
+      .replace(/\t/g, ' ')
+      .replace(/[ \u00a0]+/g, ' ')
+      .replace(/\n\s+/g, '\n')
+      .trim();
+    if (!raw) return '';
+    if (!/◈|\d{2,3}\s*만\s*원?\s*(?:이상|구간|시)/.test(raw)) return escHtml(raw);
+
+    var note = '';
+    var main = raw;
+    var noteIndex = raw.indexOf('※');
+    if (noteIndex >= 0) {
+      main = raw.slice(0, noteIndex).trim();
+      note = raw.slice(noteIndex).trim();
+    }
+
+    var chunks = main
+      .replace(/\s*◈\s*/g, '\n◈ ')
+      .split('\n')
+      .map(function(line){ return line.trim(); })
+      .filter(Boolean);
+    var html = [];
+    chunks.forEach(function(line){
+      if (/^◈\s*/.test(line)) {
+        html.push('<span class="bj-card-detail-tier">' + escHtml(line.replace(/^◈\s*/, '')) + '</span>');
+      } else {
+        html.push('<span class="bj-card-detail-head">' + escHtml(line) + '</span>');
+      }
+    });
+    if (note) html.push('<span class="bj-card-detail-note">' + escHtml(note) + '</span>');
+    return html.join('');
   }
   function enhancePartnershipCard(article){
     if (!article) return null;
