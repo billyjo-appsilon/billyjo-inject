@@ -8359,7 +8359,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
     /* v0.5.65: 제휴카드 페이지 상단 강조 박스 */
     '#bj-partnership-highlight{',
-    '  margin:20px 0 30px !important; padding:0 !important;',
+    '  width:calc(100% - 48px) !important; max-width:980px !important;',
+    '  margin:20px auto 30px !important; padding:0 !important;',
     '  border:2px solid #ffd000 !important; border-radius:12px !important;',
     '  background:linear-gradient(180deg, #fff8e7 0%, #fff 60%) !important;',
     '  box-shadow:0 4px 12px rgba(255,208,0,0.2) !important;',
@@ -8386,7 +8387,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '  list-style:none !important; margin:0 !important; padding:0 !important;',
     '}',
     '@media (max-width:600px){',
-    '  #bj-partnership-highlight{ margin:12px 0 20px !important; border-radius:10px !important }',
+    '  #bj-partnership-highlight{ width:calc(100% - 32px) !important; margin:12px auto 20px !important; border-radius:10px !important }',
     '  #bj-partnership-highlight .bj-php-label{ font-size:12.5px !important; padding:8px 12px !important }',
     '  #bj-partnership-highlight .bj-php-clone{ padding:12px !important }',
     '}',
@@ -13299,12 +13300,19 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (!isPartnershipCardPage() || document.getElementById('bj-partnership-card-style')) return;
     var css = [
       'body.bj-card-page{background:#f6f8fc!important}',
-      '.bj-card-page .board__data>li{max-width:980px!important;margin:0 auto 22px!important;padding:0 16px 20px!important;background:#fff!important;border:1px solid #e7ebf3!important;border-radius:18px!important;box-shadow:0 10px 30px rgba(15,23,42,.08)!important;overflow:hidden!important}',
-      '.bj-card-page .board__data>li>p:first-child{display:flex!important;align-items:center!important;gap:8px!important;margin:0 -16px 16px!important;padding:16px 18px!important;background:linear-gradient(135deg,#eef4ff,#fff)!important;color:#0838f8!important;font-size:20px!important;font-weight:900!important;letter-spacing:0!important}',
-      '.bj-card-page .board__data>li>p:first-child:before{content:"";display:inline-block;width:6px;height:22px;border-radius:999px;background:#0838f8}',
-      '.bj-card-page .board__data>li>p:nth-child(2){margin:0 0 18px!important;color:#526071!important;font-size:14px!important;font-weight:700!important}',
+      '.bj-card-page #container>.wide-inner{max-width:1040px!important;margin-left:auto!important;margin-right:auto!important;padding-left:24px!important;padding-right:24px!important;box-sizing:border-box!important}',
+      '.bj-card-page #bj-partnership-highlight{width:calc(100% - 48px)!important;max-width:980px!important;margin:20px auto 30px!important;box-sizing:border-box!important}',
+      '.bj-card-page .pc__board>li{max-width:980px!important;margin:0 auto 22px!important;padding:0 16px 20px!important;background:#fff!important;border:1px solid #e7ebf3!important;border-radius:18px!important;box-shadow:0 10px 30px rgba(15,23,42,.08)!important;overflow:hidden!important}',
+      '.bj-card-page .board__tit{display:block!important;margin:0 -16px 16px!important;padding:16px 18px!important;background:#fff!important;border-bottom:1px solid #eef2f7!important;color:#0838f8!important}',
+      '.bj-card-page .tit__param01{display:flex!important;align-items:center!important;gap:12px!important;margin:0!important;color:#0838f8!important;font-size:20px!important;font-weight:900!important;letter-spacing:0!important;line-height:1.25!important}',
+      '.bj-card-page .tit__param01:before{content:"";display:inline-block;width:6px;height:22px;border-radius:999px;background:#0838f8;flex:0 0 auto}',
+      '.bj-card-page .tit__img{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:auto!important;min-width:0!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important}',
+      '.bj-card-page .tit__img img{display:block!important;max-width:82px!important;max-height:34px!important;width:auto!important;height:auto!important;object-fit:contain!important}',
+      '.bj-card-page .tit__param02{margin:0 0 18px!important;color:#526071!important;font-size:14px!important;font-weight:700!important}',
       '.bj-card-page .card--article{display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;gap:24px!important;align-items:center!important;padding:22px 0!important;border-top:1px solid #edf0f5!important;background:#fff!important}',
       '.bj-card-page .card--article:first-of-type{border-top:0!important}',
+      '.bj-card-page .card--article.bj-card-promo-first{position:relative!important}',
+      '.bj-card-page .card--article.bj-card-promo-first:before{content:"추천 프로모션";position:absolute;left:0;top:12px;z-index:2;padding:5px 9px;border-radius:999px;background:#0838f8;color:#fff;font:900 11px/1.1 Pretendard,Arial,sans-serif;letter-spacing:0!important;box-shadow:0 5px 14px rgba(8,56,248,.18)}',
       '.bj-card-page .card__img{display:flex!important;align-items:center!important;justify-content:center!important;min-height:132px!important;padding:16px!important;background:#f8fafc!important;border:1px solid #eef2f7!important;border-radius:16px!important}',
       '.bj-card-page .card__img img{display:block!important;max-width:180px!important;max-height:116px!important;width:auto!important;height:auto!important;object-fit:contain!important}',
       '.bj-card-page .card__info{min-width:0!important}',
@@ -13315,7 +13323,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '.bj-card-page .info__detail li{display:grid!important;grid-template-columns:86px minmax(0,1fr)!important;gap:12px!important;margin:0!important;padding:12px!important;background:#f8fafc!important;border:1px solid #edf1f7!important;border-radius:12px!important;color:#2b3445!important;font-size:13px!important;line-height:1.55!important}',
       '.bj-card-page .info__detail li>p{margin:0!important;word-break:keep-all!important;overflow-wrap:anywhere!important}',
       '.bj-card-page .info__detail li>p:first-child{color:#667085!important;font-size:12px!important;font-weight:900!important}',
-      '@media(max-width:768px){.bj-card-page .contents,.bj-card-page .sub_content,.bj-card-page .inner{padding-left:14px!important;padding-right:14px!important}.bj-card-page .board__data>li{margin:0 0 18px!important;padding:0 14px 16px!important;border-radius:16px!important}.bj-card-page .board__data>li>p:first-child{margin:0 -14px 14px!important;padding:15px 16px!important;font-size:19px!important}.bj-card-page .card--article{display:block!important;padding:18px 0!important}.bj-card-page .card__img{min-height:118px!important;margin-bottom:14px!important}.bj-card-page .card__img img{max-width:176px!important;max-height:108px!important}.bj-card-page .info__tit{font-size:17px!important}.bj-card-page .info__detail li{grid-template-columns:1fr!important;gap:5px!important;padding:11px 12px!important;font-size:13px!important}.bj-card-page .info__detail li>p:first-child{font-size:12px!important;color:#0838f8!important}.bj-card-page .quick_list{right:10px!important}.bj-card-page .quick_list a,.bj-card-page .quick_list button{width:44px!important;height:44px!important}}'
+      '@media(max-width:768px){.bj-card-page #container>.wide-inner,.bj-card-page .contents,.bj-card-page .sub_content,.bj-card-page .inner{padding-left:16px!important;padding-right:16px!important;box-sizing:border-box!important}.bj-card-page #bj-partnership-highlight{width:calc(100% - 32px)!important;margin:12px auto 20px!important}.bj-card-page .pc__board>li{margin:0 0 18px!important;padding:0 14px 16px!important;border-radius:16px!important}.bj-card-page .board__tit{margin:0 -14px 14px!important;padding:12px 14px!important;background:#fff!important}.bj-card-page .tit__param01{gap:8px!important;font-size:17px!important}.bj-card-page .tit__param01:before{width:4px!important;height:18px!important}.bj-card-page .tit__img img{max-width:64px!important;max-height:26px!important}.bj-card-page .tit__param02{font-size:13px!important}.bj-card-page .card--article{display:block!important;padding:18px 0!important}.bj-card-page .card--article.bj-card-promo-first:before{top:10px;left:0;font-size:10.5px;padding:5px 8px}.bj-card-page .card__img{min-height:108px!important;margin-bottom:14px!important;padding:12px!important}.bj-card-page .card__img img{max-width:150px!important;max-height:92px!important}.bj-card-page .info__tit{font-size:17px!important}.bj-card-page .info__detail li{grid-template-columns:1fr!important;gap:5px!important;padding:11px 12px!important;font-size:13px!important}.bj-card-page .info__detail li>p:first-child{font-size:12px!important;color:#0838f8!important}.bj-card-page .quick_list{right:10px!important}.bj-card-page .quick_list a,.bj-card-page .quick_list button{width:44px!important;height:44px!important}}'
     ].join('\n');
     var style = document.createElement('style');
     style.id = 'bj-partnership-card-style';
@@ -13323,7 +13331,41 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     document.head.appendChild(style);
     document.body.classList.add('bj-card-page');
   }
-  ready(injectPartnershipCardStyle);
+  function scorePartnershipCard(article){
+    var text = ((article && article.textContent) || '').replace(/\s+/g, ' ');
+    var hasLowSpend = /(30\s*만\s*원|30만원|30만)\s*(?:이상|이상만|시)/.test(text);
+    var hasExtraPromo = /(추가\s*(?:프로모션|할인)|기본\s*[\d,만천원\s]+\+\s*[\d,만천원\s]+|[+＋]\s*[\d,만천원\s]+\s*추가)/.test(text);
+    if (hasLowSpend && hasExtraPromo) return 2;
+    if (hasExtraPromo) return 1;
+    return 0;
+  }
+  function promotePartnershipCards(){
+    if (!isPartnershipCardPage()) return;
+    var lists = document.querySelectorAll('.board__data');
+    for (var i = 0; i < lists.length; i++) {
+      if (lists[i].getAttribute('data-bj-card-ranked') === 'true') continue;
+      var articles = Array.prototype.slice.call(lists[i].querySelectorAll(':scope > article.card--article'));
+      if (!articles.length) continue;
+      articles.forEach(function(article, idx){
+        var score = scorePartnershipCard(article);
+        article.setAttribute('data-bj-card-score', String(score));
+        article.setAttribute('data-bj-card-order', String(idx));
+        if (score >= 2) article.classList.add('bj-card-promo-first');
+      });
+      articles.sort(function(a, b){
+        return (Number(b.getAttribute('data-bj-card-score')) || 0) - (Number(a.getAttribute('data-bj-card-score')) || 0) ||
+          (Number(a.getAttribute('data-bj-card-order')) || 0) - (Number(b.getAttribute('data-bj-card-order')) || 0);
+      });
+      articles.forEach(function(article){ lists[i].appendChild(article); });
+      lists[i].setAttribute('data-bj-card-ranked', 'true');
+    }
+  }
+  ready(function(){
+    injectPartnershipCardStyle();
+    promotePartnershipCards();
+    setTimeout(promotePartnershipCards, 600);
+    setTimeout(promotePartnershipCards, 1800);
+  });
 })();
 
 /* CHPI-7430N 자가관리 공개 경로 보강
