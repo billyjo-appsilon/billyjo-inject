@@ -848,7 +848,11 @@
   function pad(n){ return String(n).padStart(2, '0'); }
   function nowTime(){ var d = new Date(); return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds()); }
   function fmtDate(d){ return String(d.getFullYear()).slice(2) + '.' + pad(d.getMonth()+1) + '.' + pad(d.getDate()) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes()); }
-  function money70(p){ var rate = ((state.cfg && state.cfg.directOffer && state.cfg.directOffer.customerGiftRate) || 0.7); return Math.floor(((p && p.maxGift) || 0) * rate / 10000) * 10000; }
+  function money70(p){
+    /* maxGift from Admin2 is already the customer-facing maximum gift amount.
+       Do not apply the direct-offer rate a second time, or 70% max becomes 49%. */
+    return Math.max(0, Math.floor((Number(p && p.maxGift) || 0) / 1000) * 1000);
+  }
   function getProdNo(){
     var m = location.pathname.match(/(?:prod_view|rental\/d)\/(\d+)/);
     if (m) return m[1];
@@ -1295,7 +1299,8 @@
           if (ym) out.contractTermMonths = parseInt(ym[1], 10) * 12;
           else if (mm) out.contractTermMonths = parseInt(mm[1], 10);
         }
-        var priceEl = activeTerm.querySelector('.bj-ws-term-price') ||
+        var priceEl = activeTerm.querySelector('.bj-ws-term-orig') ||
+                      activeTerm.querySelector('.bj-ws-term-price') ||
                       activeTerm.querySelector('.bb-month-price');
         var priceText = (priceEl && priceEl.textContent) || activeTerm.getAttribute('data-price') || '';
         var priceNum = parseInt(String(priceText).replace(/[^\d]/g, ''), 10) || 0;
@@ -10827,7 +10832,13 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
         if (wtRows.length > 0) {
           var pickSupIdx = function(serviceText){
-            if (suppliers.length === 1) return 0;
+            if (suppliers.length === 1) {
+              var single = suppliers[0] && suppliers[0].name;
+              if (serviceText && single && !(
+                single.indexOf(serviceText) >= 0 || serviceText.indexOf(single) >= 0
+              )) return -1;
+              return 0;
+            }
             for (var si = 0; si < suppliers.length; si++) {
               if (serviceText && suppliers[si].name && (
                 suppliers[si].name.indexOf(serviceText) >= 0 || serviceText.indexOf(suppliers[si].name) >= 0
@@ -10837,6 +10848,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           };
           wtRows.forEach(function(r){
             var sidx = pickSupIdx(r.service);
+            if (sidx < 0) return;
             var sup = suppliers[sidx];
             // 중복 방지 — 이미 같은 term 라벨 있으면 skip
             var label = r.term;
