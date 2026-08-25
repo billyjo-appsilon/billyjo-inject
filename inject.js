@@ -13398,7 +13398,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 })();
 
 /* 제휴카드 안내 페이지 모바일 가독성 보강
-   네이티브 마크업은 이미지와 상세 테이블이 좁은 폭에 그대로 눌려 보인다. */
+   고객은 카드명보다 "내가 얼마나 덜 내는지"를 먼저 본다. */
 (function(){
   function ready(fn){ if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', fn); else fn(); }
   function isPartnershipCardPage(){
@@ -13420,18 +13420,28 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '.bj-card-page .card--article{display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;gap:24px!important;align-items:center!important;padding:22px 0!important;border-top:1px solid #edf0f5!important;background:#fff!important}',
       '.bj-card-page .card--article:first-of-type{border-top:0!important}',
       '.bj-card-page .card--article.bj-card-promo-first{position:relative!important}',
-      '.bj-card-page .card--article.bj-card-promo-first:before{content:"추천 프로모션";position:absolute;left:0;top:12px;z-index:2;padding:5px 9px;border-radius:999px;background:#0838f8;color:#fff;font:900 11px/1.1 Pretendard,Arial,sans-serif;letter-spacing:0!important;box-shadow:0 5px 14px rgba(8,56,248,.18)}',
+      '.bj-card-page .card--article.bj-card-promo-first:before{content:attr(data-bj-card-badge);position:absolute;left:0;top:12px;z-index:2;padding:5px 9px;border-radius:999px;background:#0838f8;color:#fff;font:900 11px/1.1 Pretendard,Arial,sans-serif;letter-spacing:0!important;box-shadow:0 5px 14px rgba(8,56,248,.18)}',
       '.bj-card-page .card__img{display:flex!important;align-items:center!important;justify-content:center!important;min-height:132px!important;padding:16px!important;background:#f8fafc!important;border:1px solid #eef2f7!important;border-radius:16px!important}',
       '.bj-card-page .card__img img{display:block!important;max-width:180px!important;max-height:116px!important;width:auto!important;height:auto!important;object-fit:contain!important}',
       '.bj-card-page .card__info{min-width:0!important}',
       '.bj-card-page .info__tit{margin:0!important;color:#172033!important;font-size:18px!important;font-weight:900!important;line-height:1.32!important}',
-      '.bj-card-page .info__stit{margin:6px 0 14px!important;color:#667085!important;font-size:14px!important;font-weight:700!important;line-height:1.45!important}',
+      '.bj-card-page .info__stit{margin:6px 0 12px!important;color:#667085!important;font-size:14px!important;font-weight:700!important;line-height:1.45!important}',
       '.bj-card-page .info__stit b{color:#0838f8!important}',
+      '.bj-card-page .bj-card-benefit-summary{margin:0 0 12px!important;padding:12px 14px!important;border:1px solid #dbe6ff!important;border-left:4px solid #0838f8!important;border-radius:12px!important;background:#f7faff!important;color:#172033!important;font-family:Pretendard,Arial,sans-serif!important;box-sizing:border-box!important}',
+      '.bj-card-page .bj-card-benefit-top{display:flex!important;align-items:center!important;gap:6px!important;flex-wrap:wrap!important;margin-bottom:7px!important}',
+      '.bj-card-page .bj-card-benefit-badge{display:inline-flex!important;align-items:center!important;min-height:22px!important;padding:4px 7px!important;border-radius:999px!important;background:#0838f8!important;color:#fff!important;font-size:11px!important;font-weight:900!important;line-height:1!important;letter-spacing:0!important}',
+      '.bj-card-page .bj-card-benefit-badge.is-soft{background:#eef3ff!important;color:#0838f8!important;border:1px solid #cddaff!important}',
+      '.bj-card-page .bj-card-benefit-main{display:flex!important;align-items:baseline!important;gap:8px!important;flex-wrap:wrap!important;margin:0!important;font-size:14px!important;font-weight:800!important;line-height:1.35!important}',
+      '.bj-card-page .bj-card-benefit-amount{color:#0838f8!important;font-size:22px!important;font-weight:950!important;line-height:1.1!important}',
+      '.bj-card-page .bj-card-benefit-sub{margin:5px 0 0!important;color:#526071!important;font-size:12px!important;font-weight:700!important;line-height:1.45!important}',
+      '.bj-card-page .bj-card-benefit-max{margin-left:6px!important;color:#0f172a!important;font-weight:900!important}',
+      '.bj-card-page .bj-card-amt{color:#0838f8!important;font-weight:950!important;white-space:nowrap!important}',
+      '.bj-card-page .bj-card-threshold{color:#172033!important;font-weight:900!important;white-space:nowrap!important}',
       '.bj-card-page .info__detail{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;margin:0!important;padding:0!important;list-style:none!important}',
       '.bj-card-page .info__detail li{display:grid!important;grid-template-columns:86px minmax(0,1fr)!important;gap:12px!important;margin:0!important;padding:12px!important;background:#f8fafc!important;border:1px solid #edf1f7!important;border-radius:12px!important;color:#2b3445!important;font-size:13px!important;line-height:1.55!important}',
       '.bj-card-page .info__detail li>p{margin:0!important;word-break:keep-all!important;overflow-wrap:anywhere!important}',
       '.bj-card-page .info__detail li>p:first-child{color:#667085!important;font-size:12px!important;font-weight:900!important}',
-      '@media(max-width:768px){.bj-card-page #container>.wide-inner,.bj-card-page .contents,.bj-card-page .sub_content,.bj-card-page .inner{padding-left:16px!important;padding-right:16px!important;box-sizing:border-box!important}.bj-card-page #bj-partnership-highlight{width:calc(100% - 32px)!important;margin:12px auto 20px!important}.bj-card-page .pc__board>li{margin:0 0 18px!important;padding:0 14px 16px!important;border-radius:16px!important}.bj-card-page .board__tit{margin:0 -14px 14px!important;padding:12px 14px!important;background:#fff!important}.bj-card-page .tit__param01{gap:8px!important;font-size:17px!important}.bj-card-page .tit__param01:before{width:4px!important;height:18px!important}.bj-card-page .tit__img img{max-width:64px!important;max-height:26px!important}.bj-card-page .tit__param02{font-size:13px!important}.bj-card-page .card--article{display:block!important;padding:18px 0!important}.bj-card-page .card--article.bj-card-promo-first:before{top:10px;left:0;font-size:10.5px;padding:5px 8px}.bj-card-page .card__img{min-height:108px!important;margin-bottom:14px!important;padding:12px!important}.bj-card-page .card__img img{max-width:150px!important;max-height:92px!important}.bj-card-page .card__info{padding:0 8px!important;box-sizing:border-box!important}.bj-card-page .info__tit{font-size:17px!important}.bj-card-page .info__detail li{grid-template-columns:1fr!important;gap:5px!important;padding:11px 12px!important;font-size:13px!important}.bj-card-page .info__detail li>p:first-child{font-size:12px!important;color:#0838f8!important}.bj-card-page .quick_list,.bj-card-page .new-qb{display:none!important}}'
+      '@media(max-width:768px){.bj-card-page #container>.wide-inner,.bj-card-page .contents,.bj-card-page .sub_content,.bj-card-page .inner{padding-left:16px!important;padding-right:16px!important;box-sizing:border-box!important}.bj-card-page #bj-partnership-highlight{width:calc(100% - 32px)!important;margin:12px auto 20px!important}.bj-card-page .pc__board>li{margin:0 0 18px!important;padding:0 14px 16px!important;border-radius:16px!important}.bj-card-page .board__tit{margin:0 -14px 14px!important;padding:12px 14px!important;background:#fff!important}.bj-card-page .tit__param01{gap:8px!important;font-size:17px!important}.bj-card-page .tit__param01:before{width:4px!important;height:18px!important}.bj-card-page .tit__img img{max-width:64px!important;max-height:26px!important}.bj-card-page .tit__param02{font-size:13px!important}.bj-card-page .card--article{display:block!important;padding:18px 0!important}.bj-card-page .card--article.bj-card-promo-first:before{top:10px;left:0;font-size:10.5px;padding:5px 8px}.bj-card-page .card__img{min-height:108px!important;margin-bottom:14px!important;padding:12px!important}.bj-card-page .card__img img{max-width:150px!important;max-height:92px!important}.bj-card-page .card__info{padding:0 8px!important;box-sizing:border-box!important}.bj-card-page .info__tit{font-size:17px!important}.bj-card-page .bj-card-benefit-summary{padding:11px 12px!important;margin-bottom:10px!important}.bj-card-page .bj-card-benefit-main{gap:6px!important;font-size:13px!important}.bj-card-page .bj-card-benefit-amount{font-size:20px!important}.bj-card-page .bj-card-benefit-sub{font-size:12px!important}.bj-card-page .info__detail li{grid-template-columns:1fr!important;gap:5px!important;padding:11px 12px!important;font-size:13px!important}.bj-card-page .info__detail li>p:first-child{font-size:12px!important;color:#0838f8!important}.bj-card-page .quick_list,.bj-card-page .new-qb{display:none!important}}'
     ].join('\n');
     var style = document.createElement('style');
     style.id = 'bj-partnership-card-style';
@@ -13439,27 +13449,145 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     document.head.appendChild(style);
     document.body.classList.add('bj-card-page');
   }
+  function escHtml(v){
+    return String(v == null ? '' : v).replace(/[&<>"']/g, function(ch){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+    });
+  }
+  function normalizeCardText(v){
+    return String(v || '').replace(/\s+/g, ' ').trim();
+  }
+  function parseKoreanAmount(raw){
+    var s = String(raw || '').replace(/\s+/g, '').replace(/,/g, '');
+    var m = s.match(/(\d+)만(?:(\d+)천)?원?/);
+    if (m) return (Number(m[1]) || 0) * 10000 + (Number(m[2]) || 0) * 1000;
+    m = s.match(/(\d+)천원?/);
+    if (m) return (Number(m[1]) || 0) * 1000;
+    m = s.match(/(\d+)원?/);
+    return m ? Number(m[1]) || 0 : 0;
+  }
+  function won(n){
+    return (Number(n) || 0).toLocaleString('ko-KR') + '원';
+  }
+  function getTier(tiers, threshold){
+    var key = String(Number(threshold) || 0);
+    if (!tiers[key]) tiers[key] = { threshold: Number(threshold) || 0, base: 0, extra: 0 };
+    return tiers[key];
+  }
+  function parsePartnershipCardSummary(article){
+    if (!article) return null;
+    var sourceNodes = article.querySelectorAll('.info__stit, .info__detail');
+    var text = sourceNodes.length ?
+      normalizeCardText(Array.prototype.map.call(sourceNodes, function(node){ return node.textContent || ''; }).join(' ')) :
+      normalizeCardText(article.textContent);
+    if (!text) return null;
+    var tiers = {};
+    var re = /(\d{2,3})\s*만\s*원?\s*(?:이상|구간|시)[^◈※\n]{0,90}?((?:\d[\d,]*\s*원|\d+\s*만\s*(?:\d+\s*천)?\s*원?|\d+\s*천\s*원?))(?:\s*(?:청구)?할인)?(?:\s*\(([^)]*)\))?/g;
+    var m;
+    while ((m = re.exec(text))) {
+      var row = m[0] || '';
+      var threshold = Number(m[1]) || 0;
+      var amount = parseKoreanAmount(m[2]);
+      if (!threshold || !amount) continue;
+      var tier = getTier(tiers, threshold);
+      var detail = m[3] || '';
+      var base = detail.match(/기본\s*((?:\d[\d,]*\s*원|\d+\s*만\s*(?:\d+\s*천)?\s*원?|\d+\s*천\s*원?))/);
+      var extra = detail.match(/\+\s*((?:\d[\d,]*\s*원|\d+\s*만\s*(?:\d+\s*천)?\s*원?|\d+\s*천\s*원?))\s*추가/);
+      if (base || extra) {
+        if (base) tier.base = Math.max(tier.base, parseKoreanAmount(base[1]));
+        if (extra) tier.extra = Math.max(tier.extra, parseKoreanAmount(extra[1]));
+      } else if (/추가\s*(?:프로모션|할인)/.test(row) && !/기본/.test(row)) {
+        tier.extra = Math.max(tier.extra, amount);
+      } else {
+        tier.base = Math.max(tier.base, amount);
+      }
+    }
+    var keys = Object.keys(tiers).map(Number).filter(Boolean).sort(function(a,b){ return a - b; });
+    if (!keys.length) return null;
+    var primaryKey = keys.indexOf(30) !== -1 ? 30 : keys[0];
+    var maxTotal = 0;
+    keys.forEach(function(k){
+      var t = tiers[String(k)];
+      t.total = Math.max(t.base + t.extra, t.base, t.extra);
+      maxTotal = Math.max(maxTotal, t.total);
+    });
+    var primary = tiers[String(primaryKey)];
+    if (!primary || !primary.total) return null;
+    var badge = primary.threshold <= 30 && primary.extra ? '30만원 구간 추천' :
+      primary.extra ? '추가할인 포함' :
+      primary.threshold <= 30 ? '낮은 실적 추천' : '';
+    return { primary: primary, maxTotal: maxTotal, badge: badge, hasExtra: keys.some(function(k){ return !!tiers[String(k)].extra; }) };
+  }
+  function highlightBenefitText(article){
+    if (!article || article.getAttribute('data-bj-benefit-highlighted') === 'true') return;
+    var nodes = article.querySelectorAll('.info__stit, .info__detail li>p:not(:first-child)');
+    for (var i = 0; i < nodes.length; i++) {
+      var node = nodes[i];
+      if (node.querySelector('a, button, input, select, textarea')) continue;
+      var html = escHtml(node.textContent || '');
+      html = html
+        .replace(/(\d{2,3}\s*만\s*원?\s*(?:이상|구간|시))/g, '<strong class="bj-card-threshold">$1</strong>')
+        .replace(/((?:월\s*)?(?:\d[\d,]*\s*원|\d+\s*만\s*(?:\d+\s*천)?\s*원?|\d+\s*천\s*원?)\s*(?:청구)?(?:할인|추가\s*프로모션|추가\s*할인)?)/g, '<strong class="bj-card-amt">$1</strong>');
+      node.innerHTML = html;
+    }
+    article.setAttribute('data-bj-benefit-highlighted', 'true');
+  }
+  function enhancePartnershipCard(article){
+    if (!article) return null;
+    var summary = parsePartnershipCardSummary(article);
+    highlightBenefitText(article);
+    if (!summary || article.getAttribute('data-bj-card-enhanced') === 'true') return summary;
+    var info = article.querySelector('.card__info');
+    var anchor = article.querySelector('.info__detail');
+    if (!info || !anchor) return summary;
+    var p = summary.primary;
+    var formula = p.extra && p.base ? '기본 ' + won(p.base) + ' + 추가 ' + won(p.extra) : '카드 청구할인 기준';
+    var max = summary.maxTotal > p.total ? '<span class="bj-card-benefit-max">최대 월 ' + won(summary.maxTotal) + '까지</span>' : '';
+    var badgeHtml = summary.badge ? '<span class="bj-card-benefit-badge">' + escHtml(summary.badge) + '</span>' : '';
+    if (summary.hasExtra && summary.badge !== '추가할인 포함') badgeHtml += '<span class="bj-card-benefit-badge is-soft">추가할인 포함</span>';
+    var box = document.createElement('div');
+    box.className = 'bj-card-benefit-summary';
+    box.innerHTML =
+      '<div class="bj-card-benefit-top">' + badgeHtml + '</div>' +
+      '<p class="bj-card-benefit-main"><span>전월 ' + escHtml(p.threshold) + '만원 기준</span><span class="bj-card-benefit-amount">월 ' + escHtml(won(p.total)) + ' 할인</span>' + max + '</p>' +
+      '<p class="bj-card-benefit-sub">' + escHtml(formula) + '</p>';
+    info.insertBefore(box, anchor);
+    article.setAttribute('data-bj-card-enhanced', 'true');
+    return summary;
+  }
   function scorePartnershipCard(article){
-    var text = ((article && article.textContent) || '').replace(/\s+/g, ' ');
+    var summary = enhancePartnershipCard(article);
+    if (summary && summary.primary) {
+      var p = summary.primary;
+      return (p.threshold <= 30 ? 1000000 : 0) + (summary.hasExtra ? 100000 : 0) + ((p.total || 0) * 10) + (summary.maxTotal || 0);
+    }
+    var text = normalizeCardText(article && article.textContent);
     var hasLowSpend = /(30\s*만\s*원|30만원|30만)\s*(?:이상|이상만|시)/.test(text);
     var hasExtraPromo = /(추가\s*(?:프로모션|할인)|기본\s*[\d,만천원\s]+\+\s*[\d,만천원\s]+|[+＋]\s*[\d,만천원\s]+\s*추가)/.test(text);
-    if (hasLowSpend && hasExtraPromo) return 2;
-    if (hasExtraPromo) return 1;
+    if (hasLowSpend && hasExtraPromo) return 1100000;
+    if (hasExtraPromo) return 100000;
     return 0;
   }
   function promotePartnershipCards(){
     if (!isPartnershipCardPage()) return;
     var lists = document.querySelectorAll('.board__data');
     for (var i = 0; i < lists.length; i++) {
-      if (lists[i].getAttribute('data-bj-card-ranked') === 'true') continue;
       var articles = Array.prototype.slice.call(lists[i].querySelectorAll(':scope > article.card--article'));
       if (!articles.length) continue;
       articles.forEach(function(article, idx){
+        if (!article.hasAttribute('data-bj-card-order')) article.setAttribute('data-bj-card-order', String(idx));
         var score = scorePartnershipCard(article);
         article.setAttribute('data-bj-card-score', String(score));
-        article.setAttribute('data-bj-card-order', String(idx));
-        if (score >= 2) article.classList.add('bj-card-promo-first');
+        var badge = article.getAttribute('data-bj-card-badge') || '';
+        var summary = parsePartnershipCardSummary(article);
+        if (summary && summary.badge) {
+          badge = summary.badge;
+          article.setAttribute('data-bj-card-badge', badge);
+        }
+        if (score >= 1000000 && badge) article.classList.add('bj-card-promo-first');
+        else article.classList.remove('bj-card-promo-first');
       });
+      if (lists[i].getAttribute('data-bj-card-ranked') === 'true') continue;
       articles.sort(function(a, b){
         return (Number(b.getAttribute('data-bj-card-score')) || 0) - (Number(a.getAttribute('data-bj-card-score')) || 0) ||
           (Number(a.getAttribute('data-bj-card-order')) || 0) - (Number(b.getAttribute('data-bj-card-order')) || 0);
