@@ -13407,41 +13407,42 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   function injectPartnershipCardStyle(){
     if (!isPartnershipCardPage() || document.getElementById('bj-partnership-card-style')) return;
     var css = [
-      'body.bj-card-page{background:#f6f8fc!important}',
+      'body.bj-card-page{background:#fff!important}',
       '.bj-card-page #container>.wide-inner{max-width:1040px!important;margin-left:auto!important;margin-right:auto!important;padding-left:24px!important;padding-right:24px!important;box-sizing:border-box!important}',
       '.bj-card-page #bj-partnership-highlight{width:calc(100% - 48px)!important;max-width:980px!important;margin:20px auto 30px!important;box-sizing:border-box!important}',
-      '.bj-card-page .pc__board>li{max-width:980px!important;margin:0 auto 22px!important;padding:0 16px 20px!important;background:#fff!important;border:1px solid #e7ebf3!important;border-radius:18px!important;box-shadow:0 10px 30px rgba(15,23,42,.08)!important;overflow:hidden!important}',
-      '.bj-card-page .board__tit{display:block!important;margin:0 -16px 16px!important;padding:16px 18px!important;background:#fff!important;border-bottom:1px solid #eef2f7!important;color:#0838f8!important}',
-      '.bj-card-page .tit__param01{display:flex!important;align-items:center!important;gap:12px!important;margin:0!important;color:#0838f8!important;font-size:20px!important;font-weight:900!important;letter-spacing:0!important;line-height:1.25!important}',
-      '.bj-card-page .tit__param01:before{content:"";display:inline-block;width:6px;height:22px;border-radius:999px;background:#0838f8;flex:0 0 auto}',
+      '.bj-card-page .pc__board>li{max-width:980px!important;margin:0 auto 22px!important;padding:0 16px 20px!important;background:#fff!important;border:1px solid #e6e9ef!important;border-radius:10px!important;box-shadow:none!important;overflow:hidden!important}',
+      '.bj-card-page .board__tit{display:block!important;margin:0 -16px 16px!important;padding:15px 18px!important;background:#fff!important;border-bottom:1px solid #eef0f4!important;color:#172033!important}',
+      '.bj-card-page .tit__param01{display:flex!important;align-items:center!important;gap:10px!important;margin:0!important;color:#172033!important;font-size:19px!important;font-weight:800!important;letter-spacing:0!important;line-height:1.3!important}',
+      '.bj-card-page .tit__param01:before{content:"";display:inline-block;width:4px;height:18px;border-radius:999px;background:#0838f8;flex:0 0 auto}',
       '.bj-card-page .tit__img{display:inline-flex!important;align-items:center!important;justify-content:center!important;width:auto!important;min-width:0!important;margin:0!important;padding:0!important;background:transparent!important;border:0!important}',
       '.bj-card-page .tit__img img{display:block!important;max-width:82px!important;max-height:34px!important;width:auto!important;height:auto!important;object-fit:contain!important}',
       '.bj-card-page .tit__param02{margin:0 0 18px!important;color:#526071!important;font-size:14px!important;font-weight:700!important}',
       '.bj-card-page .card--article{display:grid!important;grid-template-columns:220px minmax(0,1fr)!important;gap:24px!important;align-items:center!important;padding:22px 0!important;border-top:1px solid #edf0f5!important;background:#fff!important}',
       '.bj-card-page .card--article:first-of-type{border-top:0!important}',
       '.bj-card-page .card--article.bj-card-promo-first{position:relative!important}',
-      '.bj-card-page .card--article.bj-card-promo-first:before{content:attr(data-bj-card-badge);position:absolute;left:0;top:12px;z-index:2;padding:5px 9px;border-radius:999px;background:#0838f8;color:#fff;font:900 11px/1.1 Pretendard,Arial,sans-serif;letter-spacing:0!important;box-shadow:0 5px 14px rgba(8,56,248,.18)}',
-      '.bj-card-page .card__img{display:flex!important;align-items:center!important;justify-content:center!important;min-height:132px!important;padding:16px!important;background:#f8fafc!important;border:1px solid #eef2f7!important;border-radius:16px!important}',
+      '.bj-card-page .card--article.bj-card-promo-first:before{display:none!important}',
+      '.bj-card-page .card__img{display:flex!important;align-items:center!important;justify-content:center!important;min-height:132px!important;padding:16px!important;background:#fff!important;border:1px solid #eef0f4!important;border-radius:10px!important}',
       '.bj-card-page .card__img img{display:block!important;max-width:180px!important;max-height:116px!important;width:auto!important;height:auto!important;object-fit:contain!important}',
       '.bj-card-page .card__info{min-width:0!important}',
-      '.bj-card-page .info__tit{margin:0!important;color:#172033!important;font-size:18px!important;font-weight:900!important;line-height:1.32!important}',
+      '.bj-card-page .info__tit{margin:0!important;color:#172033!important;font-size:18px!important;font-weight:800!important;line-height:1.32!important}',
       '.bj-card-page .info__stit{margin:6px 0 12px!important;color:#667085!important;font-size:14px!important;font-weight:700!important;line-height:1.45!important}',
-      '.bj-card-page .info__stit b{color:#0838f8!important}',
-      '.bj-card-page .bj-card-benefit-summary{margin:0 0 12px!important;padding:12px 14px!important;border:1px solid #dbe6ff!important;border-left:4px solid #0838f8!important;border-radius:12px!important;background:#f7faff!important;color:#172033!important;font-family:Pretendard,Arial,sans-serif!important;box-sizing:border-box!important}',
-      '.bj-card-page .bj-card-benefit-top{display:flex!important;align-items:center!important;gap:6px!important;flex-wrap:wrap!important;margin-bottom:7px!important}',
-      '.bj-card-page .bj-card-benefit-badge{display:inline-flex!important;align-items:center!important;min-height:22px!important;padding:4px 7px!important;border-radius:999px!important;background:#0838f8!important;color:#fff!important;font-size:11px!important;font-weight:900!important;line-height:1!important;letter-spacing:0!important}',
-      '.bj-card-page .bj-card-benefit-badge.is-soft{background:#eef3ff!important;color:#0838f8!important;border:1px solid #cddaff!important}',
-      '.bj-card-page .bj-card-benefit-main{display:flex!important;align-items:baseline!important;gap:8px!important;flex-wrap:wrap!important;margin:0!important;font-size:14px!important;font-weight:800!important;line-height:1.35!important}',
-      '.bj-card-page .bj-card-benefit-amount{color:#0838f8!important;font-size:22px!important;font-weight:950!important;line-height:1.1!important}',
-      '.bj-card-page .bj-card-benefit-sub{margin:5px 0 0!important;color:#526071!important;font-size:12px!important;font-weight:700!important;line-height:1.45!important}',
-      '.bj-card-page .bj-card-benefit-max{margin-left:6px!important;color:#0f172a!important;font-weight:900!important}',
-      '.bj-card-page .bj-card-amt{color:#0838f8!important;font-weight:950!important;white-space:nowrap!important}',
-      '.bj-card-page .bj-card-threshold{color:#172033!important;font-weight:900!important;white-space:nowrap!important}',
+      '.bj-card-page .info__stit b{color:#172033!important;font-weight:800!important}',
+      '.bj-card-page .bj-card-benefit-summary{margin:0 0 12px!important;padding:11px 13px!important;border:1px solid #dbe6ff!important;border-left:3px solid #0838f8!important;border-radius:8px!important;background:#fbfdff!important;color:#172033!important;font-family:Pretendard,Arial,sans-serif!important;box-sizing:border-box!important}',
+      '.bj-card-page .bj-card-benefit-top{display:flex!important;align-items:center!important;gap:5px!important;flex-wrap:wrap!important;margin-bottom:6px!important}',
+      '.bj-card-page .bj-card-benefit-badge{display:inline-flex!important;align-items:center!important;min-height:20px!important;padding:3px 7px!important;border-radius:999px!important;background:#fff!important;color:#0838f8!important;border:1px solid #cfdcff!important;font-size:11px!important;font-weight:800!important;line-height:1!important;letter-spacing:0!important}',
+      '.bj-card-page .bj-card-benefit-badge.is-soft{background:#fff!important;color:#0838f8!important;border:1px solid #dbe6ff!important}',
+      '.bj-card-page .bj-card-benefit-main{display:flex!important;align-items:baseline!important;gap:7px!important;flex-wrap:wrap!important;margin:0!important;font-size:14px!important;font-weight:700!important;line-height:1.4!important}',
+      '.bj-card-page .bj-card-benefit-amount{color:#0838f8!important;font-size:18px!important;font-weight:850!important;line-height:1.15!important}',
+      '.bj-card-page .bj-card-benefit-sub{margin:5px 0 0!important;color:#526071!important;font-size:13px!important;font-weight:600!important;line-height:1.45!important}',
+      '.bj-card-page .bj-card-benefit-sub .bj-card-benefit-sub-amt{color:#0838f8!important;font-weight:800!important}',
+      '.bj-card-page .bj-card-benefit-max{margin-left:4px!important;color:#0838f8!important;font-size:14px!important;font-weight:800!important}',
+      '.bj-card-page .bj-card-amt{color:#172033!important;font-weight:800!important;white-space:nowrap!important}',
+      '.bj-card-page .bj-card-threshold{color:#172033!important;font-weight:800!important;white-space:nowrap!important}',
       '.bj-card-page .info__detail{display:grid!important;grid-template-columns:1fr!important;gap:10px!important;margin:0!important;padding:0!important;list-style:none!important}',
-      '.bj-card-page .info__detail li{display:grid!important;grid-template-columns:86px minmax(0,1fr)!important;gap:12px!important;margin:0!important;padding:12px!important;background:#f8fafc!important;border:1px solid #edf1f7!important;border-radius:12px!important;color:#2b3445!important;font-size:13px!important;line-height:1.55!important}',
+      '.bj-card-page .info__detail li{display:grid!important;grid-template-columns:86px minmax(0,1fr)!important;gap:12px!important;margin:0!important;padding:12px!important;background:#fafbfc!important;border:1px solid #edf0f4!important;border-radius:8px!important;color:#2b3445!important;font-size:13px!important;line-height:1.55!important}',
       '.bj-card-page .info__detail li>p{margin:0!important;word-break:keep-all!important;overflow-wrap:anywhere!important}',
       '.bj-card-page .info__detail li>p:first-child{color:#667085!important;font-size:12px!important;font-weight:900!important}',
-      '@media(max-width:768px){.bj-card-page #container>.wide-inner,.bj-card-page .contents,.bj-card-page .sub_content,.bj-card-page .inner{padding-left:16px!important;padding-right:16px!important;box-sizing:border-box!important}.bj-card-page #bj-partnership-highlight{width:calc(100% - 32px)!important;margin:12px auto 20px!important}.bj-card-page .pc__board>li{margin:0 0 18px!important;padding:0 14px 16px!important;border-radius:16px!important}.bj-card-page .board__tit{margin:0 -14px 14px!important;padding:12px 14px!important;background:#fff!important}.bj-card-page .tit__param01{gap:8px!important;font-size:17px!important}.bj-card-page .tit__param01:before{width:4px!important;height:18px!important}.bj-card-page .tit__img img{max-width:64px!important;max-height:26px!important}.bj-card-page .tit__param02{font-size:13px!important}.bj-card-page .card--article{display:block!important;padding:18px 0!important}.bj-card-page .card--article.bj-card-promo-first:before{top:10px;left:0;font-size:10.5px;padding:5px 8px}.bj-card-page .card__img{min-height:108px!important;margin-bottom:14px!important;padding:12px!important}.bj-card-page .card__img img{max-width:150px!important;max-height:92px!important}.bj-card-page .card__info{padding:0 8px!important;box-sizing:border-box!important}.bj-card-page .info__tit{font-size:17px!important}.bj-card-page .bj-card-benefit-summary{padding:11px 12px!important;margin-bottom:10px!important}.bj-card-page .bj-card-benefit-main{gap:6px!important;font-size:13px!important}.bj-card-page .bj-card-benefit-amount{font-size:20px!important}.bj-card-page .bj-card-benefit-sub{font-size:12px!important}.bj-card-page .info__detail li{grid-template-columns:1fr!important;gap:5px!important;padding:11px 12px!important;font-size:13px!important}.bj-card-page .info__detail li>p:first-child{font-size:12px!important;color:#0838f8!important}.bj-card-page .quick_list,.bj-card-page .new-qb{display:none!important}}'
+      '@media(max-width:768px){.bj-card-page #container>.wide-inner,.bj-card-page .contents,.bj-card-page .sub_content,.bj-card-page .inner{padding-left:16px!important;padding-right:16px!important;box-sizing:border-box!important}.bj-card-page #bj-partnership-highlight{width:calc(100% - 32px)!important;margin:12px auto 20px!important}.bj-card-page .pc__board>li{margin:0 0 18px!important;padding:0 14px 16px!important;border-radius:10px!important}.bj-card-page .board__tit{margin:0 -14px 14px!important;padding:12px 14px!important;background:#fff!important}.bj-card-page .tit__param01{gap:8px!important;font-size:17px!important}.bj-card-page .tit__param01:before{width:4px!important;height:17px!important}.bj-card-page .tit__img img{max-width:64px!important;max-height:26px!important}.bj-card-page .tit__param02{font-size:13px!important}.bj-card-page .card--article{display:block!important;padding:18px 0!important}.bj-card-page .card--article.bj-card-promo-first:before{top:10px;left:0;font-size:10.5px;padding:4px 8px}.bj-card-page .card__img{min-height:108px!important;margin-bottom:14px!important;padding:12px!important}.bj-card-page .card__img img{max-width:150px!important;max-height:92px!important}.bj-card-page .card__info{padding:0 8px!important;box-sizing:border-box!important}.bj-card-page .info__tit{font-size:17px!important}.bj-card-page .bj-card-benefit-summary{padding:10px 12px!important;margin-bottom:10px!important}.bj-card-page .bj-card-benefit-main{gap:6px!important;font-size:13px!important}.bj-card-page .bj-card-benefit-amount{font-size:17px!important}.bj-card-page .bj-card-benefit-sub{font-size:12.5px!important}.bj-card-page .info__detail li{grid-template-columns:1fr!important;gap:5px!important;padding:11px 12px!important;font-size:13px!important}.bj-card-page .info__detail li>p:first-child{font-size:12px!important;color:#667085!important}.bj-card-page .quick_list,.bj-card-page .new-qb{display:none!important}}'
     ].join('\n');
     var style = document.createElement('style');
     style.id = 'bj-partnership-card-style';
@@ -13541,7 +13542,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var anchor = article.querySelector('.info__detail');
     if (!info || !anchor) return summary;
     var p = summary.primary;
-    var formula = p.extra && p.base ? '기본 ' + won(p.base) + ' + 추가 ' + won(p.extra) : '카드 청구할인 기준';
+    var formulaHtml = p.extra && p.base ?
+      '기본 <span class="bj-card-benefit-sub-amt">' + escHtml(won(p.base)) + '</span> + 추가 <span class="bj-card-benefit-sub-amt">' + escHtml(won(p.extra)) + '</span>' :
+      '카드 청구할인 기준';
     var max = summary.maxTotal > p.total ? '<span class="bj-card-benefit-max">최대 월 ' + won(summary.maxTotal) + '까지</span>' : '';
     var badgeHtml = summary.badge ? '<span class="bj-card-benefit-badge">' + escHtml(summary.badge) + '</span>' : '';
     if (summary.hasExtra && summary.badge !== '추가할인 포함') badgeHtml += '<span class="bj-card-benefit-badge is-soft">추가할인 포함</span>';
@@ -13550,7 +13553,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     box.innerHTML =
       '<div class="bj-card-benefit-top">' + badgeHtml + '</div>' +
       '<p class="bj-card-benefit-main"><span>전월 ' + escHtml(p.threshold) + '만원 기준</span><span class="bj-card-benefit-amount">월 ' + escHtml(won(p.total)) + ' 할인</span>' + max + '</p>' +
-      '<p class="bj-card-benefit-sub">' + escHtml(formula) + '</p>';
+      '<p class="bj-card-benefit-sub">' + formulaHtml + '</p>';
     info.insertBefore(box, anchor);
     article.setAttribute('data-bj-card-enhanced', 'true');
     return summary;
