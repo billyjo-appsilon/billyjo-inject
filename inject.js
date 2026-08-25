@@ -7706,13 +7706,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (!visibleParent) visibleParent = document.body;
       var wrap = existing || document.createElement('div');
       wrap.id = 'bj-partnership-highlight';
-      var safeName = supName.replace(/[<>&"']/g, '');
-      wrap.innerHTML =
-        '<div class="bj-php-label">' +
-          '<span class="bj-php-icon">📌</span>' +
-          '<span>지금 보신 제품의 렌탈사 <strong>' + safeName + '</strong> 제휴카드입니다</span>' +
-        '</div>' +
-        '<div class="bj-php-clone"></div>';
+      wrap.innerHTML = '<div class="bj-php-clone"></div>';
       wrap.querySelector('.bj-php-clone').appendChild(targetLi.cloneNode(true));
       visibleParent.insertBefore(wrap, beforeNode || visibleParent.firstChild);
       if (sourceList && sourceList.children && sourceList.children.length > 1) {
@@ -8419,39 +8413,34 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     '  .bj-consult-call-phone{ font-size:16px }',
     '}',
 
-    /* v0.5.65: 제휴카드 페이지 상단 강조 박스 */
+    /* v0.5.65: 제휴카드 페이지 상단 렌탈사 필터 결과 */
     '#bj-partnership-highlight{',
     '  width:calc(100% - 48px) !important; max-width:980px !important;',
-    '  margin:20px auto 30px !important; padding:0 !important;',
-    '  border:2px solid #ffd000 !important; border-radius:12px !important;',
-    '  background:linear-gradient(180deg, #fff8e7 0%, #fff 60%) !important;',
-    '  box-shadow:0 4px 12px rgba(255,208,0,0.2) !important;',
-    '  overflow:hidden !important;',
-    '}',
-    '#bj-partnership-highlight .bj-php-label{',
-    '  display:flex !important; align-items:center !important; gap:8px !important;',
-    '  background:#ffd000 !important; color:#3a2a00 !important;',
-    '  padding:10px 16px !important;',
-    '  font-family:Pretendard,sans-serif !important;',
-    '  font-size:14px !important; font-weight:700 !important;',
-    '  letter-spacing:0.2px !important; line-height:1.4 !important;',
-    '}',
-    '#bj-partnership-highlight .bj-php-label strong{',
-    '  color:#0838F8 !important; font-weight:800 !important;',
-    '}',
-    '#bj-partnership-highlight .bj-php-icon{',
-    '  font-size:18px !important; flex:0 0 auto !important;',
+    '  margin:10px auto 28px !important; padding:0 !important;',
+    '  border:0 !important; border-radius:0 !important;',
+    '  background:#fff !important;',
+    '  box-shadow:none !important;',
+    '  overflow:visible !important;',
     '}',
     '#bj-partnership-highlight .bj-php-clone{',
-    '  padding:16px !important; background:#fff !important;',
+    '  padding:0 !important; background:#fff !important;',
+    '  list-style:none !important;',
     '}',
     '#bj-partnership-highlight .bj-php-clone li{',
     '  list-style:none !important; margin:0 !important; padding:0 !important;',
     '}',
+    '#bj-partnership-highlight > .bj-php-clone > li{',
+    '  display:block !important; list-style-type:none !important;',
+    '}',
+    '#bj-partnership-highlight .bj-php-clone li::marker{',
+    '  content:"" !important;',
+    '}',
+    '#bj-partnership-highlight .board__tit .tit__param01:before{',
+    '  display:none !important;',
+    '}',
     '@media (max-width:600px){',
-    '  #bj-partnership-highlight{ width:calc(100% - 32px) !important; margin:12px auto 20px !important; border-radius:10px !important }',
-    '  #bj-partnership-highlight .bj-php-label{ font-size:12.5px !important; padding:8px 12px !important }',
-    '  #bj-partnership-highlight .bj-php-clone{ padding:12px !important }',
+    '  #bj-partnership-highlight{ width:calc(100% - 32px) !important; margin:6px auto 22px !important }',
+    '  #bj-partnership-highlight .bj-php-clone{ padding:0 !important }',
     '}',
     '.bj-bar-handle-toggle{',
     '  width:36px; height:24px; border-radius:6px;',
@@ -13410,6 +13399,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       'body.bj-card-page{background:#fff!important}',
       '.bj-card-page #container>.wide-inner{max-width:1040px!important;margin-left:auto!important;margin-right:auto!important;padding-left:24px!important;padding-right:24px!important;box-sizing:border-box!important}',
       '.bj-card-page #bj-partnership-highlight{width:calc(100% - 48px)!important;max-width:980px!important;margin:20px auto 30px!important;box-sizing:border-box!important}',
+      '.bj-card-page #bj-partnership-highlight>.bj-php-clone>li{display:block!important;list-style:none!important;list-style-type:none!important}',
+      '.bj-card-page #bj-partnership-highlight>.bj-php-clone>li::marker{content:""!important}',
+      '.bj-card-page #bj-partnership-highlight .board__tit .tit__param01:before{display:none!important}',
       '.bj-card-page .pc__board>li{max-width:980px!important;margin:0 auto 22px!important;padding:0 16px 20px!important;background:#fff!important;border:1px solid #e6e9ef!important;border-radius:10px!important;box-shadow:none!important;overflow:hidden!important}',
       '.bj-card-page .board__tit{display:block!important;margin:0 -16px 16px!important;padding:15px 18px!important;background:#fff!important;border-bottom:1px solid #eef0f4!important;color:#172033!important}',
       '.bj-card-page .tit__param01{display:flex!important;align-items:center!important;gap:10px!important;margin:0!important;color:#172033!important;font-size:19px!important;font-weight:800!important;letter-spacing:0!important;line-height:1.3!important}',
