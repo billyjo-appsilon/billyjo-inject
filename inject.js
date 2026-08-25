@@ -1328,6 +1328,45 @@
     if (sel.supplier) copy.supplier = sel.supplier;
     return copy;
   }
+  function refreshCurrentGiftFromQuote(box){
+    var cur = state.current && applyCurrentWidgetSelection(hydrateLpProduct(state.current, state.current.name || state.current.model));
+    if (!cur || !cur.prodNo) return;
+    var item = {
+      productId: cur.prodNo,
+      productName: cur.name,
+      model: cur.model,
+      supplier: cur.supplier || cur.brand,
+      contractTerm: cur.contractTerm || cur.term,
+      monthlyFee: cur.monthlyFee,
+      price: cur.monthlyFee
+    };
+    fetch(API + '/v1/quote/calculate', {
+      method: 'POST',
+      credentials: 'omit',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        quoteCartId: 'preview-' + createOfferId(),
+        source: 'website_direct_offer_preview',
+        items: [item],
+        applyDirectCoupon: false
+      })
+    }).then(function(r){ return r.json(); }).then(function(j){
+      if (!j || !j.ok) return;
+      var amount = (j.gift && j.gift.baseAmount) || (j.items && j.items[0] && j.items[0].giftAmount) || 0;
+      if (!amount) return;
+      state.current.maxGift = amount;
+      if (state.current.model && state.selected[state.current.model]) {
+        state.selected[state.current.model] = Object.assign({}, state.selected[state.current.model], {
+          maxGift: amount,
+          term: cur.term,
+          contractTerm: cur.contractTerm,
+          monthlyFee: cur.monthlyFee,
+          supplier: cur.supplier
+        });
+      }
+      if (box && document.body.contains(box)) refreshModal(box);
+    }).catch(function(){});
+  }
   function saveDirectQuoteContext(){
     try {
       var memo = makeMemo();
@@ -1560,7 +1599,10 @@
       }
       setTimeout(function(){ var b = box.querySelector('.bj-do-copy'); if (b) b.textContent = state.cfg.ctaLabel || 'AI 견적신청하기'; }, 1400);
     };
-    if (state.cfg && state.current) refreshModal(box);
+    if (state.cfg && state.current) {
+      refreshModal(box);
+      refreshCurrentGiftFromQuote(box);
+    }
     selectedList().concat(allProducts().slice(0, 8)).forEach(function(p){
       loadOneReview(p).then(function(){ if (document.body.contains(box)) refreshModal(box); });
     });
