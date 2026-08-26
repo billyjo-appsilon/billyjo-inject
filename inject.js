@@ -54,6 +54,15 @@
   function text(el){ return (el && (el.textContent || el.value || el.getAttribute('title')) || '').replace(/\s+/g, ' ').trim(); }
   function digits(v){ return String(v || '').replace(/\D+/g, ''); }
   function won(n){ return '₩' + Number(n || 0).toLocaleString('ko-KR'); }
+  function openSecretPackage(){
+    if (typeof window.bjOpenSecretPackage === 'function') {
+      window.bjOpenSecretPackage();
+      return;
+    }
+    if (window.bjPersona) {
+      window.bjPersona.open({ style: 'curation', origin: '빈 견적비교함', headerTitle: '시크릿 1:1 패키지' });
+    }
+  }
   function cartId(){
     try {
       var v = localStorage.getItem(CART_ID_KEY);
@@ -229,6 +238,34 @@
       '<p><strong>렌탈은 구매가 아니므로, 결제 없이 신청으로 접수됩니다.</strong></p>' +
       '<p>빌리조에서는 별도의 <strong class="bj-cart-desc-blue">회원가입 없이</strong> 렌탈신청이 가능합니다.</p>';
   }
+  function ensureEmptyCartCta(){
+    if (!isCartPage()) return;
+    var existing = document.getElementById('bj-empty-cart-secret-cta');
+    if (collectItems('all').length) {
+      if (existing) existing.remove();
+      return;
+    }
+    if (existing) return;
+    var box = document.createElement('div');
+    box.id = 'bj-empty-cart-secret-cta';
+    box.className = 'bj-empty-cart-secret';
+    box.innerHTML =
+      '<div class="bj-empty-cart-secret__icon" aria-hidden="true">' +
+        '<svg viewBox="0 0 64 64" focusable="false"><path d="M10 24h34v29H10z" fill="#fff" stroke="#0838f8" stroke-width="3.5" stroke-linejoin="round"/><path d="M8 18h38v10H8zM27 18v35M14 18c0-6 6-9 13 0M40 18c0-6-6-9-13 0" fill="none" stroke="#0838f8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="43" cy="41" r="10" fill="#fff" stroke="#0838f8" stroke-width="3.8"/><path d="M50 48l8 8" fill="none" stroke="#0838f8" stroke-width="3.8" stroke-linecap="round"/></svg>' +
+      '</div>' +
+      '<div class="bj-empty-cart-secret__title">담아둔 제품이 없습니다</div>' +
+      '<div class="bj-empty-cart-secret__desc">오늘 적용 가능한 프로모션 제품을 먼저 찾아보세요.</div>' +
+      '<button type="button" class="bj-empty-cart-secret__btn">오늘 최대혜택 찾기</button>';
+    var anchor = document.querySelector('.page_desc.bj-cart-page-desc,.page_desc');
+    var parent = anchor && anchor.parentNode ? anchor.parentNode : (document.querySelector('#container .wide-inner,#container,.contents,.content') || document.body);
+    if (anchor && anchor.nextSibling) parent.insertBefore(box, anchor.nextSibling);
+    else parent.insertBefore(box, parent.firstChild || null);
+    var btn = box.querySelector('.bj-empty-cart-secret__btn');
+    if (btn) btn.addEventListener('click', function(e){
+      e.preventDefault();
+      openSecretPackage();
+    });
+  }
   function injectMemo(memo){
     var fields = document.querySelectorAll('textarea,input[type="text"]');
     var done = false;
@@ -355,6 +392,12 @@
       'body.bj-quote-cart-page .page_desc.bj-cart-page-desc p+p{margin-top:5px!important}' +
       'body.bj-quote-cart-page .page_desc.bj-cart-page-desc strong{font-weight:900!important;color:#17253a!important}' +
       'body.bj-quote-cart-page .page_desc.bj-cart-page-desc .bj-cart-desc-blue{color:#0838f8!important}' +
+      'body.bj-quote-cart-page .bj-empty-cart-secret{margin:0 0 22px!important;padding:22px 18px!important;border:1px solid #dfe7f3!important;border-radius:16px!important;background:linear-gradient(180deg,#fbfdff 0%,#f4f7ff 100%)!important;box-shadow:0 10px 26px rgba(15,36,72,.07)!important;text-align:center!important;font-family:Pretendard,Arial,sans-serif!important;color:#17253a!important}' +
+      'body.bj-quote-cart-page .bj-empty-cart-secret__icon{width:54px!important;height:54px!important;margin:0 auto 10px!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#fff!important;border:1px solid #dfe7f3!important;border-radius:999px!important}' +
+      'body.bj-quote-cart-page .bj-empty-cart-secret__icon svg{width:36px!important;height:36px!important;display:block!important}' +
+      'body.bj-quote-cart-page .bj-empty-cart-secret__title{font-size:18px!important;line-height:1.3!important;font-weight:950!important;letter-spacing:0!important;margin:0 0 6px!important}' +
+      'body.bj-quote-cart-page .bj-empty-cart-secret__desc{font-size:14px!important;line-height:1.5!important;color:#647084!important;margin:0 0 14px!important;letter-spacing:0!important}' +
+      'body.bj-quote-cart-page .bj-empty-cart-secret__btn{appearance:none!important;border:0!important;border-radius:12px!important;background:#0838f8!important;color:#fff!important;min-height:46px!important;padding:0 18px!important;font:950 15px/1 Pretendard,Arial,sans-serif!important;letter-spacing:0!important;box-shadow:0 12px 26px rgba(8,56,248,.22)!important;cursor:pointer!important}' +
       'body.bj-quote-cart-page .new-cs,body.bj-quote-cart-page .m_customer,body.bj-quote-cart-page .cs__top,body.bj-quote-cart-page .bj-fsupport{display:none!important}' +
       'body.bj-quote-cart-page footer.new-footer .footer__info,body.bj-quote-cart-page footer.new-footer .footer__cs{display:none!important}' +
       'body.bj-quote-cart-page .new-qb,body.bj-quote-cart-page .quick,body.bj-quote-cart-page .goTop{display:none!important}' +
@@ -393,11 +436,14 @@
     enhanceCartCardLayout();
     enhanceCartActionButtons();
     enhanceCartPageDescription();
+    ensureEmptyCartCta();
     setTimeout(enhanceCartCardLayout, 600);
     setTimeout(enhanceCartCardLayout, 1800);
     setTimeout(enhanceCartActionButtons, 600);
     setTimeout(enhanceCartActionButtons, 1800);
     setTimeout(enhanceCartPageDescription, 600);
+    setTimeout(ensureEmptyCartCta, 700);
+    setTimeout(ensureEmptyCartCta, 1800);
     document.addEventListener('click', function(e){
       var btn = e.target && e.target.closest ? e.target.closest('button,a,input[type="button"],input[type="submit"]') : null;
       if (!btn) return;
@@ -7443,15 +7489,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var st = document.createElement('style');
     st.id = 'bj-ai-quote-quick-style';
     st.textContent =
-      '.new-qb .quick .link>p{position:relative!important}' +
-      '.new-qb .quick .link>p>a,.new-qb .quick .link .bj-ai-quote-quick a{width:53px!important;height:53px!important;box-sizing:border-box!important;background:#fff!important;border:2.5px solid #0838f8!important;border-radius:999px!important;color:#0838f8!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:none!important}' +
-      '.new-qb .quick .link>p>a>img,.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:34px!important;height:34px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;object-fit:contain!important;margin:0!important;pointer-events:none!important}' +
+      '.new-qb .quick .link{display:flex!important;flex-direction:column!important;align-items:center!important;gap:8px!important}' +
+      '.new-qb .quick .link>p{position:relative!important;width:46px!important;height:46px!important;margin:0!important;padding:0!important;float:none!important;clear:none!important}' +
+      '.new-qb .quick .link>p>a,.new-qb .quick .link .bj-ai-quote-quick a{width:46px!important;height:46px!important;box-sizing:border-box!important;background:#fff!important;border:2px solid #0838f8!important;border-radius:999px!important;color:#0838f8!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:none!important}' +
+      '.new-qb .quick .link>p>a>img,.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:29px!important;height:29px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;object-fit:contain!important;margin:0!important;pointer-events:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-label{display:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-badge{display:none!important;position:absolute!important;right:-6px!important;top:-6px!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;background:#0838f8!important;color:#fff!important;border:2px solid #fff!important;align-items:center!important;justify-content:center!important;font:900 10px/1 Pretendard,Arial,sans-serif!important;box-shadow:0 2px 7px rgba(8,56,248,.28)!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick.has-count .bj-ai-quote-badge{display:flex!important}' +
-      '.new-qb .quick .link .bj-ai-quote-quick a:after{content:"견적비교함";position:absolute;right:62px;top:50%;transform:translateY(-50%);background:#172033;color:#fff;border-radius:8px;padding:7px 9px;font:800 12px/1 Pretendard,Arial,sans-serif;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;box-shadow:0 8px 20px rgba(0,0,0,.18)}' +
+      '.new-qb .quick .link .bj-ai-quote-quick a:after{content:"오늘 최대혜택 찾기";position:absolute;right:54px;top:50%;transform:translateY(-50%);background:#172033;color:#fff;border-radius:8px;padding:7px 9px;font:800 12px/1 Pretendard,Arial,sans-serif;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;box-shadow:0 8px 20px rgba(0,0,0,.18)}' +
       '.new-qb .quick .link .bj-ai-quote-quick a:hover:after{opacity:1;transform:translateY(-50%) translateX(-3px)}' +
-      '@media(max-width:767px){.new-qb .quick .link .bj-ai-quote-quick a:after{display:none!important}}';
+      '@media(max-width:767px){.new-qb{right:8px!important}.new-qb .quick .link{gap:7px!important}.new-qb .quick .link>p{width:44px!important;height:44px!important}.new-qb .quick .link>p>a,.new-qb .quick .link .bj-ai-quote-quick a{width:44px!important;height:44px!important}.new-qb .quick .link>p>a>img,.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:28px!important;height:28px!important}.new-qb .quick .link .bj-ai-quote-quick a:after{display:none!important}}';
     (document.head || document.documentElement).appendChild(st);
   }
   function cartCount(){
@@ -7477,10 +7524,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     for (var i = scripts.length - 1; i >= 0; i--) {
       var src = scripts[i].src || '';
       if (src.indexOf('billyjo-inject@') !== -1 && src.indexOf('/inject.js') !== -1) {
-        return src.replace(/\/inject\.js(?:\?.*)?$/, '/icons/trolley-plus-transparent.gif');
+        return src.replace(/\/inject\.js(?:\?.*)?$/, '/icons/gift-search.svg');
       }
     }
-    return 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/icons/trolley-plus-transparent.gif';
+    return 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/icons/gift-search.svg';
   }
   function mountQuoteQuick(link){
     if (!link || link.querySelector('.bj-ai-quote-quick')) return;
@@ -7488,12 +7535,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     p.className = 'org clearfix bj-ai-quote-quick';
     var a = document.createElement('a');
     a.href = '/html/dh_order/shop_cart';
-    a.setAttribute('title', '견적비교함');
-    a.setAttribute('aria-label', '견적비교함으로 이동');
+    a.setAttribute('title', '오늘 최대혜택 찾기');
+    a.setAttribute('aria-label', '오늘 최대혜택 찾기');
     var iconUrl = quoteIconUrl();
     a.innerHTML =
       '<img class="bj-ai-quote-icon" src="' + iconUrl + '" alt="" width="34" height="34" loading="lazy" decoding="async">' +
-      '<span class="bj-ai-quote-label">견적비교함</span>' +
+      '<span class="bj-ai-quote-label">오늘 최대혜택 찾기</span>' +
       '<span class="bj-ai-quote-badge" aria-hidden="true"></span>';
     p.appendChild(a);
     link.insertBefore(p, link.firstChild);
@@ -7559,11 +7606,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     s.id = 'bj-home-conversion-nudge-css';
     s.textContent =
       '.bj-benefit-amount{display:inline-block;color:#0838f8!important;font-weight:950!important;font-size:1.22em!important;line-height:1.05!important;letter-spacing:0!important;text-shadow:0 5px 15px rgba(8,56,248,.14)}' +
-      '#bj-home-mobile-cta{position:fixed;left:10px;right:10px;bottom:10px;z-index:99998;display:none;grid-template-columns:1fr 1fr;gap:8px;padding:8px;border:1px solid rgba(8,56,248,.16);border-radius:16px;background:rgba(255,255,255,.96);box-shadow:0 16px 36px rgba(15,23,42,.18);backdrop-filter:blur(14px);font-family:Pretendard,Arial,sans-serif}' +
+      '#bj-home-mobile-cta{display:none!important}' +
       '#bj-home-mobile-cta button{appearance:none;border:0;border-radius:12px;min-height:46px;padding:9px 10px;font:900 13px/1.18 Pretendard,Arial,sans-serif;letter-spacing:0;cursor:pointer;word-break:keep-all}' +
       '#bj-home-mobile-cta .bj-home-cta-consult{background:#0838f8;color:#fff;box-shadow:0 8px 18px rgba(8,56,248,.24)}' +
       '#bj-home-mobile-cta .bj-home-cta-secret{background:#fff7d6;color:#3b2a00;border:1px solid #ffe27a}' +
-      '@media(max-width:767px){body.bj-home-cta-on{padding-bottom:78px!important}#bj-home-mobile-cta{display:grid}#bj-v5-injected .lead{font-size:20px!important;line-height:1.45!important;word-break:keep-all}#bj-v5-injected .diff-card .t{font-size:15px!important;line-height:1.45!important;font-weight:800!important}#bj-v5-injected .diff-card .d,#bj-v5-injected .review-item p,#bj-v5-injected .highlight-bar,#bj-v5-injected .bj-home-faq-answer{font-size:14px!important;line-height:1.62!important}#bj-v5-injected .bj-trust-cta{font-size:15px!important;min-height:50px!important}.bj-benefit-amount{font-size:1.34em!important}}' +
+      '@media(max-width:767px){body.bj-home-cta-on{padding-bottom:0!important}#bj-home-mobile-cta{display:none!important}#bj-v5-injected .lead{font-size:20px!important;line-height:1.45!important;word-break:keep-all}#bj-v5-injected .diff-card .t{font-size:15px!important;line-height:1.45!important;font-weight:800!important}#bj-v5-injected .diff-card .d,#bj-v5-injected .review-item p,#bj-v5-injected .highlight-bar,#bj-v5-injected .bj-home-faq-answer{font-size:14px!important;line-height:1.62!important}#bj-v5-injected .bj-trust-cta{font-size:15px!important;min-height:50px!important}.bj-benefit-amount{font-size:1.34em!important}}' +
       '@media(min-width:768px){#bj-v5-injected .bj-trust-cta{font-size:16px!important;min-height:50px!important}}';
     (document.head || document.documentElement).appendChild(s);
   }
@@ -7572,7 +7619,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     else if (window.bjPersona) window.bjPersona.open({ style:'curation', origin:'시크릿 1:1 패키지' });
   }
   function mountCta(){
-    if (!isHome() || document.getElementById('bj-home-mobile-cta')) return;
+    var existing = document.getElementById('bj-home-mobile-cta');
+    if (existing) existing.remove();
+    if (document.body) document.body.classList.remove('bj-home-cta-on');
+    if (!isHome()) return;
+    return;
     var bar = document.createElement('div');
     bar.id = 'bj-home-mobile-cta';
     bar.setAttribute('aria-label', '빠른 상담 신청');

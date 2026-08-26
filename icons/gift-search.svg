@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="혜택 찾기">
+  <style>
+    .gift{fill:#fff;stroke:#0838f8;stroke-width:3.8;stroke-linecap:round;stroke-linejoin:round}
+    .ribbon{fill:none;stroke:#0838f8;stroke-width:3.8;stroke-linecap:round;stroke-linejoin:round}
+    .lens{fill:#fff;stroke:#0838f8;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;transform-origin:43px 43px}
+    .spark{fill:#ffd43b;stroke:#0838f8;stroke-width:2;stroke-linejoin:round;transform-origin:17px 16px}
+    @media (prefers-reduced-motion:no-preference){
+      .lens{animation:bjGiftSearchScan 2.2s ease-in-out infinite}
+      .spark{animation:bjGiftSearchPop 1.8s ease-in-out infinite}
+    }
+    @keyframes bjGiftSearchScan{
+      0%,100%{transform:translate(0,0) rotate(0deg)}
+      45%{transform:translate(-2px,-2px) rotate(-5deg)}
+      70%{transform:translate(1px,1px) rotate(3deg)}
+    }
+    @keyframes bjGiftSearchPop{
+      0%,100%{transform:scale(.92);opacity:.72}
+      50%{transform:scale(1.08);opacity:1}
+    }
+  </style>
+  <path class="spark" d="M17 7l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L17 21.2l-5.6 3 1.1-6.2L8 13.6l6.2-.9z"/>
+  <rect class="gift" x="10" y="25" width="32" height="27" rx="5"/>
+  <path class="gift" d="M8 19h36v10H8z"/>
+  <path class="ribbon" d="M26 19v33M13 19c0-6 6-9 13 0M39 19c0-6-6-9-13 0"/>
+  <circle class="lens" cx="42" cy="41" r="10"/>
+  <path class="lens" d="M49.5 48.5L58 57"/>
+</svg>
