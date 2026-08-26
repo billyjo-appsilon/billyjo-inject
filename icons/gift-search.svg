@@ -5,17 +5,23 @@
     .lens{fill:#fff;stroke:#0838f8;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;transform-origin:43px 43px}
     .spark{fill:#ffd43b;stroke:#0838f8;stroke-width:2;stroke-linejoin:round;transform-origin:17px 16px}
     @media (prefers-reduced-motion:no-preference){
-      .lens{animation:bjGiftSearchScan 2.2s ease-in-out infinite}
-      .spark{animation:bjGiftSearchPop 1.8s ease-in-out infinite}
+      .gift,.ribbon{animation:bjGiftSearchGift 1.35s ease-in-out infinite}
+      .lens{animation:bjGiftSearchScan 1.15s ease-in-out infinite}
+      .spark{animation:bjGiftSearchPop 1.05s ease-in-out infinite}
+    }
+    @keyframes bjGiftSearchGift{
+      0%,100%{transform:translateY(0)}
+      42%{transform:translateY(-2px)}
+      68%{transform:translateY(1px)}
     }
     @keyframes bjGiftSearchScan{
       0%,100%{transform:translate(0,0) rotate(0deg)}
-      45%{transform:translate(-2px,-2px) rotate(-5deg)}
-      70%{transform:translate(1px,1px) rotate(3deg)}
+      38%{transform:translate(-6px,-5px) rotate(-13deg)}
+      68%{transform:translate(4px,3px) rotate(8deg)}
     }
     @keyframes bjGiftSearchPop{
-      0%,100%{transform:scale(.92);opacity:.72}
-      50%{transform:scale(1.08);opacity:1}
+      0%,100%{transform:scale(.72);opacity:.45}
+      45%{transform:scale(1.22) rotate(8deg);opacity:1}
     }
   </style>
   <path class="spark" d="M17 7l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L17 21.2l-5.6 3 1.1-6.2L8 13.6l6.2-.9z"/>
