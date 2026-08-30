@@ -9684,7 +9684,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (document.getElementById('bjpw-style')) return;
     var s = document.createElement('style'); s.id = 'bjpw-style';
     s.textContent =
-      '.bjpw-back{position:fixed;inset:0;background:rgba(17,17,17,.55);z-index:100000;display:flex;align-items:center;justify-content:center;padding:16px}' +
+      '.bjpw-back{position:fixed;inset:0;background:rgba(17,17,17,.55);z-index:1000001;display:flex;align-items:center;justify-content:center;padding:16px}' +
       '.bjpw-box{background:#fff;border-radius:18px;max-width:420px;width:100%;max-height:86vh;overflow:auto;padding:20px 18px 16px;box-shadow:0 18px 50px rgba(0,0,0,.25);font-family:inherit}' +
       '.bjpw-h{font-size:17px;font-weight:800;color:#1a1a1a}.bjpw-sub{font-size:12px;color:#888;margin:3px 0 14px}' +
       '.bjpw-f{margin-bottom:16px}.bjpw-l{font-size:13.5px;font-weight:700;color:#333}.bjpw-l b{color:#e0492a}' +
@@ -9699,6 +9699,20 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '.bjpw-x{position:absolute;top:10px;right:14px;border:0;background:none;font-size:22px;color:#bbb;cursor:pointer;line-height:1}' +
       '.bj-persona-up{padding:4px 0 2px;text-align:left}.bj-persona-up .bj-consult-title{text-align:center;margin-bottom:8px}.bj-up-card{border:1.5px solid #e0e8ff;background:#f7f9ff;border-radius:14px;padding:14px;margin:12px 0}.bj-up-kicker{font-size:12px;font-weight:800;color:#0838f8;margin-bottom:4px}.bj-up-main{font-size:19px;font-weight:900;color:#111;line-height:1.28;letter-spacing:0}.bj-up-desc{font-size:12.5px;color:#555;line-height:1.55;margin-top:8px}.bj-up-actions{display:grid;gap:9px;margin-top:12px}.bj-up-primary,.bj-up-secondary{width:100%;border:0;border-radius:12px;padding:13px 12px;font-size:14px;font-weight:800;cursor:pointer}.bj-up-primary{background:#0838f8;color:#fff}.bj-up-secondary{background:#fff;color:#555;border:1.5px solid #e5e7eb}.bj-up-note{font-size:10.5px;color:#888;line-height:1.45;margin-top:8px;text-align:center}.bj-up-done{border-color:#bbf7d0;background:#f0fdf4}.bj-up-done .bj-up-kicker{color:#16a34a}.bj-up-done .bj-up-main{color:#14532d}';
     document.head.appendChild(s);
+  }
+  function bjPersonaOptionLabel(opt){
+    if (opt && typeof opt === 'object') {
+      return (opt.emoji ? opt.emoji + ' ' : '') + (opt.title || opt.label || opt.value || '');
+    }
+    return opt;
+  }
+  function bjPersonaOptionValue(opt){
+    if (opt && typeof opt === 'object') return opt.title || opt.label || opt.value || '';
+    return opt;
+  }
+  function bjPersonaOptionPreset(opt){
+    if (!opt || typeof opt !== 'object' || !opt.preset) return '';
+    try { return bjpwEsc(JSON.stringify(opt.preset)); } catch(_) { return ''; }
   }
   function bjShowPersonaWizard(fields, done){
     bjInjectPersonaStyles();
@@ -9718,7 +9732,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       } else {
         html += '<div class="bjpw-opts">';
         for (var j = 0; j < (f.options || []).length; j++){
-          html += '<button type="button" class="bjpw-chip" data-val="' + bjpwEsc(f.options[j]) + '">' + bjpwEsc(f.options[j]) + '</button>';
+          var opt = f.options[j];
+          html += '<button type="button" class="bjpw-chip" data-val="' + bjpwEsc(bjPersonaOptionValue(opt)) + '" data-preset="' + bjPersonaOptionPreset(opt) + '">' + bjpwEsc(bjPersonaOptionLabel(opt)) + '</button>';
         }
         html += '</div>';
       }
@@ -9767,6 +9782,15 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           } else {
             Array.prototype.forEach.call(fEl.querySelectorAll('.bjpw-chip'), function(c){ c.classList.remove('on'); });
             chip.classList.add('on'); sel[key] = val;
+            var preset = chip.getAttribute('data-preset');
+            if (preset) {
+              try {
+                var parsed = JSON.parse(preset);
+                Object.keys(parsed || {}).forEach(function(pKey){
+                  if (sel[pKey] == null) sel[pKey] = parsed[pKey];
+                });
+              } catch(_) {}
+            }
           }
         });
       });
