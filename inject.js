@@ -9696,7 +9696,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '.bjpw-ft{display:flex;gap:9px;margin-top:6px}' +
       '.bjpw-skip{flex:0 0 auto;background:#f4f4f4;color:#888;border:0;border-radius:12px;padding:11px 14px;font-size:13px;cursor:pointer}' +
       '.bjpw-go{flex:1;background:#e0492a;color:#fff;border:0;border-radius:12px;padding:11px;font-size:14px;font-weight:800;cursor:pointer}' +
-      '.bjpw-x{position:absolute;top:10px;right:14px;border:0;background:none;font-size:22px;color:#bbb;cursor:pointer;line-height:1}';
+      '.bjpw-x{position:absolute;top:10px;right:14px;border:0;background:none;font-size:22px;color:#bbb;cursor:pointer;line-height:1}' +
+      '.bj-persona-up{padding:4px 0 2px;text-align:left}.bj-persona-up .bj-consult-title{text-align:center;margin-bottom:8px}.bj-up-card{border:1.5px solid #e0e8ff;background:#f7f9ff;border-radius:14px;padding:14px;margin:12px 0}.bj-up-kicker{font-size:12px;font-weight:800;color:#0838f8;margin-bottom:4px}.bj-up-main{font-size:19px;font-weight:900;color:#111;line-height:1.28;letter-spacing:0}.bj-up-desc{font-size:12.5px;color:#555;line-height:1.55;margin-top:8px}.bj-up-actions{display:grid;gap:9px;margin-top:12px}.bj-up-primary,.bj-up-secondary{width:100%;border:0;border-radius:12px;padding:13px 12px;font-size:14px;font-weight:800;cursor:pointer}.bj-up-primary{background:#0838f8;color:#fff}.bj-up-secondary{background:#fff;color:#555;border:1.5px solid #e5e7eb}.bj-up-note{font-size:10.5px;color:#888;line-height:1.45;margin-top:8px;text-align:center}.bj-up-done{border-color:#bbf7d0;background:#f0fdf4}.bj-up-done .bj-up-kicker{color:#16a34a}.bj-up-done .bj-up-main{color:#14532d}';
     document.head.appendChild(s);
   }
   function bjShowPersonaWizard(fields, done){
@@ -9784,6 +9785,103 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       });
       finish(out);
     });
+  }
+  function bjAttachPersonaInput(requestData, contact, personaInput){
+    if (!requestData || !requestData.requestId || !requestData.code || !personaInput || !Object.keys(personaInput).length) {
+      return Promise.resolve(false);
+    }
+    var payload = {
+      code: requestData.code,
+      customerPhone: contact && contact.phone,
+      personaInput: personaInput
+    };
+    return fetch(bjPersonaBase() + '/v1/consult/' + encodeURIComponent(requestData.requestId) + '/persona-input', {
+      method: 'POST',
+      mode: 'cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    }).then(function(r){
+      if (!r.ok) throw new Error('persona attach HTTP ' + r.status);
+      return r.json();
+    }).then(function(){
+      bjTrackJourney('persona_bonus_completed', {
+        request_id: requestData.requestId,
+        event_id: 'billyjo_persona_bonus_' + requestData.requestId,
+        coupon_bonus_amount: 10000
+      });
+      return true;
+    });
+  }
+  function bjRenderLeadResult(modal, data, contact){
+    if (contact && contact.minutes || data.status === 'scheduled') {
+      renderScheduleConfirm(modal, data, {
+        phone: contact && contact.phone,
+        minutes: contact && contact.minutes,
+        label: contact && contact.label
+      }, data.scheduledAt);
+      return;
+    }
+    renderImmediateCall(modal, data);
+  }
+  function bjShowPersonaUpsell(modal, data, contact){
+    if (!modal || !modal.parentNode || !data || !data.requestId || bjGetPersonaInput() || window.__bjPersonaSkippedAfterLead) {
+      bjRenderLeadResult(modal, data, contact);
+      return;
+    }
+    var body = modal.querySelector('.bj-consult-modal-body');
+    body.innerHTML =
+      '<div class="bj-persona-up">' +
+        '<div class="bj-consult-title bj-consult-title-ok">상담 신청 완료</div>' +
+        '<div class="bj-up-card">' +
+          '<div class="bj-up-kicker">추가 혜택</div>' +
+          '<div class="bj-up-main">10초만 더 작성하면<br>10,000원 추가 쿠폰 지급</div>' +
+          '<div class="bj-up-desc">사용 인원, 선호 브랜드, 중요 기준을 알려주시면 상담사가 더 맞는 상품과 혜택으로 연락드립니다.</div>' +
+        '</div>' +
+        '<div class="bj-up-actions">' +
+          '<button type="button" class="bj-up-primary" data-bj-persona-bonus>추가 쿠폰 받고 맞춤견적 보기</button>' +
+          '<button type="button" class="bj-up-secondary" data-bj-persona-skip>상담만 신청하고 끝내기</button>' +
+        '</div>' +
+        '<div class="bj-up-note">상담 신청 후 맞춤정보까지 입력한 고객에게 지급됩니다.</div>' +
+      '</div>';
+    body.querySelector('[data-bj-persona-skip]').onclick = function(){
+      window.__bjPersonaSkippedAfterLead = true;
+      bjTrackJourney('persona_bonus_skipped', { request_id: data.requestId });
+      bjRenderLeadResult(modal, data, contact);
+    };
+    body.querySelector('[data-bj-persona-bonus]').onclick = function(){
+      bjTrackJourney('persona_bonus_start', { request_id: data.requestId });
+      bjFetchPersonaForm().then(function(fields){
+        if (!fields || !fields.length) {
+          bjRenderLeadResult(modal, data, contact);
+          return;
+        }
+        bjShowPersonaWizard(fields, function(answers){
+          if (!answers || !Object.keys(answers).length) {
+            window.__bjPersonaSkippedAfterLead = true;
+            bjRenderLeadResult(modal, data, contact);
+            return;
+          }
+          bjSetPersonaInput(answers);
+          body.innerHTML =
+            '<div class="bj-persona-up">' +
+              '<div class="bj-up-card bj-up-done">' +
+                '<div class="bj-up-kicker">상세폼 저장 중</div>' +
+                '<div class="bj-up-main">추가 쿠폰 대상 확인 중입니다</div>' +
+                '<div class="bj-up-desc">잠시만 기다려 주세요.</div>' +
+              '</div>' +
+            '</div>';
+          bjAttachPersonaInput(data, contact, answers)
+            .catch(function(err){
+              console.error('[bj-consult] persona attach failed:', err);
+            })
+            .then(function(){
+              bjRenderLeadResult(modal, data, contact);
+            });
+        });
+      }).catch(function(){
+        bjRenderLeadResult(modal, data, contact);
+      });
+    };
   }
   function bjpwEsc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
@@ -10127,15 +10225,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       });
       assignConsultant(contact).then(function(data){
         if (!modal.parentNode) return;
-        if (contact.minutes || data.status === 'scheduled') {
-          renderScheduleConfirm(modal, data, {
-            phone: contact.phone,
-            minutes: contact.minutes,
-            label: contact.label
-          }, data.scheduledAt);
-          return;
-        }
-        renderImmediateCall(modal, data);
+        bjShowPersonaUpsell(modal, data, contact);
       }).catch(function(err){
         bjTrackJourney('lead_submit_error', {
           error_status: err && err.status,
