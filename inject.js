@@ -9757,7 +9757,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     }
     ['pointerdown','mousedown','mouseup','click','touchstart','touchend'].forEach(function(type){
       back.addEventListener(type, keepOutsideClick, true);
-      box.addEventListener(type, function(e){ e.stopPropagation(); }, true);
+      box.addEventListener(type, function(e){ e.stopPropagation(); });
     });
     var keepOpenObserver = new MutationObserver(function(){
       if (!allowClose && !back.isConnected) document.body.appendChild(back);
