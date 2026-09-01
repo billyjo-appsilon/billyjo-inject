@@ -4404,8 +4404,8 @@ function bjHeaderMainInit() {
       '27062': { card: 0, reward: 16910 },
       '32099': { card: 1900, reward: 18710 },
       '32098': { card: 0, reward: 16010 },
-      '32097': { card: 0 },
-      '32096': { card: 0 }
+      '32097': { card: 0, reward: 16910 },
+      '32096': { card: 0, reward: 14210 }
     };
     var bjpProdNo = function(item) {
       var a = item && item.querySelector('a[href*="/prod_view/"]');
@@ -5051,15 +5051,15 @@ function bjHeaderMainInit() {
           else if(cy.indexOf('M')!==-1){td2='방문관리';cd=cy.replace('M','')+'개월 방문'}
           else{td2=cy}
           var useP=dP||nP;var ps=r[3]+'년의무';
-          var isNonCoway=cm.match(/^W[IPDUH]/)||cm.match(/^CP-/)||cm.match(/^CBT-/)||cm.match(/^P-/)||cm.match(/^HQP/)||cm.match(/^HQPM/)||cm.match(/^WPU/);
-          if(isNonCoway&&pm.indexOf('반값')!==-1){
+          var isNonCoway=cm.match(/^W[IPDUH]/)||cm.match(/^CBT-/)||cm.match(/^P-/)||cm.match(/^HQP/)||cm.match(/^HQPM/)||cm.match(/^WPU/);
+          if(pm.indexOf('반값')!==-1&&pm.indexOf('타사보상')!==-1&&tP>0){
+            var hm=pm.match(/(\d+개월)\s*반값할인/);var hp=hm?hm[1]+'반값할인':'반값할인';
+            fil.push({m:cm,mk:cmk,t:td2,p:ps,c:cd,pm:hp,dp:useP,fp:Math.round(useP/2)});
+            fil.push({m:cm,mk:cmk,t:td2,p:ps+' 타사보상',c:cd,pm:'1년간 렌탈료 1만원 할인',dp:tP,fp:tP-10000});
+          } else if(isNonCoway&&pm.indexOf('반값')!==-1){
             fil.push({m:cm,mk:cmk,t:td2,p:ps,c:cd,pm:pm,dp:useP,fp:Math.round(useP/2)});
           } else if(isNonCoway){
             fil.push({m:cm,mk:cmk,t:td2,p:ps,c:cd,pm:pm,dp:useP,fp:useP});
-          } else if(pm.indexOf('반값')!==-1&&pm.indexOf('타사보상')!==-1&&tP>0){
-            var hm=pm.match(/(d+개월)s*반값할인/);var hp=hm?hm[1]+'반값할인':'반값할인';
-            fil.push({m:cm,mk:cmk,t:td2,p:ps,c:cd,pm:hp,dp:useP,fp:Math.round(useP/2)});
-            fil.push({m:cm,mk:cmk,t:td2,p:ps+' 타사보상',c:cd,pm:'1년간 렌탈료 1만원 할인',dp:tP,fp:tP-10000});
           } else if(pm.indexOf('반값')!==-1){
             fil.push({m:cm,mk:cmk,t:td2,p:ps,c:cd,pm:pm,dp:useP,fp:Math.round(useP/2)});
           } else if(tP>0&&pm.indexOf('타사보상')!==-1){
@@ -5075,6 +5075,11 @@ function bjHeaderMainInit() {
         var seen={};fil=fil.filter(function(r){var key=r.t+'|'+r.p+'|'+r.c+'|'+r.pm+'|'+r.fp;if(seen[key])return false;seen[key]=true;return true;});
         if(!fil.length){document.getElementById('livePriceTable').classList.add('lpt-empty');return}
         document.getElementById('lptTitle').innerHTML=fil[0].mk+'<br><span style="font-size:12px;opacity:0.8">'+fil[0].m+'</span>';
+        try {
+          document.getElementById('livePriceTable').setAttribute('data-bj-lpt-signature', fil.map(function(r){
+            return [r.t, r.p, r.dp > 0 ? r.dp.toLocaleString() + '원' : '', r.fp > 0 ? r.fp.toLocaleString() + '원' : ''].join('|');
+          }).join(';'));
+        } catch(_){}
 
         // Sort: 방문관리 first, then 자가관리
         var visit=fil.filter(function(r){return r.t==='방문관리'});
@@ -11030,10 +11035,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         if (wtRows.length > 0) {
           var pickSupIdx = function(serviceText){
             if (suppliers.length === 1) {
-              var single = suppliers[0] && suppliers[0].name;
-              if (serviceText && single && !(
-                single.indexOf(serviceText) >= 0 || serviceText.indexOf(single) >= 0
-              )) return -1;
               return 0;
             }
             for (var si = 0; si < suppliers.length; si++) {
