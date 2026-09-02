@@ -964,7 +964,7 @@
   var BLUE = '#0838f8';
   var STORE_DETAIL = 'https://billyjo.co.kr/html/dh_prod/prod_view/{pid}';
   var LP_IMAGE_BASE = 'https://live.billyjo.co.kr/';
-  var DIRECT_COUPON_TITLE = '다이렉트 15,000pt 추가 쿠폰 발급 완료(지금 신청 시 적용)';
+  var DIRECT_COUPON_TITLE = '이번달 특가 프로모션 제품 같이 신청하고, 더x2 많은 사은품 받으세요!';
   var DIRECT_QUOTE_CONTEXT_KEY = 'bj_direct_offer_quote_context';
   var DIRECT_FAB_CLOSED_KEY = 'bj_direct_offer_fab_closed';
   var state = {
@@ -987,6 +987,7 @@
     var value = String(text || DIRECT_COUPON_TITLE)
       .replace(/다이렉트 10,000쿠폰 발급 중/g, DIRECT_COUPON_TITLE)
       .replace(/다이렉트 10,000pt 추가 쿠폰 발급 완료\(지금 신청 시 적용\)/g, DIRECT_COUPON_TITLE)
+      .replace(/다이렉트 15,000pt 추가 쿠폰 발급 완료\(지금 신청 시 적용\)/g, DIRECT_COUPON_TITLE)
       .replace(/결합 상품 추가/g, DIRECT_COUPON_TITLE)
       .replace(/선택 상품 기준\\n추가 혜택을 준비 중입니다/g, DIRECT_COUPON_TITLE)
       .replace(/선택 상품 기준\n추가 혜택을 준비 중입니다/g, DIRECT_COUPON_TITLE);
@@ -1324,7 +1325,7 @@
       '#bj-do-fab .bj-do-fab-ic{width:28px;height:28px;border-radius:999px;background:'+BLUE+';color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 7px 18px rgba(8,56,248,.28)}#bj-do-fab .bj-do-fab-ic svg{width:17px;height:17px;display:block;fill:currentColor}#bj-do-fab .bj-do-fab-t{display:inline-block;word-break:keep-all}#bj-do-fab .bj-do-fab-x{position:absolute;right:7px;top:7px;width:22px;height:22px;border:0;border-radius:999px;background:#eef3ff;color:'+BLUE+';font:900 15px/20px Arial,sans-serif;padding:0;cursor:pointer}' +
       '#bj-do-back{position:fixed;inset:0;background:rgba(10,16,30,.62);z-index:100001;display:flex;align-items:center;justify-content:center;padding:18px;font-family:Pretendard,Arial,sans-serif}' +
       '#bj-do-box{width:100%;max-width:760px;max-height:90vh;overflow:hidden;background:#fff;border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.32);color:#172033;display:flex;flex-direction:column;position:relative}' +
-      '#bj-do-head{padding:20px 22px 16px;background:linear-gradient(135deg,#0838f8 0%,#1b55ff 100%);position:relative;color:#fff}.bj-do-badge{font-size:11px;font-weight:900;color:'+BLUE+';background:#fff;border-radius:999px;padding:5px 10px;display:inline-block;box-shadow:0 6px 16px rgba(0,0,0,.12)}.bj-do-h{font-size:24px;font-weight:950;line-height:1.14;margin:12px 42px 7px 0;white-space:pre-line;letter-spacing:0}.bj-do-h-sub{display:inline-block;font-size:calc(1em - 1px);font-weight:900;margin-left:2px}.bj-do-sub{max-width:560px;font-size:13px;color:rgba(255,255,255,.9);line-height:1.45}.bj-do-x{position:absolute;right:14px;top:14px;width:34px;height:34px;border:0;background:rgba(255,255,255,.92);color:'+BLUE+';font-size:22px;line-height:30px;border-radius:50%;cursor:pointer}' +
+      '#bj-do-head{padding:20px 22px 18px;background:linear-gradient(135deg,#0838f8 0%,#1b55ff 100%);position:relative;color:#fff}.bj-do-badge{font-size:11px;font-weight:900;color:'+BLUE+';background:#fff;border-radius:999px;padding:5px 10px;display:inline-block;box-shadow:0 6px 16px rgba(0,0,0,.12)}.bj-do-h{font-size:24px;font-weight:950;line-height:1.18;margin:12px 42px 0 0;white-space:pre-line;letter-spacing:0;word-break:keep-all}.bj-do-h-sub{display:inline-block;font-size:calc(1em - 1px);font-weight:900;margin-left:2px}.bj-do-sub{display:none}.bj-do-x{position:absolute;right:14px;top:14px;width:34px;height:34px;border:0;background:rgba(255,255,255,.92);color:'+BLUE+';font-size:22px;line-height:30px;border-radius:50%;cursor:pointer}' +
       '#bj-do-body{padding:0;overflow:auto}.bj-do-layout{display:grid;grid-template-columns:minmax(0,1fr) 268px;gap:0;min-height:0}.bj-do-main{padding:16px 16px 18px}.bj-do-side{padding:16px;background:#f7f9ff;border-left:1px solid #e2e8f7}.bj-do-sec{margin-top:16px}.bj-do-sec:first-child{margin-top:0}.bj-do-sec h3{font-size:13px;margin:0 0 9px;font-weight:950;color:#263248}.bj-do-cats{display:flex;gap:7px;overflow:auto;padding-bottom:2px}.bj-do-chip{border:1px solid #d8e1f2;background:#fff;color:#445065;border-radius:999px;padding:8px 11px;font-size:12px;font-weight:900;white-space:nowrap}.bj-do-chip.on{border-color:'+BLUE+';background:#eef3ff;color:'+BLUE+'}.bj-do-group{display:flex;align-items:center;gap:8px;margin:12px 0 8px;font-size:12px;font-weight:950;color:#263248}.bj-do-group:after{content:"";height:1px;background:#e8edf7;flex:1}' +
       '.bj-do-card{border:1px solid #e1e7f2;border-radius:12px;padding:10px;margin-bottom:9px;display:grid;grid-template-columns:68px minmax(0,1fr) 58px;gap:11px;align-items:center;background:#fff;box-shadow:0 6px 18px rgba(19,32,58,.05);transition:border-color .14s,box-shadow .14s,transform .14s}.bj-do-card.on{border-color:'+BLUE+';box-shadow:0 0 0 2px rgba(8,56,248,.08),0 8px 22px rgba(8,56,248,.11)}.bj-do-card img{width:68px;height:68px;object-fit:contain;border-radius:10px;background:#f4f7fc}.bj-do-info{min-width:0}.bj-do-pname{font-size:13px;font-weight:950;line-height:1.28;color:#182236;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.bj-do-meta{font-size:11px;color:#7b8596;margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-do-gift{font-size:12.5px;font-weight:950;color:'+BLUE+';margin-top:5px}.bj-do-review{font-size:11.5px;color:#606b7c;line-height:1.35;margin-top:4px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.bj-do-add{border:0;border-radius:999px;padding:8px 0;background:#eef3ff;color:'+BLUE+';font-size:11px;font-weight:950;cursor:pointer;min-width:54px}.bj-do-card.on .bj-do-add{background:'+BLUE+';color:#fff}' +
       '#bj-do-total{background:#fff;border:1px solid #dbe5ff;border-radius:14px;padding:14px;box-shadow:0 8px 24px rgba(8,56,248,.08)}.bj-do-total-k{font-size:11px;color:#647084;font-weight:800}.bj-do-total-v{font-size:26px;font-weight:950;color:'+BLUE+';line-height:1.1;margin-top:5px}.bj-do-total-sub{font-size:11px;color:#7b8596;line-height:1.4;margin-top:6px}.bj-do-memo{display:none}.bj-do-copy{width:100%;border:0;border-radius:12px;background:'+BLUE+';color:#fff;font-size:14px;font-weight:950;padding:13px;margin-top:10px;cursor:pointer;box-shadow:0 10px 24px rgba(8,56,248,.23)}.bj-do-note{font-size:10.5px;color:#8b95a7;line-height:1.45;margin-top:9px}.bj-do-loading{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(255,255,255,.96);text-align:center;padding:22px}.bj-do-loading img{width:75px;height:75px;object-fit:contain}.bj-do-loading-title{font-size:18px;font-weight:950;color:#172033}.bj-do-loading-sub{font-size:12.5px;color:#647084;line-height:1.45}.bj-do-intro{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(255,255,255,.985);text-align:center;padding:26px}.bj-do-intro-ring{--p:0;position:relative;width:104px;height:104px;border-radius:50%;background:conic-gradient('+BLUE+' calc(var(--p)*1%),#e6ecff 0);display:grid;place-items:center;box-shadow:0 14px 32px rgba(8,56,248,.18)}.bj-do-intro-ring:before{content:"";position:absolute;width:78px;height:78px;border-radius:50%;background:#fff}.bj-do-intro-num{position:relative;z-index:1;font-size:28px;font-weight:950;color:'+BLUE+';font-variant-numeric:tabular-nums}.bj-do-intro-title{font-size:19px;font-weight:950;color:#172033}.bj-do-intro-sub{font-size:12.5px;color:#647084;line-height:1.45}' +
@@ -1338,7 +1339,7 @@
       hero: {
         badge: '다이렉트 쿠폰',
         headline: DIRECT_COUPON_TITLE,
-        subcopy: '같이 결합하면 추가 혜택! 추천제품도 확인하세요'
+        subcopy: ''
       },
       personaSection: { title: '1. 필요한 제품을 고르세요' },
       productsSection: { title: '2. 함께 많이 신청한 BEST' },
@@ -1695,7 +1696,7 @@
       '<div id="bj-do-head"><button type="button" class="bj-do-x" aria-label="닫기">×</button>' +
         '<span class="bj-do-badge">' + esc(String(hero.badge || '다이렉트 쿠폰').replace(/복수제품 설계/g, '다이렉트 쿠폰').replace(/결합 상품 추가/g, '다이렉트 쿠폰')) + '</span>' +
         '<div class="bj-do-h">' + directCouponTitleHtml(DIRECT_COUPON_TITLE) + '</div>' +
-        '<div class="bj-do-sub">' + esc(String(hero.subcopy || '같이 결합하면 추가 혜택! 추천제품도 확인하세요').replace(/선택한 제품은 자동 포함하고, 함께 신청할 상품을 불러오는 중입니다\./g, '같이 결합하면 추가 혜택! 추천제품도 확인하세요').replace(/선택한 제품 기준으로 함께 신청할 상품을 불러오는 중입니다/g, '같이 결합하면 추가 혜택! 추천제품도 확인하세요')) + '</div>' +
+        '<div class="bj-do-sub"></div>' +
       '</div>' +
       '<div id="bj-do-body">' +
         '<div class="bj-do-layout">' +
@@ -1766,7 +1767,7 @@
     overlay.innerHTML =
       '<div class="bj-do-intro-ring"><span class="bj-do-intro-num">0</span></div>' +
       '<div class="bj-do-intro-title">' + directCouponTitleHtml(DIRECT_COUPON_TITLE) + '</div>' +
-      '<div class="bj-do-intro-sub">같이 결합하면 추가 혜택! 추천제품도 확인하세요</div>';
+      '<div class="bj-do-intro-sub"></div>';
     box.appendChild(overlay);
     var ring = overlay.querySelector('.bj-do-intro-ring');
     var num = overlay.querySelector('.bj-do-intro-num');
