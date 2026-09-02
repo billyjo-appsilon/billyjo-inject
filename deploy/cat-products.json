@@ -4,15 +4,16 @@
     "url": "/html/dh_prod/prod_list/1-8",
     "items": [
       {
-        "pid": "24578",
-        "name": "코웨이 아이콘 V2 얼음냉온정수기",
-        "brand": "CHPI-7400N_V2 4개월관리 반값할인",
-        "img": "https://rentalshop.site/_data/file/goodsImages/99ea4428f69f5e1f48b893e7f9a9e30c.png",
-        "orig": 45400,
-        "final": 15400,
-        "disc": 66,
+        "pid": "32098",
+        "name": "코웨이 아이콘3 냉온정수기",
+        "brand": "CHP-7220N 자가관리 반값할인",
+        "img": "https://rentalshop.site/_data/file/goodsImages/5631010cfd5be3f421ba2bb7dcf63cf3.gif",
+        "orig": 28900,
+        "final": 4900,
+        "disc": 83,
+        "hasCard": true,
         "best": true,
-        "rvn": 429
+        "rvn": 438
       },
       {
         "pid": "18931",
@@ -25,18 +26,6 @@
         "hasCard": true,
         "best": true,
         "rvn": 0
-      },
-      {
-        "pid": "32098",
-        "name": "코웨이 아이콘3 냉온정수기",
-        "brand": "CHP-7220N 자가관리 반값할인",
-        "img": "https://rentalshop.site/_data/file/goodsImages/5631010cfd5be3f421ba2bb7dcf63cf3.gif",
-        "orig": 28900,
-        "final": 4900,
-        "disc": 83,
-        "hasCard": true,
-        "best": true,
-        "rvn": 438
       },
       {
         "pid": "15644",
@@ -108,6 +97,17 @@
         "hasCard": true,
         "best": false,
         "rvn": 0
+      },
+      {
+        "pid": "24578",
+        "name": "코웨이 아이콘 V2 얼음냉온정수기",
+        "brand": "CHPI-7400N_V2 4개월관리 반값할인",
+        "img": "https://rentalshop.site/_data/file/goodsImages/99ea4428f69f5e1f48b893e7f9a9e30c.png",
+        "orig": 45400,
+        "final": 15400,
+        "disc": 66,
+        "best": true,
+        "rvn": 429
       }
     ]
   },

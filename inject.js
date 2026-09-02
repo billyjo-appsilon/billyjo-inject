@@ -2375,15 +2375,16 @@
     "url": "/html/dh_prod/prod_list/1-8",
     "items": [
       {
-        "pid": "24578",
-        "name": "코웨이 아이콘 V2 얼음냉온정수기",
-        "brand": "CHPI-7400N_V2 4개월관리 반값할인",
-        "img": "https://rentalshop.site/_data/file/goodsImages/99ea4428f69f5e1f48b893e7f9a9e30c.png",
-        "orig": 45400,
-        "final": 15400,
-        "disc": 66,
+        "pid": "32098",
+        "name": "코웨이 아이콘3 냉온정수기",
+        "brand": "CHP-7220N 자가관리 반값할인",
+        "img": "https://rentalshop.site/_data/file/goodsImages/5631010cfd5be3f421ba2bb7dcf63cf3.gif",
+        "orig": 28900,
+        "final": 4900,
+        "disc": 83,
+        "hasCard": true,
         "best": true,
-        "rvn": 429
+        "rvn": 438
       },
       {
         "pid": "18931",
@@ -2396,18 +2397,6 @@
         "hasCard": true,
         "best": true,
         "rvn": 0
-      },
-      {
-        "pid": "32098",
-        "name": "코웨이 아이콘3 냉온정수기",
-        "brand": "CHP-7220N 자가관리 반값할인",
-        "img": "https://rentalshop.site/_data/file/goodsImages/5631010cfd5be3f421ba2bb7dcf63cf3.gif",
-        "orig": 28900,
-        "final": 4900,
-        "disc": 83,
-        "hasCard": true,
-        "best": true,
-        "rvn": 438
       },
       {
         "pid": "15644",
@@ -2479,6 +2468,17 @@
         "hasCard": true,
         "best": false,
         "rvn": 0
+      },
+      {
+        "pid": "24578",
+        "name": "코웨이 아이콘 V2 얼음냉온정수기",
+        "brand": "CHPI-7400N_V2 4개월관리 반값할인",
+        "img": "https://rentalshop.site/_data/file/goodsImages/99ea4428f69f5e1f48b893e7f9a9e30c.png",
+        "orig": 45400,
+        "final": 15400,
+        "disc": 66,
+        "best": true,
+        "rvn": 429
       }
     ]
   },
@@ -4750,9 +4750,8 @@ function bjHeaderMainInit() {
   // 대표 정수기 라인을 상단으로 올린다. 사용자가 최근/가격/후기순을 고르면 건드리지 않는다.
   if (location.pathname.indexOf('prod_list/1-8') !== -1) {
     var BJ_WATER_POPULAR_PRODNO = [
-      '27061','27062',                 // 1. 코웨이 아이콘프로 CHP-7212N
-      '32099','32098','32097','32096', // 2. 코웨이 아이콘3 CP/CHP-7220N
-      '24578','24579','24580',         // 3~5. 코웨이 아이콘 V2 얼음냉온정수기 CHPI-7400N_V2 — 후기 많은 여름 주력
+      '32099','32098','32097','32096', // 1. 코웨이 아이콘3 CP/CHP-7220N
+      '27061','27062',                 // 2. 코웨이 아이콘프로 CHP-7212N
       '20276','20277',                 // 6~7. 쿠쿠 제로100 슬림 얼음 CP-AHS100
       '18055','18056',                 // 8. LG전자 정수기 듀얼 오브제 냉온정 WU923
       '33906','33907',                 // 코웨이 아이콘2 CHP-7211N
@@ -4764,7 +4763,8 @@ function bjHeaderMainInit() {
       '33059','33060',                 // SK 메가 아이스 WPU-IAC506
       '14415','14416','14417',         // 삼성 비스포크 언더싱크 RWP54421
       '18139',                         // LG 듀얼 빌트인/SYS 라인 WU823AS
-      '11259','11260'                  // 쿠쿠 STEAM 100 CP-ABS100
+      '11259','11260',                 // 쿠쿠 STEAM 100 CP-ABS100
+      '24578','24579','24580'          // 코웨이 아이콘 V2 얼음냉온정수기 CHPI-7400N_V2 — 리스트 마지막
     ];
     var BJ_WATER_POPULAR_RANK = {};
     BJ_WATER_POPULAR_PRODNO.forEach(function(no, idx){ BJ_WATER_POPULAR_RANK[no] = idx + 1; });
