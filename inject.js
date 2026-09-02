@@ -1365,8 +1365,9 @@
     var s = document.createElement('style'); s.id = 'bj-direct-offer-style';
     s.textContent =
       '#bj-do-topbar{position:sticky;top:0;z-index:99998;background:'+BLUE+';color:#fff;font-family:Pretendard,Arial,sans-serif;font-size:12px;line-height:1.2;box-shadow:0 2px 10px rgba(0,0,0,.16)}' +
-      '#bj-do-topbar .bj-do-topin{max-width:1180px;margin:0 auto;padding:8px 14px;display:flex;gap:12px;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}' +
-      '#bj-do-topbar b{font-weight:900}.bj-do-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18),0 0 13px rgba(34,197,94,.9);display:inline-block;margin-right:6px;vertical-align:-1px}' +
+      '#bj-do-topbar .bj-do-topin{max-width:1180px;margin:0 auto;padding:7px 14px;display:flex;gap:8px;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden}' +
+      '#bj-do-topbar .bj-do-social{display:inline-flex;align-items:center;gap:5px;border:1px solid rgba(255,255,255,.24);background:rgba(255,255,255,.13);border-radius:999px;padding:5px 9px;font-weight:850;letter-spacing:0}' +
+      '#bj-do-topbar b{font-weight:950}.bj-do-dot{width:8px;height:8px;border-radius:50%;background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18),0 0 13px rgba(34,197,94,.9);display:inline-block;margin-right:2px;vertical-align:-1px}' +
       '#bj-do-fab{position:fixed;left:18px;top:50%;transform:translateY(-50%);z-index:99998;border:1.5px solid rgba(8,56,248,.72);border-radius:999px;background:#fff;color:'+BLUE+';font:900 12.5px Pretendard,Arial,sans-serif;padding:10px 38px 10px 12px;box-shadow:0 0 0 5px rgba(8,56,248,.08),0 0 24px rgba(8,56,248,.28),0 12px 30px rgba(15,32,70,.13);cursor:pointer;display:inline-flex;align-items:center;gap:7px;max-width:154px;line-height:1.15;text-align:left;white-space:normal}' +
       '#bj-do-fab .bj-do-fab-ic{width:28px;height:28px;border-radius:999px;background:'+BLUE+';color:#fff;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 7px 18px rgba(8,56,248,.28)}#bj-do-fab .bj-do-fab-ic svg{width:17px;height:17px;display:block;fill:currentColor}#bj-do-fab .bj-do-fab-t{display:inline-block;word-break:keep-all}#bj-do-fab .bj-do-fab-x{position:absolute;right:7px;top:7px;width:22px;height:22px;border:0;border-radius:999px;background:#eef3ff;color:'+BLUE+';font:900 15px/20px Arial,sans-serif;padding:0;cursor:pointer}' +
       '#bj-do-back{position:fixed;inset:0;background:rgba(10,16,30,.62);z-index:100001;display:flex;align-items:center;justify-content:center;padding:18px;font-family:Pretendard,Arial,sans-serif}' +
@@ -1377,7 +1378,7 @@
       '#bj-do-total{background:#fff;border:1px solid #dbe5ff;border-radius:14px;padding:14px;box-shadow:0 8px 24px rgba(8,56,248,.08)}.bj-do-total-k{font-size:11px;color:#647084;font-weight:800}.bj-do-total-v{font-size:26px;font-weight:950;color:'+BLUE+';line-height:1.1;margin-top:5px;font-variant-numeric:tabular-nums}.bj-do-total-v.is-calculating .bj-do-num{display:inline-block;min-width:96px}.bj-do-total-range{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px}.bj-do-range-sep{color:#647084;font-size:18px;font-weight:900}.bj-do-coupon-wrap{margin-top:12px}.bj-do-coupon-card{position:relative;min-height:92px;border-radius:18px;background:linear-gradient(135deg,#111827 0%,#1e3a8a 58%,#0ea5e9 100%);color:#fff;box-shadow:0 14px 30px rgba(17,24,39,.24);overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:5px;padding:14px 34px;border:1px dashed rgba(255,255,255,.68)}.bj-do-coupon-card:before,.bj-do-coupon-card:after{content:"";position:absolute;top:50%;width:24px;height:24px;border-radius:999px;background:#fff;transform:translateY(-50%)}.bj-do-coupon-card:before{left:-12px}.bj-do-coupon-card:after{right:-12px}.bj-do-coupon-card i{position:absolute;left:22px;right:22px;top:50%;border-top:1px dashed rgba(255,255,255,.34);transform:translateY(-50%)}.bj-do-coupon-copy{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:3px}.bj-do-coupon-copy span{font-size:12px;line-height:1.2;font-weight:900;opacity:.92}.bj-do-coupon-copy em{font-style:normal;font-size:15px;line-height:1.1;font-weight:950;letter-spacing:0}.bj-do-coupon-amount{position:relative;z-index:1;font-size:34px;line-height:1;font-weight:950;letter-spacing:0;white-space:nowrap;text-shadow:0 2px 10px rgba(0,0,0,.18)}.bj-do-coupon-time{display:block;margin-top:7px;text-align:center;font-size:11px;line-height:1.3;color:#3b4a66;font-weight:850}.bj-do-coupon-time b{color:'+BLUE+';font-weight:950;font-variant-numeric:tabular-nums}.bj-do-total-sub{display:none}.bj-do-memo{display:none}.bj-do-copy{width:100%;border:0;border-radius:12px;background:'+BLUE+';color:#fff;font-size:14px;font-weight:950;padding:13px;margin-top:10px;cursor:pointer;box-shadow:0 10px 24px rgba(8,56,248,.23)}.bj-do-note{font-size:10.5px;color:#8b95a7;line-height:1.45;margin-top:9px}.bj-do-loading{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;background:rgba(255,255,255,.96);text-align:center;padding:22px}.bj-do-loading img{width:75px;height:75px;object-fit:contain}.bj-do-loading-title{font-size:18px;font-weight:950;color:#172033}.bj-do-loading-sub{font-size:12.5px;color:#647084;line-height:1.45}.bj-do-intro{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(255,255,255,.985);text-align:center;padding:26px}.bj-do-intro-ring{--p:0;position:relative;width:104px;height:104px;border-radius:50%;background:conic-gradient('+BLUE+' calc(var(--p)*1%),#e6ecff 0);display:grid;place-items:center;box-shadow:0 14px 32px rgba(8,56,248,.18)}.bj-do-intro-ring:before{content:"";position:absolute;width:78px;height:78px;border-radius:50%;background:#fff}.bj-do-intro-num{position:relative;z-index:1;font-size:28px;font-weight:950;color:'+BLUE+';font-variant-numeric:tabular-nums}.bj-do-intro-title{font-size:19px;font-weight:950;color:#172033}.bj-do-intro-sub{font-size:12.5px;color:#647084;line-height:1.45}' +
       '#bj-do-toast{position:fixed;left:50%;top:42px;transform:translateX(-50%);z-index:100000;background:#fff;border:1px solid #dfe6f4;border-radius:999px;padding:9px 13px;box-shadow:0 12px 34px rgba(0,0,0,.18);font:800 12px Pretendard,Arial,sans-serif;color:#263248;opacity:0;pointer-events:none;transition:opacity .22s, transform .22s;white-space:nowrap}#bj-do-toast.show{opacity:1;transform:translateX(-50%) translateY(8px)}' +
       '@media(max-width:720px){#bj-do-back{align-items:flex-end;padding:0;background:rgba(10,16,30,.55)}#bj-do-box{max-width:none;max-height:92vh;border-radius:18px 18px 0 0}.bj-do-layout{display:block}.bj-do-main{padding:14px}.bj-do-side{padding:12px 14px 16px;border-left:0;border-top:1px solid #e2e8f7}.bj-do-h{font-size:21px;margin-right:36px}.bj-do-head{padding:18px 18px 14px;background:linear-gradient(135deg,#0838f8,#1b55ff)}.bj-do-card{grid-template-columns:58px minmax(0,1fr) 52px;gap:9px}.bj-do-card img{width:58px;height:58px}.bj-do-review{display:none}.bj-do-memo{min-height:96px}.bj-do-total-v{font-size:24px}}' +
-      '@media(max-width:560px){#bj-do-topbar .bj-do-topin{justify-content:flex-start;overflow-x:auto}#bj-do-fab{left:12px;top:50%;padding:9px 34px 9px 10px;max-width:142px;font-size:12px}#bj-do-fab .bj-do-fab-ic{width:26px;height:26px}.bj-do-card{grid-template-columns:54px minmax(0,1fr) 48px}.bj-do-card img{width:54px;height:54px}.bj-do-add{font-size:10.5px;min-width:46px}.bj-do-pname{font-size:12.5px}.bj-do-meta{font-size:10.5px}.bj-do-gift{font-size:12px}}';
+      '@media(max-width:560px){#bj-do-topbar .bj-do-topin{justify-content:center;gap:6px;padding-left:8px;padding-right:8px}#bj-do-topbar .bj-do-social{font-size:11.5px;padding:5px 8px}#bj-do-fab{left:12px;top:50%;padding:9px 34px 9px 10px;max-width:142px;font-size:12px}#bj-do-fab .bj-do-fab-ic{width:26px;height:26px}.bj-do-card{grid-template-columns:54px minmax(0,1fr) 48px}.bj-do-card img{width:54px;height:54px}.bj-do-add{font-size:10.5px;min-width:46px}.bj-do-pname{font-size:12.5px}.bj-do-meta{font-size:10.5px}.bj-do-gift{font-size:12px}}';
     document.head.appendChild(s);
   }
   function fallbackCfg(){
@@ -1406,18 +1407,28 @@
       }
     };
   }
+  function seededDirectViewerCount(){
+    var seed = String((state.current && (state.current.prodNo || state.current.model || state.current.name)) || getProdNo() || location.pathname || '');
+    var hash = 0;
+    for (var i = 0; i < seed.length; i++) hash = ((hash * 31) + seed.charCodeAt(i)) % 9973;
+    return 14 + (hash % 9);
+  }
+  function currentReviewCount(){
+    var n = Number(state.current && state.current.reviewCount);
+    if (n > 0) return Math.round(n);
+    var text = document.body ? (document.body.textContent || '') : '';
+    var match = text.match(/(?:리뷰|후기)\s*([0-9,]+)\s*개/) || text.match(/([0-9,]+)\s*개의?\s*(?:리뷰|후기)/);
+    return match ? Math.round(Number(match[1].replace(/,/g, '')) || 0) : 0;
+  }
   function mountTopBar(){
     if (!state.cfg.directOffer.showTopBar || document.getElementById('bj-do-topbar')) return;
     var bar = document.createElement('div'); bar.id = 'bj-do-topbar';
-    bar.innerHTML = '<div class="bj-do-topin"><span><b id="bj-do-clock">15:00</b> 동안 이 화면 조건 유지</span><span><span class="bj-do-dot"></span>지금 이 조건 확인 중 <b id="bj-do-viewers">14</b>명</span><span>오늘 다이렉트 쿠폰 <b id="bj-do-count">37</b>건</span><span id="bj-do-recent">최근 정수기 + 제습기 신청</span></div>';
+    var reviews = currentReviewCount();
+    var reviewHtml = reviews > 0
+      ? '<span class="bj-do-social">후기 <b id="bj-do-reviews">' + reviews.toLocaleString('ko-KR') + '</b>개</span>'
+      : '';
+    bar.innerHTML = '<div class="bj-do-topin"><span class="bj-do-social"><span class="bj-do-dot"></span>지금 이 제품 보는 중 <b id="bj-do-viewers">' + seededDirectViewerCount() + '</b>명</span>' + reviewHtml + '</div>';
     document.body.insertBefore(bar, document.body.firstChild);
-    state.countdownUntil = Date.now() + ((state.cfg.directOffer.countdownMinutes || 15) * 60000);
-    setInterval(function(){
-      var left = Math.max(0, state.countdownUntil - Date.now());
-      var m = Math.floor(left / 60000), s = Math.floor((left % 60000) / 1000);
-      var el = document.getElementById('bj-do-clock'); if (el) el.textContent = pad(m) + ':' + pad(s);
-      var v = document.getElementById('bj-do-viewers'); if (v && Math.random() < .08) v.textContent = String(12 + Math.floor(Math.random() * 8));
-    }, 1000);
   }
   function mountFab(){
     try { if (sessionStorage.getItem(DIRECT_FAB_CLOSED_KEY) === '1') return; } catch(_){}

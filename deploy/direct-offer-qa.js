@@ -185,6 +185,11 @@ async function testOnQuoteCartFlow(browser) {
   await page.goto('https://billyjo.co.kr/html/dh_prod/prod_view/123', { waitUntil: 'domcontentloaded' });
   await page.addScriptTag({ path: injectPath });
   await page.waitForSelector('#bj-do-fab', { timeout: 5000 });
+  const topbarText = await page.locator('#bj-do-topbar').innerText();
+  assert.ok(topbarText.includes('지금 이 제품 보는 중'), 'Top social bar should show current viewer count');
+  assert.ok(/후기\s*642\s*개/.test(topbarText), 'Top social bar should show current product review count');
+  assert.strictEqual(topbarText.includes('동안 이 화면 조건 유지'), false, 'Top social bar should not show condition duration');
+  assert.strictEqual(topbarText.includes('오늘 다이렉트 쿠폰'), false, 'Top social bar should not show direct coupon count');
   await page.click('.bj-btn-rent-gift');
   await page.waitForSelector('#bj-do-back');
 
