@@ -207,7 +207,7 @@ async function testOnQuoteCartFlow(browser) {
   assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 정수기' }).count(), 'Current real product should be included');
   assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 노블 공기청정기 AP-3021D' }).count(), 'Recommended real product should be shown');
   assert.strictEqual(await page.locator('.bj-do-card', { hasText: '상담 필요 제품' }).count(), 0, 'Products without confirmed gift amount should be hidden');
-  assert.ok((await page.locator('.bj-do-card', { hasText: '코웨이 정수기' }).innerText()).includes('결합 사은품 500,000원'), 'Gift amount label should use 결합 사은품');
+  assert.ok((await page.locator('.bj-do-card', { hasText: '코웨이 정수기' }).innerText()).includes('결합 사은품 425,000원 ~ 500,000원'), 'Gift amount label should use a fixed 85%~current range');
   assert.strictEqual(await page.locator('.bj-do-gift', { hasText: '예상 지원금' }).count(), 0, 'Direct offer cards should not use 예상 지원금 label');
   assert.strictEqual(await page.locator('.bj-do-gift', { hasText: '상담 시 확인' }).count(), 0, 'Unknown gift products should not be shown as 상담 시 확인');
 

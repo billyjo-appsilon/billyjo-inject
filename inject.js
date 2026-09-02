@@ -1042,8 +1042,13 @@
   function hasGiftAmount(p){
     return money70(p) > 0;
   }
+  function giftRange(p){
+    var high = money70(p);
+    return { low: Math.max(0, Math.round(high * 0.85)), high: high };
+  }
   function giftLabel(p){
-    return '결합 사은품 ' + won(money70(p));
+    var range = giftRange(p);
+    return '결합 사은품 ' + won(range.low) + ' ~ ' + won(range.high);
   }
   function getProdNo(){
     var m = location.pathname.match(/(?:prod_view|rental\/d)\/(\d+)/);
