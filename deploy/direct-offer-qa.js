@@ -235,7 +235,8 @@ async function testLpDirectOnlySelectedProduct(browser) {
   await page.addScriptTag({ path: injectPath });
   await page.waitForSelector('#bj-do-back', { timeout: 5000 });
   await page.waitForFunction(() => !document.querySelector('.bj-do-intro'), null, { timeout: 8000 });
-  assert.ok((await page.locator('.bj-do-h').innerText()).includes('이번달 특가 조합으로 비밀 사은품 더 받기'), 'Short promo headline should be visible');
+  assert.ok((await page.locator('.bj-do-h').textContent()).includes('이번달 특가 프로모션 + 결합 추가사은품 BEST'), 'Updated promo headline should remain accessible');
+  assert.ok((await page.locator('#bj-do-head').evaluate((el) => getComputedStyle(el).backgroundImage)).includes('direct-offer-top-banner-left-text.png'), 'Promo headline should be rendered as a banner image');
   assert.strictEqual((await page.locator('.bj-do-sub').innerText()).trim(), '', 'Header subcopy should be removed');
   assert.ok(await page.locator('.bj-do-card', { hasText: 'AP-3021D' }).count(), 'First LP selected product should be visible');
   assert.ok(await page.locator('.bj-do-card', { hasText: 'BAS51-A' }).count(), 'Second LP selected product should be visible');
