@@ -1001,6 +1001,9 @@
   var DIRECT_QUOTE_CONTEXT_KEY = 'bj_direct_offer_quote_context';
   var DIRECT_FAB_CLOSED_KEY = 'bj_direct_offer_fab_closed';
   var DIRECT_WEEKLY_COUPON_KEY = 'bj_direct_offer_weekly_coupon_v1';
+  var DIRECT_REVIEW_COUNT_OVERRIDES = {
+    '24578': 429
+  };
   var state = {
     cfg: null,
     cats: [],
@@ -1416,6 +1419,9 @@
   function currentReviewCount(){
     var n = Number(state.current && state.current.reviewCount);
     if (n > 0) return Math.round(n);
+    var prodNo = String((state.current && state.current.prodNo) || getProdNo() || '');
+    var override = Number(DIRECT_REVIEW_COUNT_OVERRIDES[prodNo]);
+    if (override > 0) return Math.round(override);
     var text = document.body ? (document.body.textContent || '') : '';
     var match = text.match(/(?:리뷰|후기)\s*([0-9,]+)\s*개/) || text.match(/([0-9,]+)\s*개의?\s*(?:리뷰|후기)/);
     return match ? Math.round(Number(match[1].replace(/,/g, '')) || 0) : 0;
