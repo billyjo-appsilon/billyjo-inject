@@ -6074,12 +6074,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       if (!bjTrust.querySelector('.bj-trust-actions')) {
         var bjTrustActions = document.createElement('div');
         bjTrustActions.className = 'bj-trust-actions';
-        bjTrustActions.innerHTML = '<button type="button" class="bj-trust-cta" data-bj-consult>오늘 최저가, 최대 사은품 AI 비교하기</button>';
+        bjTrustActions.innerHTML = '<button type="button" class="bj-trust-cta" data-bj-consult>3초 견적/제품 추천 받기</button>';
         if (bjTrustChips && bjTrustChips.parentNode) bjTrustChips.parentNode.insertBefore(bjTrustActions, bjTrustChips.nextSibling);
         else bjTrust.appendChild(bjTrustActions);
       }
       Array.prototype.forEach.call(bjTrust.querySelectorAll('.bj-trust-cta'), function(btn) {
-        btn.textContent = '오늘 최저가, 최대 사은품 AI 비교하기';
+        btn.textContent = '3초 견적/제품 추천 받기';
       });
     }
 
@@ -7769,15 +7769,17 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     st.id = 'bj-ai-quote-quick-style';
     st.textContent =
       '.new-qb .quick .link{display:flex!important;flex-direction:column!important;align-items:center!important;gap:8px!important}' +
+      '.new-qb .quick .goTop{position:relative!important;width:46px!important;height:46px!important;margin:0!important;padding:0!important;right:auto!important;bottom:auto!important;float:none!important;clear:none!important;text-align:center!important}' +
       '.new-qb .quick .link>p{position:relative!important;width:46px!important;height:46px!important;margin:0!important;padding:0!important;float:none!important;clear:none!important}' +
-      '.new-qb .quick .link>p>a,.new-qb .quick .link .bj-ai-quote-quick a{width:46px!important;height:46px!important;box-sizing:border-box!important;background:#fff!important;border:2px solid #0838f8!important;border-radius:999px!important;color:#0838f8!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:none!important}' +
+      '.new-qb .quick .link>p>a,.new-qb .quick .link .bj-ai-quote-quick a,.new-qb .quick .goTop>a{width:46px!important;height:46px!important;box-sizing:border-box!important;background:#fff!important;border:2px solid #0838f8!important;border-radius:999px!important;color:#0838f8!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:none!important;padding:0!important}' +
       '.new-qb .quick .link>p>a>img,.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:29px!important;height:29px!important;position:absolute!important;left:50%!important;top:50%!important;transform:translate(-50%,-50%)!important;display:block!important;object-fit:contain!important;margin:0!important;pointer-events:none!important}' +
+      '.new-qb .quick .goTop>a>img{display:none!important}.new-qb .quick .goTop>a:before{content:"";width:15px;height:15px;border-left:3px solid #0838f8;border-top:3px solid #0838f8;transform:translateY(4px) rotate(45deg);display:block;box-sizing:border-box}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-label{display:none!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick .bj-ai-quote-badge{display:none!important;position:absolute!important;right:-6px!important;top:-6px!important;min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;background:#0838f8!important;color:#fff!important;border:2px solid #fff!important;align-items:center!important;justify-content:center!important;font:900 10px/1 Pretendard,Arial,sans-serif!important;box-shadow:0 2px 7px rgba(8,56,248,.28)!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick.has-count .bj-ai-quote-badge{display:flex!important}' +
       '.new-qb .quick .link .bj-ai-quote-quick a:after{content:"오늘 최대혜택 찾기";position:absolute;right:54px;top:50%;transform:translateY(-50%);background:#172033;color:#fff;border-radius:8px;padding:7px 9px;font:800 12px/1 Pretendard,Arial,sans-serif;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .15s,transform .15s;box-shadow:0 8px 20px rgba(0,0,0,.18)}' +
       '.new-qb .quick .link .bj-ai-quote-quick a:hover:after{opacity:1;transform:translateY(-50%) translateX(-3px)}' +
-      '@media(max-width:767px){.new-qb{right:8px!important}.new-qb .quick .link{gap:7px!important}.new-qb .quick .link>p{width:44px!important;height:44px!important}.new-qb .quick .link>p>a,.new-qb .quick .link .bj-ai-quote-quick a{width:44px!important;height:44px!important}.new-qb .quick .link>p>a>img,.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:28px!important;height:28px!important}.new-qb .quick .link .bj-ai-quote-quick a:after{display:none!important}}';
+      '@media(max-width:767px){.new-qb{right:8px!important}.new-qb .quick{display:flex!important;flex-direction:column!important;align-items:center!important;gap:7px!important}.new-qb .quick .link{gap:7px!important}.new-qb .quick .quick_list{display:none!important}.new-qb .quick .link>p,.new-qb .quick .goTop{width:44px!important;height:44px!important}.new-qb .quick .link>p>a,.new-qb .quick .link .bj-ai-quote-quick a,.new-qb .quick .goTop>a{width:44px!important;height:44px!important}.new-qb .quick .link>p>a>img,.new-qb .quick .link .bj-ai-quote-quick img.bj-ai-quote-icon{width:28px!important;height:28px!important}.new-qb .quick .link .bj-ai-quote-quick a:after{display:none!important}}';
     (document.head || document.documentElement).appendChild(st);
   }
   function cartCount(){
