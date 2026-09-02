@@ -186,8 +186,15 @@ async function testOnQuoteCartFlow(browser) {
   assert.ok((await page.locator('.bj-do-copy').innerText()).includes('3초 견적 시작'), 'CTA should be quote-start oriented');
   assert.strictEqual(await page.locator('.bj-do-badge').count(), 0, 'Direct coupon badge should be removed from modal header');
   assert.ok((await page.locator('#bj-do-total').innerText()).includes('AI 예상 지원금 합계'), 'Total label should keep AI 예상 지원금 합계');
-  assert.ok((await page.locator('#bj-do-total').innerText()).includes('470,000원'), 'Displayed total should subtract the secret coupon amount');
-  assert.ok((await page.locator('#bj-do-total').innerText()).includes('+ 24시간 비밀쿠폰'), 'Displayed total should mention the secret coupon');
+  await page.waitForTimeout(1000);
+  const totalText = await page.locator('#bj-do-total').innerText();
+  assert.ok(totalText.includes('399,500원') && totalText.includes('470,000원'), 'Displayed total should show 85%~final benefit range');
+  assert.ok(totalText.includes('+ 30,000원 쿠폰'), 'Displayed total should mention the 30,000 coupon');
+  assert.ok(totalText.includes('남은시간:'), 'Displayed total should show a coupon countdown');
+  assert.strictEqual(totalText.includes('500,000원'), false, 'Displayed total should not flash the undiscounted raw total');
+  const couponState = await page.evaluate(() => JSON.parse(localStorage.getItem('bj_direct_offer_weekly_coupon_v1') || '{}'));
+  assert.ok(couponState.expiresAt > Date.now(), 'Coupon state should start a 30-minute countdown');
+  assert.ok(couponState.weeklyUntil - Date.now() > 6 * 24 * 60 * 60000, 'Coupon state should be held for one week');
   assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 정수기' }).count(), 'Current real product should be included');
   assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 노블 공기청정기 AP-3021D' }).count(), 'Recommended real product should be shown');
   assert.strictEqual(await page.locator('.bj-do-card', { hasText: '상담 필요 제품' }).count(), 0, 'Products without confirmed gift amount should be hidden');
