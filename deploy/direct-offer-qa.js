@@ -183,7 +183,11 @@ async function testOnQuoteCartFlow(browser) {
   await page.waitForSelector('#bj-do-back');
 
   assert.strictEqual(await page.evaluate(() => window.rentClicked || 0), 0, 'ON should intercept rent click and open popup first');
-  assert.ok((await page.locator('.bj-do-copy').innerText()).includes('AI 견적신청하기'), 'CTA should be quote-oriented');
+  assert.ok((await page.locator('.bj-do-copy').innerText()).includes('3초 견적 시작'), 'CTA should be quote-start oriented');
+  assert.strictEqual(await page.locator('.bj-do-badge').count(), 0, 'Direct coupon badge should be removed from modal header');
+  assert.ok((await page.locator('#bj-do-total').innerText()).includes('AI 예상 지원금 합계'), 'Total label should keep AI 예상 지원금 합계');
+  assert.ok((await page.locator('#bj-do-total').innerText()).includes('470,000원'), 'Displayed total should subtract the secret coupon amount');
+  assert.ok((await page.locator('#bj-do-total').innerText()).includes('+ 24시간 비밀쿠폰'), 'Displayed total should mention the secret coupon');
   assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 정수기' }).count(), 'Current real product should be included');
   assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 노블 공기청정기 AP-3021D' }).count(), 'Recommended real product should be shown');
   assert.strictEqual(await page.locator('.bj-do-card', { hasText: '상담 필요 제품' }).count(), 0, 'Products without confirmed gift amount should be hidden');
@@ -207,7 +211,7 @@ async function testLpDirectOnlySelectedProduct(browser) {
   await page.addScriptTag({ path: injectPath });
   await page.waitForSelector('#bj-do-back', { timeout: 5000 });
   await page.waitForFunction(() => !document.querySelector('.bj-do-intro'), null, { timeout: 8000 });
-  assert.ok((await page.locator('.bj-do-h').innerText()).includes('이번달 특가 프로모션 제품 같이 신청하고, 더x2 많은 사은품 받으세요!'), 'New promo headline should be visible');
+  assert.ok((await page.locator('.bj-do-h').innerText()).includes("이번달 특가 프로모션 제품을 결합하여 비밀 사은품도 '더' 받아가세요"), 'New promo headline should be visible');
   assert.strictEqual((await page.locator('.bj-do-sub').innerText()).trim(), '', 'Header subcopy should be removed');
   assert.ok(await page.locator('.bj-do-card', { hasText: 'AP-3021D' }).count(), 'First LP selected product should be visible');
   assert.ok(await page.locator('.bj-do-card', { hasText: 'BAS51-A' }).count(), 'Second LP selected product should be visible');
