@@ -214,7 +214,8 @@ async function testOnQuoteCartFlow(browser) {
   assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 정수기' }).count(), 'Current real product should be included');
   assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 노블 공기청정기 AP-3021D' }).count(), 'Recommended real product should be shown');
   assert.strictEqual(await page.locator('.bj-do-card', { hasText: '상담 필요 제품' }).count(), 0, 'Products without confirmed gift amount should be hidden');
-  assert.ok((await page.locator('.bj-do-card', { hasText: '코웨이 정수기' }).innerText()).includes('결합 사은품 425,000원 ~ 500,000원'), 'Gift amount label should use a fixed 85%~current range');
+  assert.ok((await page.locator('.bj-do-card', { hasText: '코웨이 정수기' }).innerText()).includes('예상 사은품 425,000원 ~ 500,000원'), 'Current product gift label should use 예상 사은품 with a fixed 85%~current range');
+  assert.ok((await page.locator('.bj-do-card', { hasText: '코웨이 노블 공기청정기 AP-3021D' }).innerText()).includes('결합 사은품 255,000원 ~ 300,000원'), 'Additional product gift label should keep 결합 사은품');
   assert.strictEqual(await page.locator('.bj-do-gift', { hasText: '예상 지원금' }).count(), 0, 'Direct offer cards should not use 예상 지원금 label');
   assert.strictEqual(await page.locator('.bj-do-gift', { hasText: '상담 시 확인' }).count(), 0, 'Unknown gift products should not be shown as 상담 시 확인');
 
@@ -234,7 +235,7 @@ async function testLpDirectOnlySelectedProduct(browser) {
   await page.addScriptTag({ path: injectPath });
   await page.waitForSelector('#bj-do-back', { timeout: 5000 });
   await page.waitForFunction(() => !document.querySelector('.bj-do-intro'), null, { timeout: 8000 });
-  assert.ok((await page.locator('.bj-do-h').innerText()).includes("이번달 특가 프로모션 제품을 결합하여 비밀 사은품도 '더' 받아가세요"), 'New promo headline should be visible');
+  assert.ok((await page.locator('.bj-do-h').innerText()).includes('이번달 특가 조합으로 비밀 사은품 더 받기'), 'Short promo headline should be visible');
   assert.strictEqual((await page.locator('.bj-do-sub').innerText()).trim(), '', 'Header subcopy should be removed');
   assert.ok(await page.locator('.bj-do-card', { hasText: 'AP-3021D' }).count(), 'First LP selected product should be visible');
   assert.ok(await page.locator('.bj-do-card', { hasText: 'BAS51-A' }).count(), 'Second LP selected product should be visible');

@@ -997,7 +997,7 @@
   var BLUE = '#0838f8';
   var STORE_DETAIL = 'https://billyjo.co.kr/html/dh_prod/prod_view/{pid}';
   var LP_IMAGE_BASE = 'https://live.billyjo.co.kr/';
-  var DIRECT_COUPON_TITLE = "이번달 특가 프로모션 제품을 결합하여 비밀 사은품도 '더' 받아가세요";
+  var DIRECT_COUPON_TITLE = '이번달 특가 조합으로 비밀 사은품 더 받기';
   var DIRECT_QUOTE_CONTEXT_KEY = 'bj_direct_offer_quote_context';
   var DIRECT_FAB_CLOSED_KEY = 'bj_direct_offer_fab_closed';
   var DIRECT_WEEKLY_COUPON_KEY = 'bj_direct_offer_weekly_coupon_v1';
@@ -1049,9 +1049,9 @@
     var high = money70(p);
     return { low: Math.max(0, Math.round(high * 0.85)), high: high };
   }
-  function giftLabel(p){
+  function giftLabel(p, current){
     var range = giftRange(p);
-    return '결합 사은품 ' + won(range.low) + ' ~ ' + won(range.high);
+    return (current ? '예상 사은품 ' : '결합 사은품 ') + won(range.low) + ' ~ ' + won(range.high);
   }
   function getProdNo(){
     var m = location.pathname.match(/(?:prod_view|rental\/d)\/(\d+)/);
@@ -1472,7 +1472,7 @@
       '<img src="' + esc(p.image || (current && !isDirectApplyQuery() ? pageProductImage() : '') || '') + '" alt="">' +
       '<div class="bj-do-info"><div class="bj-do-pname">' + esc(p.name || p.model) + '</div>' +
         '<div class="bj-do-meta">' + esc(p.category || '') + (p.reviewCount ? ' · ' + stars + ' · 리뷰 ' + p.reviewCount.toLocaleString('ko-KR') + '개' : '') + '</div>' +
-        '<div class="bj-do-gift">' + esc(giftLabel(p)) + '</div>' +
+        '<div class="bj-do-gift">' + esc(giftLabel(p, current)) + '</div>' +
         (rv ? '<div class="bj-do-review">“' + esc(rv) + '”</div>' : '') +
       '</div>' +
       '<button type="button" class="bj-do-add">' + (current ? '포함됨' : (on ? '선택됨' : '추가')) + '</button>' +
