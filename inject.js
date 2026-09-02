@@ -157,6 +157,13 @@
   function text(el){ return (el && (el.textContent || el.value || el.getAttribute('title')) || '').replace(/\s+/g, ' ').trim(); }
   function digits(v){ return String(v || '').replace(/\D+/g, ''); }
   function won(n){ return '₩' + Number(n || 0).toLocaleString('ko-KR'); }
+  function esc(v){
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
   function openSecretPackage(){
     if (typeof window.bjOpenSecretPackage === 'function') {
       window.bjOpenSecretPackage();
@@ -272,8 +279,8 @@
       }
       else if (t === '장바구니 담긴 상품') el.textContent = '견적비교 담긴 상품';
       else if (t === '장바구니 담기') el.textContent = '견적비교 담기';
-      else if (t === '선택상품 렌탈') el.textContent = '선택한 상품 견적 신청';
-      else if (t === '전체상품 렌탈') el.textContent = '전체 상품 견적 신청';
+      else if (t === '선택상품 렌탈') el.textContent = '선택 제품 견적/신청';
+      else if (t === '전체상품 렌탈') el.textContent = '전체 상품 견적/신청';
     });
     Array.prototype.forEach.call(document.querySelectorAll('.bb-btn-cart,.bj-fb-cart'), function(el){
       if (/장바구니/.test(text(el))) el.innerHTML = el.innerHTML.replace(/장바구니/g, '견적비교 담기');
@@ -324,7 +331,7 @@
       if (/선택상품\s*(삭제|견적서\s*출력)/.test(label)) {
         btn.classList.add('bj-cart-secondary-action');
       }
-      if (/선택한\s*상품\s*견적\s*신청|전체\s*상품\s*견적\s*신청|선택상품\s*렌탈|전체상품\s*렌탈/.test(label)) {
+      if (/선택(?:한\s*상품|\s*제품)\s*견적\s*\/?\s*신청|전체\s*상품\s*견적\s*\/?\s*신청|선택상품\s*렌탈|전체상품\s*렌탈/.test(label)) {
         btn.classList.add('bj-cart-primary-action');
         var parent = btn.parentElement;
         if (parent) parent.classList.add('bj-cart-primary-action-wrap');
@@ -417,16 +424,42 @@
           '<div><span>예상 사은품 혜택</span><b>' + won(result.gift && result.gift.finalAmount) + '</b></div>' +
           '<div><span>유효기한</span><b>' + (result.expiresAt || '-').replace('T',' ').slice(0,16) + '</b></div>' +
         '</div>' +
-        '<div class="bj-qam-memo">' + memo.replace(/</g,'&lt;') + '</div>' +
+        '<div class="bj-qam-memo">' + esc(memo) + '</div>' +
         '<div class="bj-qam-note">표시된 금액은 고객 혜택 기준입니다. 최종 지급은 설치 완료 및 상품 조건 확인 후 확정됩니다.</div>' +
-        '<button type="button" class="bj-qam-go">신청 계속하기</button>' +
+        '<div class="bj-qam-form" aria-label="신청 접수 필수 정보">' +
+          '<div class="bj-qam-form-title">신청 접수에 필요한 정보를 입력해주세요</div>' +
+          '<label>사은품 받을 계좌번호<input type="text" class="bj-qam-input" data-bj-qam-field="giftAccount" placeholder="예: 신한은행 / 홍길동 / 110-123-456789"></label>' +
+          '<label>결제정보<select class="bj-qam-input" data-bj-qam-field="payType"><option value="">결제 방법 선택</option><option value="통장 결제">통장 결제</option><option value="카드 결제">카드 결제</option></select></label>' +
+          '<label>통장/카드 정보<input type="text" class="bj-qam-input" data-bj-qam-field="payInfo" placeholder="통장: 국민은행 / 홍길동 / 123456-00-123456 또는 카드: 현대카드 / 1234-5678-9012-3456 / 12월 29년 / 홍길동"></label>' +
+          '<label>제휴카드 사용여부 및 신청 카드<input type="text" class="bj-qam-input" data-bj-qam-field="affiliateCard" placeholder="예: 사용 / 롯데렌탈 제휴카드 또는 미사용"></label>' +
+          '<div class="bj-qam-error" role="alert"></div>' +
+        '</div>' +
+        '<button type="button" class="bj-qam-go">신청 접수하기</button>' +
       '</div>';
     document.body.appendChild(div);
     div.querySelector('.bj-qam-x').onclick = function(){ div.remove(); };
     div.addEventListener('click', function(e){ if (e.target === div) div.remove(); });
     div.querySelector('.bj-qam-go').onclick = function(){
-      savePendingMemo(memo);
-      injectMemo(memo);
+      var giftAccount = (div.querySelector('[data-bj-qam-field="giftAccount"]').value || '').replace(/\s+/g, ' ').trim();
+      var payType = (div.querySelector('[data-bj-qam-field="payType"]').value || '').trim();
+      var payInfo = (div.querySelector('[data-bj-qam-field="payInfo"]').value || '').replace(/\s+/g, ' ').trim();
+      var affiliateCard = (div.querySelector('[data-bj-qam-field="affiliateCard"]').value || '').replace(/\s+/g, ' ').trim();
+      var err = div.querySelector('.bj-qam-error');
+      if (!giftAccount || !payType || !payInfo || !affiliateCard) {
+        if (err) err.textContent = '사은품 받을 계좌번호, 결제정보, 제휴카드 사용여부 및 신청 카드를 모두 입력해야 접수할 수 있습니다.';
+        var firstEmpty = Array.prototype.find.call(div.querySelectorAll('.bj-qam-input'), function(el){ return !(el.value || '').trim(); });
+        if (firstEmpty) firstEmpty.focus();
+        return;
+      }
+      var finalMemo = (memo || '').replace(/\s+$/,'') + '\n\n' +
+        '[추가 필수 입력]\n' +
+        '기존 고객메모의 사은품 고유번호, 금액, 유효기간은 지우지 말고 아래 내용만 추가 입력해주세요.\n' +
+        '1. 사은품 받을 계좌번호: ' + giftAccount + '\n' +
+        '2. 결제정보: ' + payType + ' / ' + payInfo + '\n' +
+        '3. 제휴카드 사용여부 및 신청 카드: ' + affiliateCard + '\n' +
+        '4. 제휴카드 사용 예정 고객도 접수용 카드정보 또는 결제계좌번호를 함께 입력해주세요.';
+      savePendingMemo(finalMemo);
+      injectMemo(finalMemo);
       div.remove();
       continueFn();
     };
@@ -462,13 +495,13 @@
     st.id = 'bj-quote-auth-style';
     st.textContent =
       '#bj-quote-auth-modal{position:fixed;inset:0;z-index:100002;background:rgba(12,18,32,.62);display:flex;align-items:center;justify-content:center;padding:18px;font-family:Pretendard,Arial,sans-serif}' +
-      '.bj-qam-card{width:100%;max-width:430px;background:#fff;border-radius:16px;padding:20px;box-shadow:0 24px 80px rgba(0,0,0,.28);position:relative;color:#172033}' +
+      '.bj-qam-card{width:100%;max-width:430px;max-height:92vh;overflow:auto;background:#fff;border-radius:16px;padding:20px;box-shadow:0 24px 80px rgba(0,0,0,.28);position:relative;color:#172033}' +
       '.bj-qam-x{position:absolute;right:12px;top:12px;width:32px;height:32px;border:0;border-radius:50%;background:#eef3ff;color:#0838f8;font-size:22px;line-height:28px}' +
       '.bj-qam-eyebrow{font-size:11px;font-weight:900;color:#0838f8;margin-bottom:8px}.bj-qam-title{font-size:19px;font-weight:950;line-height:1.25;margin-right:28px}' +
       '.bj-qam-code{margin:13px 0;padding:10px 12px;border-radius:10px;background:#f4f7ff;color:#0838f8;font-weight:950;letter-spacing:.02em}' +
       '.bj-qam-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bj-qam-grid div{border:1px solid #e5ebf5;border-radius:10px;padding:10px}.bj-qam-grid span{display:block;font-size:11px;color:#6b7485;font-weight:800}.bj-qam-grid b{display:block;margin-top:4px;font-size:15px;color:#172033}' +
       '.bj-qam-loading{display:flex;gap:12px;align-items:flex-start;margin:8px 28px 14px 0}.bj-qam-spin{width:24px;height:24px;border-radius:50%;border:3px solid #dbe5ff;border-top-color:#0838f8;flex:0 0 auto;animation:bjQamSpin .72s linear infinite}@keyframes bjQamSpin{to{transform:rotate(360deg)}}' +
-      '.bj-qam-memo{margin-top:12px;border:1px dashed #cdd8ef;border-radius:10px;background:#fbfcff;padding:10px;font-size:12px;line-height:1.5;color:#3c4658;white-space:pre-wrap}.bj-qam-note{margin-top:10px;font-size:11px;line-height:1.45;color:#737d8e}.bj-qam-go{width:100%;margin-top:14px;border:0;border-radius:11px;background:#0838f8;color:#fff;font-size:14px;font-weight:950;padding:13px;cursor:pointer}';
+      '.bj-qam-memo{margin-top:12px;border:1px dashed #cdd8ef;border-radius:10px;background:#fbfcff;padding:10px;font-size:12px;line-height:1.5;color:#3c4658;white-space:pre-wrap}.bj-qam-note{margin-top:10px;font-size:11px;line-height:1.45;color:#737d8e}.bj-qam-form{margin-top:12px;padding:12px;border:1px solid #dce5f5;border-radius:12px;background:#f7faff}.bj-qam-form-title{font-size:13px;font-weight:950;color:#172033;margin-bottom:9px}.bj-qam-form label{display:block;margin-top:9px;font-size:11px;font-weight:900;color:#5f6b7c}.bj-qam-input{display:block;width:100%;box-sizing:border-box;margin-top:5px;border:1px solid #d6deeb;border-radius:9px;background:#fff;color:#172033;font-size:12px;line-height:1.35;padding:10px 10px;outline:none}.bj-qam-input:focus{border-color:#0838f8;box-shadow:0 0 0 3px rgba(8,56,248,.08)}.bj-qam-error{min-height:15px;margin-top:8px;color:#e03131;font-size:11px;font-weight:800;line-height:1.35}.bj-qam-go{width:100%;margin-top:14px;border:0;border-radius:11px;background:#0838f8;color:#fff;font-size:14px;font-weight:950;padding:13px;cursor:pointer}';
     st.textContent +=
       'body.bj-quote-cart-page .cart-list,body.bj-quote-cart-page table.order-field.cart-list,body.bj-quote-cart-page .shop_cart table,body.bj-quote-cart-page .cart_list{border-collapse:separate!important;border-spacing:0 10px!important;border-top:0!important;background:transparent!important}' +
       'body.bj-quote-cart-page .cart-list thead th,body.bj-quote-cart-page table.order-field.cart-list thead th{border-top:0!important;border-bottom:0!important;background:#f3f6fb!important;color:#647084!important;font-weight:900!important}' +
@@ -551,13 +584,13 @@
       var btn = e.target && e.target.closest ? e.target.closest('button,a,input[type="button"],input[type="submit"]') : null;
       if (!btn) return;
       var label = text(btn);
-      if (!/(선택상품|선택한 상품|전체상품|전체 상품|렌탈)/.test(label)) return;
+      if (!/(선택상품|선택한 상품|선택 제품|전체상품|전체 상품|렌탈)/.test(label)) return;
       if (!/(렌탈|신청|주문)/.test(label)) return;
       if (btn.getAttribute('data-bj-quote-continue') === '1') {
         btn.removeAttribute('data-bj-quote-continue');
         return;
       }
-      var mode = /(선택상품|선택한 상품)/.test(label) ? 'selected' : 'all';
+      var mode = /(선택상품|선택한 상품|선택 제품)/.test(label) ? 'selected' : 'all';
       var items = collectItems(mode);
       e.preventDefault();
       e.stopPropagation();
