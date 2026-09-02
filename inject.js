@@ -437,18 +437,59 @@
         '<button type="button" class="bj-qam-go">신청 접수하기</button>' +
       '</div>';
     document.body.appendChild(div);
+    try {
+      if (typeof window.BillyjoJourneyTrack === 'function') {
+        window.BillyjoJourneyTrack('cart_quote_view', {
+          quote_transaction_id: result.quoteTransactionId || '',
+          expected_gift_amount: result.gift && result.gift.finalAmount,
+          quote_expires_at: result.expiresAt || ''
+        });
+      }
+    } catch(_) {}
     div.querySelector('.bj-qam-x').onclick = function(){ div.remove(); };
     div.addEventListener('click', function(e){ if (e.target === div) div.remove(); });
+    var formStarted = false;
+    Array.prototype.forEach.call(div.querySelectorAll('.bj-qam-input'), function(el){
+      el.addEventListener('focus', function(){
+        if (formStarted) return;
+        formStarted = true;
+        try {
+          if (typeof window.BillyjoJourneyTrack === 'function') {
+            window.BillyjoJourneyTrack('cart_quote_form_start', {
+              quote_transaction_id: result.quoteTransactionId || '',
+              expected_gift_amount: result.gift && result.gift.finalAmount
+            });
+          }
+        } catch(_) {}
+      }, { once: true });
+    });
     div.querySelector('.bj-qam-go').onclick = function(){
       var giftAccount = (div.querySelector('[data-bj-qam-field="giftAccount"]').value || '').replace(/\s+/g, ' ').trim();
       var payType = (div.querySelector('[data-bj-qam-field="payType"]').value || '').trim();
       var payInfo = (div.querySelector('[data-bj-qam-field="payInfo"]').value || '').replace(/\s+/g, ' ').trim();
       var affiliateCard = (div.querySelector('[data-bj-qam-field="affiliateCard"]').value || '').replace(/\s+/g, ' ').trim();
       var err = div.querySelector('.bj-qam-error');
+      try {
+        if (typeof window.BillyjoJourneyTrack === 'function') {
+          window.BillyjoJourneyTrack('cart_quote_submit_attempt', {
+            quote_transaction_id: result.quoteTransactionId || '',
+            expected_gift_amount: result.gift && result.gift.finalAmount,
+            payment_type: payType || ''
+          });
+        }
+      } catch(_) {}
       if (!giftAccount || !payType || !payInfo || !affiliateCard) {
         if (err) err.textContent = '사은품 받을 계좌번호, 결제정보, 제휴카드 사용여부 및 신청 카드를 모두 입력해야 접수할 수 있습니다.';
         var firstEmpty = Array.prototype.find.call(div.querySelectorAll('.bj-qam-input'), function(el){ return !(el.value || '').trim(); });
         if (firstEmpty) firstEmpty.focus();
+        try {
+          if (typeof window.BillyjoJourneyTrack === 'function') {
+            window.BillyjoJourneyTrack('cart_quote_submit_error', {
+              quote_transaction_id: result.quoteTransactionId || '',
+              error_type: 'required_field_missing'
+            });
+          }
+        } catch(_) {}
         return;
       }
       var finalMemo = (memo || '').replace(/\s+$/,'') + '\n\n' +
@@ -460,6 +501,15 @@
         '4. 제휴카드 사용 예정 고객도 접수용 카드정보 또는 결제계좌번호를 함께 입력해주세요.';
       savePendingMemo(finalMemo);
       injectMemo(finalMemo);
+      try {
+        if (typeof window.BillyjoJourneyTrack === 'function') {
+          window.BillyjoJourneyTrack('cart_quote_form_complete', {
+            quote_transaction_id: result.quoteTransactionId || '',
+            expected_gift_amount: result.gift && result.gift.finalAmount,
+            payment_type: payType
+          });
+        }
+      } catch(_) {}
       div.remove();
       continueFn();
     };
@@ -710,6 +760,15 @@
     if (nameEl && nameEl.textContent) out.product_name = nameEl.textContent.replace(/\s+/g, ' ').trim().slice(0, 120);
     return out;
   }
+  function eventTier(eventName){
+    if (/^(lead_submit_success|consult_scheduled|phone_submit)$/.test(eventName)) return 'conversion';
+    if (/^(persona_complete|quote_view|product_pick|coupon_issued|quote_call_click|direct_offer_|cart_quote_form_complete|cart_quote_submit_attempt)/.test(eventName)) return 'high_intent';
+    if (/^(lead_start|lead_submit_attempt|cart_quote_form_start|direct_coupon_submit)$/.test(eventName)) return 'intent';
+    return 'engagement';
+  }
+  function isAudienceSignal(eventName){
+    return /^(persona_complete|quote_view|product_pick|coupon_issued|quote_call_click|consult_scheduled|direct_offer_|cart_quote_form_complete|cart_quote_submit_attempt)/.test(eventName);
+  }
   function track(eventName, extra){
     try {
       var currentIds = clickIdsFromUrl(location.href);
@@ -726,7 +785,11 @@
         page_title: document.title || '',
         conversion_platform: platform,
         ad_platform: platform,
-        attribution_model: 'last_click_only'
+        attribution_model: 'last_click_only',
+        event_tier: eventTier(eventName),
+        audience_signal: isAudienceSignal(eventName),
+        micro_event_name: eventName,
+        ga_event_name: eventName
       };
       var product = productContext();
       Object.keys(product).forEach(function(k){ payload[k] = product[k]; });
@@ -737,6 +800,7 @@
       window.dataLayer.push(payload);
     } catch(_){}
   }
+  window.BillyjoJourneyTrack = track;
   function once(key, eventName, extra){
     if (seen[key]) return;
     seen[key] = true;
@@ -1027,10 +1091,37 @@
     countdownUntil: null,
     active: false,
     ready: false,
-    couponTimer: null
+    couponTimer: null,
+    trackedCouponView: false
   };
 
   function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function directOfferTrack(eventName, extra){
+    try {
+      extra = extra || {};
+      if (!extra.offer_id && state.offerId) extra.offer_id = state.offerId;
+      if (state.current) {
+        extra.current_product_id = extra.current_product_id || state.current.prodNo || '';
+        extra.current_product_name = extra.current_product_name || state.current.name || state.current.model || '';
+      }
+      extra.selected_product_count = extra.selected_product_count || selectedList().filter(hasGiftAmount).length;
+      if (typeof window.BillyjoJourneyTrack === 'function') {
+        window.BillyjoJourneyTrack(eventName, extra);
+      } else {
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push(Object.assign({
+          event: 'bj_' + eventName,
+          analytics_event_name: eventName,
+          micro_event_name: eventName,
+          ga_event_name: eventName,
+          event_tier: /^direct_offer_submit_success$/.test(eventName) ? 'high_intent' : 'intent',
+          audience_signal: true,
+          page_location: location.href,
+          page_path: location.pathname || '/'
+        }, extra));
+      }
+    } catch(_) {}
+  }
   function directCouponTitleHtml(text){
     var value = String(text || DIRECT_COUPON_TITLE)
       .replace(/다이렉트 10,000쿠폰 발급 중/g, DIRECT_COUPON_TITLE)
@@ -1826,6 +1917,15 @@
     box.querySelector('.bj-do-total-sub').textContent = totalRangeText();
     animateTotalNumbers(box);
     startCouponCountdown(box);
+    if (!state.trackedCouponView && box.querySelector('.bj-do-coupon-card')) {
+      state.trackedCouponView = true;
+      directOfferTrack('direct_offer_coupon_view', {
+        coupon_value: 30000,
+        coupon_type: 'weekly_30min',
+        expected_gift_low: displayTotalRange().low,
+        expected_gift_high: displayTotalRange().high
+      });
+    }
     box.querySelector('.bj-do-memo').value = makeMemo();
     var copyBtn = box.querySelector('.bj-do-copy');
     if (copyBtn) {
@@ -1837,10 +1937,24 @@
         if (!model || (state.current && model === state.current.model)) return;
         var p = allProducts().filter(function(x){ return x.model === model; })[0];
         if (!p) return;
-        if (state.selected[model]) delete state.selected[model];
+        if (state.selected[model]) {
+          directOfferTrack('direct_offer_product_unselect', {
+            product_id: p.prodNo || '',
+            product_name: p.name || p.model || '',
+            product_model: p.model || '',
+            expected_gift_amount: money70(p)
+          });
+          delete state.selected[model];
+        }
         else {
           if (selectedList().length >= ((state.cfg && state.cfg.maxSelect) || 5)) return;
           state.selected[model] = p;
+          directOfferTrack('direct_offer_product_select', {
+            product_id: p.prodNo || '',
+            product_name: p.name || p.model || '',
+            product_model: p.model || '',
+            expected_gift_amount: money70(p)
+          });
           loadOneReview(p).then(function(){ refreshModal(box); });
         }
         refreshModal(box);
@@ -1879,6 +1993,11 @@
         '</div>' +
       '</div>';
     back.appendChild(box); document.body.appendChild(back);
+    directOfferTrack('direct_offer_open', {
+      open_source: (opts && opts.allowShell) ? 'direct_apply_query' : (proceed ? 'rent_gift_button' : 'auto_or_fab'),
+      expected_gift_low: displayTotalRange().low,
+      expected_gift_high: displayTotalRange().high
+    });
     if (isDirectApplyQuery()) showIntroLoading(box, !!opts.keepIntro);
     function close(){
       state.opened = false;
@@ -1891,6 +2010,11 @@
       var memo = makeMemo();
       saveDirectQuoteContext();
       box.querySelector('.bj-do-memo').value = memo;
+      directOfferTrack('direct_offer_submit_attempt', {
+        submit_destination: selectedList().filter(hasGiftAmount).length > 0 ? 'quote_cart' : (state.pendingProceed ? 'native_rental_apply' : 'memo_copy'),
+        expected_gift_low: displayTotalRange().low,
+        expected_gift_high: displayTotalRange().high
+      });
       try {
         var clip = navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(memo) : null;
         if (clip && clip.catch) clip.catch(function(){});
@@ -1903,9 +2027,18 @@
         btn.textContent = 'Billy가 찾는 중입니다...';
         btn.disabled = true;
         Promise.all([addSelectedToCart(), quoteDelay()]).then(function(){
+          directOfferTrack('direct_offer_submit_success', {
+            submit_destination: 'quote_cart',
+            expected_gift_low: displayTotalRange().low,
+            expected_gift_high: displayTotalRange().high
+          });
           btn.textContent = '견적 페이지로 이동합니다';
           setTimeout(function(){ location.href = '/html/dh_order/shop_cart'; }, 320);
         }).catch(function(){
+          directOfferTrack('direct_offer_submit_error', {
+            submit_destination: 'quote_cart',
+            error_type: 'cart_add_failed'
+          });
           var loading = box.querySelector('.bj-do-loading');
           if (loading) loading.remove();
           btn.disabled = false;
@@ -1915,9 +2048,19 @@
       }
       box.querySelector('.bj-do-copy').textContent = next ? 'AI 견적신청으로 이동합니다' : '설계 내역 복사됨';
       if (next) {
+        directOfferTrack('direct_offer_submit_success', {
+          submit_destination: 'native_rental_apply',
+          expected_gift_low: displayTotalRange().low,
+          expected_gift_high: displayTotalRange().high
+        });
         setTimeout(function(){ try { close(); } catch(_){} next(); }, 420);
         return;
       }
+      directOfferTrack('direct_offer_submit_success', {
+        submit_destination: 'memo_copy',
+        expected_gift_low: displayTotalRange().low,
+        expected_gift_high: displayTotalRange().high
+      });
       setTimeout(function(){ var b = box.querySelector('.bj-do-copy'); if (b) b.textContent = '3초 견적 시작'; }, 1400);
     };
     if (state.cfg && state.current) {
@@ -9823,12 +9966,23 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (nameEl && nameEl.textContent) out.product_name = nameEl.textContent.replace(/\s+/g, ' ').trim().slice(0, 120);
     return out;
   }
+  function bjEventTier(eventName){
+    if (/^(lead_submit_success|consult_scheduled|phone_submit)$/.test(eventName)) return 'conversion';
+    if (/^(persona_complete|quote_view|product_pick|coupon_issued|quote_call_click|direct_offer_|cart_quote_form_complete|cart_quote_submit_attempt)/.test(eventName)) return 'high_intent';
+    if (/^(lead_start|lead_submit_attempt|cart_quote_form_start|direct_coupon_submit)$/.test(eventName)) return 'intent';
+    return 'engagement';
+  }
+  function bjAudienceSignal(eventName){
+    return /^(persona_complete|quote_view|product_pick|coupon_issued|quote_call_click|consult_scheduled|direct_offer_|cart_quote_form_complete|cart_quote_submit_attempt)/.test(eventName);
+  }
   function bjAnalyticsPayload(eventName, extra){
     var attr = {};
     try { attr = bjReadAttribution() || {}; } catch(_){}
     var payload = {
       event: 'bj_' + eventName,
       analytics_event_name: eventName,
+      micro_event_name: eventName,
+      ga_event_name: eventName,
       landing_id: bjLandingId(),
       page_type: bjPageType(),
       page_location: location.href,
@@ -9841,7 +9995,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       karrot_campaign_id: attr.campaignId || '',
       karrot_ad_group_id: attr.adsetId || '',
       karrot_material_id: attr.adId || attr.creativeId || '',
-      attribution_model: 'last_click_only'
+      attribution_model: 'last_click_only',
+      event_tier: bjEventTier(eventName),
+      audience_signal: bjAudienceSignal(eventName)
     };
     var product = bjProductContext();
     Object.keys(product).forEach(function(k){ payload[k] = product[k]; });
@@ -9856,6 +10012,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       window.dataLayer.push(bjAnalyticsPayload(eventName, extra || {}));
     } catch(_){}
   }
+  window.BillyjoJourneyTrack = window.BillyjoJourneyTrack || bjTrackJourney;
   function bjTrackJourneyOnce(key, eventName, extra){
     if (BJ_ANALYTICS_SEEN[key]) return;
     BJ_ANALYTICS_SEEN[key] = true;

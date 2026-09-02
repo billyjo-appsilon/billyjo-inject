@@ -192,6 +192,7 @@ async function testOnQuoteCartFlow(browser) {
   assert.strictEqual(topbarText.includes('오늘 다이렉트 쿠폰'), false, 'Top social bar should not show direct coupon count');
   await page.click('.bj-btn-rent-gift');
   await page.waitForSelector('#bj-do-back');
+  assert.ok(await page.evaluate(() => (window.dataLayer || []).some((e) => e.analytics_event_name === 'direct_offer_open' && e.audience_signal === true && e.event_tier === 'high_intent')), 'Direct offer open should be tracked as a high-intent audience signal');
 
   assert.strictEqual(await page.evaluate(() => window.rentClicked || 0), 0, 'ON should intercept rent click and open popup first');
   assert.ok((await page.locator('.bj-do-copy').innerText()).includes('3초 견적 시작'), 'CTA should be quote-start oriented');
@@ -220,7 +221,9 @@ async function testOnQuoteCartFlow(browser) {
   assert.strictEqual(await page.locator('.bj-do-gift', { hasText: '상담 시 확인' }).count(), 0, 'Unknown gift products should not be shown as 상담 시 확인');
 
   await page.locator('.bj-do-card', { hasText: '코웨이 노블 공기청정기 AP-3021D' }).click();
+  assert.ok(await page.evaluate(() => (window.dataLayer || []).some((e) => e.analytics_event_name === 'direct_offer_product_select' && e.product_id === '7606' && e.audience_signal === true)), 'Additional product selection should be tracked for remarketing');
   await page.click('.bj-do-copy');
+  await page.waitForFunction(() => (window.dataLayer || []).some((e) => e.analytics_event_name === 'direct_offer_submit_success' && e.submit_destination === 'quote_cart' && e.event_tier === 'high_intent'), null, { timeout: 7000 });
   await page.waitForURL('**/html/dh_order/shop_cart', { timeout: 8000 });
 
   assert.strictEqual(cartPosts.length, 2, 'Selected current + additional products should both post to cart');
