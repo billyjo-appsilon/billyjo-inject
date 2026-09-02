@@ -198,7 +198,9 @@ async function testOnQuoteCartFlow(browser) {
   assert.ok(totalText.includes('1주일에 한번! 오늘만') && totalText.includes('30,000p'), 'Displayed total should show the 30,000p coupon banner');
   assert.strictEqual(totalText.includes('이번 주 30,000원 쿠폰은 이미 확인된 조건입니다.'), false, 'Old confirmed-coupon notice should be removed');
   assert.strictEqual(totalText.includes('지원금 합계금은 최종표기금액의 85%'), false, 'Old benefit-range help text should be removed');
-  assert.strictEqual(await page.locator('.bj-do-coupon-card').count(), 1, 'Coupon should render as a blue coupon card');
+  assert.ok(totalText.includes('쿠폰 유효시간'), 'Coupon should show the 30-minute countdown copy');
+  assert.strictEqual(await page.locator('.bj-do-coupon-card').count(), 1, 'Coupon should render as a distinct coupon card');
+  assert.strictEqual(await page.locator('[data-bj-do-coupon-left]').count(), 1, 'Coupon countdown should be visible below the coupon card');
   assert.strictEqual(totalText.includes('500,000원'), false, 'Displayed total should not flash the undiscounted raw total');
   assert.strictEqual(totalText.includes('530,000원'), false, 'Displayed total should not be overwritten by delayed quote recalculation');
   const couponState = await page.evaluate(() => JSON.parse(localStorage.getItem('bj_direct_offer_weekly_coupon_v1') || '{}'));
