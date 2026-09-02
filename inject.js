@@ -1610,6 +1610,7 @@
   function refreshCurrentGiftFromQuote(box){
     var cur = state.current && applyCurrentWidgetSelection(hydrateLpProduct(state.current, state.current.name || state.current.model));
     if (!cur || !cur.prodNo) return;
+    if (hasGiftAmount(cur)) return;
     var item = {
       productId: cur.prodNo,
       productName: cur.name,

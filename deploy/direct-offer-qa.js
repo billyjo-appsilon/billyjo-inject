@@ -135,6 +135,12 @@ async function newMockedPage(browser, { enabled }) {
   await page.route('https://admin2-api.billyjo.co.kr/v1/reviews**', async (route) => {
     await route.fulfill({ contentType: 'application/json', body: JSON.stringify({ ok: true, items: [{ text: '설치가 빨랐어요.' }] }) });
   });
+  await page.route('https://admin2-api.billyjo.co.kr/v1/quote/calculate', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({ ok: true, gift: { baseAmount: 530000 }, items: [{ giftAmount: 530000 }] }),
+    });
+  });
   await page.route('https://billyjo.co.kr/html/dh_prod/prod_view/7606', async (route) => {
     await route.fulfill({ contentType: 'text/html', body: productHtml('7606', '코웨이 노블 공기청정기 AP-3021D', 'AP-3021D') });
   });
@@ -194,6 +200,7 @@ async function testOnQuoteCartFlow(browser) {
   assert.strictEqual(totalText.includes('지원금 합계금은 최종표기금액의 85%'), false, 'Old benefit-range help text should be removed');
   assert.strictEqual(await page.locator('.bj-do-coupon-card').count(), 1, 'Coupon should render as a blue coupon card');
   assert.strictEqual(totalText.includes('500,000원'), false, 'Displayed total should not flash the undiscounted raw total');
+  assert.strictEqual(totalText.includes('530,000원'), false, 'Displayed total should not be overwritten by delayed quote recalculation');
   const couponState = await page.evaluate(() => JSON.parse(localStorage.getItem('bj_direct_offer_weekly_coupon_v1') || '{}'));
   assert.ok(couponState.expiresAt > Date.now(), 'Coupon state should start a 30-minute countdown');
   assert.ok(couponState.weeklyUntil - Date.now() > 6 * 24 * 60 * 60000, 'Coupon state should be held for one week');
