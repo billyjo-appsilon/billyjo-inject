@@ -189,8 +189,10 @@ async function testOnQuoteCartFlow(browser) {
   await page.waitForTimeout(1000);
   const totalText = await page.locator('#bj-do-total').innerText();
   assert.ok(totalText.includes('399,500원') && totalText.includes('470,000원'), 'Displayed total should show 85%~final benefit range');
-  assert.ok(totalText.includes('+ 30,000원 쿠폰'), 'Displayed total should mention the 30,000 coupon');
-  assert.ok(totalText.includes('남은시간:'), 'Displayed total should show a coupon countdown');
+  assert.ok(totalText.includes('1주일에 한번! 오늘만') && totalText.includes('30,000p'), 'Displayed total should show the 30,000p coupon banner');
+  assert.strictEqual(totalText.includes('이번 주 30,000원 쿠폰은 이미 확인된 조건입니다.'), false, 'Old confirmed-coupon notice should be removed');
+  assert.strictEqual(totalText.includes('지원금 합계금은 최종표기금액의 85%'), false, 'Old benefit-range help text should be removed');
+  assert.strictEqual(await page.locator('.bj-do-coupon-card').count(), 1, 'Coupon should render as a blue coupon card');
   assert.strictEqual(totalText.includes('500,000원'), false, 'Displayed total should not flash the undiscounted raw total');
   const couponState = await page.evaluate(() => JSON.parse(localStorage.getItem('bj_direct_offer_weekly_coupon_v1') || '{}'));
   assert.ok(couponState.expiresAt > Date.now(), 'Coupon state should start a 30-minute countdown');
