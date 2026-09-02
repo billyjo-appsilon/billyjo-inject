@@ -37,6 +37,102 @@
 })();
 
 /* =========================================================================
+ * 렌탈신청 최종 접수 화면 보정 (2026-09-02)
+ * - 신청서 상단 빨강 테두리를 브랜드 블루로 통일
+ * - 고객메모에 사은품 계좌/결제정보 필수 입력 템플릿을 노출하고 미입력 제출 방지
+ * ========================================================================= */
+(function bjRentalOrderFinalStepPatch(){
+  var BLUE = '#0838F8';
+  var TEMPLATE_MARK = '[추가 필수 입력]';
+  var REQUIRED_TEMPLATE = TEMPLATE_MARK + '\n' +
+    '1. 사은품 받을 계좌번호: 은행 / 예금주 / 계좌번호\n' +
+    '2. 결제정보: 통장 결제 시 은행 / 예금주 / 계좌번호, 카드 결제 시 카드사 / 카드번호 / 유효기간 / 명의자\n' +
+    '3. 제휴카드 사용 예정 고객도 접수용 카드정보 또는 결제계좌번호를 함께 입력해주세요.';
+
+  function isRentalOrderPage(){
+    return /\/html\/dh_order\/rental(?:\/|$)/.test(location.pathname || '');
+  }
+
+  function memoArea(){
+    return document.getElementById('tx_content') ||
+      document.querySelector('textarea[name*="content"],textarea[name*="memo"],textarea[name*="msg"],textarea');
+  }
+
+  function addStyle(){
+    if (document.getElementById('bj-rental-order-final-style')) return;
+    var st = document.createElement('style');
+    st.id = 'bj-rental-order-final-style';
+    st.textContent = [
+      'body.bj-rental-order-page [style*="#ff1818"],body.bj-rental-order-page [style*="#FF1818"],body.bj-rental-order-page [style*="ff1818"],body.bj-rental-order-page [style*="FF1818"]{border-color:' + BLUE + '!important;border-top-color:' + BLUE + '!important;color:' + BLUE + '!important}',
+      'body.bj-rental-order-page table,body.bj-rental-order-page .order-field,body.bj-rental-order-page .tbl_order,body.bj-rental-order-page .table_form{border-top-color:' + BLUE + '!important}',
+      'body.bj-rental-order-page .bj-rental-required-memo{margin:8px 0 7px;padding:10px 11px;border:1px solid #cfdcff;border-radius:8px;background:#f5f8ff;color:#17253a;font-size:12px;line-height:1.55;word-break:keep-all}',
+      'body.bj-rental-order-page .bj-rental-required-memo b{display:block;color:' + BLUE + ';font-size:12px;margin-bottom:4px}',
+      'body.bj-rental-order-page .bj-rental-required-memo span{display:block;color:#445064}'
+    ].join('');
+    (document.head || document.documentElement).appendChild(st);
+  }
+
+  function addTemplate(area){
+    if (!area) return;
+    var current = area.value || '';
+    if (current.indexOf(TEMPLATE_MARK) >= 0) return;
+    area.value = current.replace(/\s+$/,'') + (current ? '\n\n' : '') + REQUIRED_TEMPLATE;
+    area.dispatchEvent(new Event('input', { bubbles: true }));
+    area.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+
+  function addNotice(area){
+    if (!area || document.getElementById('bj-rental-required-memo')) return;
+    var notice = document.createElement('div');
+    notice.id = 'bj-rental-required-memo';
+    notice.className = 'bj-rental-required-memo';
+    notice.innerHTML =
+      '<b>고객메모 필수 입력</b>' +
+      '<span>사은품 받을 계좌번호(은행, 예금주, 계좌번호)와 결제정보를 함께 입력해야 접수가 가능합니다. 통장 결제는 통장 정보, 카드 결제는 카드정보를 입력해주세요. 제휴카드 사용 예정 고객도 접수용 카드 또는 결제계좌 정보가 필요합니다.</span>';
+    area.parentNode.insertBefore(notice, area);
+  }
+
+  function hasUnfilledTemplate(value){
+    return value.indexOf('은행 / 예금주 / 계좌번호') >= 0 ||
+      value.indexOf('카드사 / 카드번호 / 유효기간 / 명의자') >= 0;
+  }
+
+  function hasRequiredPaymentInfo(value){
+    return /사은품/.test(value) && /계좌번호/.test(value) && /결제정보/.test(value) && /(통장|자동이체|카드)/.test(value) && !hasUnfilledTemplate(value);
+  }
+
+  function bindSubmitValidation(area){
+    if (!area || area.getAttribute('data-bj-required-payment-bound') === '1') return;
+    area.setAttribute('data-bj-required-payment-bound', '1');
+    var form = area.closest('form');
+    if (!form) return;
+    form.addEventListener('submit', function(e){
+      var value = area.value || '';
+      if (hasRequiredPaymentInfo(value)) return;
+      e.preventDefault();
+      alert('고객메모에 사은품 받을 계좌번호와 결제정보를 입력해야 접수가 가능합니다.');
+      area.focus();
+    }, true);
+  }
+
+  function patch(){
+    if (!isRentalOrderPage()) return;
+    document.body.classList.add('bj-rental-order-page');
+    addStyle();
+    var area = memoArea();
+    addNotice(area);
+    addTemplate(area);
+    bindSubmitValidation(area);
+  }
+
+  try {
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', patch);
+    else patch();
+    [300, 900, 1800, 3200].forEach(function(delay){ setTimeout(patch, delay); });
+  } catch (_) {}
+})();
+
+/* =========================================================================
  * 견적비교 장바구니 인증 (2026-08-11)
  * - shop_cart 의 선택상품/전체상품 렌탈 버튼을 Admin2 견적 계산으로 경유.
  * - 클라이언트는 상품 식별자만 보낸다. 월렌탈료/본사수수료/사은품 금액은 서버 계산값만 신뢰.
