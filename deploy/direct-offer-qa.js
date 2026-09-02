@@ -191,7 +191,8 @@ async function testLpDirectOnlySelectedProduct(browser) {
   await page.addScriptTag({ path: injectPath });
   await page.waitForSelector('#bj-do-back', { timeout: 5000 });
   await page.waitForFunction(() => !document.querySelector('.bj-do-intro'), null, { timeout: 8000 });
-  assert.ok((await page.locator('.bj-do-h').innerHTML()).includes('bj-do-h-sub'), 'Parenthetical title copy should be styled separately');
+  assert.ok((await page.locator('.bj-do-h').innerText()).includes('이번달 특가 프로모션 제품 같이 신청하고, 더x2 많은 사은품 받으세요!'), 'New promo headline should be visible');
+  assert.strictEqual((await page.locator('.bj-do-sub').innerText()).trim(), '', 'Header subcopy should be removed');
   assert.ok(await page.locator('.bj-do-card', { hasText: 'CHPI-620L' }).count(), 'First LP selected product should be visible');
   assert.ok(await page.locator('.bj-do-card', { hasText: 'WD724R' }).count(), 'Second LP selected product should be visible');
 
