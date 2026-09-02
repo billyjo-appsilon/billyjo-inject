@@ -77,6 +77,18 @@ async function newMockedPage(browser, { enabled }) {
                 avgStars: 4.8,
                 detailUrl: 'https://billyjo.co.kr/html/dh_prod/prod_view/7606',
               },
+              {
+                model: 'UNKNOWN-GIFT',
+                prodNo: '99999',
+                name: '상담 필요 제품',
+                category: '공기청정기',
+                image: 'https://billyjo.co.kr/logo.png',
+                maxGift: 0,
+                term: '상담확인',
+                reviewCount: 3,
+                avgStars: 4.1,
+                detailUrl: 'https://billyjo.co.kr/html/dh_prod/prod_view/99999',
+              },
             ],
           },
           {
@@ -174,6 +186,10 @@ async function testOnQuoteCartFlow(browser) {
   assert.ok((await page.locator('.bj-do-copy').innerText()).includes('AI 견적신청하기'), 'CTA should be quote-oriented');
   assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 정수기' }).count(), 'Current real product should be included');
   assert.ok(await page.locator('.bj-do-card', { hasText: '코웨이 노블 공기청정기 AP-3021D' }).count(), 'Recommended real product should be shown');
+  assert.strictEqual(await page.locator('.bj-do-card', { hasText: '상담 필요 제품' }).count(), 0, 'Products without confirmed gift amount should be hidden');
+  assert.ok((await page.locator('.bj-do-card', { hasText: '코웨이 정수기' }).innerText()).includes('결합 사은품 500,000원'), 'Gift amount label should use 결합 사은품');
+  assert.strictEqual(await page.locator('.bj-do-gift', { hasText: '예상 지원금' }).count(), 0, 'Direct offer cards should not use 예상 지원금 label');
+  assert.strictEqual(await page.locator('.bj-do-gift', { hasText: '상담 시 확인' }).count(), 0, 'Unknown gift products should not be shown as 상담 시 확인');
 
   await page.locator('.bj-do-card', { hasText: '코웨이 노블 공기청정기 AP-3021D' }).click();
   await page.click('.bj-do-copy');
@@ -187,21 +203,21 @@ async function testOnQuoteCartFlow(browser) {
 
 async function testLpDirectOnlySelectedProduct(browser) {
   const { context, page, cartPosts } = await newMockedPage(browser, { enabled: true });
-  await page.goto('https://billyjo.co.kr/?bj_direct_apply=1&bj_lp_products=CHPI-620L,WD724R', { waitUntil: 'domcontentloaded' });
+  await page.goto('https://billyjo.co.kr/?bj_direct_apply=1&bj_lp_products=AP-3021D,BAS51-A', { waitUntil: 'domcontentloaded' });
   await page.addScriptTag({ path: injectPath });
   await page.waitForSelector('#bj-do-back', { timeout: 5000 });
   await page.waitForFunction(() => !document.querySelector('.bj-do-intro'), null, { timeout: 8000 });
   assert.ok((await page.locator('.bj-do-h').innerText()).includes('이번달 특가 프로모션 제품 같이 신청하고, 더x2 많은 사은품 받으세요!'), 'New promo headline should be visible');
   assert.strictEqual((await page.locator('.bj-do-sub').innerText()).trim(), '', 'Header subcopy should be removed');
-  assert.ok(await page.locator('.bj-do-card', { hasText: 'CHPI-620L' }).count(), 'First LP selected product should be visible');
-  assert.ok(await page.locator('.bj-do-card', { hasText: 'WD724R' }).count(), 'Second LP selected product should be visible');
+  assert.ok(await page.locator('.bj-do-card', { hasText: 'AP-3021D' }).count(), 'First LP selected product should be visible');
+  assert.ok(await page.locator('.bj-do-card', { hasText: 'BAS51-A' }).count(), 'Second LP selected product should be visible');
 
   await page.click('.bj-do-copy');
   await page.waitForURL('**/html/dh_order/shop_cart', { timeout: 8000 });
 
   assert.strictEqual(cartPosts.length, 2, 'LP selected products without addons should be posted to cart');
-  assert.ok(cartPosts.some((body) => body.includes('public_model_no=1792')), 'First LP selected product should resolve to a cartable prodNo');
-  assert.ok(cartPosts.some((body) => body.includes('public_model_no=35200')), 'Second LP selected product should resolve to a cartable prodNo');
+  assert.ok(cartPosts.some((body) => body.includes('public_model_no=7606')), 'First LP selected product should resolve to a cartable prodNo');
+  assert.ok(cartPosts.some((body) => body.includes('public_model_no=32985')), 'Second LP selected product should resolve to a cartable prodNo');
   await context.close();
 }
 

@@ -1004,6 +1004,12 @@
        Do not apply the direct-offer rate a second time, or 70% max becomes 49%. */
     return Math.max(0, Math.floor((Number(p && p.maxGift) || 0) / 1000) * 1000);
   }
+  function hasGiftAmount(p){
+    return money70(p) > 0;
+  }
+  function giftLabel(p){
+    return '결합 사은품 ' + won(money70(p));
+  }
   function getProdNo(){
     var m = location.pathname.match(/(?:prod_view|rental\/d)\/(\d+)/);
     if (m) return m[1];
@@ -1393,10 +1399,15 @@
   }
   function visibleCategories(){
     var currCat = state.current && state.current.category;
-    return (state.cats || []).filter(function(c){ return c.products && c.products.length && c.category !== currCat; }).slice(0, 5);
+    return (state.cats || []).map(function(c){
+      return Object.assign({}, c, {
+        products: (c.products || []).filter(hasGiftAmount)
+      });
+    }).filter(function(c){ return c.products && c.products.length && c.category !== currCat; }).slice(0, 5);
   }
   function renderProductCard(p, current){
     p = hydrateLpProduct(p, p && (p.name || p.model));
+    if (!hasGiftAmount(p)) return '';
     var on = !!state.selected[p.model];
     var rv = state.reviews[p.model] || '';
     var stars = p.avgStars ? ('★ ' + Number(p.avgStars).toFixed(1)) : '후기';
@@ -1404,18 +1415,18 @@
       '<img src="' + esc(p.image || (current && !isDirectApplyQuery() ? pageProductImage() : '') || '') + '" alt="">' +
       '<div class="bj-do-info"><div class="bj-do-pname">' + esc(p.name || p.model) + '</div>' +
         '<div class="bj-do-meta">' + esc(p.category || '') + (p.reviewCount ? ' · ' + stars + ' · 리뷰 ' + p.reviewCount.toLocaleString('ko-KR') + '개' : '') + '</div>' +
-        '<div class="bj-do-gift">예상 지원금 ' + (p.maxGift ? won(money70(p)) : '상담 시 확인') + '</div>' +
+        '<div class="bj-do-gift">' + esc(giftLabel(p)) + '</div>' +
         (rv ? '<div class="bj-do-review">“' + esc(rv) + '”</div>' : '') +
       '</div>' +
       '<button type="button" class="bj-do-add">' + (current ? '포함됨' : (on ? '선택됨' : '추가')) + '</button>' +
     '</div>';
   }
   function calcTotal(){
-    return selectedList().reduce(function(sum, p){ return sum + money70(p); }, 0);
+    return selectedList().reduce(function(sum, p){ return sum + (hasGiftAmount(p) ? money70(p) : 0); }, 0);
   }
   function makeMemo(){
     if (!state.offerId) state.offerId = createOfferId();
-    var list = selectedList().map(function(p){
+    var list = selectedList().filter(hasGiftAmount).map(function(p){
       return applyCurrentWidgetSelection(hydrateLpProduct(p, p && (p.name || p.model)));
     });
     var lines = [
@@ -1423,10 +1434,10 @@
       '확인번호: ' + state.offerId,
       '생성시각: ' + fmtDate(new Date()),
       '혜택구간: 견적 생성 후 24시간 내 신청 기준',
-      '고객 안내 예상 지원금: 최대 ' + won(calcTotal())
+      '고객 안내 결합 사은품: 최대 ' + won(calcTotal())
     ];
     list.forEach(function(p, i){
-      lines.push('선택상품 ' + (i + 1) + ': ' + (p.name || p.model) + ' / ' + (p.term || '약정 상담확인') + ' / 예상지원금 ' + (p.maxGift ? won(money70(p)) : '상담확인'));
+      lines.push('선택상품 ' + (i + 1) + ': ' + (p.name || p.model) + ' / ' + (p.term || '약정 상담확인') + ' / ' + giftLabel(p));
     });
     lines.push('※ 실제 지급액은 본사 조건 및 최종 승인 후 확정');
     return lines.join('\n');
@@ -1526,7 +1537,7 @@
         memo: memo,
         expectedGiftAmount: calcTotal(),
         issuedAt: new Date().toISOString(),
-        selectedProducts: selectedList().map(function(p){
+        selectedProducts: selectedList().filter(hasGiftAmount).map(function(p){
           var x = applyCurrentWidgetSelection(hydrateLpProduct(p, p && (p.name || p.model)));
           return {
             prodNo: x && x.prodNo,
@@ -1535,7 +1546,7 @@
             term: x && (x.term || x.contractTerm),
             monthlyFee: x && x.monthlyFee,
             supplier: x && x.supplier,
-            expectedGiftAmount: x && x.maxGift ? money70(x) : 0
+            expectedGiftAmount: hasGiftAmount(x) ? money70(x) : 0
           };
         })
       };
@@ -1616,6 +1627,7 @@
     var seen = {};
     var list = selectedList().filter(function(p){
       p = hydrateLpProduct(p, p && (p.name || p.model));
+      if (!hasGiftAmount(p)) return false;
       if (!p || !p.prodNo || seen[p.prodNo]) return false;
       seen[p.prodNo] = true;
       return true;
@@ -1644,14 +1656,15 @@
   }
   function refreshModal(box){
     var cats = visibleCategories();
-    var catHtml = '<button type="button" class="bj-do-chip on">현재 상품 포함</button>' + cats.map(function(c){ return '<button type="button" class="bj-do-chip">' + esc(c.category) + '</button>'; }).join('');
     var currentItems = [];
     selectedList().forEach(function(p){
       if (!p || !p.model) return;
+      if (!hasGiftAmount(p)) return;
       if (currentItems.filter(function(x){ return x.model === p.model || (x.prodNo && p.prodNo && String(x.prodNo) === String(p.prodNo)); }).length) return;
       if (isDirectApplyQuery() || (state.current && p.model === state.current.model)) currentItems.push(p);
     });
-    if (!currentItems.length && state.current) currentItems.push(state.current);
+    if (!currentItems.length && state.current && hasGiftAmount(state.current)) currentItems.push(state.current);
+    var catHtml = (currentItems.length ? '<button type="button" class="bj-do-chip on">현재 상품 포함</button>' : '') + cats.map(function(c){ return '<button type="button" class="bj-do-chip">' + esc(c.category) + '</button>'; }).join('');
     var cards = currentItems.length ? '<div class="bj-do-group">현재 보고 있는 상품</div>' + currentItems.map(function(p){ return renderProductCard(p, true); }).join('') : '';
     cats.forEach(function(c){
       cards += '<div class="bj-do-group">' + esc(c.category) + ' BEST</div>' + (c.products || []).map(function(p){ return renderProductCard(p, false); }).join('');
@@ -1705,7 +1718,7 @@
             '<div class="bj-do-sec"><h3>' + esc((cfg.productsSection && cfg.productsSection.title) || '2. 함께 많이 신청한 BEST') + '</h3><div class="bj-do-products"></div></div>' +
           '</div>' +
           '<div class="bj-do-side">' +
-            '<div id="bj-do-total"><div class="bj-do-total-k">AI 예상 지원금 합계</div><div class="bj-do-total-v">0원</div><div class="bj-do-total-sub">선택한 제품 구성 기준으로 산출한 예상 혜택입니다. 실제 지급액은 상담 후 확정됩니다.</div></div>' +
+            '<div id="bj-do-total"><div class="bj-do-total-k">결합 사은품 합계</div><div class="bj-do-total-v">0원</div><div class="bj-do-total-sub">선택한 제품 구성 기준으로 산출한 결합 사은품입니다. 실제 지급액은 상담 후 확정됩니다.</div></div>' +
             '<textarea class="bj-do-memo" readonly></textarea>' +
             '<button type="button" class="bj-do-copy">AI 견적신청하기</button>' +
             '<div class="bj-do-note">선택 상품은 견적비교함에 담긴 뒤 24시간 견적 인증/신청 단계로 이동합니다.</div>' +
@@ -1727,7 +1740,7 @@
       } catch(_){}
       var next = state.pendingProceed;
       state.pendingProceed = null;
-      if (selectedList().length > 0) {
+      if (selectedList().filter(hasGiftAmount).length > 0) {
         var btn = box.querySelector('.bj-do-copy');
         showQuoteLoading(box);
         btn.textContent = 'Billy가 찾는 중입니다...';
@@ -1754,7 +1767,7 @@
       refreshModal(box);
       refreshCurrentGiftFromQuote(box);
     }
-    selectedList().concat(allProducts().slice(0, 8)).forEach(function(p){
+    selectedList().concat(allProducts().filter(hasGiftAmount).slice(0, 8)).forEach(function(p){
       loadOneReview(p).then(function(){ if (document.body.contains(box)) refreshModal(box); });
     });
     return true;
