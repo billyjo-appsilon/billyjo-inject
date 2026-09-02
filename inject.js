@@ -47,7 +47,8 @@
   var REQUIRED_TEMPLATE = TEMPLATE_MARK + '\n' +
     '1. 사은품 받을 계좌번호: 은행 / 예금주 / 계좌번호\n' +
     '2. 결제정보: 통장 결제 시 은행 / 예금주 / 계좌번호, 카드 결제 시 카드사 / 카드번호 / 유효기간 / 명의자\n' +
-    '3. 제휴카드 사용 예정 고객도 접수용 카드정보 또는 결제계좌번호를 함께 입력해주세요.';
+    '3. 제휴카드 사용여부 및 신청 카드: 사용 / 미사용, 신청 카드명\n' +
+    '4. 제휴카드 사용 예정 고객도 접수용 카드정보 또는 결제계좌번호를 함께 입력해주세요.';
 
   function isRentalOrderPage(){
     return /\/html\/dh_order\/rental(?:\/|$)/.test(location.pathname || '');
@@ -88,17 +89,20 @@
     notice.className = 'bj-rental-required-memo';
     notice.innerHTML =
       '<b>고객메모 필수 입력</b>' +
-      '<span>사은품 받을 계좌번호(은행, 예금주, 계좌번호)와 결제정보를 함께 입력해야 접수가 가능합니다. 통장 결제는 통장 정보, 카드 결제는 카드정보를 입력해주세요. 제휴카드 사용 예정 고객도 접수용 카드 또는 결제계좌 정보가 필요합니다.</span>';
+      '<span>사은품 받을 계좌번호(은행, 예금주, 계좌번호), 결제정보, 제휴카드 사용여부 및 신청 카드를 함께 입력해야 접수가 가능합니다. 통장 결제는 통장 정보, 카드 결제는 카드정보를 입력해주세요. 제휴카드 사용 예정 고객도 접수용 카드 또는 결제계좌 정보가 필요합니다.</span>';
     area.parentNode.insertBefore(notice, area);
   }
 
   function hasUnfilledTemplate(value){
     return value.indexOf('은행 / 예금주 / 계좌번호') >= 0 ||
-      value.indexOf('카드사 / 카드번호 / 유효기간 / 명의자') >= 0;
+      value.indexOf('카드사 / 카드번호 / 유효기간 / 명의자') >= 0 ||
+      value.indexOf('사용 / 미사용, 신청 카드명') >= 0;
   }
 
   function hasRequiredPaymentInfo(value){
-    return /사은품/.test(value) && /계좌번호/.test(value) && /결제정보/.test(value) && /(통장|자동이체|카드)/.test(value) && !hasUnfilledTemplate(value);
+    return /사은품/.test(value) && /계좌번호/.test(value) && /결제정보/.test(value) &&
+      /제휴카드/.test(value) && /(사용|미사용)/.test(value) && /(통장|자동이체|카드)/.test(value) &&
+      !hasUnfilledTemplate(value);
   }
 
   function bindSubmitValidation(area){
@@ -110,7 +114,7 @@
       var value = area.value || '';
       if (hasRequiredPaymentInfo(value)) return;
       e.preventDefault();
-      alert('고객메모에 사은품 받을 계좌번호와 결제정보를 입력해야 접수가 가능합니다.');
+      alert('고객메모에 사은품 받을 계좌번호, 결제정보, 제휴카드 사용여부 및 신청 카드를 입력해야 접수가 가능합니다.');
       area.focus();
     }, true);
   }
