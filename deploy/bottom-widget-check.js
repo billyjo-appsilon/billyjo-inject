@@ -83,14 +83,41 @@ function userAgent(vp) {
         const rentStyle = rentButton && getComputedStyle(rentButton);
         const rentVisible = !!(rentButton && rentStyle.display !== 'none' && rentStyle.visibility !== 'hidden' &&
           rentRect.height > 10 && rentRect.width > 60 && rentRect.bottom > 0 && rentRect.top < innerHeight);
+        const isCustom = !!custom;
+        const isCollapsed = !isCustom || target.classList.contains('bj-bar-collapsed');
+        const rentHiddenWhileCollapsed = !isCustom || !rentVisible;
         return {
           injectSrc,
-          ok: Boolean(inViewport && visible && hasHandle && rentVisible && r.height > 10 && r.width > Math.min(300, innerWidth * 0.7)),
+          ok: Boolean(inViewport && visible && hasHandle && isCollapsed && rentHiddenWhileCollapsed && r.height > 10 && r.width > Math.min(300, innerWidth * 0.7)),
           reason: '',
           kind: custom ? 'custom' : 'native',
           className: target.className,
           rect: { top: Math.round(r.top), bottom: Math.round(r.bottom), left: Math.round(r.left), width: Math.round(r.width), height: Math.round(r.height) },
           handleText: (target.querySelector('.bj-bar-handle') || target).textContent.trim().replace(/\s+/g, ' ').slice(0, 120),
+          rentText: rentButton ? (rentButton.value || rentButton.textContent || '').trim().replace(/\s+/g, ' ') : '',
+          isCollapsed,
+          rentVisible,
+        };
+      });
+
+      const expandedResult = await page.evaluate(async () => {
+        const target = document.querySelector('.prod_view_bot.card.mt40');
+        const handle = target && target.querySelector('.bj-bar-handle');
+        if (!target || !handle) return { ok: true, skipped: true };
+        handle.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: innerWidth / 2, clientY: innerHeight - 22 }));
+        document.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: innerWidth / 2, clientY: innerHeight - 22 }));
+        await new Promise((resolve) => setTimeout(resolve, 420));
+        const rentButton = Array.from(target.querySelectorAll('button, a, input')).find((el) => {
+          const label = (el.value || el.textContent || '').replace(/\s+/g, ' ').trim();
+          if (!/렌탈\s*\+?\s*사은품\s*신청|지원금\s*쿠폰\s*받고\s*신청|렌탈신청/.test(label)) return false;
+          const rr = el.getBoundingClientRect();
+          const rs = getComputedStyle(el);
+          return rs.display !== 'none' && rs.visibility !== 'hidden' &&
+            rr.height > 10 && rr.width > 60 && rr.bottom > 0 && rr.top < innerHeight;
+        });
+        return {
+          ok: target.classList.contains('bj-bar-expanded') && !target.classList.contains('bj-bar-collapsed') && !!rentButton,
+          className: target.className,
           rentText: rentButton ? (rentButton.value || rentButton.textContent || '').trim().replace(/\s+/g, ' ') : '',
         };
       });
@@ -103,6 +130,11 @@ function userAgent(vp) {
         fails.push(`${tag} bottom widget not visible (${result.reason || JSON.stringify(result.rect || {})})`);
         fs.mkdirSync(SHOT_DIR, { recursive: true });
         await page.screenshot({ path: path.join(SHOT_DIR, `${pid}-${vp.name}.png`), fullPage: false });
+      }
+      if (!expandedResult.ok) {
+        fails.push(`${tag} bottom widget handle does not expand to CTA (${expandedResult.className || 'no class'})`);
+        fs.mkdirSync(SHOT_DIR, { recursive: true });
+        await page.screenshot({ path: path.join(SHOT_DIR, `${pid}-${vp.name}-expanded-fail.png`), fullPage: false });
       }
       await ctx.close();
     }

@@ -12121,17 +12121,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         'important');
       wrapper.dataset.bjBarTransition = '1';
     }
-    /* v0.7.4: 페이지 진입 시 CTA가 바로 보이도록 기본 펼침 상태로 노출.
-       접힌 48px 핸들만 보이면 대표 CTA가 사라진 것처럼 보이므로 버튼 줄을 우선 노출한다. */
+    /* v0.7.5: 페이지 진입 시 위젯은 접힌 상태로 노출.
+       접힌 핸들이 기본 상태이고, 탭/위로 드래그 시 CTA 영역을 펼친다. */
     wrapper.classList.remove('bj-bar-slide-hidden');
-    wrapper.classList.remove('bj-bar-collapsed');
-    wrapper.classList.add('bj-bar-expanded');
+    wrapper.classList.add('bj-bar-collapsed');
+    wrapper.classList.remove('bj-bar-expanded');
 
     var SESSION_KEY = 'bjBarDismissed_' + (location.pathname.match(/prod_view\/(\d+)/) || [,'unknown'])[1];
     var manualHide = (function(){ try { return sessionStorage.getItem(SESSION_KEY) === '1'; } catch(e){ return false; } })();
-    /* v0.7.4: 트리거는 자동 확장에만 사용.
-       초기 in-view 상태에서 자동 collapse를 걸면 CTA 줄이 숨겨져 하단 위젯이 사라진 것처럼 보인다.
-       사용자가 명시적으로 핸들을 탭/드래그해 접은 상태는 유지하고, 상세 정보를 충분히 본 뒤에는 다시 펼친다. */
+    /* v0.7.5: 트리거는 visibility 유지에만 사용.
+       자동 펼침/접힘은 사용자가 기대한 기본 접힘 상태를 깨므로, 상태 변경은 핸들 탭/드래그에만 맡긴다. */
     var lastTriggerState = null; /* 'oov' | 'inview' | null */
     function evalScroll(){
       var r = triggerEl.getBoundingClientRect();
@@ -12140,13 +12139,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var newTrigger = null;
       if (cardOutOfView) newTrigger = 'oov';
       else if (cardInView) newTrigger = 'inview';
-      /* 천이가 일어났을 때만 자동 적용 — 그 사이엔 사용자 수동 토글 유지 */
+      /* 천이는 기록만 한다. show/bottom/pointer-events는 apply에서 보장. */
       if (newTrigger && newTrigger !== lastTriggerState) {
         lastTriggerState = newTrigger;
-        if (newTrigger === 'oov') {
-          wrapper.classList.remove('bj-bar-collapsed');
-          wrapper.classList.add('bj-bar-expanded');
-        }
       }
       apply();
     }
