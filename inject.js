@@ -12121,18 +12121,17 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         'important');
       wrapper.dataset.bjBarTransition = '1';
     }
-    /* v0.5.31: 위젯이 페이지 진입 시부터 접힌 상태(collapsed)로 항상 노출.
-       이전 slide-hidden 초기값 폐기 — 사용자 핸들이 항상 보여야 다시 펼침 가능. */
+    /* v0.7.4: 페이지 진입 시 CTA가 바로 보이도록 기본 펼침 상태로 노출.
+       접힌 48px 핸들만 보이면 대표 CTA가 사라진 것처럼 보이므로 버튼 줄을 우선 노출한다. */
     wrapper.classList.remove('bj-bar-slide-hidden');
-    wrapper.classList.add('bj-bar-collapsed');
-    wrapper.classList.remove('bj-bar-expanded');
+    wrapper.classList.remove('bj-bar-collapsed');
+    wrapper.classList.add('bj-bar-expanded');
 
     var SESSION_KEY = 'bjBarDismissed_' + (location.pathname.match(/prod_view\/(\d+)/) || [,'unknown'])[1];
     var manualHide = (function(){ try { return sessionStorage.getItem(SESSION_KEY) === '1'; } catch(e){ return false; } })();
-    /* v0.5.31: 트리거 의미 변경 — show/hide 결정 → expand/collapse 결정.
-       페이지 진입 시 항상 visible+collapsed. trigger 천이(oov ↔ inview) 시점에만
-       자동으로 expand/collapse 적용 (hysteresis). 사용자가 수동 토글한 후에는 다음
-       trigger 천이까지 사용자 결정이 유지됨. 사용자 명시적 dismiss는 핸들 ≥120px 드래그. */
+    /* v0.7.4: 트리거는 자동 확장에만 사용.
+       초기 in-view 상태에서 자동 collapse를 걸면 CTA 줄이 숨겨져 하단 위젯이 사라진 것처럼 보인다.
+       사용자가 명시적으로 핸들을 탭/드래그해 접은 상태는 유지하고, 상세 정보를 충분히 본 뒤에는 다시 펼친다. */
     var lastTriggerState = null; /* 'oov' | 'inview' | null */
     function evalScroll(){
       var r = triggerEl.getBoundingClientRect();
@@ -12147,9 +12146,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         if (newTrigger === 'oov') {
           wrapper.classList.remove('bj-bar-collapsed');
           wrapper.classList.add('bj-bar-expanded');
-        } else {
-          wrapper.classList.remove('bj-bar-expanded');
-          wrapper.classList.add('bj-bar-collapsed');
         }
       }
       apply();

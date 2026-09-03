@@ -71,20 +71,33 @@ function userAgent(vp) {
         const inViewport = r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth;
         const visible = cs.display !== 'none' && cs.visibility !== 'hidden' && Number(cs.opacity || 1) > 0.05;
         const hasHandle = !!target.querySelector('.bj-bar-handle') || target.classList.contains('prod_fix_wrap');
+        const rentButton = Array.from(target.querySelectorAll('button, a, input')).find((el) => {
+          const label = (el.value || el.textContent || '').replace(/\s+/g, ' ').trim();
+          if (!/렌탈\s*\+?\s*사은품\s*신청|지원금\s*쿠폰\s*받고\s*신청|렌탈신청/.test(label)) return false;
+          const rr = el.getBoundingClientRect();
+          const rs = getComputedStyle(el);
+          return rs.display !== 'none' && rs.visibility !== 'hidden' &&
+            rr.height > 10 && rr.width > 60 && rr.bottom > 0 && rr.top < innerHeight;
+        });
+        const rentRect = rentButton && rentButton.getBoundingClientRect();
+        const rentStyle = rentButton && getComputedStyle(rentButton);
+        const rentVisible = !!(rentButton && rentStyle.display !== 'none' && rentStyle.visibility !== 'hidden' &&
+          rentRect.height > 10 && rentRect.width > 60 && rentRect.bottom > 0 && rentRect.top < innerHeight);
         return {
           injectSrc,
-          ok: Boolean(inViewport && visible && hasHandle && r.height > 10 && r.width > Math.min(300, innerWidth * 0.7)),
+          ok: Boolean(inViewport && visible && hasHandle && rentVisible && r.height > 10 && r.width > Math.min(300, innerWidth * 0.7)),
           reason: '',
           kind: custom ? 'custom' : 'native',
           className: target.className,
           rect: { top: Math.round(r.top), bottom: Math.round(r.bottom), left: Math.round(r.left), width: Math.round(r.width), height: Math.round(r.height) },
           handleText: (target.querySelector('.bj-bar-handle') || target).textContent.trim().replace(/\s+/g, ' ').slice(0, 120),
+          rentText: rentButton ? (rentButton.value || rentButton.textContent || '').trim().replace(/\s+/g, ' ') : '',
         };
       });
 
       const tag = `[${pid}/${vp.name}]`;
       rows.push({ tag, ...result });
-      console.log(`${tag} ${result.ok ? 'OK' : 'FAIL'} ${result.kind || '-'} ${result.handleText || result.reason || ''}`);
+      console.log(`${tag} ${result.ok ? 'OK' : 'FAIL'} ${result.kind || '-'} ${result.rentText || result.handleText || result.reason || ''}`);
       if (!result.injectSrc) fails.push(`${tag} inject.js not loaded`);
       if (!result.ok) {
         fails.push(`${tag} bottom widget not visible (${result.reason || JSON.stringify(result.rect || {})})`);
