@@ -302,6 +302,73 @@ async function testMobileJumpToSubmit(browser) {
   await context.close();
 }
 
+async function testMobileCartCardLayout(browser) {
+  const context = await browser.newContext({
+    baseURL: 'https://billyjo.co.kr',
+    viewport: { width: 390, height: 844 },
+  });
+  const page = await context.newPage();
+  await page.route('https://billyjo.co.kr/html/dh_order/shop_cart', async (route) => {
+    await route.fulfill({
+      contentType: 'text/html',
+      body: `<!doctype html><html><head><meta charset="utf-8"></head><body>
+        <h1>장바구니</h1>
+        <div class="page_desc"><p>렌탈은 구매가 아니므로, 결제 없이 신청으로 접수됩니다.</p></div>
+        <h2>장바구니 담긴 상품 (1)</h2>
+        <table class="order-field cart-list"><tbody>
+          <tr>
+            <td><input type="checkbox" checked idx="557051" mprice="28900" cprice="0" cnt="1" month="84"></td>
+            <td class="thumb size2"><img src="https://billyjo.co.kr/logo.png" alt=""></td>
+            <td class="prod"><p class="name">코웨이 아이콘3 아이콘 정수기 3.0 냉온정수기 (CHP-7220N) 자가관리 (색상 6중 1택)</p><p class="brand">코웨이</p></td>
+            <td class="row month36 month-etc">7년(7년의무)</td>
+            <td>월 28,900 원</td>
+            <td><em class="dh_red">해당없음</em></td>
+            <td>1 개</td>
+          </tr>
+        </tbody></table>
+        <button class="plain btn-border-s">선택상품 삭제</button>
+        <button class="plain btn-border-s">선택상품 견적서출력</button>
+        <button class="plain btn_large c2">선택상품 렌탈</button>
+        <button class="plain btn_large c1">전체상품 렌탈</button>
+      </body></html>`,
+    });
+  });
+  await page.goto('https://billyjo.co.kr/html/dh_order/shop_cart', { waitUntil: 'domcontentloaded' });
+  await page.addScriptTag({ path: injectPath });
+  await page.waitForSelector('.bj-cart-card-row', { timeout: 5000 });
+  await page.waitForFunction(() => document.querySelectorAll('.bj-cart-primary-action').length === 2, null, { timeout: 5000 });
+
+  const layout = await page.evaluate(() => {
+    const row = document.querySelector('.bj-cart-card-row');
+    const term = document.querySelector('.month36');
+    const first = document.querySelector('.bj-cart-primary-action');
+    const second = Array.from(document.querySelectorAll('.bj-cart-primary-action'))[1];
+    const rr = row.getBoundingClientRect();
+    const tr = term.getBoundingClientRect();
+    const fr = first.getBoundingClientRect();
+    const sr = second.getBoundingClientRect();
+    return {
+      rowLeft: rr.left,
+      rowWidth: rr.width,
+      termBefore: getComputedStyle(term, '::before').content,
+      termHeight: tr.height,
+      firstButtonWidth: fr.width,
+      secondButtonWidth: sr.width,
+      firstButtonText: first.textContent.trim(),
+      secondButtonText: second.textContent.trim(),
+    };
+  });
+
+  assert.ok(layout.rowLeft >= 12, 'Mobile cart card should align with page gutters');
+  assert.ok(layout.rowWidth <= 366, 'Mobile cart card should not span edge to edge');
+  assert.strictEqual(layout.termBefore, 'none', 'Native month badge pseudo-element must not overlap the term text');
+  assert.ok(layout.termHeight >= 16, 'Term text should keep a normal readable line box');
+  assert.ok(Math.abs(layout.firstButtonWidth - layout.secondButtonWidth) < 2, 'Primary cart actions should have matching widths');
+  assert.strictEqual(layout.firstButtonText, '선택 제품 견적/신청');
+  assert.strictEqual(layout.secondButtonText, '전체 상품 견적/신청');
+  await context.close();
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
@@ -310,6 +377,7 @@ async function testMobileJumpToSubmit(browser) {
     await testLpDirectOnlySelectedProduct(browser);
     await testLpSelectedProductsUseProductThumbs(browser);
     await testMobileJumpToSubmit(browser);
+    await testMobileCartCardLayout(browser);
   } finally {
     await browser.close();
   }
