@@ -195,13 +195,14 @@ async function testOnQuoteCartFlow(browser) {
   assert.ok(await page.evaluate(() => (window.dataLayer || []).some((e) => e.analytics_event_name === 'direct_offer_open' && e.audience_signal === true && e.event_tier === 'high_intent')), 'Direct offer open should be tracked as a high-intent audience signal');
 
   assert.strictEqual(await page.evaluate(() => window.rentClicked || 0), 0, 'ON should intercept rent click and open popup first');
-  assert.ok((await page.locator('.bj-do-copy').innerText()).includes('3초 견적 시작'), 'CTA should be quote-start oriented');
+  assert.ok((await page.locator('.bj-do-copy').innerText()).includes('지원금 쿠폰 받기'), 'CTA should be coupon-claim oriented');
   assert.strictEqual(await page.locator('.bj-do-badge').count(), 0, 'Direct coupon badge should be removed from modal header');
   assert.ok((await page.locator('#bj-do-total').innerText()).includes('AI 예상 지원금 합계'), 'Total label should keep AI 예상 지원금 합계');
+  assert.ok((await page.locator('#bj-do-total').innerText()).includes('예상 사은품 + 지원금 쿠폰'), 'Total formula should explain gift plus support coupon');
   await page.waitForTimeout(1000);
   const totalText = await page.locator('#bj-do-total').innerText();
   assert.ok(totalText.includes('399,500원') && totalText.includes('470,000원'), 'Displayed total should show 85%~final benefit range');
-  assert.ok(totalText.includes('1주일에 한번! 오늘만') && totalText.includes('30,000p'), 'Displayed total should show the 30,000p coupon banner');
+  assert.ok(totalText.includes('1주일에 한번! 오늘만') && totalText.includes('지원금 쿠폰') && totalText.includes('30,000p'), 'Displayed total should show the 30,000p support coupon banner');
   assert.strictEqual(totalText.includes('이번 주 30,000원 쿠폰은 이미 확인된 조건입니다.'), false, 'Old confirmed-coupon notice should be removed');
   assert.strictEqual(totalText.includes('지원금 합계금은 최종표기금액의 85%'), false, 'Old benefit-range help text should be removed');
   assert.ok(totalText.includes('쿠폰 유효시간'), 'Coupon should show the 30-minute countdown copy');
