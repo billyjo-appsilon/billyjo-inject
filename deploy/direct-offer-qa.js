@@ -197,6 +197,14 @@ async function testOnQuoteCartFlow(browser) {
 
   assert.strictEqual(await page.evaluate(() => window.rentClicked || 0), 0, 'ON should intercept rent click and open popup first');
   assert.ok((await page.locator('.bj-do-copy').innerText()).includes('지원금 쿠폰 받고 신청'), 'CTA should be coupon-claim and application oriented');
+  const ctaVisual = await page.locator('.bj-do-copy').evaluate((el) => {
+    const s = getComputedStyle(el);
+    const before = getComputedStyle(el, '::before');
+    return { background: s.backgroundImage, shadow: s.boxShadow, animation: before.animationName };
+  });
+  assert.ok(ctaVisual.background.includes('linear-gradient'), 'CTA should use a blue gradient instead of a flat fill');
+  assert.ok(ctaVisual.shadow.includes('rgb(0, 29, 153)') || ctaVisual.shadow.includes('rgba(8, 56, 248'), 'CTA should have raised 3D shadow depth');
+  assert.strictEqual(ctaVisual.animation, 'bjDoCtaShine', 'CTA should have a subtle shine animation');
   assert.strictEqual(await page.locator('.bj-do-badge').count(), 0, 'Direct coupon badge should be removed from modal header');
   assert.ok((await page.locator('#bj-do-total').innerText()).includes('AI 예상 지원금 합계'), 'Total label should keep AI 예상 지원금 합계');
   assert.ok((await page.locator('#bj-do-total').innerText()).includes('예상 사은품 + 지원금 쿠폰'), 'Total formula should explain gift plus support coupon');
@@ -289,6 +297,14 @@ async function testMobileJumpToSubmit(browser) {
   await page.click('.bj-btn-rent-gift');
   await page.waitForSelector('#bj-do-box.bj-do-jump-on #bj-do-jump', { timeout: 5000 });
   assert.ok((await page.locator('#bj-do-jump').innerText()).includes('지원금 쿠폰 받고 신청'), 'Mobile jump CTA should use coupon-claim and application copy');
+  const jumpVisual = await page.locator('#bj-do-jump').evaluate((el) => {
+    const s = getComputedStyle(el);
+    const before = getComputedStyle(el, '::before');
+    return { background: s.backgroundImage, shadow: s.boxShadow, animation: before.animationName };
+  });
+  assert.ok(jumpVisual.background.includes('linear-gradient'), 'Mobile jump CTA should use a blue gradient');
+  assert.ok(jumpVisual.shadow.includes('rgb(0, 29, 153)') || jumpVisual.shadow.includes('rgba(8, 56, 248'), 'Mobile jump CTA should have raised 3D shadow depth');
+  assert.strictEqual(jumpVisual.animation, 'bjDoCtaShine', 'Mobile jump CTA should have a subtle shine animation');
 
   await page.click('#bj-do-jump');
   await page.waitForFunction(() => {
