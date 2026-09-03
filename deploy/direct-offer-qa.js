@@ -252,8 +252,18 @@ async function testLpDirectOnlySelectedProduct(browser) {
   const desktopBannerStyle = await page.locator('#bj-do-head').evaluate((el) => getComputedStyle(el).backgroundImage);
   assert.ok(desktopBannerStyle.includes('direct-offer-top-banner-desktop.jpg'), 'Desktop promo headline should use the attached banner image');
   await page.setViewportSize({ width: 390, height: 844 });
-  const mobileBannerStyle = await page.locator('#bj-do-head').evaluate((el) => getComputedStyle(el).backgroundImage);
-  assert.ok(mobileBannerStyle.includes('direct-offer-top-banner-mobile.jpg'), 'Mobile promo headline should use the attached mobile banner image');
+  const mobileBannerStyle = await page.locator('#bj-do-head').evaluate((el) => {
+    const style = getComputedStyle(el);
+    return {
+      image: style.backgroundImage,
+      position: style.backgroundPosition,
+      positionY: style.backgroundPositionY,
+      size: style.backgroundSize,
+    };
+  });
+  assert.ok(mobileBannerStyle.image.includes('direct-offer-top-banner-mobile.jpg'), 'Mobile promo headline should use the attached mobile banner image');
+  assert.ok(mobileBannerStyle.positionY === '0%' || mobileBannerStyle.positionY === '0px', 'Mobile banner should anchor to the top so any crop happens at the bottom');
+  assert.ok(mobileBannerStyle.size === '100%' || mobileBannerStyle.size === '100% auto', 'Mobile banner should size by full width and preserve top content');
   assert.strictEqual((await page.locator('.bj-do-sub').innerText()).trim(), '', 'Header subcopy should be removed');
   assert.ok(await page.locator('.bj-do-card', { hasText: 'AP-3021D' }).count(), 'First LP selected product should be visible');
   assert.ok(await page.locator('.bj-do-card', { hasText: 'BAS51-A' }).count(), 'Second LP selected product should be visible');
