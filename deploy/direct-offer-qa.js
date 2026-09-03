@@ -369,6 +369,72 @@ async function testMobileCartCardLayout(browser) {
   await context.close();
 }
 
+async function testAffiliateCardSelectionModal(browser) {
+  const context = await browser.newContext({
+    baseURL: 'https://billyjo.co.kr',
+    viewport: { width: 390, height: 844 },
+  });
+  const page = await context.newPage();
+  await page.route('https://admin2-api.billyjo.co.kr/v1/quote/calculate', async (route) => {
+    await route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        ok: true,
+        quoteTransactionId: 'BJ-QA-COWAY',
+        expiresAt: '2026-09-03T23:59:00+09:00',
+        gift: { finalAmount: 348000 },
+        customerMemo: '[빌리조 24시간 혜택 보장번호: BJ-QA-COWAY]\n예상 사은품 혜택: 348,000원\n유효기한: 2026-09-03 23:59',
+      }),
+    });
+  });
+  await page.route('https://billyjo.co.kr/html/dh_order/shop_cart', async (route) => {
+    await route.fulfill({
+      contentType: 'text/html',
+      body: `<!doctype html><html><head><meta charset="utf-8"></head><body>
+        <form id="cart-form">
+          <table class="order-field cart-list"><tbody>
+            <tr>
+              <td><input type="checkbox" checked></td>
+              <td class="thumb size2"><img src="https://billyjo.co.kr/logo.png" alt=""></td>
+              <td class="prod">
+                <input name="public_model_no" value="CHP-7220N 셀프 반값할인">
+                <input name="prod_model_no" value="CHP-7220N">
+                <input name="prod_name" value="코웨이 아이콘3 아이콘 3.0 냉온정수기">
+                <input name="sup_name" value="코웨이">
+                <input name="month" value="7년(7년의무)">
+                <input name="price" value="28,900">
+                <p class="name">코웨이 아이콘3 아이콘 3.0 냉온정수기</p>
+                <p class="brand">코웨이</p>
+              </td>
+            </tr>
+          </tbody></table>
+          <button type="submit" class="plain btn_large c2">선택상품 렌탈</button>
+        </form>
+      </body></html>`,
+    });
+  });
+  await page.goto('https://billyjo.co.kr/html/dh_order/shop_cart', { waitUntil: 'domcontentloaded' });
+  await page.addScriptTag({ path: injectPath });
+  await page.click('.bj-cart-primary-action');
+  await page.waitForSelector('#bj-quote-auth-modal .bj-qam-aff-seg', { timeout: 5000 });
+
+  assert.strictEqual(await page.locator('.bj-qam-memo').count(), 0, 'Customer memo template should not be visible in the quote modal');
+  assert.ok(await page.locator('.bj-qam-aff-card', { hasText: '코웨이 신한카드' }).count(), 'Coway affiliate cards should be shown for Coway products');
+  assert.ok((await page.locator('.bj-qam-aff-card', { hasText: '코웨이 신한카드' }).innerText()).includes('전월 30만원 기준 월 24,000원 할인'), 'Cards should show the minimum spend discount first');
+  assert.ok((await page.locator('.bj-qam-aff-thumb img').first().getAttribute('src')).includes('/af_card/'), 'Card thumbnails should use real affiliate card images');
+
+  await page.click('[data-bj-aff-toggle="apply"]');
+  await page.fill('[data-bj-qam-field="giftAccount"]', '신한은행 / 홍길동 / 110-123-456789');
+  await page.selectOption('[data-bj-qam-field="payType"]', '통장 결제');
+  await page.fill('[data-bj-qam-field="payInfo"]', '국민은행 / 홍길동 / 123456-00-123456');
+  await page.click('.bj-qam-go');
+
+  const memo = await page.evaluate(() => sessionStorage.getItem('bj_quote_pending_customer_memo') || '');
+  assert.ok(memo.includes('3. 제휴카드: 코웨이 신한카드 / 전월 30만원 기준 월 24,000원 할인'), 'Selected card should be stored in the internal memo');
+  assert.strictEqual(memo.includes('사용 / 미사용, 신청 카드명'), false, 'Old free-text affiliate-card template should not remain');
+  await context.close();
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
@@ -378,6 +444,7 @@ async function testMobileCartCardLayout(browser) {
     await testLpSelectedProductsUseProductThumbs(browser);
     await testMobileJumpToSubmit(browser);
     await testMobileCartCardLayout(browser);
+    await testAffiliateCardSelectionModal(browser);
   } finally {
     await browser.close();
   }

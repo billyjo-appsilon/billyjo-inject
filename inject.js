@@ -39,19 +39,11 @@
 /* =========================================================================
  * 렌탈신청 최종 접수 화면 보정 (2026-09-02)
  * - 신청서 상단 빨강 테두리를 브랜드 블루로 통일
- * - 고객메모에 사은품 계좌/결제정보 필수 입력 템플릿을 노출하고 미입력 제출 방지
+ * - 고객메모에는 접수 전 단계에서 수집한 구조화 메모만 주입하고 미입력 제출 방지
  * ========================================================================= */
 (function bjRentalOrderFinalStepPatch(){
   var BLUE = '#0838F8';
   var TEMPLATE_MARK = '[추가 필수 입력]';
-  var REQUIRED_TEMPLATE = TEMPLATE_MARK + '\n' +
-    '기존 고객메모의 사은품 고유번호, 금액, 유효기간은 지우지 말고 아래 내용만 추가 입력해주세요.\n' +
-    '1. 사은품 받을 계좌번호: 은행 / 예금주 / 계좌번호\n' +
-    '2. 결제정보:\n' +
-    '   - 통장 결제: 은행 / 예금주 / 계좌번호 (예: 국민은행 / 홍길동 / 123456-00-123456)\n' +
-    '   - 카드 결제: 카드사 / 카드번호 / 유효기간 / 명의자 (예: 현대카드 / 1234-5678-9012-3456 / 12월 29년 / 홍길동)\n' +
-    '3. 제휴카드 사용여부 및 신청 카드: 사용 / 미사용, 신청 카드명\n' +
-    '4. 제휴카드 사용 예정 고객도 접수용 카드정보 또는 결제계좌번호를 함께 입력해주세요.';
 
   function isRentalOrderPage(){
     return /\/html\/dh_order\/rental(?:\/|$)/.test(location.pathname || '');
@@ -69,31 +61,9 @@
     st.textContent = [
       'body.bj-rental-order-page [style*="#ff1818"],body.bj-rental-order-page [style*="#FF1818"],body.bj-rental-order-page [style*="ff1818"],body.bj-rental-order-page [style*="FF1818"]{border-color:' + BLUE + '!important;border-top-color:' + BLUE + '!important;color:' + BLUE + '!important}',
       'body.bj-rental-order-page table,body.bj-rental-order-page .order-field,body.bj-rental-order-page .tbl_order,body.bj-rental-order-page .table_form{border-top-color:' + BLUE + '!important}',
-      'body.bj-rental-order-page .bj-rental-required-memo{margin:8px 0 7px;padding:10px 11px;border:1px solid #cfdcff;border-radius:8px;background:#f5f8ff;color:#17253a;font-size:12px;line-height:1.55;word-break:keep-all}',
-      'body.bj-rental-order-page .bj-rental-required-memo b{display:block;color:' + BLUE + ';font-size:12px;margin-bottom:4px}',
-      'body.bj-rental-order-page .bj-rental-required-memo span{display:block;color:#445064}'
+      'body.bj-rental-order-page .bj-rental-required-memo{display:none!important}'
     ].join('');
     (document.head || document.documentElement).appendChild(st);
-  }
-
-  function addTemplate(area){
-    if (!area) return;
-    var current = area.value || '';
-    if (current.indexOf(TEMPLATE_MARK) >= 0) return;
-    area.value = current.replace(/\s+$/,'') + (current ? '\n\n' : '') + REQUIRED_TEMPLATE;
-    area.dispatchEvent(new Event('input', { bubbles: true }));
-    area.dispatchEvent(new Event('change', { bubbles: true }));
-  }
-
-  function addNotice(area){
-    if (!area || document.getElementById('bj-rental-required-memo')) return;
-    var notice = document.createElement('div');
-    notice.id = 'bj-rental-required-memo';
-    notice.className = 'bj-rental-required-memo';
-    notice.innerHTML =
-      '<b>고객메모 필수 입력</b>' +
-      '<span>기존 고객메모의 사은품 고유번호, 금액, 유효기간은 지우지 말고 사은품 받을 계좌번호(은행, 예금주, 계좌번호), 결제정보, 제휴카드 사용여부 및 신청 카드를 함께 입력해야 접수가 가능합니다. 통장 결제는 통장 정보, 카드 결제는 카드정보를 입력해주세요. 제휴카드 사용 예정 고객도 접수용 카드 또는 결제계좌 정보가 필요합니다.</span>';
-    area.parentNode.insertBefore(notice, area);
   }
 
   function hasUnfilledTemplate(value){
@@ -104,7 +74,7 @@
 
   function hasRequiredPaymentInfo(value){
     return /사은품/.test(value) && /계좌번호/.test(value) && /결제정보/.test(value) &&
-      /제휴카드/.test(value) && /(사용|미사용)/.test(value) && /(통장|자동이체|카드)/.test(value) &&
+      /제휴카드/.test(value) && /(선택 안 함|전월|기준|카드)/.test(value) && /(통장|자동이체|카드)/.test(value) &&
       !hasUnfilledTemplate(value);
   }
 
@@ -117,7 +87,7 @@
       var value = area.value || '';
       if (hasRequiredPaymentInfo(value)) return;
       e.preventDefault();
-      alert('고객메모에 사은품 받을 계좌번호, 결제정보, 제휴카드 사용여부 및 신청 카드를 입력해야 접수가 가능합니다.');
+      alert('사은품 받을 계좌번호, 결제정보, 제휴카드 선택값을 먼저 입력해야 접수가 가능합니다.');
       area.focus();
     }, true);
   }
@@ -127,8 +97,6 @@
     document.body.classList.add('bj-rental-order-page');
     addStyle();
     var area = memoArea();
-    addNotice(area);
-    addTemplate(area);
     bindSubmitValidation(area);
   }
 
@@ -163,6 +131,56 @@
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
+  }
+  var LAST_QUOTE_ITEMS = [];
+  var AFFILIATE_CARD_CATALOG = {
+    coway: {
+      brandRe: /코웨이|coway/i,
+      title: '코웨이 제휴카드',
+      cards: [
+        { name: '코웨이 신한카드', image: 'https://rentalshop.site/_data/file/af_card/182b6d07e327ec4ea6802affe30a3390.png', minSpend: '30만원', minDiscount: '24,000원', maxDiscount: '30,000원', note: '기본 13,000원 + 추가 11,000원' },
+        { name: '코웨이 NH올원카드', image: 'https://rentalshop.site/_data/file/af_card/dc60c7b908a08596fc392301e2e5a3cd.png', minSpend: '30만원', minDiscount: '20,000원', maxDiscount: '40,000원', note: '기본 10,000원 + 추가 10,000원' },
+        { name: '코웨이 ICON 우리카드', image: 'https://rentalshop.site/_data/file/af_card/4f0d0ddb454c7ae87ef3d173f854d53a.png', minSpend: '30만원', minDiscount: '24,000원', maxDiscount: '30,000원', note: '프로모션 포함 청구할인' },
+        { name: '코웨이 하나카드', image: 'https://rentalshop.site/_data/file/af_card/879840a1c011246281d7a7aad49619c7.png', minSpend: '30만원', minDiscount: '13,000원', maxDiscount: '25,000원', note: '카드 청구할인 기준' },
+        { name: '코웨이 IBK카드', image: 'https://rentalshop.site/_data/file/af_card/f0c59a6e6fd053d798b0b80d51644f99.png', minSpend: '30만원', minDiscount: '13,000원', maxDiscount: '23,000원', note: '카드 청구할인 기준' },
+        { name: '코웨이 삼성카드', image: 'https://rentalshop.site/_data/file/af_card/644f9c4e000457cfb1b4c5ed8c05e251.png', minSpend: '30만원', minDiscount: '22,000원', maxDiscount: '26,000원', note: '프로모션 신규발급 기준' },
+        { name: '코웨이 현대카드', image: 'https://rentalshop.site/_data/file/af_card/884b78202eaaea3e63a88849ea6bc7f4.png', minSpend: '40만원', minDiscount: '25,000원', maxDiscount: '30,000원', note: '기본 8,000원 + 추가 17,000원' },
+        { name: '코웨이 KB국민카드2', image: 'https://rentalshop.site/_data/file/af_card/93ed5b48c116687b230ddfa654599ef7.png', minSpend: '40만원', minDiscount: '26,000원', maxDiscount: '30,000원', note: '프로모션 신규발급 기준' }
+      ]
+    }
+  };
+  function quoteAffiliateSeed(result){
+    var parts = [];
+    try {
+      (LAST_QUOTE_ITEMS || []).forEach(function(item){
+        parts.push(item.supplier, item.productName, item.model);
+      });
+    } catch(_) {}
+    try {
+      var rawDirect = sessionStorage.getItem(DIRECT_COUPON_KEY);
+      var ctx = rawDirect ? JSON.parse(rawDirect) : null;
+      (ctx && ctx.selectedProducts || []).forEach(function(item){
+        parts.push(item.supplier, item.name, item.model);
+      });
+    } catch(_) {}
+    parts.push(result && result.supplier, result && result.productName);
+    return parts.filter(Boolean).join(' ');
+  }
+  function affiliateCardSet(result){
+    var seed = quoteAffiliateSeed(result);
+    var keys = Object.keys(AFFILIATE_CARD_CATALOG);
+    for (var i = 0; i < keys.length; i++) {
+      var set = AFFILIATE_CARD_CATALOG[keys[i]];
+      if (set.brandRe.test(seed)) return set;
+    }
+    return null;
+  }
+  function renderAffiliateCard(card, idx){
+    return '<button type="button" class="bj-qam-aff-card' + (idx === 0 ? ' on' : '') + '" data-bj-aff-card="' + idx + '">' +
+      '<span class="bj-qam-aff-thumb"><img src="' + esc(card.image) + '" alt=""></span>' +
+      '<span class="bj-qam-aff-copy"><strong>' + esc(card.name) + '</strong><em>전월 ' + esc(card.minSpend) + ' 기준 <b>월 ' + esc(card.minDiscount) + ' 할인</b> · 최대 ' + esc(card.maxDiscount) + '</em><i>' + esc(card.note) + '</i></span>' +
+      '<span class="bj-qam-aff-check">✓</span>' +
+    '</button>';
   }
   function openSecretPackage(){
     if (typeof window.bjOpenSecretPackage === 'function') {
@@ -410,6 +428,8 @@
     var old = document.getElementById('bj-quote-auth-modal');
     if (old) old.remove();
     var memo = result.customerMemo || '';
+    var cardSet = affiliateCardSet(result);
+    var affiliateCards = cardSet ? cardSet.cards : [];
     savePendingMemo(memo);
     injectMemo(memo);
     var div = document.createElement('div');
@@ -424,14 +444,22 @@
           '<div><span>예상 사은품 혜택</span><b>' + won(result.gift && result.gift.finalAmount) + '</b></div>' +
           '<div><span>유효기한</span><b>' + (result.expiresAt || '-').replace('T',' ').slice(0,16) + '</b></div>' +
         '</div>' +
-        '<div class="bj-qam-memo">' + esc(memo) + '</div>' +
         '<div class="bj-qam-note">표시된 금액은 고객 혜택 기준입니다. 최종 지급은 설치 완료 및 상품 조건 확인 후 확정됩니다.</div>' +
         '<div class="bj-qam-form" aria-label="신청 접수 필수 정보">' +
           '<div class="bj-qam-form-title">신청 접수에 필요한 정보를 입력해주세요</div>' +
           '<label>사은품 받을 계좌번호<input type="text" class="bj-qam-input" data-bj-qam-field="giftAccount" placeholder="예: 신한은행 / 홍길동 / 110-123-456789"></label>' +
           '<label>결제정보<select class="bj-qam-input" data-bj-qam-field="payType"><option value="">결제 방법 선택</option><option value="통장 결제">통장 결제</option><option value="카드 결제">카드 결제</option></select></label>' +
           '<label>통장/카드 정보<input type="text" class="bj-qam-input" data-bj-qam-field="payInfo" placeholder="통장: 국민은행 / 홍길동 / 123456-00-123456 또는 카드: 현대카드 / 1234-5678-9012-3456 / 12월 29년 / 홍길동"></label>' +
-          '<label>제휴카드 사용여부 및 신청 카드<input type="text" class="bj-qam-input" data-bj-qam-field="affiliateCard" placeholder="예: 사용 / 롯데렌탈 제휴카드 또는 미사용"></label>' +
+          '<label>제휴카드 선택</label>' +
+          '<div class="bj-qam-aff-seg" data-bj-aff-option="none">' +
+            '<button type="button" class="on" data-bj-aff-toggle="none">선택 안 함</button>' +
+            '<button type="button" data-bj-aff-toggle="apply">사용/신청</button>' +
+          '</div>' +
+          '<div class="bj-qam-aff-none">제휴카드 없이 기본 결제정보로 접수됩니다.</div>' +
+          '<div class="bj-qam-aff-list" hidden>' +
+            '<div class="bj-qam-aff-head"><b>' + esc(cardSet && cardSet.title || '제휴카드') + '</b><span>' + (affiliateCards.length ? '실적 낮은 순' : '상담 확인') + '</span></div>' +
+            (affiliateCards.length ? affiliateCards.map(renderAffiliateCard).join('') : '<div class="bj-qam-aff-empty">이 브랜드의 제휴카드 정보는 상담원이 확인 후 안내드립니다.</div>') +
+          '</div>' +
           '<div class="bj-qam-error" role="alert"></div>' +
         '</div>' +
         '<button type="button" class="bj-qam-go">신청 접수하기</button>' +
@@ -448,6 +476,38 @@
     } catch(_) {}
     div.querySelector('.bj-qam-x').onclick = function(){ div.remove(); };
     div.addEventListener('click', function(e){ if (e.target === div) div.remove(); });
+    var affiliateOption = 'none';
+    var selectedAffiliateCard = affiliateCards[0] || null;
+    function syncAffiliateUi(){
+      var seg = div.querySelector('.bj-qam-aff-seg');
+      var noneBox = div.querySelector('.bj-qam-aff-none');
+      var list = div.querySelector('.bj-qam-aff-list');
+      Array.prototype.forEach.call(div.querySelectorAll('[data-bj-aff-toggle]'), function(btn){
+        btn.classList.toggle('on', btn.getAttribute('data-bj-aff-toggle') === affiliateOption);
+      });
+      if (seg) seg.setAttribute('data-bj-aff-option', affiliateOption);
+      if (noneBox) noneBox.hidden = affiliateOption !== 'none';
+      if (list) list.hidden = affiliateOption !== 'apply';
+      Array.prototype.forEach.call(div.querySelectorAll('.bj-qam-aff-card'), function(btn){
+        var idx = Number(btn.getAttribute('data-bj-aff-card') || 0);
+        btn.classList.toggle('on', affiliateCards[idx] === selectedAffiliateCard);
+      });
+    }
+    Array.prototype.forEach.call(div.querySelectorAll('[data-bj-aff-toggle]'), function(btn){
+      btn.addEventListener('click', function(){
+        affiliateOption = btn.getAttribute('data-bj-aff-toggle') || 'none';
+        syncAffiliateUi();
+      });
+    });
+    Array.prototype.forEach.call(div.querySelectorAll('.bj-qam-aff-card'), function(btn){
+      btn.addEventListener('click', function(){
+        var idx = Number(btn.getAttribute('data-bj-aff-card') || 0);
+        if (affiliateCards[idx]) selectedAffiliateCard = affiliateCards[idx];
+        affiliateOption = 'apply';
+        syncAffiliateUi();
+      });
+    });
+    syncAffiliateUi();
     var formStarted = false;
     Array.prototype.forEach.call(div.querySelectorAll('.bj-qam-input'), function(el){
       el.addEventListener('focus', function(){
@@ -467,19 +527,23 @@
       var giftAccount = (div.querySelector('[data-bj-qam-field="giftAccount"]').value || '').replace(/\s+/g, ' ').trim();
       var payType = (div.querySelector('[data-bj-qam-field="payType"]').value || '').trim();
       var payInfo = (div.querySelector('[data-bj-qam-field="payInfo"]').value || '').replace(/\s+/g, ' ').trim();
-      var affiliateCard = (div.querySelector('[data-bj-qam-field="affiliateCard"]').value || '').replace(/\s+/g, ' ').trim();
+      var affiliateCard = affiliateOption === 'apply'
+        ? (selectedAffiliateCard ? (selectedAffiliateCard.name + ' / 전월 ' + selectedAffiliateCard.minSpend + ' 기준 월 ' + selectedAffiliateCard.minDiscount + ' 할인') : '사용/신청 희망 - 상담원 카드 확인 필요')
+        : '선택 안 함';
       var err = div.querySelector('.bj-qam-error');
       try {
         if (typeof window.BillyjoJourneyTrack === 'function') {
           window.BillyjoJourneyTrack('cart_quote_submit_attempt', {
             quote_transaction_id: result.quoteTransactionId || '',
             expected_gift_amount: result.gift && result.gift.finalAmount,
-            payment_type: payType || ''
+            payment_type: payType || '',
+            affiliate_card_option: affiliateOption,
+            affiliate_card_name: selectedAffiliateCard && selectedAffiliateCard.name || ''
           });
         }
       } catch(_) {}
-      if (!giftAccount || !payType || !payInfo || !affiliateCard) {
-        if (err) err.textContent = '사은품 받을 계좌번호, 결제정보, 제휴카드 사용여부 및 신청 카드를 모두 입력해야 접수할 수 있습니다.';
+      if (!giftAccount || !payType || !payInfo || (affiliateOption === 'apply' && affiliateCards.length && !selectedAffiliateCard)) {
+        if (err) err.textContent = '사은품 받을 계좌번호, 결제정보, 제휴카드 선택값을 모두 입력해야 접수할 수 있습니다.';
         var firstEmpty = Array.prototype.find.call(div.querySelectorAll('.bj-qam-input'), function(el){ return !(el.value || '').trim(); });
         if (firstEmpty) firstEmpty.focus();
         try {
@@ -497,8 +561,7 @@
         '기존 고객메모의 사은품 고유번호, 금액, 유효기간은 지우지 말고 아래 내용만 추가 입력해주세요.\n' +
         '1. 사은품 받을 계좌번호: ' + giftAccount + '\n' +
         '2. 결제정보: ' + payType + ' / ' + payInfo + '\n' +
-        '3. 제휴카드 사용여부 및 신청 카드: ' + affiliateCard + '\n' +
-        '4. 제휴카드 사용 예정 고객도 접수용 카드정보 또는 결제계좌번호를 함께 입력해주세요.';
+        '3. 제휴카드: ' + affiliateCard;
       savePendingMemo(finalMemo);
       injectMemo(finalMemo);
       try {
@@ -506,7 +569,9 @@
           window.BillyjoJourneyTrack('cart_quote_form_complete', {
             quote_transaction_id: result.quoteTransactionId || '',
             expected_gift_amount: result.gift && result.gift.finalAmount,
-            payment_type: payType
+            payment_type: payType,
+            affiliate_card_option: affiliateOption,
+            affiliate_card_name: selectedAffiliateCard && selectedAffiliateCard.name || ''
           });
         }
       } catch(_) {}
@@ -551,7 +616,7 @@
       '.bj-qam-code{margin:13px 0;padding:10px 12px;border-radius:10px;background:#f4f7ff;color:#0838f8;font-weight:950;letter-spacing:.02em}' +
       '.bj-qam-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.bj-qam-grid div{border:1px solid #e5ebf5;border-radius:10px;padding:10px}.bj-qam-grid span{display:block;font-size:11px;color:#6b7485;font-weight:800}.bj-qam-grid b{display:block;margin-top:4px;font-size:15px;color:#172033}' +
       '.bj-qam-loading{display:flex;gap:12px;align-items:flex-start;margin:8px 28px 14px 0}.bj-qam-spin{width:24px;height:24px;border-radius:50%;border:3px solid #dbe5ff;border-top-color:#0838f8;flex:0 0 auto;animation:bjQamSpin .72s linear infinite}@keyframes bjQamSpin{to{transform:rotate(360deg)}}' +
-      '.bj-qam-memo{margin-top:12px;border:1px dashed #cdd8ef;border-radius:10px;background:#fbfcff;padding:10px;font-size:12px;line-height:1.5;color:#3c4658;white-space:pre-wrap}.bj-qam-note{margin-top:10px;font-size:11px;line-height:1.45;color:#737d8e}.bj-qam-form{margin-top:12px;padding:12px;border:1px solid #dce5f5;border-radius:12px;background:#f7faff}.bj-qam-form-title{font-size:13px;font-weight:950;color:#172033;margin-bottom:9px}.bj-qam-form label{display:block;margin-top:9px;font-size:11px;font-weight:900;color:#5f6b7c}.bj-qam-input{display:block;width:100%;box-sizing:border-box;margin-top:5px;border:1px solid #d6deeb;border-radius:9px;background:#fff;color:#172033;font-size:12px;line-height:1.35;padding:10px 10px;outline:none}.bj-qam-input:focus{border-color:#0838f8;box-shadow:0 0 0 3px rgba(8,56,248,.08)}.bj-qam-error{min-height:15px;margin-top:8px;color:#e03131;font-size:11px;font-weight:800;line-height:1.35}.bj-qam-go{width:100%;margin-top:14px;border:0;border-radius:11px;background:#0838f8;color:#fff;font-size:14px;font-weight:950;padding:13px;cursor:pointer}';
+      '.bj-qam-memo{display:none}.bj-qam-note{margin-top:10px;font-size:11px;line-height:1.45;color:#737d8e}.bj-qam-form{margin-top:12px;padding:12px;border:1px solid #dce5f5;border-radius:12px;background:#f7faff}.bj-qam-form-title{font-size:13px;font-weight:950;color:#172033;margin-bottom:9px}.bj-qam-form label{display:block;margin-top:9px;font-size:11px;font-weight:900;color:#5f6b7c}.bj-qam-input{display:block;width:100%;box-sizing:border-box;margin-top:5px;border:1px solid #d6deeb;border-radius:9px;background:#fff;color:#172033;font-size:12px;line-height:1.35;padding:10px 10px;outline:none}.bj-qam-input:focus{border-color:#0838f8;box-shadow:0 0 0 3px rgba(8,56,248,.08)}.bj-qam-aff-seg{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:6px}.bj-qam-aff-seg button{min-height:42px;border:1px solid #d6deeb;border-radius:10px;background:#fff;color:#3c4658;font:950 12px/1.2 Pretendard,Arial,sans-serif;letter-spacing:0;cursor:pointer}.bj-qam-aff-seg button.on{border-color:#0838f8;background:#eef3ff;color:#0838f8;box-shadow:0 0 0 3px rgba(8,56,248,.07)}.bj-qam-aff-none{margin-top:10px;padding:10px;border-radius:10px;border:1px solid #e4e9f2;background:#fff;color:#5f6b7c;font-size:11px;line-height:1.45}.bj-qam-aff-list{margin-top:10px;padding-top:10px;border-top:1px dashed #d7deea}.bj-qam-aff-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}.bj-qam-aff-head b{font-size:12px;color:#172033}.bj-qam-aff-head span{flex:0 0 auto;font-size:10px;color:#0838f8;font-weight:900;background:#eef3ff;border-radius:999px;padding:4px 8px}.bj-qam-aff-card{display:grid;grid-template-columns:74px minmax(0,1fr) 22px;gap:10px;align-items:center;width:100%;min-height:80px;margin-top:8px;padding:9px;border:1px solid #dbe3f0;border-radius:12px;background:#fff;text-align:left;cursor:pointer;font-family:Pretendard,Arial,sans-serif}.bj-qam-aff-card.on{border-color:#0838f8;box-shadow:0 0 0 3px rgba(8,56,248,.07)}.bj-qam-aff-thumb{width:74px;height:48px;display:flex;align-items:center;justify-content:center;overflow:hidden;border-radius:9px;background:#f8fafc;box-shadow:0 8px 16px rgba(15,36,72,.12)}.bj-qam-aff-thumb img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}.bj-qam-aff-copy{display:block;min-width:0}.bj-qam-aff-copy strong{display:block;font-size:12px;line-height:1.3;font-weight:950;color:#172033;word-break:keep-all}.bj-qam-aff-copy em{display:block;margin-top:4px;font-style:normal;font-size:11px;line-height:1.35;color:#596579;word-break:keep-all}.bj-qam-aff-copy em b{color:#0838f8;font-weight:950}.bj-qam-aff-copy i{display:block;margin-top:2px;font-style:normal;font-size:10px;line-height:1.3;color:#8a94a6;word-break:keep-all}.bj-qam-aff-check{width:21px;height:21px;border-radius:50%;border:1px solid #cbd5e1;display:grid;place-items:center;color:transparent;font-size:13px;font-weight:950}.bj-qam-aff-card.on .bj-qam-aff-check{border-color:#0838f8;background:#0838f8;color:#fff}.bj-qam-aff-empty{margin-top:8px;padding:10px;border:1px solid #e4e9f2;border-radius:10px;background:#fff;color:#647084;font-size:11px;line-height:1.45}.bj-qam-error{min-height:15px;margin-top:8px;color:#e03131;font-size:11px;font-weight:800;line-height:1.35}.bj-qam-go{width:100%;margin-top:14px;border:0;border-radius:11px;background:#0838f8;color:#fff;font-size:14px;font-weight:950;padding:13px;cursor:pointer}';
     st.textContent +=
       'body.bj-quote-cart-page .cart-list,body.bj-quote-cart-page table.order-field.cart-list,body.bj-quote-cart-page .shop_cart table,body.bj-quote-cart-page .cart_list{border-collapse:separate!important;border-spacing:0 10px!important;border-top:0!important;background:transparent!important}' +
       'body.bj-quote-cart-page .cart-list thead th,body.bj-quote-cart-page table.order-field.cart-list thead th{border-top:0!important;border-bottom:0!important;background:#f3f6fb!important;color:#647084!important;font-weight:900!important}' +
@@ -596,6 +661,7 @@
   }
   function calculateQuote(items, source){
     var directContext = null;
+    LAST_QUOTE_ITEMS = (items || []).slice();
     try {
       var rawDirect = sessionStorage.getItem(DIRECT_COUPON_KEY);
       if (rawDirect) directContext = JSON.parse(rawDirect);
