@@ -21,8 +21,8 @@ function productHtml(prodNo, name, model) {
 </body></html>`;
 }
 
-async function newMockedPage(browser, { enabled }) {
-  const context = await browser.newContext({ baseURL: 'https://billyjo.co.kr' });
+async function newMockedPage(browser, { enabled, viewport }) {
+  const context = await browser.newContext({ baseURL: 'https://billyjo.co.kr', viewport });
   const page = await context.newPage();
   const cartPosts = [];
 
@@ -275,6 +275,33 @@ async function testLpSelectedProductsUseProductThumbs(browser) {
   await context.close();
 }
 
+async function testMobileJumpToSubmit(browser) {
+  const { context, page, cartPosts } = await newMockedPage(browser, {
+    enabled: true,
+    viewport: { width: 390, height: 720 },
+  });
+  await page.goto('https://billyjo.co.kr/html/dh_prod/prod_view/123', { waitUntil: 'domcontentloaded' });
+  await page.addScriptTag({ path: injectPath });
+  await page.waitForSelector('#bj-do-fab', { timeout: 5000 });
+  await page.click('.bj-btn-rent-gift');
+  await page.waitForSelector('#bj-do-box.bj-do-jump-on #bj-do-jump', { timeout: 5000 });
+
+  await page.click('#bj-do-jump');
+  await page.waitForFunction(() => {
+    const scroller = document.querySelector('#bj-do-body');
+    const cta = document.querySelector('.bj-do-copy');
+    if (!scroller || !cta) return false;
+    const sr = scroller.getBoundingClientRect();
+    const cr = cta.getBoundingClientRect();
+    return cr.top < sr.bottom - 18 && cr.bottom > sr.top + 18;
+  }, null, { timeout: 3000 });
+
+  assert.strictEqual(await page.locator('#bj-do-box.bj-do-jump-on').count(), 0, 'Jump button should hide once the original CTA is visible');
+  assert.strictEqual(page.url().endsWith('/html/dh_order/shop_cart'), false, 'Jump button should reveal the CTA, not submit automatically');
+  assert.strictEqual(cartPosts.length, 0, 'Jump button should not add products to cart by itself');
+  await context.close();
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
@@ -282,6 +309,7 @@ async function testLpSelectedProductsUseProductThumbs(browser) {
     await testOnQuoteCartFlow(browser);
     await testLpDirectOnlySelectedProduct(browser);
     await testLpSelectedProductsUseProductThumbs(browser);
+    await testMobileJumpToSubmit(browser);
   } finally {
     await browser.close();
   }
