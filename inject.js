@@ -2319,7 +2319,6 @@
         state.active = true;
         state.ready = true;
         mountTopBar();
-        mountFab();
         scheduleActivity(true);
         if (state.opened) {
           var box = document.getElementById('bj-do-box');

@@ -184,7 +184,8 @@ async function testOnQuoteCartFlow(browser) {
   const { context, page, cartPosts } = await newMockedPage(browser, { enabled: true });
   await page.goto('https://billyjo.co.kr/html/dh_prod/prod_view/123', { waitUntil: 'domcontentloaded' });
   await page.addScriptTag({ path: injectPath });
-  await page.waitForSelector('#bj-do-fab', { timeout: 5000 });
+  await page.waitForSelector('#bj-do-topbar', { timeout: 5000 });
+  assert.strictEqual(await page.locator('#bj-do-fab').count(), 0, 'Direct coupon FAB should not mount over the product image');
   const topbarText = await page.locator('#bj-do-topbar').innerText();
   assert.ok(topbarText.includes('지금 이 제품 보는 중'), 'Top social bar should show current viewer count');
   assert.ok(/후기\s*642\s*개/.test(topbarText), 'Top social bar should show current product review count');
@@ -283,7 +284,8 @@ async function testMobileJumpToSubmit(browser) {
   });
   await page.goto('https://billyjo.co.kr/html/dh_prod/prod_view/123', { waitUntil: 'domcontentloaded' });
   await page.addScriptTag({ path: injectPath });
-  await page.waitForSelector('#bj-do-fab', { timeout: 5000 });
+  await page.waitForSelector('#bj-do-topbar', { timeout: 5000 });
+  assert.strictEqual(await page.locator('#bj-do-fab').count(), 0, 'Direct coupon FAB should not mount on mobile');
   await page.click('.bj-btn-rent-gift');
   await page.waitForSelector('#bj-do-box.bj-do-jump-on #bj-do-jump', { timeout: 5000 });
 
