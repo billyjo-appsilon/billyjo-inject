@@ -196,7 +196,7 @@ async function testOnQuoteCartFlow(browser) {
   assert.ok(await page.evaluate(() => (window.dataLayer || []).some((e) => e.analytics_event_name === 'direct_offer_open' && e.audience_signal === true && e.event_tier === 'high_intent')), 'Direct offer open should be tracked as a high-intent audience signal');
 
   assert.strictEqual(await page.evaluate(() => window.rentClicked || 0), 0, 'ON should intercept rent click and open popup first');
-  assert.ok((await page.locator('.bj-do-copy').innerText()).includes('지원금 쿠폰 받기'), 'CTA should be coupon-claim oriented');
+  assert.ok((await page.locator('.bj-do-copy').innerText()).includes('지원금 쿠폰 받고 신청'), 'CTA should be coupon-claim and application oriented');
   assert.strictEqual(await page.locator('.bj-do-badge').count(), 0, 'Direct coupon badge should be removed from modal header');
   assert.ok((await page.locator('#bj-do-total').innerText()).includes('AI 예상 지원금 합계'), 'Total label should keep AI 예상 지원금 합계');
   assert.ok((await page.locator('#bj-do-total').innerText()).includes('예상 사은품 + 지원금 쿠폰'), 'Total formula should explain gift plus support coupon');
@@ -288,6 +288,7 @@ async function testMobileJumpToSubmit(browser) {
   assert.strictEqual(await page.locator('#bj-do-fab').count(), 0, 'Direct coupon FAB should not mount on mobile');
   await page.click('.bj-btn-rent-gift');
   await page.waitForSelector('#bj-do-box.bj-do-jump-on #bj-do-jump', { timeout: 5000 });
+  assert.ok((await page.locator('#bj-do-jump').innerText()).includes('지원금 쿠폰 받고 신청'), 'Mobile jump CTA should use coupon-claim and application copy');
 
   await page.click('#bj-do-jump');
   await page.waitForFunction(() => {
