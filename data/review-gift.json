@@ -1,24 +1,24 @@
 {
- "generated_at": "2026-07-31T08:47:45+00:00",
- "month": "2026-07-01",
+ "generated_at": "2026-09-07T19:23:02+00:00",
+ "month": "2026-09-01",
  "rate": 0.8,
  "note": "수수료×0.8 을 10만원 단위로 절하한 '예상 지원금'. 후기 작성자가 받은 금액이 아니다.",
  "tiers": {
   "CHP-7220N": 30,
-  "CHPI-7430N": 40
+  "CHPI-7430N": 30
  },
  "detail": {
   "CHP-7220N": {
    "tier": 30,
    "company": "코웨이",
-   "incentive": 428000,
-   "gift": 342400
+   "incentive": 491000,
+   "gift": 392800
   },
   "CHPI-7430N": {
-   "tier": 40,
+   "tier": 30,
    "company": "코웨이",
-   "incentive": 511000,
-   "gift": 408800
+   "incentive": 453000,
+   "gift": 362400
   }
  }
 }
