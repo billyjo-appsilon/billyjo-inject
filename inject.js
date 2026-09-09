@@ -14457,3 +14457,86 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     }, 500);
   });
 })();
+
+/* =========================================================================
+ * [모듈] 간편 실시간 문의 → admin2 직결 (bjQnaBridge, 2026-09-09)
+ *   /html/dh/counsel 의 문의 폼(action=/html/dh_board/write/qna, iframe 제출)을 가로채
+ *   admin1(비즈케어) 전송은 그대로 두고 admin2(/v1/consult/inquiry)에도 동시에 보낸다.
+ *   → 상부점 동기화(2~10분)를 기다리지 않고 즉시 상담카드 + 담당 상담사 알림 + 접수 안내 문자.
+ *   사이트 검증(checkForm + 스팸문자)이 통과한 뒤에만 실제 submit 이 일어나므로, submit 시점에 읽는다.
+ *   jQuery `$("#frm").submit()` 은 네이티브 submit 이벤트를 안 태우고 form.submit() 을 직접 부르므로
+ *   두 경로(이벤트 + form.submit 오버라이드)를 모두 잡고 60초 내 같은 내용은 한 번만 보낸다.
+ * ========================================================================= */
+(function bjQnaBridge() {
+  if (window.__bjQnaBridgeInit) return;
+  window.__bjQnaBridgeInit = true;
+  var API = window.__bjConsultApiUrl || 'https://admin2-api.billyjo.co.kr';
+  var lastKey = '', lastAt = 0;
+
+  function val(form, sel) { var el = form.querySelector(sel); return el ? String(el.value || '').trim() : ''; }
+  function selText(form, sel) {
+    var el = form.querySelector(sel);
+    if (!el || !el.options) return '';
+    var o = el.options[el.selectedIndex];
+    return (o && o.value) ? String(o.text || '').trim() : '';
+  }
+  function read(form) {
+    var agreeEl = form.querySelector('[name="agree"]');
+    return {
+      customerName: val(form, '[name="name"]'),
+      customerPhone: val(form, '[name="data1"]'),
+      question: val(form, '[name="tx_content"]'),
+      category1: selText(form, '[name="cate_no1"]'),
+      category2: selText(form, '[name="cate_no2"]'),
+      agree: agreeEl ? !!agreeEl.checked : true,
+      pageUrl: location.href,
+      referrerUrl: document.referrer || '',
+      submittedAt: new Date().toISOString()
+    };
+  }
+  function send(form) {
+    var p;
+    try { p = read(form); } catch (e) { return; }
+    if (!p.customerPhone || !p.question) return;
+    var key = p.customerPhone + '|' + p.question;
+    if (key === lastKey && Date.now() - lastAt < 60000) return;
+    lastKey = key; lastAt = Date.now();
+    try {
+      fetch(API + '/v1/consult/inquiry', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify(p),
+        keepalive: true
+      }).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+        var data = d && d.data ? d.data : null;
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
+          event: 'bj_quick_inquiry_submitted',
+          canonical_event: 'quick_inquiry_submitted',
+          request_id: data && data.requestId ? String(data.requestId) : '',
+          inquiry_status: data && data.status ? data.status : 'unknown'
+        });
+      }).catch(function () {});
+    } catch (e) {}
+  }
+  function hook(form) {
+    if (form.__bjQnaHooked) return;
+    form.__bjQnaHooked = true;
+    form.addEventListener('submit', function () { send(form); }, true);
+    var nativeSubmit = form.submit;
+    if (typeof nativeSubmit === 'function') {
+      form.submit = function () {
+        try { send(form); } catch (e) {}
+        return nativeSubmit.apply(form, arguments);
+      };
+    }
+  }
+  function init() {
+    var forms = document.querySelectorAll('form[action*="dh_board/write/qna"]');
+    for (var i = 0; i < forms.length; i++) hook(forms[i]);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+  try {
+    new MutationObserver(function () { init(); }).observe(document.documentElement, { childList: true, subtree: true });
+  } catch (e) {}
+})();

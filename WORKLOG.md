@@ -1609,3 +1609,12 @@ prod_no 33,807). 이 인덱스는 추천 후보 풀이자 admin2 `catalog_produc
 
 **검증**: 22064 세스코 — 인덱스 43,900 / 스윕 41,900 → **프로덕션 추천 응답 41,900**.
 가격 수집 3,417건, `catalogEvaluated` 4,046 유지.
+
+## 2026-09-09 간편 실시간 문의 → admin2 직결 (bjQnaBridge)
+
+`/html/dh/counsel` 문의 폼(action=/html/dh_board/write/qna, iframe 제출)을 가로채 admin1 전송과
+동시에 `POST admin2-api/v1/consult/inquiry` 로 보낸다. 상부점 동기화(주간 2분·야간 10분)를 기다리지
+않고 즉시 상담카드 생성/기존 고객 추가문의 + 담당 상담사 웍스 알림 + 고객 접수 안내 문자(문자 공급사
+설정 시). 같은 문의가 상부점 동기화로 다시 들어오면 서버가 텍스트·시각(48h)으로 중복 처리한다.
+jQuery `.submit()` 은 네이티브 submit 이벤트를 안 내므로 form.submit 오버라이드 + submit 이벤트 둘 다 잡고
+60초 내 동일 내용은 1회만 전송. 홈의 "간편 실시간 문의" 팝업(.call_popup_wrap)은 name 없는 정적 목업이라 대상 아님.
