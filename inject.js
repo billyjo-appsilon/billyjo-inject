@@ -14540,3 +14540,43 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     new MutationObserver(function () { init(); }).observe(document.documentElement, { childList: true, subtree: true });
   } catch (e) {}
 })();
+
+/* =========================================================================
+ * [모듈] 개인정보처리방침 담당자 정보 보완 (2026-09-09)
+ *   rental-shop 원본 정책의 빈 담당부서/책임자/연락처/이메일 행을 빌리조의
+ *   실제 개인정보보호 담당 정보로 채운다. 다른 페이지와 다른 ml30 문단은 건드리지 않는다.
+ * ========================================================================= */
+(function billyjoPrivacyOfficerInfo() {
+  if (!/\/html\/dh\/privacy_policy\/?$/.test(location.pathname || '')) return;
+
+  function apply() {
+    var headings = document.querySelectorAll('h4');
+    var heading = null;
+    for (var i = 0; i < headings.length; i++) {
+      if ((headings[i].textContent || '').trim() === '6. 개인정보책임자') {
+        heading = headings[i];
+        break;
+      }
+    }
+    if (!heading) return;
+
+    var rows = [];
+    var node = heading.nextElementSibling;
+    while (node && node.tagName !== 'H4') {
+      if (node.matches && node.matches('p.ml30')) rows.push(node);
+      node = node.nextElementSibling;
+    }
+    if (rows.length < 7) return;
+
+    rows[0].textContent = '- 담당부서 : 운영관리팀';
+    rows[1].textContent = '- 책임자 : 안태훈';
+    rows[2].innerHTML = '- 연락처 : <a href="tel:070-4918-7683">070-4918-7683</a>';
+    rows[3].innerHTML = '- 이메일 : <a href="mailto:thahn@billyjo.co.kr">thahn@billyjo.co.kr</a>';
+    rows[4].textContent = '- 담당자 : 안태훈';
+    rows[5].innerHTML = '- 연락처 : <a href="tel:070-4918-7683">070-4918-7683</a>';
+    rows[6].innerHTML = '- 이메일 : <a href="mailto:thahn@billyjo.co.kr">thahn@billyjo.co.kr</a>';
+  }
+
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
+  else apply();
+})();
