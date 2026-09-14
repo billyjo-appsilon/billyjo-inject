@@ -2586,6 +2586,59 @@
     }
   })();
 
+  // === 자동차 리스/렌탈은 전용 사이트를 새 창으로 연다 (2026-09-14) ===
+  // 원본 쇼핑몰이 PC GNB·카테고리 바·모바일 aside를 서로 다른 href로 만들기 때문에
+  // 표시 문구와 기존 자동차 카테고리 경로를 함께 확인해 같은 목적지로 정규화한다.
+  (function linkCarRentalSite() {
+    if (window.__bjCarRentalLink) return;
+    window.__bjCarRentalLink = true;
+    var CAR_URL = 'https://car.billyjo.co.kr/';
+
+    function isCarCategoryLink(a) {
+      if (!a || a.tagName !== 'A') return false;
+      var label = (a.textContent || '').replace(/\s+/g, '');
+      var href = a.getAttribute('href') || '';
+      return /^자동차(?:리스\/?렌탈|렌탈)$/.test(label)
+        && (/\/html\/dh_prod\/prod_list\/7-591(?:[/?#]|$)/.test(href)
+          || /^javascript:\s*$/.test(href)
+          || (!href && a.id === '7'));
+    }
+
+    function apply(root) {
+      var scope = root && root.querySelectorAll ? root : document;
+      Array.prototype.forEach.call(scope.querySelectorAll('a'), function(a) {
+        if (!isCarCategoryLink(a)) return;
+        a.href = CAR_URL;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.setAttribute('data-bj-car-rental-link', '1');
+      });
+    }
+
+    document.addEventListener('click', function(e) {
+      var a = e.target && e.target.closest && e.target.closest('a[data-bj-car-rental-link="1"]');
+      if (!a) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var opened = window.open(CAR_URL, '_blank', 'noopener,noreferrer');
+      if (opened) opened.opener = null;
+    }, true);
+
+    function run() { try { apply(document); } catch (_) {} }
+    run();
+    document.addEventListener('DOMContentLoaded', run);
+    [300, 900, 1800, 3500].forEach(function(delay) { setTimeout(run, delay); });
+    if (window.MutationObserver) {
+      try {
+        new MutationObserver(function(mutations) {
+          for (var i = 0; i < mutations.length; i++) {
+            if (mutations[i].addedNodes && mutations[i].addedNodes.length) { run(); break; }
+          }
+        }).observe(document.documentElement, { childList: true, subtree: true });
+      } catch (_) {}
+    }
+  })();
+
   // === 홈 히어로 하단 렌트리형 카테고리 버튼 (2026-08-11) ===
   // 카드, 아이콘 이미지 면, 텍스트 영역의 배경을 같은 색으로 고정해 하나의 버튼처럼 보이게 한다.
   (function injectHomeCategoryQuickLinks() {
