@@ -2594,6 +2594,17 @@
     window.__bjCarRentalLink = true;
     var CAR_URL = 'https://car.billyjo.co.kr/';
 
+    function ensureStyle() {
+      if (document.getElementById('bj-car-rental-direct-style')) return;
+      var style = document.createElement('style');
+      style.id = 'bj-car-rental-direct-style';
+      style.textContent = [
+        'li.bj-car-rental-direct > .menu__gsnb,',
+        'li.bj-car-rental-direct > .aside_sub { display:none!important; }'
+      ].join('\n');
+      (document.head || document.documentElement).appendChild(style);
+    }
+
     function isCarCategoryLink(a) {
       if (!a || a.tagName !== 'A') return false;
       var label = (a.textContent || '').replace(/\s+/g, '');
@@ -2605,13 +2616,26 @@
     }
 
     function apply(root) {
+      ensureStyle();
       var scope = root && root.querySelectorAll ? root : document;
       Array.prototype.forEach.call(scope.querySelectorAll('a'), function(a) {
         if (!isCarCategoryLink(a)) return;
         a.href = CAR_URL;
         a.target = '_blank';
         a.rel = 'noopener noreferrer';
+        a.removeAttribute('aria-expanded');
+        a.removeAttribute('aria-haspopup');
         a.setAttribute('data-bj-car-rental-link', '1');
+        var parent = a.parentElement;
+        if (parent && parent.tagName === 'LI') {
+          parent.classList.add('bj-car-rental-direct');
+          Array.prototype.forEach.call(parent.children, function(child) {
+            if (child.classList && (child.classList.contains('menu__gsnb') || child.classList.contains('aside_sub'))) {
+              child.style.setProperty('display', 'none', 'important');
+              child.setAttribute('aria-hidden', 'true');
+            }
+          });
+        }
       });
     }
 
