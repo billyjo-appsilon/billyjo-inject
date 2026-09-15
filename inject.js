@@ -2385,6 +2385,30 @@
 })();
 
 /* =========================================================================
+ * [홈 PC 상품 그리드] 가변 높이 카드의 float 계단식 밀림 방지 (2026-09-15)
+ *
+ * 네이티브 홈 상품 묶음은 4열 float 레이아웃이다. 카드별 가격/혜택 줄 수가 달라지면
+ * 다음 카드가 앞 카드의 float 아래로 밀리며 큰 빈칸이 생긴다. 홈 PC에서만 명시적인
+ * 4열 Grid로 전환해 각 상품이 DOM 순서대로 정확히 4개씩 배치되게 한다.
+ * 상품목록 페이지와 모바일 네이티브 레이아웃은 그대로 둔다.
+ * ========================================================================= */
+(function bjFixHomeDesktopProductGrid() {
+  var pathname = (location.pathname || '/').replace(/\/+$/, '') || '/';
+  if (pathname !== '/') return;
+
+  document.documentElement.classList.add('bj-home-product-grid');
+  var style = document.createElement('style');
+  style.id = 'bj-home-product-grid-style';
+  style.textContent = [
+    '@media(min-width:769px){',
+    'html.bj-home-product-grid .prodList_wrap .prod_scroll .pc_prod_list{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;column-gap:0!important;row-gap:28px!important;height:auto!important}',
+    'html.bj-home-product-grid .prodList_wrap .prod_scroll .pc_prod_list>.item{float:none!important;width:auto!important;height:auto!important;margin:0!important}',
+    '}'
+  ].join('');
+  (document.head || document.documentElement).appendChild(style);
+})();
+
+/* =========================================================================
  * [모듈 A] skin-css/inject.js — 빌리조 사이트 전역 패치
  * ========================================================================= */
 // BillyJo Inject - Auto-generated from logscript
