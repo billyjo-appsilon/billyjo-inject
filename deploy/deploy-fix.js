@@ -28,7 +28,15 @@ if (!ADMIN_USER || !ADMIN_PASS) {
     return prefix + content;
   }
 
-  const logscript = ensureRequiredSnippets(fs.readFileSync('current-logscript.html', 'utf8'));
+  const requestedInjectHash = (process.env.BILLYJO_INJECT_HASH || '').trim();
+  if (requestedInjectHash && !/^[0-9a-f]{7,40}$/i.test(requestedInjectHash)) {
+    throw new Error('BILLYJO_INJECT_HASH must be a 7-40 character git hash');
+  }
+  let logscript = ensureRequiredSnippets(fs.readFileSync('current-logscript.html', 'utf8'));
+  if (requestedInjectHash) {
+    logscript = logscript.replace(/billyjo-inject@[0-9a-f]{7,40}\/inject\.js/gi,
+      'billyjo-inject@' + requestedInjectHash + '/inject.js');
+  }
   console.log('Local file size:', logscript.length);
 
   // Login
@@ -94,6 +102,7 @@ if (!ADMIN_USER || !ADMIN_PASS) {
       has49d: ta.value.includes('49d134'),
       hasGtm: ta.value.includes('GTM-W32HD9CG') || ta.value.includes('googletagmanager.com/gtm.js'),
       hasFacebookDomainVerificationInLogscript: ta.value.includes('facebook-domain-verification') || ta.value.includes('b92rqd32dcxyj4vka8dyrxnw7s7glc'),
+      injectHashes: Array.from(ta.value.matchAll(/billyjo-inject@([0-9a-f]{7,40})\/inject\.js/gi)).map(function (m) { return m[1]; }),
       webmasterName: document.querySelector('input[name="google_webmaster_name"]')?.value,
       webmasterContent: document.querySelector('input[name="google_webmaster"]')?.value
     };
