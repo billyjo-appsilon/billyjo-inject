@@ -2610,7 +2610,7 @@
     }
   })();
 
-  // === 자동차 리스/렌탈은 전용 사이트를 새 창으로 연다 (2026-09-14) ===
+  // === 자동차 장기렌트는 전용 사이트를 새 창으로 연다 (2026-09-14) ===
   // 원본 쇼핑몰이 PC GNB·카테고리 바·모바일 aside를 서로 다른 href로 만들기 때문에
   // 표시 문구와 기존 자동차 카테고리 경로를 함께 확인해 같은 목적지로 정규화한다.
   (function linkCarRentalSite() {
@@ -2633,7 +2633,7 @@
       if (!a || a.tagName !== 'A') return false;
       var label = (a.textContent || '').replace(/\s+/g, '');
       var href = a.getAttribute('href') || '';
-      return /^자동차(?:리스\/?렌탈|렌탈)$/.test(label)
+      return /^자동차(?:리스\/?렌탈|렌탈|장기렌트)$/.test(label)
         && (/\/html\/dh_prod\/prod_list\/7-591(?:[/?#]|$)/.test(href)
           || /^javascript:\s*$/.test(href)
           || (!href && a.id === '7'));
@@ -2644,6 +2644,8 @@
       var scope = root && root.querySelectorAll ? root : document;
       Array.prototype.forEach.call(scope.querySelectorAll('a'), function(a) {
         if (!isCarCategoryLink(a)) return;
+        a.textContent = '자동차 장기렌트';
+        a.setAttribute('aria-label', '자동차 장기렌트');
         a.href = CAR_URL;
         a.target = '_blank';
         a.rel = 'noopener noreferrer';
