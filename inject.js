@@ -839,7 +839,23 @@
   function isAudienceSignal(eventName){
     return /^(persona_complete|quote_view|product_pick|coupon_issued|quote_call_click|consult_scheduled|direct_offer_|cart_quote_form_complete|cart_quote_submit_attempt)/.test(eventName);
   }
+  var SUPPRESSED_LEAD_FUNNEL_EVENTS = {
+    lead_start: true,
+    form_start: true,
+    phone_submit: true,
+    lead_submit_attempt: true,
+    lead_submit_error: true,
+    lead_submit_success: true,
+    lead_step1_done: true,
+    lead_first_submit_success: true,
+    lead_first_skipped: true,
+    persona_start: true,
+    persona_complete: true,
+    persona_bonus_start: true,
+    persona_bonus_skipped: true
+  };
   function track(eventName, extra){
+    if (SUPPRESSED_LEAD_FUNNEL_EVENTS[eventName]) return false;
     try {
       var currentIds = clickIdsFromUrl(location.href);
       var latestIds = clickIdsFromUrl(latestAdClickUrl());
@@ -10242,10 +10258,30 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     });
     return payload;
   }
+  var BJ_SUPPRESSED_LEAD_FUNNEL_EVENTS = {
+    lead_start: true,
+    form_start: true,
+    phone_submit: true,
+    lead_submit_attempt: true,
+    lead_submit_error: true,
+    lead_submit_success: true,
+    lead_step1_done: true,
+    lead_first_submit_success: true,
+    lead_first_skipped: true,
+    persona_start: true,
+    persona_complete: true,
+    persona_bonus_start: true,
+    persona_bonus_skipped: true
+  };
   function bjTrackJourney(eventName, extra){
+    if (BJ_SUPPRESSED_LEAD_FUNNEL_EVENTS[eventName]) return false;
     try {
+      var payload = bjAnalyticsPayload(eventName, extra || {});
       window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push(bjAnalyticsPayload(eventName, extra || {}));
+      window.dataLayer.push(payload);
+      if (eventName === 'persona_bonus_completed' && typeof window.gtag === 'function') {
+        window.gtag('event', 'persona_bonus_completed', payload);
+      }
     } catch(_){}
   }
   window.BillyjoJourneyTrack = window.BillyjoJourneyTrack || bjTrackJourney;

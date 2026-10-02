@@ -19,5 +19,13 @@ assert.equal(
   2,
   'both deleted/test branches must be auditable'
 );
+assert.ok(
+  (source.match(/SUPPRESSED_LEAD_FUNNEL_EVENTS/g) || []).length >= 4,
+  'all injected tracking paths must share an intermediate lead-event suppression policy'
+);
+assert.ok(
+  source.includes("eventName === 'persona_bonus_completed' && typeof window.gtag === 'function'"),
+  'the completed second step must still reach GA4'
+);
 
 console.log('BillyJo lead conversion guard checks passed');
