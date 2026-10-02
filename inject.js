@@ -884,6 +884,9 @@
       });
       window.dataLayer = window.dataLayer || [];
       window.dataLayer.push(payload);
+      if (eventName === 'persona_bonus_completed' && typeof window.gtag === 'function') {
+        window.gtag('event', 'persona_bonus_completed', payload);
+      }
     } catch(_){}
   }
   window.BillyjoJourneyTrack = track;
