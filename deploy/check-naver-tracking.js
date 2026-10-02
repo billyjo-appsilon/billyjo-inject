@@ -44,12 +44,22 @@ function runtime(hostname, pathname = '/') {
 }
 
 (async () => {
+  for (const host of [
+    'billyjo.co.kr',
+    'live1.billyjo.co.kr',
+    'live.billyjo.co.kr',
+    'meta.billyjo.co.kr'
+  ]) {
+    const allowed = runtime(host);
+    assert.equal(allowed.appended[0].src, 'https://wcs.naver.net/wcslog.js', `${host}: must load Naver script`);
+    allowed.load();
+    assert.equal(allowed.window.wcs_add.wa, 's_265c8d8df91c');
+    assert.deepEqual(allowed.calls.inflow, [host]);
+    assert.equal(allowed.calls.pageView, 1);
+  }
+
   const app = runtime('billyjo.co.kr');
-  assert.equal(app.appended[0].src, 'https://wcs.naver.net/wcslog.js');
   app.load();
-  assert.equal(app.window.wcs_add.wa, 's_265c8d8df91c');
-  assert.deepEqual(app.calls.inflow, ['billyjo.co.kr']);
-  assert.equal(app.calls.pageView, 1);
 
   await app.window.fetch('https://admin2-api.billyjo.co.kr/v1/consult/quick-assign', {
     method: 'POST',
@@ -92,6 +102,8 @@ function runtime(hostname, pathname = '/') {
     ['car.billyjo.co.kr', '/'],
     ['billyjo.co.kr', '/car'],
     ['billyjo.co.kr', '/car/estimate'],
+    ['cars.billyjo.co.kr', '/'],
+    ['landing.billyjo.co.kr', '/'],
     ['www.billyjo.co.kr', '/']
   ]) {
     const excluded = runtime(host, path);
@@ -99,7 +111,7 @@ function runtime(hostname, pathname = '/') {
     assert.equal(excluded.window.fetch.name, 'fetch', `${host}${path}: fetch must not be wrapped`);
   }
 
-  console.log('Naver main-site tracking checks passed');
+  console.log('Naver general-landing boundary checks passed');
 })().catch((error) => {
   console.error(error);
   process.exit(1);
