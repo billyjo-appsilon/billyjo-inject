@@ -1,8 +1,9 @@
-/* Naver SA/GFA conversion tracking for the BillyJo appliance site.
+/* Naver SA/GFA conversion tracking for BillyJo appliance/general landings.
  * Common key: s_265c8d8df91c
  *
- * The car service is a separate analytics property. This file exits before
- * loading wcslog.js on car.billyjo.co.kr and on billyjo.co.kr/car.
+ * The car service is a separate analytics property. This file only enables
+ * the general-appliance hosts and exits before loading wcslog.js on
+ * car.billyjo.co.kr and on billyjo.co.kr/car.
  */
 (function billyjoNaverTracking(w, d) {
   'use strict';
@@ -11,7 +12,14 @@
   var SCRIPT_SRC = 'https://wcs.naver.net/wcslog.js';
   var host = String(w.location && w.location.hostname || '').toLowerCase();
   var path = String(w.location && w.location.pathname || '/');
-  var enabled = host === 'billyjo.co.kr' && !/^\/car(?:\/|$)/.test(path);
+  var GENERAL_HOSTS = {
+    'billyjo.co.kr': true,
+    'live1.billyjo.co.kr': true,
+    'live.billyjo.co.kr': true,
+    'meta.billyjo.co.kr': true
+  };
+  var enabled = !!GENERAL_HOSTS[host] &&
+    !(host === 'billyjo.co.kr' && /^\/car(?:\/|$)/.test(path));
   var state = w.__billyjoNaverTracking = w.__billyjoNaverTracking || {
     enabled: enabled,
     ready: false,
