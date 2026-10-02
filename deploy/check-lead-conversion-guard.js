@@ -24,8 +24,8 @@ assert.ok(
   'all injected tracking paths must share an intermediate lead-event suppression policy'
 );
 assert.ok(
-  source.includes("eventName === 'persona_bonus_completed' && typeof window.gtag === 'function'"),
-  'the completed second step must still reach GA4'
+  (source.match(/eventName === 'persona_bonus_completed' && typeof window\.gtag === 'function'/g) || []).length >= 2,
+  'every injected tracking path must send the completed second step to GA4'
 );
 
 console.log('BillyJo lead conversion guard checks passed');
