@@ -8047,28 +8047,32 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         var attr = (payload && payload.attribution) || {};
         var clickIds = attr.clickIds || {};
         var requestId = data && data.requestId;
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-          event: 'bj_admin2_lead_created',
-          canonical_event: 'admin2_lead_created',
-          ga_event_name: 'admin2_lead_created',
-          conversion_audit_event: 'admin2_lead_created',
-          lead_attribution_model: 'last_click_only',
-          lead_id: String(data && (data.requestId || data.code) || '').slice(0, 120),
-          request_id: requestId,
-          event_id: requestId ? ('billyjo_lead_' + requestId) : undefined,
-          conversion_platform: attr.adPlatform || '',
-          ad_platform: attr.adPlatform || '',
-          product_id: payload.productId || '',
-          product_name: payload.productName || '',
-          kmckid: clickIds.kmckid || attr.kmckid || '',
-          kmctc: clickIds.kmctc || attr.kmctc || '',
-          karrot_campaign_id: attr.campaignId || '',
-          karrot_ad_group_id: attr.adsetId || '',
-          karrot_material_id: attr.adId || attr.creativeId || '',
-          karrot_click_id: clickIds.kmckid || attr.kmckid || '',
-          karrot_tracker_id: clickIds.kmctc || attr.kmctc || ''
-        });
+        if (!data || data.status !== 'deleted') {
+          window.dataLayer = window.dataLayer || [];
+          window.dataLayer.push({
+            event: 'bj_admin2_lead_created',
+            canonical_event: 'admin2_lead_created',
+            ga_event_name: 'admin2_lead_created',
+            conversion_audit_event: 'admin2_lead_created',
+            lead_attribution_model: 'last_click_only',
+            lead_id: String(data && (data.requestId || data.code) || '').slice(0, 120),
+            request_id: requestId,
+            event_id: requestId ? ('billyjo_lead_' + requestId) : undefined,
+            conversion_platform: attr.adPlatform || '',
+            ad_platform: attr.adPlatform || '',
+            product_id: payload.productId || '',
+            product_name: payload.productName || '',
+            kmckid: clickIds.kmckid || attr.kmckid || '',
+            kmctc: clickIds.kmctc || attr.kmctc || '',
+            karrot_campaign_id: attr.campaignId || '',
+            karrot_ad_group_id: attr.adsetId || '',
+            karrot_material_id: attr.adId || attr.creativeId || '',
+            karrot_click_id: clickIds.kmckid || attr.kmckid || '',
+            karrot_tracker_id: clickIds.kmctc || attr.kmctc || ''
+          });
+        } else if (window.console) {
+          console.info('[bj-consult] deleted/test lead suppressed from browser conversion events');
+        }
         if (contact.slot || data.status === 'scheduled') {
           buildModal(
             '<div class="bj-reserve-done">' +
@@ -10713,20 +10717,24 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           var attr = (body && body.attribution) || {};
           var clickIds = attr.clickIds || {};
           var requestId = data && data.requestId;
-          _pushLeadDataLayers(_catalogProductFromBody(body), {
-            lead_id: String(data && (data.requestId || data.code) || '').slice(0, 120),
-            request_id: requestId,
-            event_id: requestId ? ('billyjo_lead_' + requestId) : undefined,
-            conversion_platform: attr.adPlatform || '',
-            ad_platform: attr.adPlatform || '',
-            kmckid: clickIds.kmckid || attr.kmckid || '',
-            kmctc: clickIds.kmctc || attr.kmctc || '',
-            karrot_campaign_id: attr.campaignId || '',
-            karrot_ad_group_id: attr.adsetId || '',
-            karrot_material_id: attr.adId || attr.creativeId || '',
-            karrot_click_id: clickIds.kmckid || attr.kmckid || '',
-            karrot_tracker_id: clickIds.kmctc || attr.kmctc || ''
-          });
+          if (!data || data.status !== 'deleted') {
+            _pushLeadDataLayers(_catalogProductFromBody(body), {
+              lead_id: String(data && (data.requestId || data.code) || '').slice(0, 120),
+              request_id: requestId,
+              event_id: requestId ? ('billyjo_lead_' + requestId) : undefined,
+              conversion_platform: attr.adPlatform || '',
+              ad_platform: attr.adPlatform || '',
+              kmckid: clickIds.kmckid || attr.kmckid || '',
+              kmctc: clickIds.kmctc || attr.kmctc || '',
+              karrot_campaign_id: attr.campaignId || '',
+              karrot_ad_group_id: attr.adsetId || '',
+              karrot_material_id: attr.adId || attr.creativeId || '',
+              karrot_click_id: clickIds.kmckid || attr.kmckid || '',
+              karrot_tracker_id: clickIds.kmctc || attr.kmctc || ''
+            });
+          } else if (window.console) {
+            console.info('[bj-consult] deleted/test lead suppressed from browser conversion events');
+          }
           bjTrackJourney('coupon_issued', {
             request_id: requestId,
             event_id: requestId ? ('billyjo_lead_' + requestId) : undefined,
