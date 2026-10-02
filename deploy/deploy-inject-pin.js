@@ -28,6 +28,7 @@ if (!/^[0-9a-f]{7,40}$/i.test(releaseHash)) {
       return field.value;
     });
     const pinsBefore = Array.from(before.matchAll(/billyjo-inject@([0-9a-f]{7,40})\/inject\.js/gi), (m) => m[1]);
+    const naverLoadersBefore = (before.match(/data-bj-naver-loader/g) || []).length;
     if (!pinsBefore.length) throw new Error('inject.js pin not found in current admin logscript');
 
     const after = before.replace(
@@ -58,10 +59,10 @@ if (!/^[0-9a-f]{7,40}$/i.test(releaseHash)) {
         length: value.length
       };
     }, { expected: after, hash: releaseHash });
-    if (!verified.exact || !verified.hasExpectedHash || !verified.hasGtm || verified.naverLoaders !== 1) {
+    if (!verified.exact || !verified.hasExpectedHash || !verified.hasGtm || verified.naverLoaders !== naverLoadersBefore) {
       throw new Error(`Inject pin verification failed: ${JSON.stringify(verified)}`);
     }
-    console.log(JSON.stringify({ pinsBefore, verified }, null, 2));
+    console.log(JSON.stringify({ pinsBefore, naverLoadersBefore, verified }, null, 2));
   } finally {
     await browser.close();
   }
