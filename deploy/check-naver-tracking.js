@@ -8,10 +8,7 @@ function runtime(hostname, pathname = '/') {
   const appended = [];
   const calls = { inflow: [], pageView: 0, conversions: [] };
   const storage = new Map();
-  const response = {
-    ok: true,
-    clone() { return { json: async () => ({ consult: { requestId: 'REQ-77' } }) }; }
-  };
+  let responseSequence = 0;
   const document = {
     head: { appendChild(node) { appended.push(node); } },
     documentElement: { appendChild(node) { appended.push(node); } },
@@ -24,7 +21,14 @@ function runtime(hostname, pathname = '/') {
       getItem(key) { return storage.get(key) || null; },
       setItem(key, value) { storage.set(key, value); }
     },
-    fetch: async () => response
+    fetch: async () => {
+      responseSequence += 1;
+      const requestId = `REQ-${responseSequence}`;
+      return {
+        ok: true,
+        clone() { return { json: async () => ({ consult: { requestId } }) }; }
+      };
+    }
   };
   window.window = window;
   vm.runInContext(source, vm.createContext({ window, document, console, setTimeout, clearTimeout }), {
@@ -66,14 +70,14 @@ function runtime(hostname, pathname = '/') {
     body: JSON.stringify({ phone: '01012345678', name: '실고객' })
   });
   await new Promise((resolve) => setTimeout(resolve, 0));
-  assert.deepEqual(app.calls.conversions, [{ type: 'lead', id: 'REQ-77' }]);
+  assert.deepEqual(app.calls.conversions, [{ type: 'lead', id: 'REQ-1' }]);
 
   await app.window.fetch('https://admin2-api.billyjo.co.kr/v1/consult/quick-assign', {
     method: 'POST',
     body: JSON.stringify({ phone: '01000001234', name: '전환테스트' })
   });
   await new Promise((resolve) => setTimeout(resolve, 0));
-  assert.equal(app.calls.conversions.length, 1, 'test lead must be suppressed');
+  assert.deepEqual(app.calls.conversions[1], { type: 'lead', id: 'REQ-2' });
 
   app.window.BillyjoNaverTrackLead({
     lead_id: 'REQ-OPAQUE',
@@ -82,21 +86,21 @@ function runtime(hostname, pathname = '/') {
     memo: '최신 제품 문의',
     gclid: 'opaque-TEST-token'
   });
-  assert.deepEqual(app.calls.conversions[1], { type: 'lead', id: 'REQ-OPAQUE' });
+  assert.deepEqual(app.calls.conversions[2], { type: 'lead', id: 'REQ-OPAQUE' });
 
   app.window.BillyjoNaverTrackLead({
     lead_id: 'REQ-TEST-DIRECT',
     phone: '01012345670',
     name: 'my-test-user'
   });
-  assert.equal(app.calls.conversions.length, 2, 'direct test payload must be suppressed');
+  assert.deepEqual(app.calls.conversions[3], { type: 'lead', id: 'REQ-TEST-DIRECT' });
 
   app.window.BillyjoNaverTrackLead({
     lead_id: 'REQ-CONTEST',
     phone: '01012345671',
     name: 'contest winner'
   });
-  assert.deepEqual(app.calls.conversions[2], { type: 'lead', id: 'REQ-CONTEST' });
+  assert.deepEqual(app.calls.conversions[4], { type: 'lead', id: 'REQ-CONTEST' });
 
   for (const [host, path] of [
     ['car.billyjo.co.kr', '/'],

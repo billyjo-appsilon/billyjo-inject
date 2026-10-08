@@ -8066,9 +8066,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         var attr = (payload && payload.attribution) || {};
         var clickIds = attr.clickIds || {};
         var requestId = data && data.requestId;
-        if (!data || data.status !== 'deleted') {
-          window.dataLayer = window.dataLayer || [];
-          window.dataLayer.push({
+        window.dataLayer = window.dataLayer || [];
+        window.dataLayer.push({
             event: 'bj_admin2_lead_created',
             canonical_event: 'admin2_lead_created',
             ga_event_name: 'admin2_lead_created',
@@ -8081,6 +8080,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
             ad_platform: attr.adPlatform || '',
             product_id: payload.productId || '',
             product_name: payload.productName || '',
+            test_lead: !!(data && (data.isTestLead || data.status === 'deleted')),
+            test_lead_isolated: !!(data && (data.isTestLead || data.status === 'deleted')),
             kmckid: clickIds.kmckid || attr.kmckid || '',
             kmctc: clickIds.kmctc || attr.kmctc || '',
             karrot_campaign_id: attr.campaignId || '',
@@ -8089,8 +8090,15 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
             karrot_click_id: clickIds.kmckid || attr.kmckid || '',
             karrot_tracker_id: clickIds.kmctc || attr.kmctc || ''
           });
-        } else if (window.console) {
-          console.info('[bj-consult] deleted/test lead suppressed from browser conversion events');
+        if (data && data.status === 'deleted') {
+          buildModal(
+            '<div class="bj-reserve-done">' +
+            '<div class="bj-done-check">✓</div>' +
+            '<div class="bj-done-title">전환 테스트가 기록되었습니다</div>' +
+            '<div class="bj-done-desc">상담사 배정과 상부점 전송은 하지 않았습니다.</div>' +
+            '</div>'
+          );
+          return;
         }
         if (contact.slot || data.status === 'scheduled') {
           buildModal(
@@ -10756,13 +10764,14 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           var attr = (body && body.attribution) || {};
           var clickIds = attr.clickIds || {};
           var requestId = data && data.requestId;
-          if (!data || data.status !== 'deleted') {
-            _pushLeadDataLayers(_catalogProductFromBody(body), {
+          _pushLeadDataLayers(_catalogProductFromBody(body), {
               lead_id: String(data && (data.requestId || data.code) || '').slice(0, 120),
               request_id: requestId,
               event_id: requestId ? ('billyjo_lead_' + requestId) : undefined,
               conversion_platform: attr.adPlatform || '',
               ad_platform: attr.adPlatform || '',
+              test_lead: !!(data && (data.isTestLead || data.status === 'deleted')),
+              test_lead_isolated: !!(data && (data.isTestLead || data.status === 'deleted')),
               kmckid: clickIds.kmckid || attr.kmckid || '',
               kmctc: clickIds.kmctc || attr.kmctc || '',
               karrot_campaign_id: attr.campaignId || '',
@@ -10771,9 +10780,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
               karrot_click_id: clickIds.kmckid || attr.kmckid || '',
               karrot_tracker_id: clickIds.kmctc || attr.kmctc || ''
             });
-          } else if (window.console) {
-            console.info('[bj-consult] deleted/test lead suppressed from browser conversion events');
-          }
           bjTrackJourney('coupon_issued', {
             request_id: requestId,
             event_id: requestId ? ('billyjo_lead_' + requestId) : undefined,
@@ -10913,6 +10919,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '<span class="bj-consult-call-cta">대표번호로 직접</span>' +
       '</a>';
   }
+  function renderIsolatedTestLead(modal){
+    modal.querySelector('.bj-consult-modal-body').innerHTML =
+      '<div class="bj-consult-title bj-consult-title-ok">✓ 전환 테스트 완료</div>' +
+      '<div class="bj-consult-agent" style="margin-top:10px">매체 전환은 기록했고 상담사 배정과 상부점 전송은 하지 않았습니다.</div>';
+  }
   function renderConsultApply(modal){
     var slots = bjModalReserveSlots24h();
     var body = modal.querySelector('.bj-consult-modal-body');
@@ -10966,6 +10977,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       });
       assignConsultant(contact).then(function(data){
         if (!modal.parentNode) return;
+        if (data && data.status === 'deleted') {
+          renderIsolatedTestLead(modal);
+          return;
+        }
         bjShowPersonaUpsell(modal, data, contact);
       }).catch(function(err){
         bjTrackJourney('lead_submit_error', {

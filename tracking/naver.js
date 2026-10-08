@@ -56,7 +56,6 @@
   }
 
   function sendLead(payload) {
-    if (isTestPayload(payload)) return false;
     if (!state.ready || !w.wcs || typeof w.wcs.trans !== 'function') {
       state.queue.push(payload || {});
       return false;
@@ -163,7 +162,7 @@
       var url = '';
       try { url = typeof input === 'string' ? input : (input && input.url) || ''; } catch (err) { url = ''; }
       return nativeFetch.apply(this, arguments).then(function (response) {
-        if (response && response.ok && /\/v1\/consult\/quick-assign(?:\?|$)/.test(url) && !isTestRequest(init)) {
+        if (response && response.ok && /\/v1\/consult\/quick-assign(?:\?|$)/.test(url)) {
           responseLeadId(response).then(function (id) {
             sendLead({ lead_id: id, request_id: id });
           });
