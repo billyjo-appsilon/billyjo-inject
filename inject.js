@@ -11718,8 +11718,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         var priceNum = digits(price);
         var dcNum = digits(dcprice);
         var cardDisNum = digits(cardDis);
-        /* 최종 월 부담액: 명시적 dcprice가 있으면 0원도 그대로 쓴다. */
-        var effective = hasCardPrice ? dcNum :
+        /* 최종 월 부담액: 카드할인가(dcprice)는 0보다 클 때만 유효한 카드가로 본다.
+           dcprice=0 은 "카드 프로그램 없음"(placeholder)이므로 정가로 폴백한다 —
+           안 그러면 카드할인 없는 상품의 전 약정 effective 가 0으로 동률이 돼
+           best 가 '정가 최저'가 아니라 라벨 숫자 최소 약정으로 잘못 뽑힌다. */
+        var effective = (hasCardPrice && dcNum > 0) ? dcNum :
                         (cardDisNum > 0 && cardDisNum < priceNum) ? (priceNum - cardDisNum) :
                         priceNum;
         return {
@@ -11806,7 +11809,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var bestSupIdx = 0, bestTermIdx = 0, bestEff = Infinity, bestMonths = Infinity;
     suppliers.forEach(function(s, si){
       s.terms.forEach(function(t, ti){
-        if (t.effective < 0 || (!t.hasCardPrice && t.effective === 0)) return;
+        if (t.effective <= 0) return;
         /* underlying 없는 약정(타사보상)은 기본 선택에서 제외 — 주문폼에 실을 수 없어
            "화면 가격 ≠ 접수 가격"이 된다. pill 로는 계속 보여주되 기본값은 주문 가능한 것만. */
         if (!t.el) return;
