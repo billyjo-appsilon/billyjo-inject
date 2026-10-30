@@ -11899,12 +11899,15 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           }).join('') +
         '</div>';
 
-      /* v0.5.64: 카드할인 있는 약정이 하나라도 있으면 약정 pill 아래 카드 안내 chip 표시.
+      /* v0.5.64: 제휴카드 프로그램이 있는 상품이면 약정 pill 아래 '제휴카드 안내' chip 표시.
          v0.5.65: chip href에 현재 active 렌탈사명 ?bj= param 추가 → 이동 페이지에서 해당
-         렌탈사 카드 섹션을 맨 위에 강조 표시 (highlightPartnershipCardForProduct). */
-      var hasAnyCardDc = sup.terms.some(function(t){ return t.hasCardPrice && t.effective < t.priceNum; });
+         렌탈사 카드 섹션을 맨 위에 강조 표시 (highlightPartnershipCardForProduct).
+         ⚠️ chip 노출은 '카드 프로그램 유무'(card_dis!=='N')로 판정한다. 약정별 카드할인가
+         (dcprice) 유무로 판정하면, 상품 차원엔 카드혜택이 있어도 약정별 dcprice=0 인 상품에서
+         링크가 사라진다(2026-10-30 CS 회귀). 약정별 카드가 표시(has-card-dc)와는 별개 신호다. */
+      var hasCardProgram = sup.terms.some(function(t){ return String(t.cardDis).trim() !== 'N'; });
       var supParam = sup.name ? '?bj=' + encodeURIComponent(sup.name) : '';
-      var cardNotice = hasAnyCardDc ?
+      var cardNotice = hasCardProgram ?
         '<a href="/html/dh/partnership_card' + supParam + '" class="bj-card-info-chip" target="_blank" rel="noopener">' +
           '<span class="bj-card-info-icon">💳</span>' +
           '<span>' + (sup.name ? '<strong>' + escapeWidgetHtml(sup.name) + '</strong> ' : '') + '제휴카드 안내 보기</span>' +
