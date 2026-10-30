@@ -11718,11 +11718,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         var priceNum = digits(price);
         var dcNum = digits(dcprice);
         var cardDisNum = digits(cardDis);
-        /* 최종 월 부담액: 카드할인가(dcprice)는 0보다 클 때만 유효한 카드가로 본다.
-           dcprice=0 은 "카드 프로그램 없음"(placeholder)이므로 정가로 폴백한다 —
-           안 그러면 카드할인 없는 상품의 전 약정 effective 가 0으로 동률이 돼
-           best 가 '정가 최저'가 아니라 라벨 숫자 최소 약정으로 잘못 뽑힌다. */
-        var effective = (hasCardPrice && dcNum > 0) ? dcNum :
+        /* 최종 월 부담액: 명시적 dcprice가 있으면 0원도 그대로 쓴다. */
+        var effective = hasCardPrice ? dcNum :
                         (cardDisNum > 0 && cardDisNum < priceNum) ? (priceNum - cardDisNum) :
                         priceNum;
         return {
@@ -11805,17 +11802,24 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     } catch(_){}
 
     /* v0.5.7: BEST 자동 선택 — 모든 (렌탈사 × 약정) 조합에서 effective(카드할인 후 월 부담액) 최저.
-       동률이면 약정 길이 짧은 쪽 우선(약속 부담 적은 게 유리). */
-    var bestSupIdx = 0, bestTermIdx = 0, bestEff = Infinity, bestMonths = Infinity;
+       effective 는 카드가(dcprice)를 그대로 쓴다 — dcprice=0 은 "카드가 0원"(가장 싼 카드가)으로
+       취급한다(카드 0원 표시·제휴카드 안내 링크 유지, 제거 금지). 카드가가 있으면 카드가 최저가 이긴다.
+       동률(예: 전 약정 카드가 0원)이면 **정가 최저**를 우선하고, 그래도 같으면 약정 짧은 쪽.
+       (과거엔 동률 타이브레이크가 약정기간이라, 전 약정 카드가 0원인 상품에서 정가가 더 비싼 짧은
+        약정을 최저가로 잘못 골랐다 — 예: 10042 정가 17,900 대신 22,900. 2026-10-30 수정.) */
+    var bestSupIdx = 0, bestTermIdx = 0, bestEff = Infinity, bestPrice = Infinity, bestMonths = Infinity;
     suppliers.forEach(function(s, si){
       s.terms.forEach(function(t, ti){
-        if (t.effective <= 0) return;
+        if (t.effective < 0 || (!t.hasCardPrice && t.effective === 0)) return;
         /* underlying 없는 약정(타사보상)은 기본 선택에서 제외 — 주문폼에 실을 수 없어
            "화면 가격 ≠ 접수 가격"이 된다. pill 로는 계속 보여주되 기본값은 주문 가능한 것만. */
         if (!t.el) return;
         var months = digits(t.month);
-        if (t.effective < bestEff || (t.effective === bestEff && months < bestMonths)) {
+        if (t.effective < bestEff ||
+            (t.effective === bestEff && t.priceNum < bestPrice) ||
+            (t.effective === bestEff && t.priceNum === bestPrice && months < bestMonths)) {
           bestEff = t.effective;
+          bestPrice = t.priceNum;
           bestMonths = months;
           bestSupIdx = si;
           bestTermIdx = ti;
@@ -11899,15 +11903,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           }).join('') +
         '</div>';
 
-      /* v0.5.64: 제휴카드 프로그램이 있는 상품이면 약정 pill 아래 '제휴카드 안내' chip 표시.
+      /* v0.5.64: 카드할인 있는 약정이 하나라도 있으면 약정 pill 아래 카드 안내 chip 표시.
          v0.5.65: chip href에 현재 active 렌탈사명 ?bj= param 추가 → 이동 페이지에서 해당
-         렌탈사 카드 섹션을 맨 위에 강조 표시 (highlightPartnershipCardForProduct).
-         ⚠️ chip 노출은 '카드 프로그램 유무'(card_dis!=='N')로 판정한다. 약정별 카드할인가
-         (dcprice) 유무로 판정하면, 상품 차원엔 카드혜택이 있어도 약정별 dcprice=0 인 상품에서
-         링크가 사라진다(2026-10-30 CS 회귀). 약정별 카드가 표시(has-card-dc)와는 별개 신호다. */
-      var hasCardProgram = sup.terms.some(function(t){ return String(t.cardDis).trim() !== 'N'; });
+         렌탈사 카드 섹션을 맨 위에 강조 표시 (highlightPartnershipCardForProduct). */
+      var hasAnyCardDc = sup.terms.some(function(t){ return t.hasCardPrice && t.effective < t.priceNum; });
       var supParam = sup.name ? '?bj=' + encodeURIComponent(sup.name) : '';
-      var cardNotice = hasCardProgram ?
+      var cardNotice = hasAnyCardDc ?
         '<a href="/html/dh/partnership_card' + supParam + '" class="bj-card-info-chip" target="_blank" rel="noopener">' +
           '<span class="bj-card-info-icon">💳</span>' +
           '<span>' + (sup.name ? '<strong>' + escapeWidgetHtml(sup.name) + '</strong> ' : '') + '제휴카드 안내 보기</span>' +
