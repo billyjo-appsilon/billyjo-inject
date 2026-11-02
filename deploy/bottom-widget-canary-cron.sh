@@ -11,6 +11,14 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$SCRIPT_DIR" || exit 1
 mkdir -p "$SCRIPT_DIR/.logs"
 
+# ── Playwright 브라우저 가드(2026-11): cron 은 PLAYWRIGHT_BROWSERS_PATH(zsh 전용·External SSD)를 못 받아
+#    기본 ~/Library/Caches/ms-playwright 를 본다. playwright 범프 후에도 거기에 헤드리스 셸이 있도록
+#    보장(이미 있으면 ~0.3s no-op·무download). 설치 실패해도 본작업 진행 — 실제 launch 가 진짜 신호. ──
+if [ -f node_modules/playwright/cli.js ]; then
+  PLAYWRIGHT_BROWSERS_PATH="$HOME/Library/Caches/ms-playwright" \
+    node node_modules/playwright/cli.js install chromium-headless-shell >/dev/null 2>&1 || true
+fi
+
 STATUS="failed"
 NOTE="unknown"
 
