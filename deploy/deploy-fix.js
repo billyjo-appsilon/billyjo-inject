@@ -34,8 +34,10 @@ if (!ADMIN_USER || !ADMIN_PASS) {
   }
   let logscript = ensureRequiredSnippets(fs.readFileSync('current-logscript.html', 'utf8'));
   if (requestedInjectHash) {
-    logscript = logscript.replace(/billyjo-inject@[0-9a-f]{7,40}\/inject\.js/gi,
-      'billyjo-inject@' + requestedInjectHash + '/inject.js');
+    // 라이브는 inject.min.js(jsDelivr Terser 자동 미니파이)를 서빙한다. 해시 범프 시
+    // .js/.min.js 양쪽을 매칭하되 항상 .min.js 로 표준화한다(비-min 으로 회귀 방지).
+    logscript = logscript.replace(/billyjo-inject@[0-9a-f]{7,40}\/inject(?:\.min)?\.js/gi,
+      'billyjo-inject@' + requestedInjectHash + '/inject.min.js');
   }
   console.log('Local file size:', logscript.length);
 
@@ -102,7 +104,7 @@ if (!ADMIN_USER || !ADMIN_PASS) {
       has49d: ta.value.includes('49d134'),
       hasGtm: ta.value.includes('GTM-W32HD9CG') || ta.value.includes('googletagmanager.com/gtm.js'),
       hasFacebookDomainVerificationInLogscript: ta.value.includes('facebook-domain-verification') || ta.value.includes('b92rqd32dcxyj4vka8dyrxnw7s7glc'),
-      injectHashes: Array.from(ta.value.matchAll(/billyjo-inject@([0-9a-f]{7,40})\/inject\.js/gi)).map(function (m) { return m[1]; }),
+      injectHashes: Array.from(ta.value.matchAll(/billyjo-inject@([0-9a-f]{7,40})\/inject(?:\.min)?\.js/gi)).map(function (m) { return m[1]; }),
       webmasterName: document.querySelector('input[name="google_webmaster_name"]')?.value,
       webmasterContent: document.querySelector('input[name="google_webmaster"]')?.value
     };

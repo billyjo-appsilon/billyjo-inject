@@ -10,7 +10,8 @@ billyjo.kr 사이트의 CSS/JS injection 코드(`inject.js`)를 GitHub + jsDeliv
 - **SSH:** `ssh appsilon@172.30.1.55` (공유 계정 — 비번은 팀에게 문의)
 - **Windows 파일 드래그:** `\\172.30.1.55\repos\billyJo\skin-css` ⚠️ **자격증명 사용자명에 `172.30.1.55\` prefix 필수** (`appsilon`만 입력하면 거부됨)
 - **GitHub:** https://github.com/billyjo-appsilon/billyjo-inject
-- **CDN:** `https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@<COMMIT_HASH>/inject.js`
+- **CDN:** `https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@<COMMIT_HASH>/inject.min.js`
+  - ⚠️ **라이브는 `inject.min.js`를 서빙한다**(2026-11-03~, 로딩속도 개선). jsDelivr가 `inject.js`를 **Terser로 자동 미니파이**해 `.min.js`로 제공 → 전송 255KB→165KB(gzip), 파싱대상 908KB→581KB. **소스는 여전히 `inject.js`만 편집**하고 빌드단계 없음(미니파이는 jsDelivr가 자동). 원본과 동등성 검증 완료(eval A/B + 시각). `deploy-fix.js`는 해시 범프 시 `.min.js`로 표준화함.
 
 ### 핵심 명령 (서버 기준)
 ```bash
