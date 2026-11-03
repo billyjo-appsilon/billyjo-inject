@@ -1982,7 +1982,7 @@
     var div = document.createElement('div');
     div.className = 'bj-do-loading';
     div.innerHTML =
-      '<img class="bjpw-search-gif" src="https://admin2.billyjo.co.kr/billymag-down.gif" alt="" width="75" height="75" decoding="async">' +
+      '<img class="bjpw-search-gif" src="https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@2840649/images/billymag-down.webp" alt="" width="75" height="75" decoding="async">' +
       '<div class="bj-do-loading-title">Billy가 찾는 중입니다...</div>' +
       '<div class="bj-do-loading-sub">선택한 제품 구성에 맞춰 AI 예상 견적을 준비하고 있습니다.</div>';
     box.appendChild(div);
@@ -6205,8 +6205,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 // 헤더 로고 cross-fade(alternateBillyjoLogo)는 모듈 B(prod_view 전용)에만 있어서
 // 전 페이지에 뜨는 aside 메뉴 로고에는 적용 안 됨 → 모듈 A(전역)에서 별도 처리.
 (function billyjoAsideLogo() {
-  var BJ_LOGO_KO = 'https://admin2.billyjo.co.kr/logo/billyjo-ko.png';
-  var BJ_LOGO_EN = 'https://admin2.billyjo.co.kr/logo/billyjo-en.png';
+  var BJ_LOGO_KO = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@2840649/images/logo/billyjo-ko.webp';
+  var BJ_LOGO_EN = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@2840649/images/logo/billyjo-en.webp';
   var ASIDE_LOGO_SEL = '.aside__top .top__logo img';
 
   // 크기 축소 (모바일 한정) — 기존 대비 많이 줄임. 부모를 inline-block+relative로
@@ -13480,8 +13480,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   /* v0.5.73: 빌리조 본 사이트 헤더 로고를 한글/영문 2초 cross-fade.
      admin2에 호스팅된 PNG를 사용 (같은 .billyjo.co.kr sub-domain).
      img 두 장을 부모 안에 absolute로 겹치고 opacity 토글 → 깜빡임 없는 부드러운 fade. */
-  var BJ_LOGO_KO = 'https://admin2.billyjo.co.kr/logo/billyjo-ko.png';
-  var BJ_LOGO_EN = 'https://admin2.billyjo.co.kr/logo/billyjo-en.png';
+  var BJ_LOGO_KO = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@2840649/images/logo/billyjo-ko.webp';
+  var BJ_LOGO_EN = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@2840649/images/logo/billyjo-en.webp';
   function alternateBillyjoLogo(){
     var logos = document.querySelectorAll('.logo > img, header .logo img');
     if (!logos.length) return;
@@ -13966,7 +13966,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 /* 페이지 전환 로딩 오버레이 — billymag (로딩 길어지는 곳). beforeunload에 표시(실제 네비게이션에만 발생),
    bfcache 복귀(pageshow)·탭 복귀·12s 세이프티로 멈춤 방지. 오버레이/gif는 init때 미리 생성·프리로드. */
 (function(){
-  var GIF='https://admin2.billyjo.co.kr/billymag-down.gif';
+  var GIF='https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@2840649/images/billymag-down.webp';
   var ov, safeT;
   function build(){
     if(ov||!document.body) return;
