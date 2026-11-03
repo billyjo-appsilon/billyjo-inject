@@ -2801,7 +2801,10 @@
     }
     function build() {
       if (!isHome() || document.getElementById('bj-home-cat-links')) return;
-      var hero = document.querySelector('.new-mv_wrap') || document.querySelector('.new-mv') || document.querySelector('.main_visual') || document.querySelector('.visual');
+      // 앵커: 메인비주얼 바로 아래 삽입. 2026-11 몰 템플릿이 메인비주얼을
+      // .new-mv_wrap 슬라이더 → section.billyjo-video-hero(프로모션 영상)로 교체하면서
+      // 옛 셀렉터만 찾던 이 섹션이 앵커 실패로 사라졌다. 영상 히어로를 최우선 앵커로 추가.
+      var hero = document.querySelector('.billyjo-video-hero') || document.querySelector('.new-mv_wrap') || document.querySelector('.new-mv') || document.querySelector('.main_visual') || document.querySelector('.visual');
       if (!hero || !hero.parentNode) return;
       addStyle();
       var section = document.createElement('section');
