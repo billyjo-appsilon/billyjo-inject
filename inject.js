@@ -14780,3 +14780,83 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', apply);
   else apply();
 })();
+
+/* ===========================================================================
+   근거 없는 고객 노출 주장 숨김 (2026-11-05) — 표시광고 안전장치
+   점검(2026-11-05)에서 정책표·공식 출처로 확인되지 않은 문구 2종을 내린다. 근거가 확인되면
+   아래 CLAIMS 에서 해당 항목만 지우면 된다(원문은 카드 HTML/v5 템플릿에 그대로 있다).
+   1) 상품 상세 AI 카드 '제조사 프로모션 — 6개월 무상 A/S + 패키지 추가 시 월 2,000원 할인'
+      · billyjo-cards 4,183장에 v0.3.2(2026-05-21) 프로토타입 샘플 문구가 그대로 복제됨.
+        정책서(2026.10·11 렌탈사 정책서/학습자료/이번달 프로모션)에 '6개월 무상 A/S'·'패키지 추가 월 2,000원'
+        근거 0건. 카테고리와 무관(안마의자·에어컨 포함)하게 전 제품 동일.
+   2) 홈 '실시간 혜택 비교(빌리조 vs 본사 공식몰)' 섹션 + '같은 가격, 더 풍성한 혜택' 알약
+      · 근거 각주가 '2026년 5월 코웨이 공식몰 기준 · 출처: cowaymall.co.kr' — 기준 시점이 6개월 전이고
+        출처 도메인(cowaymall.co.kr)이 존재하지 않음(NXDOMAIN). 정책서에도 소비자 가격표 없음.
+        각주(고지)만 지우면 근거 없는 가격 주장만 남으므로 섹션 전체를 내린다.
+   =========================================================================== */
+(function bjHideUnverifiedClaims() {
+  'use strict';
+  if (window.__bjHideUnverifiedClaims) return;
+  window.__bjHideUnverifiedClaims = true;
+
+  var CLAIMS = [
+    {
+      id: 'maker-promo-row',
+      // 카드의 '제조사 프로모션' 행(.gift-r) 제거
+      find: function (root) {
+        var out = [], tags = root.querySelectorAll('.gift-tag');
+        for (var i = 0; i < tags.length; i++) {
+          if ((tags[i].textContent || '').replace(/\s+/g, '') === '제조사프로모션') {
+            var row = tags[i].closest('.gift-r') || tags[i].parentElement;
+            if (row) out.push(row);
+          }
+        }
+        return out;
+      }
+    },
+    {
+      id: 'price-compare-vs-hq',
+      // 비교 섹션 + 바로 앞 '같은 가격…' 알약
+      find: function (root) {
+        var out = [], pcs = root.querySelectorAll('.price-compare');
+        for (var i = 0; i < pcs.length; i++) {
+          var sec = pcs[i].closest('section') || pcs[i];
+          out.push(sec);
+          var prev = sec.previousElementSibling;
+          if (prev && /pill-wrap/.test(prev.className || '')) out.push(prev);
+        }
+        return out;
+      }
+    }
+  ];
+
+  // 레이아웃 점프를 줄이기 위해 가능한 곳은 CSS 로 먼저 숨긴다(:has 미지원 브라우저는 아래 JS 가 처리).
+  if (!document.getElementById('bj-hide-unverified-css')) {
+    var st = document.createElement('style');
+    st.id = 'bj-hide-unverified-css';
+    st.textContent = 'section:has(.price-compare),.pill-wrap:has(+ section .price-compare){display:none!important}';
+    (document.head || document.documentElement).appendChild(st);
+  }
+
+  function sweep() {
+    for (var c = 0; c < CLAIMS.length; c++) {
+      var els = [];
+      try { els = CLAIMS[c].find(document); } catch (e) {}
+      for (var i = 0; i < els.length; i++) {
+        var el = els[i];
+        if (el.getAttribute('data-bj-claim-hidden')) continue;
+        el.setAttribute('data-bj-claim-hidden', CLAIMS[c].id);
+        el.style.setProperty('display', 'none', 'important');
+      }
+    }
+  }
+
+  sweep();
+  // 카드/v5 섹션은 비동기로 주입되므로 DOM 변경을 지켜본다(SPA 식 재렌더 대비 계속 유지, 부하는 rAF 로 합침).
+  var queued = false;
+  new MutationObserver(function () {
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(function () { queued = false; sweep(); });
+  }).observe(document.documentElement, { childList: true, subtree: true });
+})();
