@@ -14828,13 +14828,37 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         return out;
       }
     }
+    ,
+    {
+      id: 'stale-promo-image',
+      // 상품 상세 '10월 코웨이/쿠쿠/LG구독 프로모션' 이미지 26장 (2026-11-05 OCR 전수점검).
+      // 11월분 이미지가 아직 없어(SK·교원웰스·청호만 11월판 2164~2199) 지난달 프로모션이 그대로 노출되던 것을 내린다.
+      // 이미지 파일명 번호가 바뀌면(11월판 교체) 자동으로 해당 없음. 디자인 교체 후 이 목록에서 삭제해도 된다.
+      find: function (root) {
+        var out = [], imgs = root.querySelectorAll('img[src*="3192f27b6a6a5731b45fa17f3f4f0885_"]');
+        for (var i = 0; i < imgs.length; i++) {
+          var m = /3192f27b6a6a5731b45fa17f3f4f0885_(\d+)\.png/.exec(imgs[i].getAttribute('src') || '');
+          if (!m || STALE_PROMO_IMG.indexOf(+m[1]) < 0) continue;
+          out.push(imgs[i]);
+          // 이미지만 담은 래퍼(p/div/a)는 같이 접어 빈 여백을 막는다
+          var par = imgs[i].parentElement;
+          if (par && par !== document.body && /^(P|DIV|A|SPAN|CENTER)$/.test(par.tagName) &&
+              !(par.textContent || '').trim() && par.querySelectorAll('img').length === 1) out.push(par);
+        }
+        return out;
+      }
+    }
   ];
+
+  var STALE_PROMO_IMG = [2006, 2011, 2013, 2022, 2023, 2025, 2028, 2035, 2052, 2058, 2063, 2069, 2073, 2074,
+    2079, 2080, 2131, 2134, 2136, 2139, 2140, 2142, 2143, 2146, 2149, 2153];
 
   // 레이아웃 점프를 줄이기 위해 가능한 곳은 CSS 로 먼저 숨긴다(:has 미지원 브라우저는 아래 JS 가 처리).
   if (!document.getElementById('bj-hide-unverified-css')) {
     var st = document.createElement('style');
     st.id = 'bj-hide-unverified-css';
-    st.textContent = 'section:has(.price-compare),.pill-wrap:has(+ section .price-compare){display:none!important}';
+    st.textContent = 'section:has(.price-compare),.pill-wrap:has(+ section .price-compare){display:none!important}' +
+      STALE_PROMO_IMG.map(function (n) { return 'img[src$="3192f27b6a6a5731b45fa17f3f4f0885_' + n + '.png"]'; }).join(',') + '{display:none!important}';
     (document.head || document.documentElement).appendChild(st);
   }
 
