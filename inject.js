@@ -4231,7 +4231,7 @@
   // === 히어로 배너 16:9 통일 (영상 상하 크롭 제거 · 배너 좌우 크롭 통일, 2026-11-04) ===
   //   몰 템플릿 히어로(.new-mv slick)는 전 슬라이드가 3.33:1(padding-top:30%, 1280×384).
   //   16:9 영상(원본 1280×720)이 여기 cover 되어 상하 ~47%가 잘렸다. 슬라이드 박스를 16:9 로
-  //   맞춰 영상은 크롭 0(영역에 꽉 맞음), 이미지 배너는 cover 로 좌우만 잘리며 전 슬라이드 크기 통일.
+  //   맞춰 영상은 크롭 0(영역에 꽉 맞음), 이미지 배너는 PC=cover 배경 / 모바일=contain(원본 비율, 확대·크롭 없음, 2026-11-10)로 전 슬라이드 박스 크기 통일.
   //   PC(>1024)=.pc 배경 div, 모바일(≤1024)=.m img, 공통=영상 프레임. 롤백: 이 블록만 제거.
   (function heroBanner169() {
     if (document.getElementById('bj-hero-169')) return;
@@ -4244,7 +4244,7 @@
       '.new-mv .item .pc{aspect-ratio:16/9 !important;height:auto !important;padding-top:0 !important;background-size:cover !important;background-position:center !important;width:100% !important}' +
       '.new-mv .item .m{aspect-ratio:16/9 !important;height:auto !important;overflow:hidden !important}' +
       '.new-mv .item .m a{display:block !important;width:100% !important;height:100% !important}' +
-      '.new-mv .item .m img{width:100% !important;height:100% !important;object-fit:cover !important;object-position:center !important}' +
+      '.new-mv .item .m img{width:100% !important;height:100% !important;object-fit:contain !important;object-position:center !important}' +
       '.billyjo-video-hero__media{object-fit:cover !important}';
     (document.head || document.documentElement).appendChild(s);
     // slick 이 슬라이드/트랙 높이를 재계산하도록 resize 발사 (init 타이밍 커버)
