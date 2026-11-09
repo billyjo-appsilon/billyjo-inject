@@ -1480,6 +1480,28 @@
       });
     });
   }
+  function replacePrimaryProductImages(product){
+    if (!product || product.imageSource !== 'billyjo' || !product.image) return;
+    if (location.pathname.indexOf('/prod_view/') === -1) return;
+    var selector = '.prod_img_big img, .prod_img_small img, .prod_img_m img';
+    var apply = function(){
+      document.querySelectorAll(selector).forEach(function(img){
+        if (img.src === product.image) return;
+        img.src = product.image;
+        img.removeAttribute('srcset');
+        img.setAttribute('data-bj-owned-image', '1');
+      });
+    };
+    apply();
+    // The native gallery initializes asynchronously and can clone its first
+    // slide after our API resolves. Re-apply briefly, then leave the DOM alone.
+    var attempts = 0;
+    var timer = setInterval(function(){
+      apply();
+      attempts += 1;
+      if (attempts >= 20) clearInterval(timer);
+    }, 250);
+  }
   function loadOneReview(p){
     if (!p || !p.model || state.reviews[p.model]) return Promise.resolve(state.reviews[p && p.model]);
     return fetchJson(API + '/v1/reviews?model=' + encodeURIComponent(p.model) + '&limit=1')
@@ -2362,6 +2384,7 @@
         ensureCurrentSelected(r[1]);
         ensureLpSelected();
         if (!state.current) { state.active = false; return; }
+        replacePrimaryProductImages(state.current);
         state.active = true;
         state.ready = true;
         mountTopBar();

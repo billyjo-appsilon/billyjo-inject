@@ -20,5 +20,14 @@ if (!source.includes("API + '/v1/products/catalog/' + encodeURIComponent(prodNo)
 if (!source.includes("imageSource: product.imageSource || 'bizcare_fallback'")) {
   throw new Error('image provenance is not preserved');
 }
+if (!source.includes("function replacePrimaryProductImages(product)")) {
+  throw new Error('owned primary product image replacement is missing');
+}
+if (!source.includes(".prod_img_big img, .prod_img_small img, .prod_img_m img")) {
+  throw new Error('native product gallery selectors are not covered');
+}
+if (!source.includes("replacePrimaryProductImages(state.current)")) {
+  throw new Error('owned primary product image replacement is not activated');
+}
 
 console.log('owned catalog path: ok');
