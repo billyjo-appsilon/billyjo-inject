@@ -1458,9 +1458,27 @@
   function loadCurrentProduct(){
     var prodNo = getProdNo();
     if (!prodNo) return Promise.resolve(null);
-    return fetchJson(API + '/v1/packages/product/' + encodeURIComponent(prodNo))
+    var benefits = fetchJson(API + '/v1/packages/product/' + encodeURIComponent(prodNo))
       .then(function(j){ return j && j.product ? j.product : null; })
       .catch(function(){ return null; });
+    var owned = fetchJson(API + '/v1/products/catalog/' + encodeURIComponent(prodNo))
+      .then(function(j){ return j && j.product ? j.product : null; })
+      .catch(function(){ return null; });
+    return Promise.all([benefits, owned]).then(function(parts){
+      var base = parts[0] || {};
+      var product = parts[1];
+      if (!product) return parts[0];
+      return Object.assign(base, {
+        prodNo: product.prodNo || prodNo,
+        model: product.modelCode || base.model,
+        name: product.name || base.name,
+        brand: product.brand || base.brand,
+        category: product.category || base.category,
+        image: product.imageUrl || base.image,
+        imageSource: product.imageSource || 'bizcare_fallback',
+        offers: product.offers || []
+      });
+    });
   }
   function loadOneReview(p){
     if (!p || !p.model || state.reviews[p.model]) return Promise.resolve(state.reviews[p && p.model]);
@@ -7094,8 +7112,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     return Number.isFinite(value) && value > 0 ? Math.round(value) : 0;
   }
 
-  // ── 추천 카드 썸네일: 빌리조 prod_view og:image 동적 fetch + 캐시 ──
-  // cards-index/추천 API에 이미지가 없어 클라이언트에서 보강. prod_view는 동일 출처라 CORS 없음.
+  // ── 추천 카드 썸네일: Admin2 자체 카탈로그 우선 + 기존 prod_view 폴백 ──
+  // 자체 CDN 전환 전에는 API가 bizcare_fallback URL을 돌려줄 수 있다. R2 게시 후에는
+  // 같은 API 응답만 BillyJo URL로 바뀌므로 inject.js를 다시 배포할 필요가 없다.
   // 캐시: sessionStorage(탭 단위, '없음'도 ''로 캐시) + in-flight Promise 중복 제거.
   var THUMB_CACHE_PREFIX = 'bj-reco-thumb:';
   var THUMB_PROMISES = {};
@@ -7116,18 +7135,29 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       THUMB_PROMISES[pid] = pc;
       return pc;
     }
-    // 상대 경로로 호출 → 현재 출처(www 여부 무관)와 동일, same-origin 보장
-    var p = fetch('/html/dh_prod/prod_view/' + pid, { credentials: 'same-origin' })
-      .then(function(r) { return r.ok ? r.text() : ''; })
-      .then(function(html) {
-        var url = '';
-        var m = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
-             || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
-        if (m) url = m[1];
+    function fromProdView() {
+      // Migration-only fallback. Remove after Admin2 published coverage reaches 100%.
+      return fetch('/html/dh_prod/prod_view/' + pid, { credentials: 'same-origin' })
+        .then(function(r) { return r.ok ? r.text() : ''; })
+        .then(function(html) {
+          var url = '';
+          var m = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+               || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+          return m ? m[1] : '';
+        })
+        .catch(function() { return ''; });
+    }
+    var p = fetch('https://admin2-api.billyjo.co.kr/v1/products/catalog/' + encodeURIComponent(pid))
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(j) {
+        var product = j && j.product;
+        return product && product.imageUrl ? product.imageUrl : fromProdView();
+      })
+      .catch(fromProdView)
+      .then(function(url) {
         thumbToCache(pid, url);
         return url;
-      })
-      .catch(function() { return ''; });
+      });
     THUMB_PROMISES[pid] = p;
     return p;
   }
