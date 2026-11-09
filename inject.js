@@ -37,6 +37,71 @@
 })();
 
 /* =========================================================================
+ * 메인 모바일 히어로 손실방지 배너 교체 (2026-11-10)
+ * - 렌탈샵 공통 128만원 배너는 그대로 두고 빌리조에서만 138만원 버전으로 치환한다.
+ * - slick clone/지연 렌더에도 동일 자산이 적용되도록 src 변경을 감시한다.
+ * ========================================================================= */
+(function bjReplaceLossHeroBanner(){
+  var OLD_ASSET_ID = '77df802a48d00a519ffb4cc96cdbd8b3';
+  var ref = 'main';
+  try {
+    var scriptSrc = (document.currentScript && document.currentScript.src) || '';
+    var match = scriptSrc.match(/billyjo-inject@([^/]+)/);
+    if (match && match[1]) ref = match[1];
+  } catch (_) { }
+  var replacement = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@' + ref + '/images/hero-loss-138manwon.png';
+
+  function isTarget(img){
+    if (!img || img.tagName !== 'IMG') return false;
+    return [img.getAttribute('src'), img.getAttribute('srcset'), img.getAttribute('ec-data-src')]
+      .some(function(value){ return String(value || '').indexOf(OLD_ASSET_ID) !== -1; });
+  }
+
+  function replace(img){
+    if (!isTarget(img)) return;
+    img.onerror = null;
+    img.removeAttribute('onerror');
+    img.removeAttribute('srcset');
+    img.removeAttribute('ec-data-src');
+    img.src = replacement;
+    img.setAttribute('data-bj-hero-loss-138', '1');
+  }
+
+  function scan(root){
+    if (!root) return;
+    if (root.tagName === 'IMG') replace(root);
+    if (root.querySelectorAll) {
+      Array.prototype.forEach.call(root.querySelectorAll('img'), replace);
+    }
+  }
+
+  try {
+    var style = document.createElement('style');
+    style.id = 'bj-hero-loss-138-style';
+    style.textContent = 'img[src*="' + OLD_ASSET_ID + '"]{content:url("' + replacement + '")!important}';
+    (document.head || document.documentElement).appendChild(style);
+    scan(document);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', function(){ scan(document); });
+    }
+    new MutationObserver(function(records){
+      records.forEach(function(record){
+        if (record.type === 'attributes') replace(record.target);
+        Array.prototype.forEach.call(record.addedNodes || [], scan);
+      });
+    }).observe(document.documentElement, {
+      childList: true,
+      subtree: true,
+      attributes: true,
+      attributeFilter: ['src', 'srcset', 'ec-data-src']
+    });
+    [250, 900, 1800, 3200].forEach(function(delay){
+      setTimeout(function(){ scan(document); }, delay);
+    });
+  } catch (_) { }
+})();
+
+/* =========================================================================
  * 렌탈신청 최종 접수 화면 보정 (2026-09-02)
  * - 신청서 상단 빨강 테두리를 브랜드 블루로 통일
  * - 고객메모에는 접수 전 단계에서 수집한 구조화 메모만 주입하고 미입력 제출 방지
