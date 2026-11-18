@@ -21,7 +21,7 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     await page.waitForFunction(() => {
       const products = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-image img')];
       const logos = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-brand-logo')];
-      return products.length === 12 && logos.length === 12 &&
+      return products.length === 24 && logos.length === 24 &&
         products.concat(logos).every((image) => image.complete && image.naturalWidth > 0);
     }, { timeout: 30000 });
     await page.waitForTimeout(10000);
@@ -42,10 +42,10 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
           priceText: card.querySelector('.bj-hgp-price')?.textContent.replace(/\s+/g, ' ').trim() || '',
           href: card.href,
           imageLoaded: card.querySelector('img').naturalWidth > 0,
-          horizontalLayout: (() => {
+          verticalLayout: (() => {
             const imageRect = card.querySelector('.bj-hgp-image').getBoundingClientRect();
             const infoRect = card.querySelector('.bj-hgp-info').getBoundingClientRect();
-            return imageRect.right <= infoRect.left + 1 && Math.abs(imageRect.top - infoRect.top) < card.getBoundingClientRect().height;
+            return imageRect.bottom <= infoRect.top + 1 && Math.abs(imageRect.left - infoRect.left) < 4;
           })(),
           imageWidth: card.querySelector('.bj-hgp-image').getBoundingClientRect().width,
           badgeTopOffset: (() => {
@@ -79,6 +79,7 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
         bands: bands.map((band) => ({
           tier: band.getAttribute('data-bj-hgp-band'),
           cardCount: band.querySelectorAll('.bj-hgp-card').length,
+          columnCount: getComputedStyle(band.querySelector('.bj-hgp-grid')).gridTemplateColumns.split(' ').length,
         })),
         beforeNativeRecommendation: !!(section.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING),
         menuLabels,
@@ -89,8 +90,8 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
       };
     });
 
-    if (result.cards.length !== 12) throw new Error(`${testCase.name}: expected twelve promo cards`);
-    if (result.cards.map((card) => card.id).join(',') !== '24129,11327,34614,32596,32586,32100,32918,33000,35730,32592,29036,33632') {
+    if (result.cards.length !== 24) throw new Error(`${testCase.name}: expected twenty-four promo cards`);
+    if (result.cards.map((card) => card.id).join(',') !== '24129,11327,3657,35287,34614,32596,10914,23052,32586,32100,28918,27223,32918,33000,22764,10428,35730,32592,27476,27503,29036,33632,31903,32406') {
       throw new Error(`${testCase.name}: promo card order is wrong`);
     }
     if (result.title !== '빌리조 위크 - 이번주 한정') throw new Error(`${testCase.name}: weekly title is wrong`);
@@ -109,8 +110,11 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     if (result.bands.map((band) => band.tier).join(',') !== expectedTiers.join(',')) {
       throw new Error(`${testCase.name}: price band order is wrong`);
     }
-    if (!result.bands.every((band) => band.cardCount === 2)) {
-      throw new Error(`${testCase.name}: every price band must contain two cards`);
+    if (!result.bands.every((band) => band.cardCount === 4)) {
+      throw new Error(`${testCase.name}: every price band must contain four cards`);
+    }
+    if (!result.bands.every((band) => band.columnCount === 2)) {
+      throw new Error(`${testCase.name}: every price band must render two cards per row`);
     }
     for (const expected of ['11월 특가', '4.9 · 후기 23개', '4.9 · 후기 58개', '4.8 · 후기 149개', '4.8 · 후기 173개', '공기청정기 1대 증정 대상', '추가 사은품 상담 대상']) {
       if (!result.cards.some((card) => card.text.includes(expected))) {
@@ -162,11 +166,11 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     if (!result.cards.every((card) => card.infoTextAlign === 'left' && card.hasPriceBox)) {
       throw new Error(`${testCase.name}: card information hierarchy is not left-aligned`);
     }
-    if (!result.cards.every((card) => card.horizontalLayout)) throw new Error(`${testCase.name}: promo cards must keep thumbnail left and product info right`);
-    const minImageWidth = testCase.name === 'mobile' ? 110 : 150;
+    if (!result.cards.every((card) => card.verticalLayout)) throw new Error(`${testCase.name}: promo cards must keep product image above product info`);
+    const minImageWidth = testCase.name === 'mobile' ? 145 : 300;
     if (!result.cards.every((card) => card.imageWidth >= minImageWidth)) throw new Error(`${testCase.name}: product thumbnail is too small`);
     if (!result.cards.every((card) => card.badgeTopOffset >= 0 && card.badgeTopOffset <= 8)) throw new Error(`${testCase.name}: badge must stay at the thumbnail top`);
-    const minPadding = testCase.name === 'mobile' ? 13 : 18;
+    const minPadding = testCase.name === 'mobile' ? 9 : 18;
     if (!result.cards.every((card) => card.cardPadding >= minPadding)) throw new Error(`${testCase.name}: card padding is too tight`);
     if (!result.beforeNativeRecommendation) throw new Error(`${testCase.name}: promo cards must precede native recommendations`);
     if (!result.menuLabels.some((label) => label.includes('프로모션/사은품 확인'))) {
