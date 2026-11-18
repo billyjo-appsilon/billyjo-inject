@@ -3068,6 +3068,21 @@
   ];
   var TIERS = ['1만원 언더', '1만원대', '2만원대', '3만원대', '4만원대', '5만원대'];
   var OFFICIAL_GIFT = '정수기 렌탈 시 공기청정기 1대 증정';
+  var HOME_ASSET_BASE = (function () {
+    try {
+      var src = (document.currentScript && document.currentScript.src) || '';
+      var match = src.match(/billyjo-inject@([^/]+)/);
+      return match ? 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@' + match[1] + '/' : '';
+    } catch (_error) { return ''; }
+  })();
+  var BRAND_LOGOS = {
+    '웰스': 'images/brands/wells.png',
+    'LG전자': 'images/brands/lg-care.jpg',
+    '청호나이스': 'images/brands/chungho.jpg',
+    '쿠쿠': 'images/brands/cuckoo.jpg',
+    '루헨스': 'images/brands/ruhens.jpg',
+    '코웨이': 'images/brands/coway.jpg'
+  };
 
   function currentMonthKst() {
     var parts = new Intl.DateTimeFormat('en-US', {
@@ -3092,14 +3107,14 @@
     style.textContent =
       '#bj-home-gift-promos{margin:0 0 38px;padding:28px 8px 14px;font-family:Pretendard,sans-serif}' +
       '#bj-home-gift-promos *{box-sizing:border-box}' +
-      '.bj-hgp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:22px}' +
-      '.bj-hgp-heading{display:flex;flex-direction:column;align-items:flex-start;gap:11px;min-width:0}' +
+      '.bj-hgp-head{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;margin-bottom:24px;text-align:center}' +
+      '.bj-hgp-heading{display:flex;flex-direction:column;align-items:center;gap:11px;min-width:0}' +
       '.bj-hgp-title{margin:0;font-size:25px;font-weight:900;line-height:1.3;letter-spacing:-.04em;color:#16181d}' +
       '.bj-hgp-title b{color:#0838f8}' +
       '.bj-hgp-countdown{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}' +
       '.bj-hgp-countdown-unit{display:flex;align-items:center;gap:5px;color:#475569;font-size:12px;font-weight:800}' +
       '.bj-hgp-countdown-unit strong{display:grid;place-items:center;min-width:50px;height:48px;padding:0 8px;border:1px solid #e2e8f0;border-radius:13px;background:#fff;color:#111827;font-size:21px;font-weight:900;letter-spacing:.02em;box-shadow:0 7px 18px rgba(15,23,42,.08)}' +
-      '.bj-hgp-source{font-size:11px;color:#64748b;text-align:right;white-space:nowrap}' +
+      '.bj-hgp-source{font-size:11px;color:#64748b;text-align:center;white-space:nowrap}' +
       '.bj-hgp-band{margin-top:24px}' +
       '.bj-hgp-band:first-of-type{margin-top:0}' +
       '.bj-hgp-band-title{display:flex;align-items:center;gap:8px;margin:0 0 9px;font-size:15px;font-weight:900;color:#1e293b}' +
@@ -3110,22 +3125,26 @@
       '.bj-hgp-image img{width:100%;height:100%;object-fit:contain;transform:scale(1.08)}' +
       '.bj-hgp-discount{position:absolute;top:5px;left:7px;padding:5px 8px;border-radius:999px;background:#ff3b30;color:#fff;font-size:11px;font-weight:900}' +
       '.bj-hgp-discount.is-benefit{background:#0838f8}' +
-      '.bj-hgp-info{min-width:0;padding:3px 0}' +
-      '.bj-hgp-brand{font-size:11px;font-weight:800;color:#64748b}' +
-      '.bj-hgp-name{margin-top:4px;font-size:16px;font-weight:900;line-height:1.35;letter-spacing:-.035em;color:#16181d}' +
-      '.bj-hgp-model{margin-top:3px;font-size:11px;color:#94a3b8}' +
-      '.bj-hgp-regular{margin-top:9px;font-size:10px;font-weight:700;color:#94a3b8}' +
+      '.bj-hgp-info{display:flex;min-width:0;height:100%;padding:3px 0;flex-direction:column;align-items:flex-start;text-align:left}' +
+      '.bj-hgp-brandmark{display:flex;align-items:center;justify-content:flex-start;width:96px;height:28px;margin-bottom:5px}' +
+      '.bj-hgp-brand-logo{display:block;max-width:96px;max-height:28px;object-fit:contain;object-position:left center}' +
+      '.bj-hgp-brand-fallback{font-size:11px;font-weight:900;color:#475569}' +
+      '.bj-hgp-name{font-size:16px;font-weight:900;line-height:1.32;letter-spacing:-.035em;color:#16181d;word-break:keep-all}' +
+      '.bj-hgp-model{margin-top:3px;font-size:11px;color:#94a3b8;letter-spacing:.01em}' +
+      '.bj-hgp-pricebox{width:100%;margin-top:10px;padding:9px 11px;border:1px solid #dbe5ff;border-radius:11px;background:#eef3ff}' +
+      '.bj-hgp-regular{font-size:10px;font-weight:700;color:#7c8aa2}' +
       '.bj-hgp-regular s{margin-left:4px;text-decoration-thickness:1.5px}' +
-      '.bj-hgp-price{margin-top:4px;color:#0838f8;font-size:12px;font-weight:800}' +
+      '.bj-hgp-price{margin-top:2px;color:#0838f8;font-size:12px;font-weight:800}' +
       '.bj-hgp-price-label{display:inline-block;margin-right:5px;color:#475569;font-size:10px;font-weight:900}' +
       '.bj-hgp-price b{font-size:21px;letter-spacing:-.04em}' +
       '.bj-hgp-vat{margin-left:4px;font-size:9px;color:#64748b;font-weight:700}' +
-      '.bj-hgp-reviews{display:flex;align-items:center;gap:5px;margin-top:7px;font-size:10px;font-weight:800;color:#475569}' +
+      '.bj-hgp-meta{display:flex;align-items:center;gap:6px;max-width:100%;margin-top:8px;flex-wrap:wrap}' +
+      '.bj-hgp-reviews{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:800;color:#475569}' +
       '.bj-hgp-reviews strong{color:#f59e0b;font-size:12px}' +
-      '.bj-hgp-gift{display:inline-flex;margin-top:8px;padding:6px 8px;border-radius:8px;background:#fff3e8;color:#b45309;font-size:10px;font-weight:900;line-height:1.35}' +
-      '.bj-hgp-cta{display:block;margin-top:9px;font-size:11px;font-weight:800;color:#0838f8}' +
+      '.bj-hgp-gift{display:inline-flex;padding:5px 8px;border-radius:8px;background:#fff3e8;color:#b45309;font-size:10px;font-weight:900;line-height:1.35}' +
+      '.bj-hgp-cta{display:flex;align-items:center;width:100%;margin-top:auto;padding-top:9px;border-top:1px solid #e4e9f5;font-size:11px;font-weight:900;color:#0838f8}' +
       '.bj-hgp-note{margin:14px 0 0;font-size:10px;line-height:1.5;color:#64748b}' +
-      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 8px 8px}.bj-hgp-head{display:block;margin-bottom:18px}.bj-hgp-heading{gap:9px}.bj-hgp-title{font-size:20px}.bj-hgp-countdown{width:100%;gap:6px}.bj-hgp-countdown-unit{flex:1 1 0;gap:4px;font-size:10px}.bj-hgp-countdown-unit strong{min-width:0;width:100%;height:44px;padding:0 4px;border-radius:12px;font-size:18px}.bj-hgp-source{margin-top:7px;font-size:9px;text-align:left;white-space:normal}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:1fr;gap:10px}.bj-hgp-card{grid-template-columns:116px minmax(0,1fr);gap:12px;align-items:start;padding:13px;border-radius:15px}.bj-hgp-image{border-radius:10px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:9px}.bj-hgp-info{min-width:0;padding:1px 0}.bj-hgp-brand{font-size:9px}.bj-hgp-name{margin-top:2px;font-size:13px;line-height:1.25}.bj-hgp-model{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-regular{margin-top:6px;font-size:8px}.bj-hgp-price{margin-top:2px;font-size:10px}.bj-hgp-price-label{margin-right:3px;font-size:8px}.bj-hgp-price b{font-size:17px}.bj-hgp-vat{display:block;margin:2px 0 0;font-size:8px}.bj-hgp-reviews{margin-top:5px;font-size:9px}.bj-hgp-reviews strong{font-size:10px}.bj-hgp-gift{margin-top:5px;padding:4px 6px;font-size:9px}.bj-hgp-cta{margin-top:5px;font-size:9px}}';
+      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 8px 8px}.bj-hgp-head{margin-bottom:18px;gap:7px}.bj-hgp-heading{width:100%;gap:9px}.bj-hgp-title{font-size:20px}.bj-hgp-countdown{width:100%;gap:6px}.bj-hgp-countdown-unit{flex:1 1 0;gap:4px;font-size:10px}.bj-hgp-countdown-unit strong{min-width:0;width:100%;height:44px;padding:0 4px;border-radius:12px;font-size:18px}.bj-hgp-source{font-size:9px;white-space:normal}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:1fr;gap:10px}.bj-hgp-card{grid-template-columns:116px minmax(0,1fr);gap:12px;align-items:stretch;padding:13px;border-radius:15px}.bj-hgp-image{border-radius:10px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:9px}.bj-hgp-info{min-width:0;padding:1px 0}.bj-hgp-brandmark{width:76px;height:22px;margin-bottom:4px}.bj-hgp-brand-logo{max-width:76px;max-height:22px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{font-size:13px;line-height:1.25}.bj-hgp-model{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-pricebox{margin-top:7px;padding:7px 8px;border-radius:9px}.bj-hgp-regular{font-size:8px}.bj-hgp-price{font-size:10px}.bj-hgp-price-label{margin-right:3px;font-size:8px}.bj-hgp-price b{font-size:17px}.bj-hgp-vat{display:block;margin:2px 0 0;font-size:8px}.bj-hgp-meta{gap:4px;margin-top:6px}.bj-hgp-reviews{font-size:9px}.bj-hgp-reviews strong{font-size:10px}.bj-hgp-gift{padding:4px 6px;font-size:9px}.bj-hgp-cta{margin-top:7px;padding-top:6px;font-size:9px}}';
     (document.head || document.documentElement).appendChild(style);
   }
   function startWeekCountdown(section) {
@@ -3171,23 +3190,27 @@
       var badge = p.regularPrice
         ? '<span class="bj-hgp-discount">11월 특가</span>'
         : '<span class="bj-hgp-discount is-benefit">혜택 집중</span>';
-      var price = p.regularPrice
+      var price = '<div class="bj-hgp-pricebox">' + (p.regularPrice
         ? '<div class="bj-hgp-regular">정가 <s>월 ' + won(p.regularPrice) + '원</s> <span class="bj-hgp-vat">(VAT 별도)</span></div>' +
           '<div class="bj-hgp-price"><span class="bj-hgp-price-label">할인가</span> 월 <b>' + won(p.price) + '</b>원~ <span class="bj-hgp-vat">(VAT 별도)</span></div>'
-        : '<div class="bj-hgp-price"><span class="bj-hgp-price-label">월요금</span> 월 <b>' + won(p.price) + '</b>원~ <span class="bj-hgp-vat">(VAT 별도)</span></div>';
+        : '<div class="bj-hgp-price"><span class="bj-hgp-price-label">월요금</span> 월 <b>' + won(p.price) + '</b>원~ <span class="bj-hgp-vat">(VAT 별도)</span></div>') + '</div>';
       var reviews = p.rating && p.reviewCount
         ? '<div class="bj-hgp-reviews" aria-label="평점 ' + p.rating + '점, 후기 ' + p.reviewCount + '개"><strong aria-hidden="true">★</strong><span>' + p.rating + ' · 후기 ' + won(p.reviewCount) + '개</span></div>'
         : '';
+      var logo = BRAND_LOGOS[p.brand];
+      var brand = '<div class="bj-hgp-brandmark">' + (logo && HOME_ASSET_BASE
+        ? '<img class="bj-hgp-brand-logo" src="' + HOME_ASSET_BASE + logo + '" alt="' + p.brand + ' 로고"><span class="bj-hgp-brand-fallback" hidden>' + p.brand + '</span>'
+        : '<span class="bj-hgp-brand-fallback">' + p.brand + '</span>') + '</div>';
       return '<a class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" data-bj-hgp-tier="' + p.tier + '" href="/html/dh_prod/prod_view/' + p.productId + '">' +
         '<div class="bj-hgp-image"><img src="' + p.image + '" alt="' + p.name + '">' + badge + '</div>' +
-        '<div class="bj-hgp-info"><div class="bj-hgp-brand">' + p.brand + '</div><div class="bj-hgp-name">' + p.name + '</div>' +
+        '<div class="bj-hgp-info">' + brand + '<div class="bj-hgp-name">' + p.name + '</div>' +
         '<div class="bj-hgp-model">' + p.model + '</div>' +
-        price + reviews +
-        '<div class="bj-hgp-gift">' + p.gift + '</div>' +
+        price + '<div class="bj-hgp-meta">' + reviews +
+        '<div class="bj-hgp-gift">' + p.gift + '</div></div>' +
         '<span class="bj-hgp-cta">제품 자세히 보기 →</span></div></a>';
     }
     section.innerHTML =
-      '<div class="bj-hgp-head"><div class="bj-hgp-heading"><h2 class="bj-hgp-title"><b>빌리조 위크</b> - 이번주 특가</h2>' +
+      '<div class="bj-hgp-head"><div class="bj-hgp-heading"><h2 class="bj-hgp-title"><b>빌리조 위크</b> - 이번주 한정</h2>' +
       '<div class="bj-hgp-countdown" data-bj-week-countdown role="timer" aria-label="이번주 특가 종료까지 남은 시간">' +
       '<span class="bj-hgp-countdown-unit"><strong data-bj-countdown="day">00</strong><span>일</span></span>' +
       '<span class="bj-hgp-countdown-unit"><strong data-bj-countdown="hour">00</strong><span>시</span></span>' +
@@ -3200,6 +3223,13 @@
           '<div class="bj-hgp-grid">' + items.map(card).join('') + '</div></div>';
       }).join('') +
       '<p class="bj-hgp-note">월요금·할인·사은품은 약정과 관리방식에 따라 달라질 수 있으며, 할인가와 후기 평점·개수는 2026.11 확인 데이터 기준입니다. 최종 혜택은 상담 시 확인됩니다.</p>';
+    section.querySelectorAll('.bj-hgp-brand-logo').forEach(function (image) {
+      image.addEventListener('error', function () {
+        image.hidden = true;
+        var fallback = image.nextElementSibling;
+        if (fallback) fallback.hidden = false;
+      });
+    });
     var v5 = document.getElementById('bj-v5-injected');
     if (v5) v5.appendChild(section);
     else heading.parentNode.insertBefore(section, heading);
