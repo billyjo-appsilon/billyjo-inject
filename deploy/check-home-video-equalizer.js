@@ -10,6 +10,7 @@ assert.match(block, /right:16px!important;bottom:16px!important/, 'button has a 
 assert.match(block, /billyjo-video-slide__frame/, 'module targets the current Cafe24 video frame');
 assert.match(block, /bj-video-equalizer/, 'equalizer icon is rendered');
 assert.match(block, /@keyframes bjVideoSoundEq/, 'audible state animates the equalizer');
+assert.match(block, /\.bj-video-equalizer i\{animation:bjVideoSoundEq/, 'equalizer animates before interaction');
 assert.match(block, /background:#ff3b30/, 'muted state shows a red diagonal slash');
 assert.match(block, /var soundOn = !video\.muted/, 'visual state follows the real muted property');
 assert.match(block, /getAttribute\('aria-pressed'\) !== pressed/, 'attribute observer cannot self-trigger forever');
