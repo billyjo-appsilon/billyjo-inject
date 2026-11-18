@@ -19,8 +19,10 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     await page.goto('https://billyjo.co.kr/', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForSelector('#bj-home-gift-promos', { timeout: 30000 });
     await page.waitForFunction(() => {
-      const images = [...document.querySelectorAll('#bj-home-gift-promos img')];
-      return images.length === 12 && images.every((image) => image.complete && image.naturalWidth > 0);
+      const products = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-image img')];
+      const logos = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-brand-logo')];
+      return products.length === 12 && logos.length === 12 &&
+        products.concat(logos).every((image) => image.complete && image.naturalWidth > 0);
     }, { timeout: 30000 });
     await page.waitForTimeout(10000);
 
@@ -57,6 +59,10 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
           reviewText: card.querySelector('.bj-hgp-reviews')?.textContent.replace(/\s+/g, ' ').trim() || '',
           badgeText: card.querySelector('.bj-hgp-discount').textContent.replace(/\s+/g, ' ').trim(),
           officialPromoBadge: !card.querySelector('.bj-hgp-discount').classList.contains('is-benefit'),
+          brandLogoLoaded: card.querySelector('.bj-hgp-brand-logo')?.naturalWidth > 0,
+          brandLogoAlt: card.querySelector('.bj-hgp-brand-logo')?.alt || '',
+          infoTextAlign: getComputedStyle(card.querySelector('.bj-hgp-info')).textAlign,
+          hasPriceBox: !!card.querySelector('.bj-hgp-pricebox'),
         })),
         title: section.querySelector('.bj-hgp-title').textContent.replace(/\s+/g, ' ').trim(),
         countdown: [...section.querySelectorAll('[data-bj-countdown]')].map((node) => ({
@@ -68,6 +74,8 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
           return !!timer && getComputedStyle(timer).display !== 'none' && timer.getBoundingClientRect().height > 0;
         })(),
         countdownAria: section.querySelector('[data-bj-week-countdown]')?.getAttribute('aria-label') || '',
+        headingCentered: getComputedStyle(section.querySelector('.bj-hgp-heading')).alignItems === 'center' &&
+          getComputedStyle(section.querySelector('.bj-hgp-head')).textAlign === 'center',
         bands: bands.map((band) => ({
           tier: band.getAttribute('data-bj-hgp-band'),
           cardCount: band.querySelectorAll('.bj-hgp-card').length,
@@ -85,7 +93,8 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     if (result.cards.map((card) => card.id).join(',') !== '24129,11327,34614,32596,32586,32100,32918,33000,35730,32592,29036,33632') {
       throw new Error(`${testCase.name}: promo card order is wrong`);
     }
-    if (result.title !== '빌리조 위크 - 이번주 특가') throw new Error(`${testCase.name}: weekly title is wrong`);
+    if (result.title !== '빌리조 위크 - 이번주 한정') throw new Error(`${testCase.name}: weekly title is wrong`);
+    if (!result.headingCentered) throw new Error(`${testCase.name}: weekly heading is not centered`);
     if (!result.countdownVisible) throw new Error(`${testCase.name}: weekly countdown is hidden`);
     if (result.countdown.map((item) => item.unit).join(',') !== 'day,hour,minute,second') {
       throw new Error(`${testCase.name}: countdown unit order is wrong`);
@@ -147,6 +156,12 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
       }
     }
     if (!result.cards.every((card) => card.imageLoaded)) throw new Error(`${testCase.name}: promo image failed`);
+    if (!result.cards.every((card) => card.brandLogoLoaded && / 로고$/.test(card.brandLogoAlt))) {
+      throw new Error(`${testCase.name}: brand logo failed`);
+    }
+    if (!result.cards.every((card) => card.infoTextAlign === 'left' && card.hasPriceBox)) {
+      throw new Error(`${testCase.name}: card information hierarchy is not left-aligned`);
+    }
     if (!result.cards.every((card) => card.horizontalLayout)) throw new Error(`${testCase.name}: promo cards must keep thumbnail left and product info right`);
     const minImageWidth = testCase.name === 'mobile' ? 110 : 150;
     if (!result.cards.every((card) => card.imageWidth >= minImageWidth)) throw new Error(`${testCase.name}: product thumbnail is too small`);
