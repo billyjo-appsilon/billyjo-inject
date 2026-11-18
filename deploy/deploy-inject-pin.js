@@ -27,13 +27,13 @@ if (!/^[0-9a-f]{7,40}$/i.test(releaseHash)) {
       if (!field) throw new Error('logscript_base not found');
       return field.value;
     });
-    const pinsBefore = Array.from(before.matchAll(/billyjo-inject@([0-9a-f]{7,40})\/inject\.js/gi), (m) => m[1]);
+    const pinsBefore = Array.from(before.matchAll(/billyjo-inject@([0-9a-f]{7,40})\/inject(?:\.min)?\.js/gi), (m) => m[1]);
     const naverLoadersBefore = (before.match(/data-bj-naver-loader/g) || []).length;
-    if (!pinsBefore.length) throw new Error('inject.js pin not found in current admin logscript');
+    if (!pinsBefore.length) throw new Error('inject.js or inject.min.js pin not found in current admin logscript');
 
     const after = before.replace(
-      /billyjo-inject@[0-9a-f]{7,40}\/inject\.js/gi,
-      `billyjo-inject@${releaseHash}/inject.js`
+      /billyjo-inject@[0-9a-f]{7,40}\/inject(\.min)?\.js/gi,
+      (_match, minSuffix) => `billyjo-inject@${releaseHash}/inject${minSuffix || ''}.js`
     );
     await page.evaluate((content) => {
       const field = document.querySelector('textarea[name="logscript_base"]');
@@ -52,10 +52,10 @@ if (!/^[0-9a-f]{7,40}$/i.test(releaseHash)) {
       const value = field ? field.value : '';
       return {
         exact: value === expected,
-        pins: Array.from(value.matchAll(/billyjo-inject@([0-9a-f]{7,40})\/inject\.js/gi), (m) => m[1]),
+        pins: Array.from(value.matchAll(/billyjo-inject@([0-9a-f]{7,40})\/inject(?:\.min)?\.js/gi), (m) => m[1]),
         hasGtm: value.includes('GTM-W32HD9CG'),
         naverLoaders: (value.match(/data-bj-naver-loader/g) || []).length,
-        hasExpectedHash: value.includes(`billyjo-inject@${hash}/inject.js`),
+        hasExpectedHash: new RegExp(`billyjo-inject@${hash}/inject(?:\\.min)?\\.js`, 'i').test(value),
         length: value.length
       };
     }, { expected: after, hash: releaseHash });
