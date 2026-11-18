@@ -36,6 +36,8 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
           id: card.getAttribute('data-bj-hgp-product'),
           tier: card.getAttribute('data-bj-hgp-tier'),
           text: card.textContent.replace(/\s+/g, ' ').trim(),
+          regularText: card.querySelector('.bj-hgp-regular')?.textContent.replace(/\s+/g, ' ').trim() || '',
+          priceText: card.querySelector('.bj-hgp-price')?.textContent.replace(/\s+/g, ' ').trim() || '',
           href: card.href,
           imageLoaded: card.querySelector('img').naturalWidth > 0,
           horizontalLayout: (() => {
@@ -43,6 +45,18 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
             const infoRect = card.querySelector('.bj-hgp-info').getBoundingClientRect();
             return imageRect.right <= infoRect.left + 1 && Math.abs(imageRect.top - infoRect.top) < card.getBoundingClientRect().height;
           })(),
+          imageWidth: card.querySelector('.bj-hgp-image').getBoundingClientRect().width,
+          badgeTopOffset: (() => {
+            const imageRect = card.querySelector('.bj-hgp-image').getBoundingClientRect();
+            const badgeRect = card.querySelector('.bj-hgp-discount').getBoundingClientRect();
+            return badgeRect.top - imageRect.top;
+          })(),
+          cardPadding: parseFloat(getComputedStyle(card).paddingTop),
+          hasRegularPrice: !!card.querySelector('.bj-hgp-regular'),
+          hasReviews: !!card.querySelector('.bj-hgp-reviews'),
+          reviewText: card.querySelector('.bj-hgp-reviews')?.textContent.replace(/\s+/g, ' ').trim() || '',
+          badgeText: card.querySelector('.bj-hgp-discount').textContent.replace(/\s+/g, ' ').trim(),
+          officialPromoBadge: !card.querySelector('.bj-hgp-discount').classList.contains('is-benefit'),
         })),
         title: section.querySelector('.bj-hgp-title').textContent.replace(/\s+/g, ' ').trim(),
         bands: bands.map((band) => ({
@@ -59,7 +73,7 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     });
 
     if (result.cards.length !== 12) throw new Error(`${testCase.name}: expected twelve promo cards`);
-    if (result.cards.map((card) => card.id).join(',') !== '33075,33724,34614,32596,32586,32100,32918,33000,35730,32592,29036,33632') {
+    if (result.cards.map((card) => card.id).join(',') !== '24129,11327,34614,32596,32586,32100,32918,33000,35730,32592,29036,33632') {
       throw new Error(`${testCase.name}: promo card order is wrong`);
     }
     if (result.title !== '11월 특가! 추가 사은품!') throw new Error(`${testCase.name}: dynamic month title is wrong`);
@@ -70,13 +84,56 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     if (!result.bands.every((band) => band.cardCount === 2)) {
       throw new Error(`${testCase.name}: every price band must contain two cards`);
     }
-    for (const expected of ['64% 할인', '월 13,450원~ (VAT 별도)', '54% 할인', '월 20,950원~ (VAT 별도)', '50% 할인', '공기청정기 1대 증정 대상', '추가 사은품 상담 대상']) {
+    for (const expected of ['11월 특가', '4.9 · 후기 23개', '4.9 · 후기 58개', '4.8 · 후기 149개', '4.8 · 후기 173개', '공기청정기 1대 증정 대상', '추가 사은품 상담 대상']) {
       if (!result.cards.some((card) => card.text.includes(expected))) {
         throw new Error(`${testCase.name}: missing ${expected}`);
       }
     }
+    const discountedPrices = {
+      '34614': ['정가 월 26,900원 (VAT 별도)', '할인가 월 13,450원~ (VAT 별도)'],
+      '32596': ['정가 월 20,900원 (VAT 별도)', '할인가 월 10,450원~ (VAT 별도)'],
+      '32586': ['정가 월 39,900원 (VAT 별도)', '할인가 월 20,950원~ (VAT 별도)'],
+    };
+    for (const [id, expected] of Object.entries(discountedPrices)) {
+      const card = result.cards.find((item) => item.id === id);
+      if (!card || card.regularText !== expected[0] || card.priceText !== expected[1]) {
+        throw new Error(`${testCase.name}: sourced regular/sale price mismatch for ${id}`);
+      }
+    }
+    if (result.cards.filter((card) => card.officialPromoBadge).length !== 3) {
+      throw new Error(`${testCase.name}: only three approved promotion badges may render`);
+    }
+    if (result.cards.filter((card) => card.hasRegularPrice).length !== 3) {
+      throw new Error(`${testCase.name}: exactly three cards must show sourced regular prices`);
+    }
+    if (result.cards.filter((card) => card.hasReviews).length !== 4) {
+      throw new Error(`${testCase.name}: exactly four model-verified review summaries must render`);
+    }
+    if (result.cards.some((card) => card.text.includes('50% 할인'))) {
+      throw new Error(`${testCase.name}: an unapproved generic 50% badge remains`);
+    }
+    if (result.cards.some((card) => /\d+% 할인/.test(card.badgeText))) {
+      throw new Error(`${testCase.name}: contradictory percentage badge remains beside regular/sale prices`);
+    }
+    const reviewByProduct = {
+      '24129': '★4.9 · 후기 23개',
+      '11327': '★4.9 · 후기 58개',
+      '34614': '★4.8 · 후기 149개',
+      '32586': '★4.8 · 후기 173개',
+    };
+    for (const [id, expectedReview] of Object.entries(reviewByProduct)) {
+      const card = result.cards.find((item) => item.id === id);
+      if (!card || card.reviewText !== expectedReview) {
+        throw new Error(`${testCase.name}: model-bound review mismatch for ${id}`);
+      }
+    }
     if (!result.cards.every((card) => card.imageLoaded)) throw new Error(`${testCase.name}: promo image failed`);
     if (!result.cards.every((card) => card.horizontalLayout)) throw new Error(`${testCase.name}: promo cards must keep thumbnail left and product info right`);
+    const minImageWidth = testCase.name === 'mobile' ? 110 : 150;
+    if (!result.cards.every((card) => card.imageWidth >= minImageWidth)) throw new Error(`${testCase.name}: product thumbnail is too small`);
+    if (!result.cards.every((card) => card.badgeTopOffset >= 0 && card.badgeTopOffset <= 8)) throw new Error(`${testCase.name}: badge must stay at the thumbnail top`);
+    const minPadding = testCase.name === 'mobile' ? 13 : 18;
+    if (!result.cards.every((card) => card.cardPadding >= minPadding)) throw new Error(`${testCase.name}: card padding is too tight`);
     if (!result.beforeNativeRecommendation) throw new Error(`${testCase.name}: promo cards must precede native recommendations`);
     if (!result.menuLabels.some((label) => label.includes('프로모션/사은품 확인'))) {
       throw new Error(`${testCase.name}: new menu label is missing`);

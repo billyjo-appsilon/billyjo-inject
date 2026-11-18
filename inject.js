@@ -2987,47 +2987,51 @@
   var SNAPSHOT_MONTH = '2026-11';
   var PRODUCTS = [
     {
-      tier: '1만원 언더', productId: '33075', brand: '청호나이스',
-      model: 'BD-36D50', name: '청호 쾌변 비데 B360', price: 9900,
+      tier: '1만원 언더', productId: '24129', brand: '웰스',
+      model: 'WP610NWA', name: '미미 직수 무전원 정수기', price: 8900,
+      rating: 4.9, reviewCount: 23,
       gift: '추가 사은품 상담 대상',
-      image: 'https://media.billyjo.co.kr/products/BD36D508/2e3760320110c3132f10f354f6d8685ee976a8c2db6efad5ebc39902275f1233/original.png'
+      image: 'https://media.billyjo.co.kr/products/WP610NWA6/967f775df9c535704fcf44d2049977444a411df17c7d2e6dfb99eb96d3749561/original.jpg'
     },
     {
-      tier: '1만원 언더', productId: '33724', brand: 'LG전자',
-      model: 'B124W14', name: 'LG 미니멀 냉장고 121L', price: 9400,
+      tier: '1만원 언더', productId: '11327', brand: 'LG전자',
+      model: 'HW300BBB', name: '퓨리케어 자연기화 가습기 3.6L', price: 9900,
+      rating: 4.9, reviewCount: 58,
       gift: '추가 사은품 상담 대상',
-      image: 'https://media.billyjo.co.kr/products/B124W14/2608ef77a48726ee2df3683b31230b8038b62afeea3d8781f91f5ffdaff412fe/original.png'
+      image: 'https://media.billyjo.co.kr/products/HW300BBB/3c54b99b16c76f383d4308f0f6125886d8be84ba60cb31292abbb3d172af37de/original.jpg'
     },
     {
       tier: '1만원대', productId: '34614', brand: '청호나이스',
-      model: 'WP-50C90621N', name: '뉴 러블리트리 정수기', price: 13450, discount: 64,
+      model: 'WP-50C90621N', name: '뉴 러블리트리 정수기', regularPrice: 26900, price: 13450, discount: 64,
+      rating: 4.8, reviewCount: 149,
       gift: '공기청정기 1대 증정 대상',
       benefitLine: '뉴 러블리트리 정수기 64% 할인 월 13,450원~',
-      image: 'https://rentalshop.site/_data/file/goodsImages/107c6468dbb70074208750fa972617ad_1_1.png'
+      image: 'https://media.billyjo.co.kr/products/WP50C90621N12/69c7339cf1c2c8835630ebcae819eaad7548fd09698f4a0fa1456c081f2fbb7d/original.png'
     },
     {
       tier: '1만원대', productId: '32596', brand: '청호나이스',
-      model: 'BS-65D70', name: 'B700 살균 리모컨 비데', price: 10450, discount: 56,
+      model: 'BS-65D70', name: 'B700 살균 리모컨 비데', regularPrice: 20900, price: 10450, discount: 56,
       gift: '추가 사은품 상담 대상',
       benefitLine: 'B700 살균 리모컨 비데 56% 할인 월 10,450원~',
       image: 'https://media.billyjo.co.kr/products/BS65D708/563a73c7934570fd1a347cd7b810d97deb48eb37e9be5ca0e672dd95fe0b40eb/original.jpg'
     },
     {
       tier: '2만원대', productId: '32586', brand: '청호나이스',
-      model: 'WI-37C90720N', name: 'The M 얼음정수기', price: 20950, discount: 54,
+      model: 'WI-37C90720N', name: 'The M 얼음정수기', regularPrice: 39900, price: 20950, discount: 54,
+      rating: 4.8, reviewCount: 173,
       gift: '공기청정기 1대 증정 대상',
       benefitLine: 'The M 얼음정수기 54% 할인 월 20,950원~',
-      image: 'https://rentalshop.site/_data/file/goodsImages/8a2b23e5e56107c06eabca22aad641cf.png'
+      image: 'https://media.billyjo.co.kr/products/WI37C90720N4/d5a9bd0fce4934e0172f6e1e16009818f29aaf25dfbf891f26a96596ce1205aa/original.png'
     },
     {
       tier: '2만원대', productId: '32100', brand: '쿠쿠',
-      model: 'CP-AMS100', name: '미니 100 초고온 직수 정수기', price: 28900, discount: 50,
+      model: 'CP-AMS100', name: '미니 100 초고온 직수 정수기', price: 28900,
       gift: '추가 사은품 상담 대상',
       image: 'https://media.billyjo.co.kr/products/CPAMS100/a203bca9b1b99d71c308d2b81702e117fd1170a6b3159161f6da934aa6cc0393/original.gif'
     },
     {
       tier: '3만원대', productId: '32918', brand: '쿠쿠',
-      model: 'CP-AQS100EWH', name: '제로 100 미니 얼음정수기', price: 38900, discount: 50,
+      model: 'CP-AQS100EWH', name: '제로 100 미니 얼음정수기', price: 38900,
       gift: '추가 사은품 상담 대상',
       image: 'https://media.billyjo.co.kr/products/CPAQS100EWH/77178de0e7c93f71661eb5a5bba5b287ef7ea6bcb70af2b54ecd9befefaf5a32/original.png'
     },
@@ -3039,25 +3043,25 @@
     },
     {
       tier: '4만원대', productId: '35730', brand: '쿠쿠',
-      model: 'CRM-D01HEMLK/HLK', name: '레스티노 매트리스 라지킹', price: 48900, discount: 50,
+      model: 'CRM-D01HEMLK/HLK', name: '레스티노 매트리스 라지킹', price: 48900,
       gift: '추가 사은품 상담 대상',
       image: 'https://media.billyjo.co.kr/products/CRMD01HEMLKHLK6/cf10af5e594cfbfcad74d6198469119d0761888885a947ba990f647c6d9f1aa6/original.png'
     },
     {
       tier: '4만원대', productId: '32592', brand: '쿠쿠',
-      model: 'CP-AHS101HEW', name: '제로백 슬림 플러스 얼음정수기', price: 44900, discount: 50,
+      model: 'CP-AHS101HEW', name: '제로백 슬림 플러스 얼음정수기', price: 40900,
       gift: '추가 사은품 상담 대상',
       image: 'https://media.billyjo.co.kr/products/CPAHS101HEW/ea76374ca79539176d764fa1f259472b094c87c1f8f80243047f438c649893bc/original.png'
     },
     {
       tier: '5만원대', productId: '29036', brand: '코웨이',
-      model: 'CHPI-7420N', name: '아이콘 얼음정수기 맥스', price: 51210, discount: 50,
+      model: 'CHPI-7420N', name: '아이콘 얼음정수기 맥스', price: 51900,
       gift: '추가 사은품 상담 대상',
       image: 'https://media.billyjo.co.kr/products/CHPI7420N2/9097007c9d194f0a03f952cdeaede5b9833867535aba842aa3d35a4c2da71ac9/original.png'
     },
     {
       tier: '5만원대', productId: '33632', brand: 'LG전자',
-      model: 'T876MQQ041', name: '디오스 오브제컬렉션 STEM 냉장고', price: 56600,
+      model: 'T876MQQ041', name: '디오스 오브제컬렉션 STEM 냉장고', price: 59900,
       gift: '추가 사은품 상담 대상',
       image: 'https://media.billyjo.co.kr/products/T876MQQ041/124b22d0e6fd45ed883240af088e47ea9a6183b7b1f4ed6e407f84456b246413/original.png'
     }
@@ -3086,32 +3090,38 @@
     var style = document.createElement('style');
     style.id = 'bj-home-gift-promos-css';
     style.textContent =
-      '#bj-home-gift-promos{margin:0 0 34px;padding:22px 0 8px;font-family:Pretendard,sans-serif}' +
+      '#bj-home-gift-promos{margin:0 0 38px;padding:28px 8px 14px;font-family:Pretendard,sans-serif}' +
       '#bj-home-gift-promos *{box-sizing:border-box}' +
-      '.bj-hgp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}' +
+      '.bj-hgp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:22px}' +
       '.bj-hgp-title{margin:0;font-size:25px;font-weight:900;line-height:1.3;letter-spacing:-.04em;color:#16181d}' +
       '.bj-hgp-title b{color:#0838f8}' +
       '.bj-hgp-source{font-size:11px;color:#64748b;text-align:right;white-space:nowrap}' +
-      '.bj-hgp-band{margin-top:18px}' +
+      '.bj-hgp-band{margin-top:24px}' +
       '.bj-hgp-band:first-of-type{margin-top:0}' +
       '.bj-hgp-band-title{display:flex;align-items:center;gap:8px;margin:0 0 9px;font-size:15px;font-weight:900;color:#1e293b}' +
       '.bj-hgp-band-title:before{content:"";width:4px;height:15px;border-radius:99px;background:#0838f8}' +
-      '.bj-hgp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}' +
-      '.bj-hgp-card{display:grid;grid-template-columns:130px minmax(0,1fr);gap:14px;align-items:center;padding:14px;border:1px solid #dbe4ff;border-radius:16px;background:linear-gradient(145deg,#fff 0%,#f6f8ff 100%);color:inherit;text-decoration:none;box-shadow:0 7px 22px rgba(8,56,248,.07)}' +
-      '.bj-hgp-image{position:relative;display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1/1;border-radius:12px;background:#fff;overflow:hidden}' +
-      '.bj-hgp-image img{width:100%;height:100%;object-fit:contain}' +
-      '.bj-hgp-discount{position:absolute;top:7px;left:7px;padding:5px 8px;border-radius:999px;background:#ff3b30;color:#fff;font-size:11px;font-weight:900}' +
+      '.bj-hgp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}' +
+      '.bj-hgp-card{display:grid;grid-template-columns:158px minmax(0,1fr);gap:18px;align-items:start;padding:18px;border:1px solid #dbe4ff;border-radius:18px;background:linear-gradient(145deg,#fff 0%,#f6f8ff 100%);color:inherit;text-decoration:none;box-shadow:0 7px 22px rgba(8,56,248,.07)}' +
+      '.bj-hgp-image{position:relative;display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1/1;border-radius:12px;background:linear-gradient(145deg,#fff 0%,#edf2ff 100%);overflow:hidden}' +
+      '.bj-hgp-image img{width:100%;height:100%;object-fit:contain;transform:scale(1.08)}' +
+      '.bj-hgp-discount{position:absolute;top:5px;left:7px;padding:5px 8px;border-radius:999px;background:#ff3b30;color:#fff;font-size:11px;font-weight:900}' +
       '.bj-hgp-discount.is-benefit{background:#0838f8}' +
+      '.bj-hgp-info{min-width:0;padding:3px 0}' +
       '.bj-hgp-brand{font-size:11px;font-weight:800;color:#64748b}' +
       '.bj-hgp-name{margin-top:4px;font-size:16px;font-weight:900;line-height:1.35;letter-spacing:-.035em;color:#16181d}' +
       '.bj-hgp-model{margin-top:3px;font-size:11px;color:#94a3b8}' +
-      '.bj-hgp-price{margin-top:9px;color:#0838f8;font-size:12px;font-weight:800}' +
+      '.bj-hgp-regular{margin-top:9px;font-size:10px;font-weight:700;color:#94a3b8}' +
+      '.bj-hgp-regular s{margin-left:4px;text-decoration-thickness:1.5px}' +
+      '.bj-hgp-price{margin-top:4px;color:#0838f8;font-size:12px;font-weight:800}' +
+      '.bj-hgp-price-label{display:inline-block;margin-right:5px;color:#475569;font-size:10px;font-weight:900}' +
       '.bj-hgp-price b{font-size:21px;letter-spacing:-.04em}' +
       '.bj-hgp-vat{margin-left:4px;font-size:9px;color:#64748b;font-weight:700}' +
+      '.bj-hgp-reviews{display:flex;align-items:center;gap:5px;margin-top:7px;font-size:10px;font-weight:800;color:#475569}' +
+      '.bj-hgp-reviews strong{color:#f59e0b;font-size:12px}' +
       '.bj-hgp-gift{display:inline-flex;margin-top:8px;padding:6px 8px;border-radius:8px;background:#fff3e8;color:#b45309;font-size:10px;font-weight:900;line-height:1.35}' +
       '.bj-hgp-cta{display:block;margin-top:9px;font-size:11px;font-weight:800;color:#0838f8}' +
       '.bj-hgp-note{margin:14px 0 0;font-size:10px;line-height:1.5;color:#64748b}' +
-      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 26px;padding:16px 0 4px}.bj-hgp-head{display:block;margin-bottom:12px}.bj-hgp-title{font-size:20px}.bj-hgp-source{margin-top:5px;font-size:9px;text-align:left;white-space:normal}.bj-hgp-band{margin-top:15px}.bj-hgp-band-title{margin-bottom:7px;font-size:13px}.bj-hgp-grid{grid-template-columns:1fr;gap:8px}.bj-hgp-card{grid-template-columns:92px minmax(0,1fr);gap:10px;align-items:center;padding:9px;border-radius:13px}.bj-hgp-image{border-radius:9px}.bj-hgp-discount{top:5px;left:5px;padding:4px 6px;font-size:9px}.bj-hgp-info{min-width:0}.bj-hgp-brand{font-size:9px}.bj-hgp-name{margin-top:2px;font-size:13px;line-height:1.25}.bj-hgp-model{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-price{margin-top:5px;font-size:10px}.bj-hgp-price b{font-size:17px}.bj-hgp-vat{font-size:8px}.bj-hgp-gift{margin-top:5px;padding:4px 6px;font-size:9px}.bj-hgp-cta{margin-top:5px;font-size:9px}}';
+      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 8px 8px}.bj-hgp-head{display:block;margin-bottom:18px}.bj-hgp-title{font-size:20px}.bj-hgp-source{margin-top:5px;font-size:9px;text-align:left;white-space:normal}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:1fr;gap:10px}.bj-hgp-card{grid-template-columns:116px minmax(0,1fr);gap:12px;align-items:start;padding:13px;border-radius:15px}.bj-hgp-image{border-radius:10px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:9px}.bj-hgp-info{min-width:0;padding:1px 0}.bj-hgp-brand{font-size:9px}.bj-hgp-name{margin-top:2px;font-size:13px;line-height:1.25}.bj-hgp-model{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-regular{margin-top:6px;font-size:8px}.bj-hgp-price{margin-top:2px;font-size:10px}.bj-hgp-price-label{margin-right:3px;font-size:8px}.bj-hgp-price b{font-size:17px}.bj-hgp-vat{display:block;margin:2px 0 0;font-size:8px}.bj-hgp-reviews{margin-top:5px;font-size:9px}.bj-hgp-reviews strong{font-size:10px}.bj-hgp-gift{margin-top:5px;padding:4px 6px;font-size:9px}.bj-hgp-cta{margin-top:5px;font-size:9px}}';
     (document.head || document.documentElement).appendChild(style);
   }
   function render(month) {
@@ -3123,14 +3133,21 @@
     section.setAttribute('aria-label', '이번달 가격대별 특가 및 추가 사은품 추천제품');
     var monthLabel = String(Number(month.split('-')[1]));
     function card(p) {
-      var badge = p.discount
-        ? '<span class="bj-hgp-discount">' + p.discount + '% 할인</span>'
+      var badge = p.regularPrice
+        ? '<span class="bj-hgp-discount">11월 특가</span>'
         : '<span class="bj-hgp-discount is-benefit">혜택 집중</span>';
+      var price = p.regularPrice
+        ? '<div class="bj-hgp-regular">정가 <s>월 ' + won(p.regularPrice) + '원</s> <span class="bj-hgp-vat">(VAT 별도)</span></div>' +
+          '<div class="bj-hgp-price"><span class="bj-hgp-price-label">할인가</span> 월 <b>' + won(p.price) + '</b>원~ <span class="bj-hgp-vat">(VAT 별도)</span></div>'
+        : '<div class="bj-hgp-price"><span class="bj-hgp-price-label">월요금</span> 월 <b>' + won(p.price) + '</b>원~ <span class="bj-hgp-vat">(VAT 별도)</span></div>';
+      var reviews = p.rating && p.reviewCount
+        ? '<div class="bj-hgp-reviews" aria-label="평점 ' + p.rating + '점, 후기 ' + p.reviewCount + '개"><strong aria-hidden="true">★</strong><span>' + p.rating + ' · 후기 ' + won(p.reviewCount) + '개</span></div>'
+        : '';
       return '<a class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" data-bj-hgp-tier="' + p.tier + '" href="/html/dh_prod/prod_view/' + p.productId + '">' +
         '<div class="bj-hgp-image"><img src="' + p.image + '" alt="' + p.name + '">' + badge + '</div>' +
         '<div class="bj-hgp-info"><div class="bj-hgp-brand">' + p.brand + '</div><div class="bj-hgp-name">' + p.name + '</div>' +
         '<div class="bj-hgp-model">' + p.model + '</div>' +
-        '<div class="bj-hgp-price">월 <b>' + won(p.price) + '</b>원~ <span class="bj-hgp-vat">(VAT 별도)</span></div>' +
+        price + reviews +
         '<div class="bj-hgp-gift">' + p.gift + '</div>' +
         '<span class="bj-hgp-cta">제품 자세히 보기 →</span></div></a>';
     }
@@ -3142,7 +3159,7 @@
         return '<div class="bj-hgp-band" data-bj-hgp-band="' + tier + '"><h3 class="bj-hgp-band-title">' + tier + '</h3>' +
           '<div class="bj-hgp-grid">' + items.map(card).join('') + '</div></div>';
       }).join('') +
-      '<p class="bj-hgp-note">월요금·할인·사은품은 약정과 관리방식에 따라 달라질 수 있으며, 최종 혜택은 상담 시 확인됩니다.</p>';
+      '<p class="bj-hgp-note">월요금·할인·사은품은 약정과 관리방식에 따라 달라질 수 있으며, 할인가와 후기 평점·개수는 2026.11 확인 데이터 기준입니다. 최종 혜택은 상담 시 확인됩니다.</p>';
     var v5 = document.getElementById('bj-v5-injected');
     if (v5) v5.appendChild(section);
     else heading.parentNode.insertBefore(section, heading);
