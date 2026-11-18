@@ -38,6 +38,11 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
           text: card.textContent.replace(/\s+/g, ' ').trim(),
           href: card.href,
           imageLoaded: card.querySelector('img').naturalWidth > 0,
+          horizontalLayout: (() => {
+            const imageRect = card.querySelector('.bj-hgp-image').getBoundingClientRect();
+            const infoRect = card.querySelector('.bj-hgp-info').getBoundingClientRect();
+            return imageRect.right <= infoRect.left + 1 && Math.abs(imageRect.top - infoRect.top) < card.getBoundingClientRect().height;
+          })(),
         })),
         title: section.querySelector('.bj-hgp-title').textContent.replace(/\s+/g, ' ').trim(),
         bands: bands.map((band) => ({
@@ -71,6 +76,7 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
       }
     }
     if (!result.cards.every((card) => card.imageLoaded)) throw new Error(`${testCase.name}: promo image failed`);
+    if (!result.cards.every((card) => card.horizontalLayout)) throw new Error(`${testCase.name}: promo cards must keep thumbnail left and product info right`);
     if (!result.beforeNativeRecommendation) throw new Error(`${testCase.name}: promo cards must precede native recommendations`);
     if (!result.menuLabels.some((label) => label.includes('프로모션/사은품 확인'))) {
       throw new Error(`${testCase.name}: new menu label is missing`);

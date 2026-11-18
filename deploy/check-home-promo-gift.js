@@ -41,6 +41,8 @@ for (const required of [
   "<b>' + monthLabel + '월 특가!</b> 추가 사은품!",
   "(VAT 별도)",
   "data-bj-hgp-tier",
+  "grid-template-columns:92px minmax(0,1fr)",
+  "class=\"bj-hgp-info\"",
   "월요금·할인·사은품은 약정과 관리방식에 따라 달라질 수 있으며",
   "if (v5) v5.appendChild(section)",
   "else heading.parentNode.insertBefore(section, heading)",
