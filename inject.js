@@ -36,6 +36,85 @@
   } catch (_) { }
 })();
 
+/* ==========================================================================
+   메인 히어로 영상 음소거 UI — 랜딩과 동일한 움직이는 이퀄라이저 (2026-11-18)
+   기존 Cafe24 버튼의 클릭 로직은 유지하고 아이콘·상태 표현만 통일한다.
+   ========================================================================== */
+(function bjHomeVideoEqualizer() {
+  'use strict';
+  if (window.__bjHomeVideoEqualizer) return;
+  window.__bjHomeVideoEqualizer = true;
+
+  var style = document.createElement('style');
+  style.id = 'bj-home-video-equalizer-css';
+  style.textContent =
+    '.billyjo-video-hero,.billyjo-video-slide__frame{position:relative!important}' +
+    '.billyjo-video-sound-toggle{position:absolute!important;right:16px!important;bottom:16px!important;z-index:8!important;width:48px!important;height:48px!important;padding:0!important;display:grid!important;place-items:center!important;border:1px solid rgba(255,255,255,.5)!important;border-radius:50%!important;background:rgba(7,14,35,.7)!important;color:#fff!important;box-shadow:0 4px 14px rgba(0,0,0,.28)!important;backdrop-filter:blur(9px)!important;-webkit-backdrop-filter:blur(9px)!important;transition:transform .2s ease,background .2s ease!important}' +
+    '.billyjo-video-sound-toggle:hover{background:rgba(7,14,35,.86)!important}' +
+    '.billyjo-video-sound-toggle:active{transform:scale(.94)}' +
+    '.billyjo-video-sound-toggle:focus-visible{outline:2px solid #fff!important;outline-offset:3px}' +
+    '.billyjo-video-sound-toggle[aria-pressed="true"]{background:rgba(8,56,248,.9)!important}' +
+    '.bj-video-equalizer{display:flex;align-items:flex-end;justify-content:center;gap:3px;width:23px;height:22px}' +
+    '.bj-video-equalizer i{display:block;width:3px;height:7px;border-radius:3px;background:currentColor;transform-origin:bottom}' +
+    '.bj-video-equalizer i:nth-child(2){height:14px}.bj-video-equalizer i:nth-child(3){height:10px}.bj-video-equalizer i:nth-child(4){height:17px}' +
+    '.billyjo-video-sound-toggle[aria-pressed="true"] .bj-video-equalizer i{animation:bjVideoSoundEq .7s ease-in-out infinite alternate}' +
+    '.billyjo-video-sound-toggle[aria-pressed="true"] .bj-video-equalizer i:nth-child(2){animation-delay:-.45s}.billyjo-video-sound-toggle[aria-pressed="true"] .bj-video-equalizer i:nth-child(3){animation-delay:-.2s}.billyjo-video-sound-toggle[aria-pressed="true"] .bj-video-equalizer i:nth-child(4){animation-delay:-.6s}' +
+    '.billyjo-video-sound-toggle::after{content:"";position:absolute;width:29px;height:3px;border-radius:999px;background:#ff3b30;box-shadow:0 0 0 1px rgba(255,255,255,.82);transform:rotate(-45deg);transition:opacity .18s ease}' +
+    '.billyjo-video-sound-toggle[aria-pressed="true"]::after{opacity:0}' +
+    '@keyframes bjVideoSoundEq{0%{transform:scaleY(.38)}100%{transform:scaleY(1)}}' +
+    '@media(prefers-reduced-motion:reduce){.billyjo-video-sound-toggle[aria-pressed="true"] .bj-video-equalizer i{animation:none}}';
+  (document.head || document.documentElement).appendChild(style);
+
+  function enhance() {
+    var hero = document.querySelector('.billyjo-video-slide__frame, .billyjo-video-hero');
+    var video = hero && hero.querySelector('video.billyjo-video-hero__media, video');
+    if (!hero || !video) return false;
+    var button = hero.querySelector('.billyjo-video-sound-toggle');
+    if (!button) {
+      button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'billyjo-video-sound-toggle';
+      button.setAttribute('data-bj-sound-owned', '1');
+      hero.appendChild(button);
+    }
+    if (!button.querySelector('.bj-video-equalizer')) {
+      button.innerHTML = '<span class="bj-video-equalizer" aria-hidden="true"><i></i><i></i><i></i><i></i></span>';
+    }
+    function sync() {
+      var soundOn = !video.muted;
+      var pressed = soundOn ? 'true' : 'false';
+      var label = soundOn ? '영상 소리 끄기' : '영상 소리 켜기';
+      if (button.getAttribute('aria-pressed') !== pressed) button.setAttribute('aria-pressed', pressed);
+      if (button.getAttribute('aria-label') !== label) button.setAttribute('aria-label', label);
+    }
+    if (button.getAttribute('data-bj-sound-owned') === '1' && button.getAttribute('data-bj-sound-bound') !== '1') {
+      button.setAttribute('data-bj-sound-bound', '1');
+      button.addEventListener('click', function () {
+        video.muted = !video.muted;
+        video.volume = 1;
+        sync();
+        if (!video.muted) {
+          var play = video.play();
+          if (play && typeof play.catch === 'function') play.catch(function () { video.muted = true; sync(); });
+        }
+      });
+    }
+    if (button.getAttribute('data-bj-sound-sync') !== '1') {
+      button.setAttribute('data-bj-sound-sync', '1');
+      video.addEventListener('volumechange', sync);
+      new MutationObserver(sync).observe(button, { attributes: true, attributeFilter: ['aria-pressed'] });
+    }
+    sync();
+    return true;
+  }
+
+  if (!enhance()) {
+    var observer = new MutationObserver(function () { if (enhance()) observer.disconnect(); });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+    setTimeout(function () { observer.disconnect(); }, 15000);
+  }
+})();
+
 /* =========================================================================
  * 메인 모바일 히어로 손실방지 배너 교체 (2026-11-10)
  * - 렌탈샵 공통 128만원 배너는 그대로 두고 빌리조에서만 138만원 버전으로 치환한다.
