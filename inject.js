@@ -3111,7 +3111,7 @@
       '.bj-hgp-gift{display:inline-flex;margin-top:8px;padding:6px 8px;border-radius:8px;background:#fff3e8;color:#b45309;font-size:10px;font-weight:900;line-height:1.35}' +
       '.bj-hgp-cta{display:block;margin-top:9px;font-size:11px;font-weight:800;color:#0838f8}' +
       '.bj-hgp-note{margin:14px 0 0;font-size:10px;line-height:1.5;color:#64748b}' +
-      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 26px;padding:16px 0 4px}.bj-hgp-head{display:block;margin-bottom:12px}.bj-hgp-title{font-size:20px}.bj-hgp-source{margin-top:5px;font-size:9px;text-align:left;white-space:normal}.bj-hgp-band{margin-top:15px}.bj-hgp-band-title{margin-bottom:7px;font-size:13px}.bj-hgp-grid{gap:8px}.bj-hgp-card{display:flex;flex-direction:column;align-items:stretch;gap:8px;padding:9px;border-radius:13px}.bj-hgp-image{border-radius:9px}.bj-hgp-discount{top:5px;left:5px;font-size:10px}.bj-hgp-name{font-size:13px;min-height:36px}.bj-hgp-model{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-price{margin-top:6px;font-size:10px}.bj-hgp-price b{font-size:17px}.bj-hgp-vat{display:block;margin:2px 0 0;font-size:8px}.bj-hgp-gift{margin-top:6px;font-size:9px;min-height:36px}.bj-hgp-cta{margin-top:7px;font-size:10px}}';
+      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 26px;padding:16px 0 4px}.bj-hgp-head{display:block;margin-bottom:12px}.bj-hgp-title{font-size:20px}.bj-hgp-source{margin-top:5px;font-size:9px;text-align:left;white-space:normal}.bj-hgp-band{margin-top:15px}.bj-hgp-band-title{margin-bottom:7px;font-size:13px}.bj-hgp-grid{grid-template-columns:1fr;gap:8px}.bj-hgp-card{grid-template-columns:92px minmax(0,1fr);gap:10px;align-items:center;padding:9px;border-radius:13px}.bj-hgp-image{border-radius:9px}.bj-hgp-discount{top:5px;left:5px;padding:4px 6px;font-size:9px}.bj-hgp-info{min-width:0}.bj-hgp-brand{font-size:9px}.bj-hgp-name{margin-top:2px;font-size:13px;line-height:1.25}.bj-hgp-model{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-price{margin-top:5px;font-size:10px}.bj-hgp-price b{font-size:17px}.bj-hgp-vat{font-size:8px}.bj-hgp-gift{margin-top:5px;padding:4px 6px;font-size:9px}.bj-hgp-cta{margin-top:5px;font-size:9px}}';
     (document.head || document.documentElement).appendChild(style);
   }
   function render(month) {
@@ -3128,7 +3128,7 @@
         : '<span class="bj-hgp-discount is-benefit">혜택 집중</span>';
       return '<a class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" data-bj-hgp-tier="' + p.tier + '" href="/html/dh_prod/prod_view/' + p.productId + '">' +
         '<div class="bj-hgp-image"><img src="' + p.image + '" alt="' + p.name + '">' + badge + '</div>' +
-        '<div><div class="bj-hgp-brand">' + p.brand + '</div><div class="bj-hgp-name">' + p.name + '</div>' +
+        '<div class="bj-hgp-info"><div class="bj-hgp-brand">' + p.brand + '</div><div class="bj-hgp-name">' + p.name + '</div>' +
         '<div class="bj-hgp-model">' + p.model + '</div>' +
         '<div class="bj-hgp-price">월 <b>' + won(p.price) + '</b>원~ <span class="bj-hgp-vat">(VAT 별도)</span></div>' +
         '<div class="bj-hgp-gift">' + p.gift + '</div>' +
