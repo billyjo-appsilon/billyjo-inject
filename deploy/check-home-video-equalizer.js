@@ -6,7 +6,8 @@ const start = source.indexOf('(function bjHomeVideoEqualizer()');
 assert.ok(start >= 0, 'home equalizer module is present');
 const block = source.slice(start, source.indexOf('\n})();', start) + 6);
 
-assert.match(block, /right:16px!important;bottom:16px!important/, 'button has a 16px video-edge inset');
+assert.match(block, /right:8px!important;bottom:8px!important/, 'button has an 8px video-edge inset');
+assert.match(block, /width:34px!important;height:34px!important/, 'button is 30 percent smaller');
 assert.match(block, /billyjo-video-slide__frame/, 'module targets the current Cafe24 video frame');
 assert.match(block, /bj-video-equalizer/, 'equalizer icon is rendered');
 assert.match(block, /@keyframes bjVideoSoundEq/, 'audible state animates the equalizer');
