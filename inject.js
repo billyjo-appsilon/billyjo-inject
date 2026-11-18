@@ -2975,6 +2975,126 @@
 
   // === 모바일 카테고리 탭 + 상품 그리드 (스와이프·실상품·배너캐러셀) (2026-07-06) ===
   //   모바일: 사은품총합(#bj-v5-injected) 아래에 [배너 캐러셀 #bjct-banners]+[탭/그리드 #bjct-sec] 삽입, 추천제품·원본배너(.new-mb_m) 숨김. bjct- 네임스페이스.
+// === 홈: 공식 이번달 프로모션의 사은품 행사제품 2종 우선 추천 (2026-11-18) ===
+// Admin2 공개 프로모션 API에서 현재 월·회사·혜택·제품 튜플이 모두 일치할 때만 노출한다.
+// 월이 바뀌거나 공식 혜택이 내려가면 오래된 행사 카드가 남지 않도록 fail-closed 한다.
+(function injectHomeFeaturedGiftPromos() {
+  if (!/^\/(?:index\.php)?$/.test(location.pathname)) return;
+  if (document.getElementById('bj-home-gift-promos')) return;
+
+  var PRODUCTS = [
+    {
+      productId: '34614',
+      model: 'WP-50C90621N',
+      name: '뉴 러블리트리 정수기',
+      discount: 64,
+      price: 13450,
+      benefitLine: '뉴 러블리트리 정수기 64% 할인 월 13,450원~',
+      image: 'https://rentalshop.site/_data/file/goodsImages/107c6468dbb70074208750fa972617ad_1_1.png'
+    },
+    {
+      productId: '32586',
+      model: 'WI-37C90720N',
+      name: 'The M 얼음정수기',
+      discount: 54,
+      price: 20950,
+      benefitLine: 'The M 얼음정수기 54% 할인 월 20,950원~',
+      image: 'https://rentalshop.site/_data/file/goodsImages/8a2b23e5e56107c06eabca22aad641cf.png'
+    }
+  ];
+  var GIFT = '정수기 렌탈 시 공기청정기 1대 증정';
+
+  function currentMonthKst() {
+    var parts = new Intl.DateTimeFormat('en-US', {
+      timeZone: 'Asia/Seoul', year: 'numeric', month: '2-digit'
+    }).formatToParts(new Date());
+    var values = {};
+    parts.forEach(function (p) { values[p.type] = p.value; });
+    return values.year + '-' + values.month;
+  }
+  function won(v) { return Number(v || 0).toLocaleString('ko-KR'); }
+  function findHeading() {
+    var headings = document.querySelectorAll('h2');
+    for (var i = 0; i < headings.length; i++) {
+      if ((headings[i].textContent || '').indexOf('이달의 추천제품') !== -1) return headings[i];
+    }
+    return null;
+  }
+  function addStyle() {
+    if (document.getElementById('bj-home-gift-promos-css')) return;
+    var style = document.createElement('style');
+    style.id = 'bj-home-gift-promos-css';
+    style.textContent =
+      '#bj-home-gift-promos{margin:0 0 34px;padding:22px 0 8px;font-family:Pretendard,sans-serif}' +
+      '#bj-home-gift-promos *{box-sizing:border-box}' +
+      '.bj-hgp-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:16px}' +
+      '.bj-hgp-kicker{font-size:12px;font-weight:900;color:#0838f8;letter-spacing:.04em}' +
+      '.bj-hgp-title{margin:4px 0 0;font-size:25px;font-weight:900;line-height:1.3;letter-spacing:-.04em;color:#16181d}' +
+      '.bj-hgp-source{font-size:11px;color:#64748b;text-align:right;white-space:nowrap}' +
+      '.bj-hgp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}' +
+      '.bj-hgp-card{display:grid;grid-template-columns:180px minmax(0,1fr);gap:18px;align-items:center;padding:18px;border:1px solid #dbe4ff;border-radius:18px;background:linear-gradient(145deg,#fff 0%,#f6f8ff 100%);color:inherit;text-decoration:none;box-shadow:0 9px 28px rgba(8,56,248,.08)}' +
+      '.bj-hgp-image{position:relative;display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1/1;border-radius:14px;background:#fff;overflow:hidden}' +
+      '.bj-hgp-image img{width:100%;height:100%;object-fit:contain}' +
+      '.bj-hgp-discount{position:absolute;top:8px;left:8px;padding:5px 8px;border-radius:999px;background:#ff3b30;color:#fff;font-size:12px;font-weight:900}' +
+      '.bj-hgp-brand{font-size:11px;font-weight:800;color:#64748b}' +
+      '.bj-hgp-name{margin-top:4px;font-size:19px;font-weight:900;line-height:1.35;letter-spacing:-.035em;color:#16181d}' +
+      '.bj-hgp-model{margin-top:3px;font-size:11px;color:#94a3b8}' +
+      '.bj-hgp-price{margin-top:12px;color:#0838f8;font-size:14px;font-weight:800}' +
+      '.bj-hgp-price b{font-size:24px;letter-spacing:-.04em}' +
+      '.bj-hgp-gift{display:inline-flex;margin-top:10px;padding:7px 9px;border-radius:8px;background:#fff3e8;color:#b45309;font-size:11px;font-weight:900;line-height:1.35}' +
+      '.bj-hgp-cta{display:block;margin-top:12px;font-size:12px;font-weight:800;color:#0838f8}' +
+      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 26px;padding:16px 0 4px}.bj-hgp-head{display:block;margin-bottom:12px}.bj-hgp-title{font-size:20px}.bj-hgp-source{margin-top:5px;font-size:9px;text-align:left}.bj-hgp-grid{gap:9px}.bj-hgp-card{display:flex;flex-direction:column;align-items:stretch;gap:9px;padding:10px;border-radius:14px}.bj-hgp-image{border-radius:10px}.bj-hgp-discount{top:6px;left:6px;font-size:11px}.bj-hgp-name{font-size:14px;min-height:38px}.bj-hgp-price{margin-top:7px;font-size:11px}.bj-hgp-price b{font-size:18px}.bj-hgp-gift{margin-top:7px;font-size:10px;min-height:41px}.bj-hgp-cta{margin-top:8px;font-size:11px}}';
+    (document.head || document.documentElement).appendChild(style);
+  }
+  function render(month) {
+    var heading = findHeading();
+    if (!heading || document.getElementById('bj-home-gift-promos')) return false;
+    addStyle();
+    var section = document.createElement('section');
+    section.id = 'bj-home-gift-promos';
+    section.setAttribute('aria-label', '이번달 사은품 행사 추천제품');
+    section.innerHTML =
+      '<div class="bj-hgp-head"><div><div class="bj-hgp-kicker">MONTHLY GIFT EVENT</div>' +
+      '<h2 class="bj-hgp-title">사은품 높은 이번달 행사제품</h2></div>' +
+      '<div class="bj-hgp-source">청호나이스 ' + month.replace('-', '.') + ' 공식 프로모션 기준</div></div>' +
+      '<div class="bj-hgp-grid">' + PRODUCTS.map(function (p) {
+        return '<a class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" href="/html/dh_prod/prod_view/' + p.productId + '">' +
+          '<div class="bj-hgp-image"><img src="' + p.image + '" alt="' + p.name + '"><span class="bj-hgp-discount">' + p.discount + '% 할인</span></div>' +
+          '<div><div class="bj-hgp-brand">청호나이스</div><div class="bj-hgp-name">' + p.name + '</div>' +
+          '<div class="bj-hgp-model">' + p.model + '</div>' +
+          '<div class="bj-hgp-price">월 <b>' + won(p.price) + '</b>원~</div>' +
+          '<div class="bj-hgp-gift">공기청정기 1대 증정 대상</div>' +
+          '<span class="bj-hgp-cta">제품 자세히 보기 →</span></div></a>';
+      }).join('') + '</div>';
+    var v5 = document.getElementById('bj-v5-injected');
+    if (v5) v5.appendChild(section);
+    else heading.parentNode.insertBefore(section, heading);
+    return true;
+  }
+  function start() {
+    var month = currentMonthKst();
+    fetch('https://admin2-api.billyjo.co.kr/v1/promotions/current?month=' + encodeURIComponent(month))
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (payload) {
+        var data = payload && payload.data;
+        if (!data || data.year_month !== month) return;
+        var promotions = data.promotions || [];
+        var promo = promotions.find(function (x) { return x && x.company === '청호나이스'; });
+        var benefits = promo && promo.benefits || [];
+        if (!promo || benefits.indexOf(GIFT) === -1) return;
+        if (!PRODUCTS.every(function (p) { return benefits.indexOf(p.benefitLine) !== -1; })) return;
+        if (render(month)) return;
+        var tries = 0;
+        var timer = setInterval(function () {
+          if (render(month) || ++tries >= 40) clearInterval(timer);
+        }, 250);
+      })
+      .catch(function () { /* 공식 프로모션 확인 실패 시 오래된 행사 카드를 노출하지 않는다. */ });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
+  else start();
+})();
+
 /* ===== 빌리조 모바일 카테고리 탭 + 상품 그리드(스와이프) — bjct- 네임스페이스 ===== */
 (function () {
   if (window.__bjctInit) return;
@@ -4767,7 +4887,7 @@ function bjHeaderMainInit() {
         bestLi.className = 'gnb__menu bj-best-gnb';
         var bestA = document.createElement('a');
         bestA.href = '#';
-        bestA.innerHTML = '<span style="margin-right:4px;line-height:1;display:inline-flex;align-items:center">🎯</span>시크릿 1:1 패키지';
+        bestA.innerHTML = '<span style="margin-right:4px;line-height:1;display:inline-flex;align-items:center">🎯</span>프로모션/사은품 확인';
         bestA.style.cssText = 'display:inline-flex;align-items:center;font:800 15px Pretendard,sans-serif;line-height:23.25px;color:#0838F8;text-decoration:none;white-space:nowrap;cursor:pointer;padding:2px 9px;border-radius:999px;background:rgba(8,56,248,.055);box-shadow:0 0 0 1px rgba(8,56,248,.12),0 0 14px rgba(8,56,248,.16);transition:background .16s,box-shadow .16s,transform .16s';
         bestA.onmouseenter = function(){ bestA.style.background = 'rgba(8,56,248,.09)'; bestA.style.boxShadow = '0 0 0 1px rgba(8,56,248,.18),0 0 18px rgba(8,56,248,.22)'; bestA.style.transform = 'translateY(-1px)'; };
         bestA.onmouseleave = function(){ bestA.style.background = 'rgba(8,56,248,.055)'; bestA.style.boxShadow = '0 0 0 1px rgba(8,56,248,.12),0 0 14px rgba(8,56,248,.16)'; bestA.style.transform = 'translateY(0)'; };
@@ -8648,7 +8768,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         var link = document.createElement('a');
         link.className = 'bj-newlywed-cat';
         link.href = '#';
-        link.innerHTML = '<span style="margin-right:3px;line-height:1;display:inline-flex;align-items:center">🎯</span>시크릿 1:1 패키지';
+        link.innerHTML = '<span style="margin-right:3px;line-height:1;display:inline-flex;align-items:center">🎯</span>프로모션/사은품 확인';
         /* 다른 카테고리 항목(.category__wrap a = 14px / line-height:1.5 / padding:0)과
            동일한 박스 모델로 맞춰 수직 정렬. 기존 13px·padding:2px·line-height:1.4 차이로
            형제 항목보다 위로 떠 보이던 문제 해소. 브랜드 파랑(#0838F8)만 강조 유지. */
@@ -13476,7 +13596,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var link = document.createElement('a');
     link.className = 'bj-newlywed-cat';
     link.href = '#';
-    link.innerHTML = '<span style="margin-right:3px">🎯</span>시크릿 1:1 패키지';
+    link.innerHTML = '<span style="margin-right:3px">🎯</span>프로모션/사은품 확인';
     link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:0;font:800 14px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:transparent;border:0;border-radius:0;box-shadow:none;white-space:nowrap;cursor:pointer;line-height:1.5';
     link.onclick = function(e){
       e.preventDefault();
