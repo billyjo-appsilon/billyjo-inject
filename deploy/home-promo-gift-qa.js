@@ -20,7 +20,7 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     await page.waitForSelector('#bj-home-gift-promos', { timeout: 30000 });
     await page.waitForFunction(() => {
       const images = [...document.querySelectorAll('#bj-home-gift-promos img')];
-      return images.length === 2 && images.every((image) => image.complete && image.naturalWidth > 0);
+      return images.length === 12 && images.every((image) => image.complete && image.naturalWidth > 0);
     }, { timeout: 30000 });
     await page.waitForTimeout(10000);
 
@@ -28,14 +28,21 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
       const section = document.querySelector('#bj-home-gift-promos');
       const heading = [...document.querySelectorAll('h2')].find((node) => node.textContent.includes('이달의 추천제품'));
       const cards = [...document.querySelectorAll('.bj-hgp-card')];
+      const bands = [...document.querySelectorAll('.bj-hgp-band')];
       const menuLabels = [...document.querySelectorAll('.bj-best-gnb, .bj-newlywed-cat')]
         .map((node) => node.textContent.replace(/\s+/g, ' ').trim());
       return {
         cards: cards.map((card) => ({
           id: card.getAttribute('data-bj-hgp-product'),
+          tier: card.getAttribute('data-bj-hgp-tier'),
           text: card.textContent.replace(/\s+/g, ' ').trim(),
           href: card.href,
           imageLoaded: card.querySelector('img').naturalWidth > 0,
+        })),
+        title: section.querySelector('.bj-hgp-title').textContent.replace(/\s+/g, ' ').trim(),
+        bands: bands.map((band) => ({
+          tier: band.getAttribute('data-bj-hgp-band'),
+          cardCount: band.querySelectorAll('.bj-hgp-card').length,
         })),
         beforeNativeRecommendation: !!(section.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING),
         menuLabels,
@@ -46,11 +53,19 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
       };
     });
 
-    if (result.cards.length !== 2) throw new Error(`${testCase.name}: expected two promo cards`);
-    if (result.cards.map((card) => card.id).join(',') !== '34614,32586') {
+    if (result.cards.length !== 12) throw new Error(`${testCase.name}: expected twelve promo cards`);
+    if (result.cards.map((card) => card.id).join(',') !== '33075,33724,34614,32596,32586,32100,32918,33000,35730,32592,29036,33632') {
       throw new Error(`${testCase.name}: promo card order is wrong`);
     }
-    for (const expected of ['64% 할인', '월 13,450원~', '54% 할인', '월 20,950원~', '공기청정기 1대 증정 대상']) {
+    if (result.title !== '11월 특가! 추가 사은품!') throw new Error(`${testCase.name}: dynamic month title is wrong`);
+    const expectedTiers = ['1만원 언더', '1만원대', '2만원대', '3만원대', '4만원대', '5만원대'];
+    if (result.bands.map((band) => band.tier).join(',') !== expectedTiers.join(',')) {
+      throw new Error(`${testCase.name}: price band order is wrong`);
+    }
+    if (!result.bands.every((band) => band.cardCount === 2)) {
+      throw new Error(`${testCase.name}: every price band must contain two cards`);
+    }
+    for (const expected of ['64% 할인', '월 13,450원~ (VAT 별도)', '54% 할인', '월 20,950원~ (VAT 별도)', '50% 할인', '공기청정기 1대 증정 대상', '추가 사은품 상담 대상']) {
       if (!result.cards.some((card) => card.text.includes(expected))) {
         throw new Error(`${testCase.name}: missing ${expected}`);
       }
@@ -66,6 +81,40 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     console.log(`${testCase.name}: ok`, JSON.stringify(result));
     await page.close();
   }
+
+  // 공식 공기청정기 증정 혜택이 철회되면 가격 할인 문구가 남아 있어도
+  // 증정 카드가 포함된 섹션 전체를 fail-closed로 숨긴다.
+  const withdrawnGift = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  await withdrawnGift.route(/cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/inject(?:\.min)?\.js/, async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: injectSource });
+  });
+  await withdrawnGift.route('https://admin2-api.billyjo.co.kr/v1/promotions/current**', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json; charset=utf-8',
+      body: JSON.stringify({
+        success: true,
+        data: {
+          year_month: '2026-11',
+          promotions: [{
+            company: '청호나이스',
+            benefits: [
+              '뉴 러블리트리 정수기 64% 할인 월 13,450원~',
+              'B700 살균 리모컨 비데 56% 할인 월 10,450원~',
+              'The M 얼음정수기 54% 할인 월 20,950원~',
+            ],
+          }],
+        },
+      }),
+    });
+  });
+  await withdrawnGift.goto('https://billyjo.co.kr/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+  await withdrawnGift.waitForTimeout(3000);
+  if (await withdrawnGift.locator('#bj-home-gift-promos').count()) {
+    throw new Error('withdrawn-gift: promo section must stay hidden without official gift benefit');
+  }
+  console.log('withdrawn-gift: ok');
+  await withdrawnGift.close();
   await browser.close();
 })().catch((error) => {
   console.error(error);
