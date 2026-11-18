@@ -59,6 +59,15 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
           officialPromoBadge: !card.querySelector('.bj-hgp-discount').classList.contains('is-benefit'),
         })),
         title: section.querySelector('.bj-hgp-title').textContent.replace(/\s+/g, ' ').trim(),
+        countdown: [...section.querySelectorAll('[data-bj-countdown]')].map((node) => ({
+          unit: node.getAttribute('data-bj-countdown'),
+          value: node.textContent,
+        })),
+        countdownVisible: (() => {
+          const timer = section.querySelector('[data-bj-week-countdown]');
+          return !!timer && getComputedStyle(timer).display !== 'none' && timer.getBoundingClientRect().height > 0;
+        })(),
+        countdownAria: section.querySelector('[data-bj-week-countdown]')?.getAttribute('aria-label') || '',
         bands: bands.map((band) => ({
           tier: band.getAttribute('data-bj-hgp-band'),
           cardCount: band.querySelectorAll('.bj-hgp-card').length,
@@ -76,7 +85,17 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     if (result.cards.map((card) => card.id).join(',') !== '24129,11327,34614,32596,32586,32100,32918,33000,35730,32592,29036,33632') {
       throw new Error(`${testCase.name}: promo card order is wrong`);
     }
-    if (result.title !== '11월 특가! 추가 사은품!') throw new Error(`${testCase.name}: dynamic month title is wrong`);
+    if (result.title !== '빌리조 위크 - 이번주 특가') throw new Error(`${testCase.name}: weekly title is wrong`);
+    if (!result.countdownVisible) throw new Error(`${testCase.name}: weekly countdown is hidden`);
+    if (result.countdown.map((item) => item.unit).join(',') !== 'day,hour,minute,second') {
+      throw new Error(`${testCase.name}: countdown unit order is wrong`);
+    }
+    if (!result.countdown.every((item) => /^\d{2}$/.test(item.value))) {
+      throw new Error(`${testCase.name}: countdown values must be two digits`);
+    }
+    if (!/^이번주 특가 종료까지 \d+일 \d+시간 \d+분 \d+초$/.test(result.countdownAria)) {
+      throw new Error(`${testCase.name}: countdown accessible label is wrong`);
+    }
     const expectedTiers = ['1만원 언더', '1만원대', '2만원대', '3만원대', '4만원대', '5만원대'];
     if (result.bands.map((band) => band.tier).join(',') !== expectedTiers.join(',')) {
       throw new Error(`${testCase.name}: price band order is wrong`);
