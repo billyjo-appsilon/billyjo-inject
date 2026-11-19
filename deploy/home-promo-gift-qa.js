@@ -115,6 +115,8 @@ const logoAssets = new Map(logoFiles.map((file) => [
           brandLogoBlendMode: getComputedStyle(card.querySelector('.bj-hgp-brand-logo')).mixBlendMode,
           brandLogoHeight: card.querySelector('.bj-hgp-brand-logo').getBoundingClientRect().height,
           brandLogoWidth: card.querySelector('.bj-hgp-brand-logo').getBoundingClientRect().width,
+          brandLogoTransform: getComputedStyle(card.querySelector('.bj-hgp-brand-logo')).transform,
+          productImageTransform: getComputedStyle(card.querySelector('.bj-hgp-image > img:not(.bj-hgp-brand-logo)')).transform,
           brandLogoWrapperHeight: card.querySelector('.bj-hgp-brandmark').getBoundingClientRect().height,
           brandLogoOverlay: (() => {
             const image = card.querySelector('.bj-hgp-image').getBoundingClientRect();
@@ -152,6 +154,10 @@ const logoAssets = new Map(logoFiles.map((file) => [
           hasActions: !!card.querySelector('.bj-hgp-actions'),
           cartLabel: card.querySelector('.bj-hgp-cart')?.textContent.trim() || '',
           detailLabel: card.querySelector('.bj-hgp-detail')?.textContent.trim() || '',
+          detailHeight: card.querySelector('.bj-hgp-detail')?.getBoundingClientRect().height || 0,
+          cartHeight: card.querySelector('.bj-hgp-cart')?.getBoundingClientRect().height || 0,
+          detailFontSize: parseFloat(getComputedStyle(card.querySelector('.bj-hgp-detail')).fontSize),
+          cartFontSize: parseFloat(getComputedStyle(card.querySelector('.bj-hgp-cart')).fontSize),
         })),
         title: section.querySelector('.bj-hgp-title').textContent.replace(/\s+/g, ' ').trim(),
         countdown: [...section.querySelectorAll('[data-bj-countdown]')].map((node) => ({
@@ -273,6 +279,9 @@ const logoAssets = new Map(logoFiles.map((file) => [
         card.brandLogoOverlay.bottomGap >= 0 && card.brandLogoOverlay.bottomGap <= 8)) {
       throw new Error(`${testCase.name}: brand logo must overlay the product image`);
     }
+    if (!result.cards.every((card) => card.productImageTransform === 'matrix(1.18, 0, 0, 1.18, 0, 0)' && card.brandLogoTransform === 'none')) {
+      throw new Error(`${testCase.name}: product thumbnails must scale to 1.18 without scaling brand logos`);
+    }
     if (testCase.name === 'mobile' && result.cards.some((card) => card.nameModelGap > 2)) {
       throw new Error(`mobile: product name/model gap is too large (${Math.max(...result.cards.map((card) => card.nameModelGap))}px)`);
     }
@@ -294,6 +303,14 @@ const logoAssets = new Map(logoFiles.map((file) => [
     }
     if (!result.cards.every((card) => card.hasActions && card.cartLabel === '담기' && card.detailLabel === '상세보기')) {
       throw new Error(`${testCase.name}: compact card actions are missing`);
+    }
+    const expectedButtonHeight = testCase.name === 'mobile' ? 28 : 34;
+    const expectedButtonFontSize = testCase.name === 'mobile' ? 11 : 13;
+    if (!result.cards.every((card) => Math.abs(card.detailHeight - expectedButtonHeight) < 0.5 &&
+        Math.abs(card.cartHeight - expectedButtonHeight) < 0.5 &&
+        Math.abs(card.detailFontSize - expectedButtonFontSize) < 0.1 &&
+        Math.abs(card.cartFontSize - expectedButtonFontSize) < 0.1)) {
+      throw new Error(`${testCase.name}: action button dimensions are wrong`);
     }
     if (testCase.name === 'mobile' && !result.cards.every((card) => card.verticalLayout)) {
       throw new Error('mobile: promo cards must keep the product image above product info');
