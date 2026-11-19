@@ -8388,6 +8388,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 #bj-consult-modal .bj-phone-input { width: 100%; padding: 14px; border: 1.5px solid #d0d8ff; border-radius: 10px; font-size: 18px; text-align: center; letter-spacing: 2px; outline: none; }\
 #bj-consult-modal .bj-phone-input:focus { border-color: #0838f8; }\
 #bj-consult-modal .bj-phone-err { font-size: 12px; color: #ff3737; margin-top: 6px; min-height: 16px; text-align: center; }\
+#bj-consult-modal .bj-consent { display: flex; align-items: flex-start; gap: 9px; margin: 12px 0 14px; padding: 11px 12px; background: #f8f9fc; border: 1px solid #e5e7eb; border-radius: 10px; }\
+#bj-consult-modal .bj-consent input { width: 18px; height: 18px; margin: 1px 0 0; flex: 0 0 auto; accent-color: #0838f8; }\
+#bj-consult-modal .bj-consent-copy { min-width: 0; font-size: 11.5px; line-height: 1.45; color: #555; }\
+#bj-consult-modal .bj-consent-title { display: block; font-size: 12.5px; font-weight: 800; color: #222; margin-bottom: 2px; }\
+#bj-consult-modal .bj-consent a { color: #0838f8; font-weight: 700; text-decoration: underline; white-space: nowrap; }\
+#bj-consult-modal .bj-contact-summary { margin: 10px 0 16px; padding: 11px 12px; background: #f8f9fc; border-radius: 10px; font-size: 13px; color: #444; line-height: 1.5; }\
 #bj-consult-modal .bj-cta { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 18px; background: #0838f8; color: #fff; border: none; border-radius: 14px; font-size: 18px; font-weight: 800; text-decoration: none; cursor: pointer; transition: all 0.15s ease; }\
 #bj-consult-modal .bj-cta:hover, #bj-consult-modal .bj-cta:active { background: #0626c0; transform: scale(0.98); }\
 #bj-consult-modal .bj-cta svg { width: 22px; height: 22px; fill: #fff; }\
@@ -8415,6 +8421,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 #bj-consult-modal .bj-error { color: #c00; }\
 #bj-consult-modal .bj-spin { display: inline-block; width: 28px; height: 28px; border: 3px solid #ddd; border-top-color: #0838f8; border-radius: 50%; animation: bj-spin 0.8s linear infinite; margin-bottom: 12px; }\
 @keyframes bj-spin { to { transform: rotate(360deg); } }\
+@media (max-width: 480px) { #bj-consult-modal { padding: 12px; } #bj-consult-modal .bj-card { padding: 20px; max-height: 94vh; } }\
 ';
     document.head.appendChild(s);
   }
@@ -8729,71 +8736,105 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
 
   function showConsultApply() {
-    var slots = genReserveSlots24h();
-    var slotButtons = slots.length
-      ? '<div class="bj-slots">' + slots.map(function(d, i) {
-          return '<button type="button" class="bj-slot" data-slot="' + i + '">' + escapeHtml(fmtSlot(d)) + '</button>';
-        }).join('') + '</div>'
-      : '<div class="bj-reserve-empty">24시간 이내 예약 가능한 시간이 없습니다.<br>바로 통화 신청을 이용해 주세요.</div>';
-    var wrap = buildModal(
-      '<div class="bj-reserve-head"><div class="bj-reserve-title">상담 신청</div></div>' +
-      '<div class="bj-reserve-sub">성함과 휴대폰 번호를 입력해야 통화 안내 코드와 상담사 전화 버튼이 표시됩니다.</div>' +
-      '<div class="bj-phone-label">이름</div>' +
-      '<input type="text" class="bj-name-input" id="bj-apply-name" placeholder="홍길동" maxlength="20" autocomplete="name">' +
-      '<div class="bj-phone-label">휴대폰 번호</div>' +
-      '<input type="tel" class="bj-phone-input" id="bj-apply-phone" placeholder="010-0000-0000" maxlength="13" autocomplete="tel" inputmode="tel">' +
-      '<div class="bj-phone-err" id="bj-apply-err"></div>' +
-      '<button type="button" class="bj-cta" id="bj-apply-now">' + PHONE_ICON + '<span>지금 견적받기</span></button>' +
-      '<div class="bj-phone-label">예약 시간대</div>' +
-      '<div class="bj-reserve-sub" style="margin-bottom:10px">24시간 이내 통화 가능한 시간대만 선택할 수 있습니다.</div>' +
-      slotButtons
-    );
-    var nameInput = wrap.querySelector('#bj-apply-name');
-    var input = wrap.querySelector('#bj-apply-phone');
-    var err = wrap.querySelector('#bj-apply-err');
-    function name(){
-      return nameInput ? String(nameInput.value || '').trim() : '';
-    }
-    function phone(){
-      return input ? input.value : '';
-    }
-    function requireContact(){
-      if (!validCustomerName(name())) {
-        if (err) err.textContent = '이름을 입력해 주세요.';
-        if (nameInput) nameInput.focus();
-        return false;
+    var state = { name: '', phone: '', consent: false, acceptedAt: null };
+
+    function renderContactStep() {
+      var wrap = buildModal(
+        '<div data-bj-lead-step="contact">' +
+        '<div class="bj-reserve-head"><div class="bj-reserve-title">3초 견적·제품 추천</div></div>' +
+        '<div class="bj-reserve-sub">정보를 남기면 조건과 혜택을 비교해 빠르게 안내해 드립니다.</div>' +
+        '<div class="bj-phone-label">이름</div>' +
+        '<input type="text" class="bj-name-input" id="bj-apply-name" placeholder="홍길동" maxlength="20" autocomplete="name" value="' + escapeAttr(state.name) + '">' +
+        '<div class="bj-phone-label">휴대폰 번호</div>' +
+        '<input type="tel" class="bj-phone-input" id="bj-apply-phone" placeholder="010-0000-0000" maxlength="13" autocomplete="tel" inputmode="tel" value="' + escapeAttr(state.phone) + '">' +
+        '<label class="bj-consent" for="bj-privacy-consent">' +
+        '<input type="checkbox" id="bj-privacy-consent"' + (state.consent ? ' checked' : '') + '>' +
+        '<span class="bj-consent-copy"><span class="bj-consent-title">[필수] 개인정보 수집·이용 동의</span>' +
+        '렌탈 견적·제품 추천 상담을 위해 성명·휴대폰 번호를 수집하며, 상담 후 24시간 이내 파기합니다. ' +
+        '<a href="https://www.billyjo.co.kr/html/dh/privacy_policy" target="_blank" rel="noopener noreferrer">자세히</a></span></label>' +
+        '<div class="bj-phone-err" id="bj-apply-err" role="alert"></div>' +
+        '<button type="button" class="bj-cta" id="bj-apply-now"><span>3초 견적받기</span></button>' +
+        '<button type="button" class="bj-cta bj-cta-secondary" id="bj-apply-reserve">' + CAL_ICON + '<span>상담 예약하기</span></button>' +
+        '</div>'
+      );
+      var nameInput = wrap.querySelector('#bj-apply-name');
+      var input = wrap.querySelector('#bj-apply-phone');
+      var consent = wrap.querySelector('#bj-privacy-consent');
+      var err = wrap.querySelector('#bj-apply-err');
+
+      function syncState(){
+        state.name = nameInput ? String(nameInput.value || '').trim() : '';
+        state.phone = input ? input.value : '';
+        state.consent = !!(consent && consent.checked);
+        if (!state.consent) state.acceptedAt = null;
       }
-      if (validPhone(phone())) {
+      function requireContact(){
+        syncState();
+        if (!validCustomerName(state.name)) {
+          if (err) err.textContent = '이름을 입력해 주세요.';
+          if (nameInput) nameInput.focus();
+          return false;
+        }
+        if (!validPhone(state.phone)) {
+          if (err) err.textContent = '휴대전화 번호를 정확히 입력해 주세요. (예: 010-1234-5678)';
+          if (input) input.focus();
+          return false;
+        }
+        if (!state.consent) {
+          if (err) err.textContent = '필수 개인정보 수집·이용에 동의해 주세요.';
+          if (consent) consent.focus();
+          return false;
+        }
+        if (!state.acceptedAt) state.acceptedAt = new Date().toISOString();
         if (err) err.textContent = '';
         return true;
       }
-      if (err) err.textContent = '휴대전화 번호를 정확히 입력해 주세요. (예: 010-1234-5678)';
-      if (input) input.focus();
-      return false;
-    }
-    if (nameInput) {
-      nameInput.addEventListener('input', function(){ if (err) err.textContent = ''; });
-      setTimeout(function(){ try { nameInput.focus(); } catch(_){} }, 80);
-    }
-    if (input) {
-      input.addEventListener('input', function(){
-        input.value = normalizePhoneInput(input.value);
-        if (err) err.textContent = '';
-      });
-    }
-    var nowBtn = wrap.querySelector('#bj-apply-now');
-    if (nowBtn) nowBtn.addEventListener('click', function(){
-      if (!requireContact()) return;
-      requestConsultWithPhone({ name: name(), phone: phone(), slot: null });
-    });
-    Array.prototype.forEach.call(wrap.querySelectorAll('[data-slot]'), function(btn){
-      btn.addEventListener('click', function(){
+      if (nameInput) nameInput.addEventListener('input', function(){ syncState(); if (err) err.textContent = ''; });
+      if (input) input.addEventListener('input', function(){ input.value = normalizePhoneInput(input.value); syncState(); if (err) err.textContent = ''; });
+      if (consent) consent.addEventListener('change', function(){ syncState(); if (err) err.textContent = ''; });
+      if (!state.name) setTimeout(function(){ try { nameInput.focus(); } catch(_){} }, 80);
+      wrap.querySelector('#bj-apply-now').addEventListener('click', function(){
         if (!requireContact()) return;
-        var slot = slots[Number(btn.getAttribute('data-slot'))];
-        if (!slot) return;
-        requestConsultWithPhone({ name: name(), phone: phone(), slot: slot, label: fmtSlot(slot) });
+        requestConsultWithPhone({ name: state.name, phone: state.phone, slot: null, privacyConsentAcceptedAt: state.acceptedAt });
       });
-    });
+      wrap.querySelector('#bj-apply-reserve').addEventListener('click', function(){
+        if (!requireContact()) return;
+        renderReservationStep();
+      });
+    }
+
+    function renderReservationStep() {
+      var slots = genReserveSlots24h().slice(0, 8);
+      var slotButtons = slots.length
+        ? '<div class="bj-slots">' + slots.map(function(d, i) {
+            return '<button type="button" class="bj-slot" data-slot="' + i + '">' + escapeHtml(fmtSlot(d)) + '</button>';
+          }).join('') + '</div>'
+        : '<div class="bj-reserve-empty">24시간 이내 예약 가능한 시간이 없습니다.<br>바로 견적 신청을 이용해 주세요.</div>';
+      var wrap = buildModal(
+        '<div data-bj-lead-step="reservation">' +
+        '<div class="bj-reserve-head"><button type="button" class="bj-back" id="bj-apply-back">‹ 뒤로</button>' +
+        '<div class="bj-reserve-title">상담 예약하기</div></div>' +
+        '<div class="bj-reserve-sub">24시간 이내 통화 가능한 시간대를 선택해 주세요.</div>' +
+        '<div class="bj-contact-summary"><strong>' + escapeHtml(state.name) + '</strong><br>' + escapeHtml(state.phone) + '</div>' +
+        slotButtons + '</div>'
+      );
+      wrap.querySelector('#bj-apply-back').addEventListener('click', renderContactStep);
+      Array.prototype.forEach.call(wrap.querySelectorAll('[data-slot]'), function(btn){
+        btn.addEventListener('click', function(){
+          var slot = slots[Number(btn.getAttribute('data-slot'))];
+          if (!slot) return;
+          requestConsultWithPhone({
+            name: state.name,
+            phone: state.phone,
+            slot: slot,
+            label: fmtSlot(slot),
+            privacyConsentAcceptedAt: state.acceptedAt
+          });
+        });
+      });
+    }
+
+    renderContactStep();
   }
 
   function requestConsultWithPhone(contact) {
@@ -8808,6 +8849,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     };
     if (contact.name) payload.customerName = contact.name;
     payload.customerPhone = contact.phone;
+    payload.formId = 'billyjo-main-quick-quote-v1';
+    payload.privacyConsentAccepted = true;
+    payload.privacyConsentAcceptedAt = contact.privacyConsentAcceptedAt || new Date().toISOString();
     if (contact.slot) {
       payload.callbackMinutes = Math.max(5, Math.round((contact.slot.getTime() - Date.now()) / 60000));
       payload.customerMemo = ['웹사이트 상담신청', '상담 희망 시간대: ' + contact.label].join('\n');
