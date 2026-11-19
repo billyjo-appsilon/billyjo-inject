@@ -3038,7 +3038,10 @@
           else extra.setAttribute('hidden', '');
         });
       }
-      document.body.classList.add('bj-home-cats-ready');
+      // Native recommendation cards stay as an invisible layout placeholder until
+      // the v5 shell and the verified promotion cards are ready together. The v5
+      // coordinator adds bj-home-cats-ready in the same frame that it reveals the
+      // final home content, avoiding native -> v5 -> promotion visible swaps.
     }
     function boot() {
       build();
@@ -3419,6 +3422,8 @@
   function render(month) {
     var heading = findHeading();
     if (!heading || document.getElementById('bj-home-gift-promos')) return false;
+    var v5 = document.getElementById('bj-v5-injected');
+    if (!v5) return false;
     addStyle();
     var section = document.createElement('section');
     section.id = 'bj-home-gift-promos';
@@ -3470,36 +3475,60 @@
       });
     });
     bindHomeCartButtons(section);
-    var v5 = document.getElementById('bj-v5-injected');
-    if (v5) v5.appendChild(section);
-    else heading.parentNode.insertBefore(section, heading);
+    v5.appendChild(section);
     startWeekCountdown(section);
+    if (typeof window.__bjHomeReleaseV5 === 'function') {
+      window.__bjHomeReleaseV5('promotion-ready');
+    }
     return true;
+  }
+  function settleWithoutPromotion(reason) {
+    window.__bjHomePromotionSettled = reason || 'promotion-unavailable';
+    if (typeof window.__bjHomeReleaseV5 === 'function') {
+      window.__bjHomeReleaseV5(window.__bjHomePromotionSettled);
+    }
   }
   function start() {
     var month = currentMonthKst();
-    if (month !== SNAPSHOT_MONTH) return;
+    if (month !== SNAPSHOT_MONTH) {
+      settleWithoutPromotion('promotion-month-mismatch');
+      return;
+    }
     fetch('https://admin2-api.billyjo.co.kr/v1/promotions/current?month=' + encodeURIComponent(month))
       .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
       .then(function (payload) {
         var data = payload && payload.data;
-        if (!data || data.year_month !== month) return;
+        if (!data || data.year_month !== month) {
+          settleWithoutPromotion('promotion-data-mismatch');
+          return;
+        }
         var promotions = data.promotions || [];
         var promo = promotions.find(function (x) { return x && x.company === '청호나이스'; });
         var benefits = promo && promo.benefits || [];
         var officialProducts = PRODUCTS.filter(function (p) { return p.benefitLine; });
-        if (!promo || benefits.indexOf(OFFICIAL_GIFT) === -1) return;
-        if (!officialProducts.every(function (p) { return benefits.indexOf(p.benefitLine) !== -1; })) return;
+        if (!promo || benefits.indexOf(OFFICIAL_GIFT) === -1) {
+          settleWithoutPromotion('promotion-policy-missing');
+          return;
+        }
+        if (!officialProducts.every(function (p) { return benefits.indexOf(p.benefitLine) !== -1; })) {
+          settleWithoutPromotion('promotion-products-missing');
+          return;
+        }
         if (render(month)) return;
         var tries = 0;
         var timer = setInterval(function () {
           if (render(month) || ++tries >= 40) clearInterval(timer);
         }, 250);
       })
-      .catch(function () { /* 공식 프로모션 확인 실패 시 오래된 행사 카드를 노출하지 않는다. */ });
+      .catch(function () {
+        // 공식 프로모션 확인 실패 시 오래된 행사 카드는 노출하지 않되,
+        // 이미 준비된 v5 콘텐츠는 기다리지 않고 즉시 공개한다.
+        settleWithoutPromotion('promotion-fetch-failed');
+      });
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
-  else start();
+  // The API request does not depend on parsed body markup. Starting it while the
+  // document parser is still running overlaps it with the v5 shell request.
+  start();
 })();
 
 /* ===== 빌리조 모바일 카테고리 탭 + 상품 그리드(스와이프) — bjct- 네임스페이스 ===== */
@@ -6944,6 +6973,44 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   var V5_URL = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@4c8fe10/preview-detail-page-v5.html';
   var CDN_BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@4c8fe10';
   var INJECTED_ID = 'bj-v5-injected';
+  var RELEASE_FALLBACK_MS = 2500;
+  var releaseTimer = 0;
+
+  function showNativeFallback(reason) {
+    if (!document.body) {
+      document.addEventListener('DOMContentLoaded', function() {
+        showNativeFallback(reason);
+      }, { once: true });
+      return;
+    }
+    document.body.classList.remove('bj-home-cats-ready');
+    document.body.classList.add('bj-home-native-fallback');
+    document.body.setAttribute('data-bj-home-fallback', reason || 'v5-unavailable');
+  }
+
+  function releaseHome(reason) {
+    var pageEl = document.getElementById(INJECTED_ID);
+    if (!pageEl || pageEl.getAttribute('data-bj-home-released')) return false;
+    pageEl.setAttribute('data-bj-home-released', reason || 'ready');
+    pageEl.removeAttribute('data-bj-home-pending');
+    pageEl.style.removeProperty('display');
+    if (document.body) {
+      document.body.classList.remove('bj-home-native-fallback');
+      document.body.classList.add('bj-home-cats-ready');
+    }
+    if (releaseTimer) {
+      clearTimeout(releaseTimer);
+      releaseTimer = 0;
+    }
+    try {
+      document.dispatchEvent(new CustomEvent('bj:home-render-ready', {
+        detail: { reason: reason || 'ready' }
+      }));
+    } catch (_error) {}
+    return true;
+  }
+
+  window.__bjHomeReleaseV5 = releaseHome;
 
   function findTargetHeading() {
     var nodes = document.querySelectorAll('h2');
@@ -7563,10 +7630,27 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
       var pageEl = v5Page.cloneNode(true);
       pageEl.id = INJECTED_ID;
+      pageEl.setAttribute('data-bj-home-pending', '1');
+      pageEl.style.setProperty('display', 'none', 'important');
       target.parentNode.insertBefore(pageEl, target);
       wrapZones(pageEl);
       reorderHome(pageEl);
-    } catch (e) { console.error('[bj-v5] inject failed:', e); }
+      pageEl.style.setProperty('display', 'none', 'important');
+      // Fail open: if the promotion policy API is unavailable, reveal the v5
+      // content instead of leaving the home page blank. In the normal path the
+      // promotion renderer cancels this timer and releases both together.
+      releaseTimer = setTimeout(function() {
+        releaseHome('promotion-timeout');
+      }, RELEASE_FALLBACK_MS);
+      if (window.__bjHomePromotionSettled) {
+        releaseHome(window.__bjHomePromotionSettled);
+      }
+    } catch (e) {
+      var pending = document.getElementById(INJECTED_ID);
+      if (pending && !pending.getAttribute('data-bj-home-released')) pending.remove();
+      showNativeFallback('v5-inject-failed');
+      console.error('[bj-v5] inject failed:', e);
+    }
     refreshGiftBadges(document.getElementById(INJECTED_ID));
   }
 
@@ -7583,16 +7667,20 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
           }
         });
         observer.observe(document.body || document.documentElement, { childList: true, subtree: true });
-        setTimeout(function() { observer.disconnect(); }, 15000);
+        setTimeout(function() {
+          observer.disconnect();
+          if (!isInjected()) showNativeFallback('v5-target-timeout');
+        }, 15000);
       })
-      .catch(function(err) { console.error('[bj-v5] fetch failed:', err); });
+      .catch(function(err) {
+        showNativeFallback('v5-fetch-failed');
+        console.error('[bj-v5] fetch failed:', err);
+      });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', start);
-  } else {
-    start();
-  }
+  // Fetch immediately so the static shell and the promotion API run in parallel
+  // with HTML parsing rather than both waiting for DOMContentLoaded.
+  start();
 })();
 
 // =============================================================================

@@ -110,8 +110,14 @@ for (const required of [
   "<span>정가</span> <s>월 ",
   "평점 ' + p.rating + '점, 후기 '",
   "월요금·할인·사은품은 약정과 관리방식에 따라 달라질 수 있으며",
-  "if (v5) v5.appendChild(section)",
-  "else heading.parentNode.insertBefore(section, heading)",
+  "if (!v5) return false",
+  "v5.appendChild(section)",
+  "window.__bjHomeReleaseV5('promotion-ready')",
+  "pageEl.setAttribute('data-bj-home-pending', '1')",
+  "releaseHome('promotion-timeout')",
+  "var RELEASE_FALLBACK_MS = 2500",
+  "showNativeFallback('v5-fetch-failed')",
+  "settleWithoutPromotion('promotion-fetch-failed')",
 ]) {
   if (!source.includes(required)) throw new Error(`missing home promo contract: ${required}`);
 }
