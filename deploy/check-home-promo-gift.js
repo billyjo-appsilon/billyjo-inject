@@ -56,7 +56,12 @@ for (const required of [
   "officialProducts.every(function (p) { return benefits.indexOf(p.benefitLine) !== -1; })",
   "data.year_month !== month",
   "section.id = 'bj-home-gift-promos'",
-  "<b>빌리조 위크</b> - 이번주 한정",
+  "var LIVE1_LANDING_CONFIG_URL = 'https://admin2-api.billyjo.co.kr/v1/landing/live1'",
+  "var banners = payload && payload.heroBanners",
+  "^\\/v1\\/landing\\/hero-assets\\/[a-z0-9]+$",
+  "class=\"bj-hgp-campaign-banner\"",
+  "data-bj-live1-banner-id=\"",
+  "data-bj-live1-banner-month=\"",
   "var BRAND_LOGOS = {",
   "'웰스': 'images/brands/wells-horizontal-20261119.png'",
   "'LG전자': 'images/brands/lg-electronics-horizontal-20261119.png'",
@@ -93,13 +98,7 @@ for (const required of [
   ".bj-hgp-pricebox{margin-top:4px;padding:4px 6px",
   "border-radius:18px;background:#fff;color:inherit",
   "aspect-ratio:1/1;border-radius:12px;background:#fff",
-  "data-bj-week-countdown role=\"timer\"",
-  "data-bj-countdown=\"day\"",
-  "data-bj-countdown=\"hour\"",
-  "data-bj-countdown=\"minute\"",
-  "data-bj-countdown=\"second\"",
-  "var daysUntilMonday = weekday === 0 ? 1 : 8 - weekday",
-  "window.setInterval(update, 1000)",
+  ".bj-hgp-campaign-banner img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover}",
   "data-bj-hgp-tier",
   "grid-template-columns:repeat(2,minmax(0,1fr));gap:8px",
   "flex-direction:column",
@@ -125,6 +124,15 @@ for (const required of [
 if (source.includes('(VAT 별도)')) throw new Error('VAT label must stay hidden on home promo cards');
 if (source.includes('추가 사은품 상담 대상')) throw new Error('stale consultation-target gift copy remains');
 if (source.includes('min-height:31px')) throw new Error('mobile product names must not reserve a blank second line');
+for (const removed of [
+  '<b>빌리조 위크</b> - 이번주 한정',
+  'data-bj-week-countdown',
+  'data-bj-countdown=',
+  'startWeekCountdown(section)',
+  'bj-hgp-source',
+]) {
+  if (source.includes(removed)) throw new Error(`removed weekly header contract remains: ${removed}`);
+}
 
 const numericDiscounts = source.match(/discount:\s*\d+/g) || [];
 if (numericDiscounts.length !== 3) {

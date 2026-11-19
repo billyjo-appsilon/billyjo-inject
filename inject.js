@@ -3100,6 +3100,8 @@
   if (document.getElementById('bj-home-gift-promos')) return;
 
   var SNAPSHOT_MONTH = '2026-11';
+  var LIVE1_LANDING_CONFIG_URL = 'https://admin2-api.billyjo.co.kr/v1/landing/live1';
+  var ADMIN2_PUBLIC_ORIGIN = 'https://admin2-api.billyjo.co.kr';
   var PRODUCTS = [
     {
       tier: '1만원 언더', productId: '24129', brand: '웰스',
@@ -3297,14 +3299,8 @@
     style.textContent =
       '#bj-home-gift-promos{margin:0 0 38px;padding:28px 8px 14px;font-family:Pretendard,sans-serif}' +
       '#bj-home-gift-promos *{box-sizing:border-box}' +
-      '.bj-hgp-head{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:9px;margin-bottom:24px;text-align:center}' +
-      '.bj-hgp-heading{display:flex;flex-direction:column;align-items:center;gap:11px;min-width:0}' +
-      '.bj-hgp-title{margin:0;font-size:25px;font-weight:900;line-height:1.3;letter-spacing:-.04em;color:#16181d}' +
-      '.bj-hgp-title b{color:#0838f8}' +
-      '.bj-hgp-countdown{display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}' +
-      '.bj-hgp-countdown-unit{display:flex;align-items:center;gap:5px;color:#475569;font-size:12px;font-weight:800}' +
-      '.bj-hgp-countdown-unit strong{display:grid;place-items:center;min-width:50px;height:48px;padding:0 8px;border:1px solid #e2e8f0;border-radius:13px;background:#fff;color:#111827;font-size:21px;font-weight:900;letter-spacing:.02em;box-shadow:0 7px 18px rgba(15,23,42,.08)}' +
-      '.bj-hgp-source{font-size:11px;color:#64748b;text-align:center;white-space:nowrap}' +
+      '.bj-hgp-campaign-banner{width:min(100%,760px);margin:0 auto 24px;border-radius:22px;overflow:hidden;background:#eef4ff;box-shadow:0 12px 30px rgba(8,56,248,.12)}' +
+      '.bj-hgp-campaign-banner img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover}' +
       '.bj-hgp-band{margin-top:24px}' +
       '.bj-hgp-band:first-of-type{margin-top:0}' +
       '.bj-hgp-band-title{display:flex;align-items:center;gap:8px;margin:0 0 9px;font-size:15px;font-weight:900;color:#1e293b}' +
@@ -3340,40 +3336,37 @@
       '.bj-hgp-cart{appearance:none;border:1px solid #0838f8;background:#0838f8;color:#fff;box-shadow:0 6px 14px rgba(8,56,248,.16)}' +
       '.bj-hgp-cart:disabled{cursor:default;opacity:.72}.bj-hgp-cart.is-added{border-color:#0f9f6e;background:#0f9f6e;opacity:1}.bj-hgp-cart.is-error{border-color:#c2410c;background:#c2410c}' +
       '.bj-hgp-note{margin:14px 0 0;font-size:10px;line-height:1.5;color:#64748b}' +
-      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 6px 8px}.bj-hgp-head{margin-bottom:18px;gap:7px}.bj-hgp-heading{width:100%;gap:9px}.bj-hgp-title{font-size:20px}.bj-hgp-countdown{width:100%;gap:6px}.bj-hgp-countdown-unit{flex:1 1 0;gap:4px;font-size:10px}.bj-hgp-countdown-unit strong{min-width:0;width:100%;height:44px;padding:0 4px;border-radius:12px;font-size:18px}.bj-hgp-source{font-size:9px;white-space:normal}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{aspect-ratio:16/10;border-radius:9px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:8px}.bj-hgp-info{min-width:0;padding:5px 1px 0}.bj-hgp-brandmark{left:6px;bottom:1px;max-width:102.4px;height:17.6px;padding:1.6px 3.2px}.bj-hgp-image .bj-hgp-brand-logo{width:auto;height:14.4px;max-width:96px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{display:-webkit-box;min-height:0;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px;line-height:1.35}.bj-hgp-model{max-width:100%;margin-top:1px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-pricebox{margin-top:4px;padding:4px 6px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:7px}.bj-hgp-price b{font-size:15px}.bj-hgp-meta{gap:3px;margin-top:4px}.bj-hgp-reviews{font-size:7px}.bj-hgp-reviews strong{font-size:8px}.bj-hgp-gift{padding:3px 4px;font-size:7px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:28px;border-radius:8px;font-size:11px}}';
+      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 6px 8px}.bj-hgp-campaign-banner{margin-bottom:18px;border-radius:18px}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{aspect-ratio:16/10;border-radius:9px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:8px}.bj-hgp-info{min-width:0;padding:5px 1px 0}.bj-hgp-brandmark{left:6px;bottom:1px;max-width:102.4px;height:17.6px;padding:1.6px 3.2px}.bj-hgp-image .bj-hgp-brand-logo{width:auto;height:14.4px;max-width:96px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{display:-webkit-box;min-height:0;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px;line-height:1.35}.bj-hgp-model{max-width:100%;margin-top:1px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-pricebox{margin-top:4px;padding:4px 6px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:7px}.bj-hgp-price b{font-size:15px}.bj-hgp-meta{gap:3px;margin-top:4px}.bj-hgp-reviews{font-size:7px}.bj-hgp-reviews strong{font-size:8px}.bj-hgp-gift{padding:3px 4px;font-size:7px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:28px;border-radius:8px;font-size:11px}}';
     (document.head || document.documentElement).appendChild(style);
   }
-  function startWeekCountdown(section) {
-    var timer = section.querySelector('[data-bj-week-countdown]');
-    if (!timer) return;
-    var day = timer.querySelector('[data-bj-countdown="day"]');
-    var hour = timer.querySelector('[data-bj-countdown="hour"]');
-    var minute = timer.querySelector('[data-bj-countdown="minute"]');
-    var second = timer.querySelector('[data-bj-countdown="second"]');
-    var KST_OFFSET = 9 * 60 * 60 * 1000;
-    function two(n) { return String(n).padStart(2, '0'); }
-    function remaining() {
-      var now = Date.now();
-      var kst = new Date(now + KST_OFFSET);
-      var weekday = kst.getUTCDay();
-      var daysUntilMonday = weekday === 0 ? 1 : 8 - weekday;
-      var nextMonday = Date.UTC(kst.getUTCFullYear(), kst.getUTCMonth(), kst.getUTCDate() + daysUntilMonday);
-      return Math.max(0, nextMonday - (now + KST_OFFSET));
-    }
-    function update() {
-      var left = remaining();
-      var days = Math.floor(left / 86400000);
-      var hours = Math.floor((left % 86400000) / 3600000);
-      var minutes = Math.floor((left % 3600000) / 60000);
-      var seconds = Math.floor((left % 60000) / 1000);
-      day.textContent = two(days);
-      hour.textContent = two(hours);
-      minute.textContent = two(minutes);
-      second.textContent = two(seconds);
-      timer.setAttribute('aria-label', '이번주 특가 종료까지 ' + days + '일 ' + hours + '시간 ' + minutes + '분 ' + seconds + '초');
-    }
-    update();
-    window.setInterval(update, 1000);
+  function escapeHomePromoAttribute(value) {
+    return String(value || '').replace(/[&<>"]/g, function (char) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char];
+    });
+  }
+  function loadLive1CampaignBanner() {
+    return fetch(LIVE1_LANDING_CONFIG_URL)
+      .then(function (response) {
+        if (!response.ok) throw new Error('live1 config HTTP ' + response.status);
+        return response.json();
+      })
+      .then(function (payload) {
+        var banners = payload && payload.heroBanners;
+        if (!Array.isArray(banners)) return null;
+        var banner = banners.slice().sort(function (a, b) {
+          return Number(a && a.order || 0) - Number(b && b.order || 0);
+        }).find(function (item) {
+          return item && /^\/v1\/landing\/hero-assets\/[a-z0-9]+$/i.test(item.imageUrl || '');
+        });
+        if (!banner) return null;
+        return {
+          id: banner.id || '',
+          imageUrl: ADMIN2_PUBLIC_ORIGIN + banner.imageUrl,
+          alt: banner.alt || '빌리조 이번 달 프로모션',
+          month: banner.month || ''
+        };
+      })
+      .catch(function () { return null; });
   }
   function readHomeCartField(form, name) {
     var input = form && form.querySelector('[name="' + name + '"]');
@@ -3452,7 +3445,7 @@
       });
     });
   }
-  function render(month) {
+  function render(live1Banner) {
     var heading = findHeading();
     if (!heading || document.getElementById('bj-home-gift-promos')) return false;
     var v5 = document.getElementById('bj-v5-injected');
@@ -3486,14 +3479,12 @@
         '<div class="bj-hgp-actions"><a class="bj-hgp-detail" href="/html/dh_prod/prod_view/' + p.productId + '">상세보기</a>' +
         '<button type="button" class="bj-hgp-cart" data-bj-hgp-cart="' + p.productId + '" aria-label="' + p.name + ' 견적비교 담기" aria-pressed="false">담기</button></div></article>';
     }
+    var campaignBanner = live1Banner
+      ? '<div class="bj-hgp-campaign-banner" data-bj-live1-banner-id="' + escapeHomePromoAttribute(live1Banner.id) + '" data-bj-live1-banner-month="' + escapeHomePromoAttribute(live1Banner.month) + '">' +
+        '<img src="' + escapeHomePromoAttribute(live1Banner.imageUrl) + '" alt="' + escapeHomePromoAttribute(live1Banner.alt) + '"></div>'
+      : '';
     section.innerHTML =
-      '<div class="bj-hgp-head"><div class="bj-hgp-heading"><h2 class="bj-hgp-title"><b>빌리조 위크</b> - 이번주 한정</h2>' +
-      '<div class="bj-hgp-countdown" data-bj-week-countdown role="timer" aria-label="이번주 특가 종료까지 남은 시간">' +
-      '<span class="bj-hgp-countdown-unit"><strong data-bj-countdown="day">00</strong><span>일</span></span>' +
-      '<span class="bj-hgp-countdown-unit"><strong data-bj-countdown="hour">00</strong><span>시</span></span>' +
-      '<span class="bj-hgp-countdown-unit"><strong data-bj-countdown="minute">00</strong><span>분</span></span>' +
-      '<span class="bj-hgp-countdown-unit"><strong data-bj-countdown="second">00</strong><span>초</span></span></div></div>' +
-      '<div class="bj-hgp-source">' + month.replace('-', '.') + ' 확인된 월요금·혜택 기준</div></div>' +
+      campaignBanner +
       TIERS.map(function (tier) {
         var items = PRODUCTS.filter(function (p) { return p.tier === tier; });
         return '<div class="bj-hgp-band" data-bj-hgp-band="' + tier + '"><h3 class="bj-hgp-band-title">' + tier + '</h3>' +
@@ -3509,7 +3500,6 @@
     });
     bindHomeCartButtons(section);
     v5.appendChild(section);
-    startWeekCountdown(section);
     if (typeof window.__bjHomeReleaseV5 === 'function') {
       window.__bjHomeReleaseV5('promotion-ready');
     }
@@ -3527,9 +3517,14 @@
       settleWithoutPromotion('promotion-month-mismatch');
       return;
     }
-    fetch('https://admin2-api.billyjo.co.kr/v1/promotions/current?month=' + encodeURIComponent(month))
-      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
-      .then(function (payload) {
+    Promise.all([
+      fetch('https://admin2-api.billyjo.co.kr/v1/promotions/current?month=' + encodeURIComponent(month))
+        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
+      loadLive1CampaignBanner()
+    ])
+      .then(function (results) {
+        var payload = results[0];
+        var live1Banner = results[1];
         var data = payload && payload.data;
         if (!data || data.year_month !== month) {
           settleWithoutPromotion('promotion-data-mismatch');
@@ -3547,10 +3542,10 @@
           settleWithoutPromotion('promotion-products-missing');
           return;
         }
-        if (render(month)) return;
+        if (render(live1Banner)) return;
         var tries = 0;
         var timer = setInterval(function () {
-          if (render(month) || ++tries >= 40) clearInterval(timer);
+          if (render(live1Banner) || ++tries >= 40) clearInterval(timer);
         }, 250);
       })
       .catch(function () {
@@ -7006,6 +7001,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 (function injectMainPageV5() {
   var V5_URL = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@4c8fe10/preview-detail-page-v5.html';
   var CDN_BASE = 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@4c8fe10';
+  var HOME_CONFIG_URL = 'https://admin2-api.billyjo.co.kr/v1/landing/home';
+  var HOME_VISIBILITY_DEFAULTS = { consultingSteps: false, legacyBenefits: false };
   var INJECTED_ID = 'bj-v5-injected';
   var RELEASE_FALLBACK_MS = 2500;
   var releaseTimer = 0;
@@ -7055,6 +7052,54 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
 
   function isInjected() { return !!document.getElementById(INJECTED_ID); }
+
+  function normalizeHomeVisibility(payload) {
+    var stored = payload && payload.config && payload.config.sectionVisibility;
+    return {
+      consultingSteps: stored && typeof stored.consultingSteps === 'boolean'
+        ? stored.consultingSteps : HOME_VISIBILITY_DEFAULTS.consultingSteps,
+      legacyBenefits: stored && typeof stored.legacyBenefits === 'boolean'
+        ? stored.legacyBenefits : HOME_VISIBILITY_DEFAULTS.legacyBenefits
+    };
+  }
+
+  function markManagedHomeSections(pageEl) {
+    if (!pageEl) return;
+    Array.prototype.forEach.call(pageEl.querySelectorAll('.zone'), function(zone) {
+      var text = (zone.textContent || '').replace(/\s+/g, ' ');
+      if (text.indexOf('1:1 라이프스타일 진단') !== -1 && text.indexOf('본사·파트너사 전수 비교') !== -1) {
+        zone.setAttribute('data-bj-home-section', 'consultingSteps');
+      }
+    });
+    var legacy = pageEl.querySelector('.bj-ben-zone');
+    if (legacy) legacy.setAttribute('data-bj-home-section', 'legacyBenefits');
+  }
+
+  function applyHomeSectionVisibility(pageEl, visibility) {
+    if (!pageEl) return;
+    markManagedHomeSections(pageEl);
+    var current = visibility || HOME_VISIBILITY_DEFAULTS;
+    Object.keys(HOME_VISIBILITY_DEFAULTS).forEach(function(key) {
+      var section = pageEl.querySelector('[data-bj-home-section="' + key + '"]');
+      if (!section) return;
+      if (current[key] === true) section.style.removeProperty('display');
+      else section.style.setProperty('display', 'none', 'important');
+      section.setAttribute('data-bj-home-visible', current[key] === true ? '1' : '0');
+    });
+  }
+
+  var homeVisibilityPromise = null;
+  function loadHomeSectionVisibility() {
+    if (homeVisibilityPromise) return homeVisibilityPromise;
+    homeVisibilityPromise = fetch(HOME_CONFIG_URL, { cache: 'no-store', mode: 'cors' })
+      .then(function(response) {
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        return response.json();
+      })
+      .then(normalizeHomeVisibility)
+      .catch(function() { return normalizeHomeVisibility(null); });
+    return homeVisibilityPromise;
+  }
 
   function wrapZones(pageEl) {
     var children = Array.prototype.slice.call(pageEl.children);
@@ -7669,6 +7714,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       target.parentNode.insertBefore(pageEl, target);
       wrapZones(pageEl);
       reorderHome(pageEl);
+      // Admin2가 소유하는 메인 섹션 노출 설정. 응답 전에도 대표 요청 기본값(두 구간 제외)을
+      // 즉시 적용해 플래시를 막고, 공개 config 도착 시 저장값으로 다시 동기화한다.
+      applyHomeSectionVisibility(pageEl, HOME_VISIBILITY_DEFAULTS);
+      loadHomeSectionVisibility().then(function(visibility) {
+        applyHomeSectionVisibility(pageEl, visibility);
+      });
       pageEl.style.setProperty('display', 'none', 'important');
       // Fail open: if the promotion policy API is unavailable, reveal the v5
       // content instead of leaving the home page blank. In the normal path the
