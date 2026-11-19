@@ -3069,26 +3069,26 @@
       tier: '1만원 언더', productId: '24129', brand: '웰스',
       model: 'WP610NWA', name: '미미 직수 무전원 정수기', price: 8900,
       rating: 4.9, reviewCount: 23,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/WP610NWA6/967f775df9c535704fcf44d2049977444a411df17c7d2e6dfb99eb96d3749561/original.jpg'
     },
     {
       tier: '1만원 언더', productId: '11327', brand: 'LG전자',
       model: 'HW300BBB', name: '퓨리케어 자연기화 가습기 3.6L', price: 9900,
       rating: 4.9, reviewCount: 58,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/HW300BBB/3c54b99b16c76f383d4308f0f6125886d8be84ba60cb31292abbb3d172af37de/original.jpg'
     },
     {
       tier: '1만원 언더', productId: '3657', brand: '쿠쿠',
       model: 'CBT-G1031W', name: 'EASY 인스퓨어 비데', price: 8900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/CBTG1031W/fd0170f1f4e2e1ccb360a7c2a48d7b284f73d36830e5c08fab710677577a7220/original.jpg'
     },
     {
       tier: '1만원 언더', productId: '35287', brand: '현대렌탈케어',
       model: 'HQBA300WBG', name: '더클린 멀티케어 비데', price: 8600,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/HQBA300WBG/ac95829121f9e77c7280bda8bbf3d210a8a9be4f75a59558dd8ab598080c5cc9/original.png'
     },
     {
@@ -3102,20 +3102,20 @@
     {
       tier: '1만원대', productId: '32596', brand: '청호나이스',
       model: 'BS-65D70', name: 'B700 살균 리모컨 비데', regularPrice: 20900, price: 10450, discount: 56,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       benefitLine: 'B700 살균 리모컨 비데 56% 할인 월 10,450원~',
       image: 'https://media.billyjo.co.kr/products/BS65D708/563a73c7934570fd1a347cd7b810d97deb48eb37e9be5ca0e672dd95fe0b40eb/original.jpg'
     },
     {
       tier: '1만원대', productId: '10914', brand: '세스코',
       model: 'EWBD351', name: '스마트핏 THE슬림 냉온정수기', price: 17900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/EWBD351/51876622d9830460dfb32a61ce8f94902572dac5fcb296c6804ee63791e7b6b2/original.jpg'
     },
     {
       tier: '1만원대', productId: '23052', brand: '삼성',
       model: 'RT25DARAHS9', name: '일반냉장고', price: 19900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/RT25DARAHS9/77b5038c7206fa6e41db6fb4b2e70ba7fb0e8acc7a7d016ca0e0537525005b79/original.png'
     },
     {
@@ -3129,91 +3129,91 @@
     {
       tier: '2만원대', productId: '32100', brand: '쿠쿠',
       model: 'CP-AMS100', name: '미니 100 초고온 직수 정수기', price: 28900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/CPAMS100/a203bca9b1b99d71c308d2b81702e117fd1170a6b3159161f6da934aa6cc0393/original.gif'
     },
     {
       tier: '2만원대', productId: '28918', brand: '코웨이',
       model: 'AP-1125G', name: '스퀘어핏 공기청정기 11평형', price: 20400,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/AP1125G/d26e968a3f8d593cf92c60d515743902c49683eb1d05bdeed6496799057ef15f/original.gif'
     },
     {
       tier: '2만원대', productId: '27223', brand: 'LG전자',
       model: 'D502MEE53', name: '디오스 하냉장 냉장고 507L', price: 22900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/D502MEE53/c0e3b6474224816c1a5c245857b27f1d91dd08477068f77e96a0b4508539c338/original.png'
     },
     {
       tier: '3만원대', productId: '32918', brand: '쿠쿠',
       model: 'CP-AQS100EWH', name: '제로 100 미니 얼음정수기', price: 38900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/CPAQS100EWH/77178de0e7c93f71661eb5a5bba5b287ef7ea6bcb70af2b54ecd9befefaf5a32/original.png'
     },
     {
       tier: '3만원대', productId: '33000', brand: '루헨스',
       model: 'WHA-440', name: '대용량 공기청정기 메가', price: 34900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/WHA440/70a584b4ba6859ec5cdd763c1b59d7139f54459eb2487689a900561363b7bb32/original.png'
     },
     {
       tier: '3만원대', productId: '22764', brand: '삼성',
       model: 'RS84DB5002CW', name: '양문형 냉장고 852L', price: 32700,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/RS84DB5002CW/e009a12124b4b62703f78b599bc01090519260af638c3055fdc793a135063c17/original.png'
     },
     {
       tier: '3만원대', productId: '10428', brand: 'LG전자',
       model: 'AS192DSFAM', name: '퓨리케어 360˚ 알파 공기청정기', price: 33900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/AS192DSFAM6/cca95f7ca2504d630d864b49288bb9be620186ca5d83264c03152bea40f901bf/original.jpg'
     },
     {
       tier: '4만원대', productId: '35730', brand: '쿠쿠',
       model: 'CRM-D01HEMLK/HLK', name: '레스티노 매트리스 라지킹', price: 48900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/CRMD01HEMLKHLK6/cf10af5e594cfbfcad74d6198469119d0761888885a947ba990f647c6d9f1aa6/original.png'
     },
     {
       tier: '4만원대', productId: '32592', brand: '쿠쿠',
       model: 'CP-AHS101HEW', name: '제로백 슬림 플러스 얼음정수기', price: 40900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/CPAHS101HEW/ea76374ca79539176d764fa1f259472b094c87c1f8f80243047f438c649893bc/original.png'
     },
     {
       tier: '4만원대', productId: '27476', brand: '삼성',
       model: 'RS70F65Q2F', name: '양문형 냉장고 651L', price: 40500,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/RS70F65Q2F/690c045d758d70c385f4155eeb5f38c1a7b56412cf3732f9ea33640b2719f753/original.png'
     },
     {
       tier: '4만원대', productId: '27503', brand: 'LG전자',
       model: 'T25PX9', name: '통돌이 세탁기 25kg', price: 40900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/T25PX9/04e5d3aa497c7a47bd26cd36383f622e0fb7e7b41645a9284c0f81b8f216b451/original.png'
     },
     {
       tier: '5만원대', productId: '29036', brand: '코웨이',
       model: 'CHPI-7420N', name: '아이콘 얼음정수기 맥스', price: 51900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/CHPI7420N2/9097007c9d194f0a03f952cdeaede5b9833867535aba842aa3d35a4c2da71ac9/original.png'
     },
     {
       tier: '5만원대', productId: '33632', brand: 'LG전자',
       model: 'T876MQQ041', name: '디오스 오브제컬렉션 STEM 냉장고', price: 59900,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/T876MQQ041/124b22d0e6fd45ed883240af088e47ea9a6183b7b1f4ed6e407f84456b246413/original.png'
     },
     {
       tier: '5만원대', productId: '31903', brand: 'LG전자',
       model: 'SC5MBR43S', name: '스타일러 오브제컬렉션 5벌', price: 50400,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/SC5MBR43S/62dd6844e8ffee749647bbc6da5eae95156dfba095ad15dee890dcc0768b3fdd/original.png'
     },
     {
       tier: '5만원대', productId: '32406', brand: '삼성',
       model: 'VR90F01SAG', name: '비스포크 AI 로봇청소기', price: 50600,
-      gift: '추가 사은품 상담 대상',
+      gift: '추가 사은품 증정',
       image: 'https://media.billyjo.co.kr/products/VR90F01SAG/451d9c9dc7a2bd4065391c2e266752c5778e90c33abd7676639739762557221c/original.jpg'
     }
   ];
@@ -3228,7 +3228,7 @@
   })();
   var BRAND_LOGOS = {
     '웰스': 'images/brands/wells-horizontal-20261119.png',
-    'LG전자': 'images/brands/lg-care-horizontal-20261119.png',
+    'LG전자': 'images/brands/lg-electronics-horizontal-20261119.png',
     '청호나이스': 'images/brands/chungho-horizontal-20261119.png',
     '쿠쿠': 'images/brands/cuckoo-horizontal-20261119.png',
     '루헨스': 'images/brands/ruhens-horizontal-20261119.png',

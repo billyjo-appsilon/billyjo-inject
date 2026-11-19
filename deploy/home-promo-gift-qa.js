@@ -5,7 +5,7 @@ const { chromium } = require('playwright');
 const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'utf8');
 const logoFiles = [
   'wells-horizontal-20261119.png',
-  'lg-care-horizontal-20261119.png',
+  'lg-electronics-horizontal-20261119.png',
   'chungho-horizontal-20261119.png',
   'cuckoo-horizontal-20261119.png',
   'ruhens-horizontal-20261119.png',
@@ -211,7 +211,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
     if (!result.bands.every((band) => band.columnCount === 2)) {
       throw new Error(`${testCase.name}: every price band must render two cards per row`);
     }
-    for (const expected of ['11월 특가', '4.9 · 후기 23개', '4.9 · 후기 58개', '4.8 · 후기 149개', '4.8 · 후기 173개', '공기청정기 1대 증정 대상', '추가 사은품 상담 대상']) {
+    for (const expected of ['11월 특가', '4.9 · 후기 23개', '4.9 · 후기 58개', '4.8 · 후기 149개', '4.8 · 후기 173개', '공기청정기 1대 증정 대상', '추가 사은품 증정']) {
       if (!result.cards.some((card) => card.text.includes(expected))) {
         throw new Error(`${testCase.name}: missing ${expected}`);
       }
@@ -265,6 +265,10 @@ const logoAssets = new Map(logoFiles.map((file) => [
     const qumingCard = result.cards.find((card) => card.id === '35287');
     if (!qumingCard || !qumingCard.brandLogoSrc.includes('quming-horizontal-20261119.png')) {
       throw new Error(`${testCase.name}: supplied Quming logo is not active`);
+    }
+    const lgCard = result.cards.find((card) => card.id === '11327');
+    if (!lgCard || !lgCard.brandLogoSrc.includes('lg-electronics-horizontal-20261119.png')) {
+      throw new Error(`${testCase.name}: supplied LG Electronics logo is not active`);
     }
     const expectedLogoHeight = testCase.name === 'mobile' ? 18 : 20;
     const expectedWrapperHeight = testCase.name === 'mobile' ? 22 : 24;

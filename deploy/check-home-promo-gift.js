@@ -59,7 +59,7 @@ for (const required of [
   "<b>빌리조 위크</b> - 이번주 한정",
   "var BRAND_LOGOS = {",
   "'웰스': 'images/brands/wells-horizontal-20261119.png'",
-  "'LG전자': 'images/brands/lg-care-horizontal-20261119.png'",
+  "'LG전자': 'images/brands/lg-electronics-horizontal-20261119.png'",
   "'청호나이스': 'images/brands/chungho-horizontal-20261119.png'",
   "'쿠쿠': 'images/brands/cuckoo-horizontal-20261119.png'",
   "'루헨스': 'images/brands/ruhens-horizontal-20261119.png'",
@@ -117,6 +117,7 @@ for (const required of [
 }
 
 if (source.includes('(VAT 별도)')) throw new Error('VAT label must stay hidden on home promo cards');
+if (source.includes('추가 사은품 상담 대상')) throw new Error('stale consultation-target gift copy remains');
 if (source.includes('min-height:31px')) throw new Error('mobile product names must not reserve a blank second line');
 
 const numericDiscounts = source.match(/discount:\s*\d+/g) || [];
