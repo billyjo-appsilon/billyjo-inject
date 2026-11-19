@@ -270,17 +270,17 @@ const logoAssets = new Map(logoFiles.map((file) => [
     if (!lgCard || !lgCard.brandLogoSrc.includes('lg-electronics-horizontal-20261119.png')) {
       throw new Error(`${testCase.name}: supplied LG Electronics logo is not active`);
     }
-    const expectedLogoHeight = testCase.name === 'mobile' ? 18 : 20;
-    const expectedWrapperHeight = testCase.name === 'mobile' ? 22 : 24;
+    const expectedLogoHeight = testCase.name === 'mobile' ? 14.4 : 16;
+    const expectedWrapperHeight = testCase.name === 'mobile' ? 17.6 : 19.2;
     if (!result.cards.every((card) => Math.abs(card.brandLogoHeight - expectedLogoHeight) < 0.5 &&
         Math.abs(card.brandLogoWrapperHeight - expectedWrapperHeight) < 0.5 &&
-        card.brandLogoWidth <= 120.5 && card.brandLogoBlendMode === 'normal')) {
+        card.brandLogoWidth <= 96.5 && card.brandLogoBlendMode === 'normal')) {
       throw new Error(`${testCase.name}: brand logo heights are not normalized`);
     }
     if (!result.cards.every((card) => card.brandLogoOverlay.position === 'absolute' &&
         card.brandLogoOverlay.insideImage && card.brandLogoOverlay.parentIsImage &&
         card.brandLogoOverlay.leftGap >= 0 && card.brandLogoOverlay.leftGap <= 9 &&
-        card.brandLogoOverlay.bottomGap >= 0 && card.brandLogoOverlay.bottomGap <= 8)) {
+        Math.abs(card.brandLogoOverlay.bottomGap - (testCase.name === 'mobile' ? 1 : 3)) < 0.5)) {
       throw new Error(`${testCase.name}: brand logo must overlay the product image`);
     }
     if (!result.cards.every((card) => card.productImageTransform === 'matrix(1.18, 0, 0, 1.18, 0, 0)' && card.brandLogoTransform === 'none')) {
