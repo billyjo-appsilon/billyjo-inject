@@ -3100,8 +3100,7 @@
   if (document.getElementById('bj-home-gift-promos')) return;
 
   var SNAPSHOT_MONTH = '2026-11';
-  var LIVE1_LANDING_CONFIG_URL = 'https://admin2-api.billyjo.co.kr/v1/landing/live1';
-  var ADMIN2_PUBLIC_ORIGIN = 'https://admin2-api.billyjo.co.kr';
+  var LIVE1_HALF_BANNER_MASCOT = 'https://live.billyjo.co.kr/images/toss-banner-mascot.webp';
   var PRODUCTS = [
     {
       tier: '1만원 언더', productId: '24129', brand: '웰스',
@@ -3299,8 +3298,20 @@
     style.textContent =
       '#bj-home-gift-promos{margin:0 0 38px;padding:28px 8px 14px;font-family:Pretendard,sans-serif}' +
       '#bj-home-gift-promos *{box-sizing:border-box}' +
-      '.bj-hgp-campaign-banner{width:min(100%,760px);margin:0 auto 24px;border-radius:22px;overflow:hidden;background:#eef4ff;box-shadow:0 12px 30px rgba(8,56,248,.12)}' +
-      '.bj-hgp-campaign-banner img{display:block;width:100%;height:auto;aspect-ratio:1/1;object-fit:cover}' +
+      '.bj-hgp-half-banner{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,42%);align-items:stretch;min-height:230px;margin:0 0 26px;overflow:hidden;border-radius:24px;background:linear-gradient(135deg,#0838f8 0%,#0e55ff 62%,#30a7ff 100%);box-shadow:0 18px 42px rgba(8,56,248,.22)}' +
+      '.bj-hgp-half-copy{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;padding:34px 12px 34px 40px;color:#fff}' +
+      '.bj-hgp-half-copy h2{margin:0;color:#fff;font-size:clamp(30px,4.8vw,48px);font-weight:900;line-height:1.12;letter-spacing:-.045em}' +
+      '.bj-hgp-half-copy h2 em{font-style:normal;color:#ffe500}' +
+      '.bj-hgp-half-copy p{margin:12px 0 0;color:rgba(255,255,255,.86);font-size:16px;font-weight:700}' +
+      '.bj-hgp-half-visual{position:relative;min-width:0;overflow:hidden}' +
+      '.bj-hgp-half-visual:before{content:"";position:absolute;z-index:1;inset:0;background:linear-gradient(90deg,#0e55ff 0%,rgba(14,85,255,.24) 34%,transparent 68%)}' +
+      '.bj-hgp-half-visual img{width:100%;height:100%;object-fit:cover;object-position:75% 68%}' +
+      '.bj-hgp-month-timer{display:flex;align-items:center;gap:7px;width:max-content;margin:14px 0 0}' +
+      '.bj-hgp-flip-group{display:flex;gap:3px;perspective:240px}' +
+      '.bj-hgp-flip-digit{display:inline-flex;align-items:center;justify-content:center;width:26px;height:34px;border-radius:7px;background:#fff;color:#111;font-size:19px;font-weight:900;font-variant-numeric:tabular-nums;box-shadow:0 3px 9px rgba(0,0,0,.22);backface-visibility:hidden;transform-origin:center 60%}' +
+      '.bj-hgp-flip-digit.is-flip{animation:bj-hgp-flip .42s cubic-bezier(.3,.7,.3,1)}' +
+      '@keyframes bj-hgp-flip{0%{transform:rotateX(-88deg)}55%{transform:rotateX(14deg)}100%{transform:rotateX(0)}}' +
+      '.bj-hgp-flip-unit{color:#fff;font-size:12px;font-weight:800}' +
       '.bj-hgp-band{margin-top:24px}' +
       '.bj-hgp-band:first-of-type{margin-top:0}' +
       '.bj-hgp-band-title{display:flex;align-items:center;gap:8px;margin:0 0 9px;font-size:15px;font-weight:900;color:#1e293b}' +
@@ -3336,37 +3347,54 @@
       '.bj-hgp-cart{appearance:none;border:1px solid #0838f8;background:#0838f8;color:#fff;box-shadow:0 6px 14px rgba(8,56,248,.16)}' +
       '.bj-hgp-cart:disabled{cursor:default;opacity:.72}.bj-hgp-cart.is-added{border-color:#0f9f6e;background:#0f9f6e;opacity:1}.bj-hgp-cart.is-error{border-color:#c2410c;background:#c2410c}' +
       '.bj-hgp-note{margin:14px 0 0;font-size:10px;line-height:1.5;color:#64748b}' +
-      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 6px 8px}.bj-hgp-campaign-banner{margin-bottom:18px;border-radius:18px}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{aspect-ratio:16/10;border-radius:9px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:8px}.bj-hgp-info{min-width:0;padding:5px 1px 0}.bj-hgp-brandmark{left:6px;bottom:1px;max-width:102.4px;height:17.6px;padding:1.6px 3.2px}.bj-hgp-image .bj-hgp-brand-logo{width:auto;height:14.4px;max-width:96px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{display:-webkit-box;min-height:0;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px;line-height:1.35}.bj-hgp-model{max-width:100%;margin-top:1px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-pricebox{margin-top:4px;padding:4px 6px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:7px}.bj-hgp-price b{font-size:15px}.bj-hgp-meta{gap:3px;margin-top:4px}.bj-hgp-reviews{font-size:7px}.bj-hgp-reviews strong{font-size:8px}.bj-hgp-gift{padding:3px 4px;font-size:7px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:28px;border-radius:8px;font-size:11px}}';
+      '@media(max-width:780px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 6px 8px}.bj-hgp-half-banner{grid-template-columns:minmax(0,58%) minmax(0,42%);min-height:170px;border-radius:18px;margin-bottom:20px}.bj-hgp-half-copy{padding:24px 4px 24px 20px}.bj-hgp-half-copy h2{font-size:28px}.bj-hgp-half-copy p{margin-top:9px;font-size:13px;line-height:1.45}.bj-hgp-month-timer{margin-top:9px;gap:5px}.bj-hgp-flip-digit{width:19px;height:26px;border-radius:5px;font-size:14px}.bj-hgp-flip-unit{font-size:10px}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{aspect-ratio:16/10;border-radius:9px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:8px}.bj-hgp-info{min-width:0;padding:5px 1px 0}.bj-hgp-brandmark{left:6px;bottom:1px;max-width:102.4px;height:17.6px;padding:1.6px 3.2px}.bj-hgp-image .bj-hgp-brand-logo{width:auto;height:14.4px;max-width:96px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{display:-webkit-box;min-height:0;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px;line-height:1.35}.bj-hgp-model{max-width:100%;margin-top:1px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-pricebox{margin-top:4px;padding:4px 6px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:7px}.bj-hgp-price b{font-size:15px}.bj-hgp-meta{gap:3px;margin-top:4px}.bj-hgp-reviews{font-size:7px}.bj-hgp-reviews strong{font-size:8px}.bj-hgp-gift{padding:3px 4px;font-size:7px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:28px;border-radius:8px;font-size:11px}}';
     (document.head || document.documentElement).appendChild(style);
   }
-  function escapeHomePromoAttribute(value) {
-    return String(value || '').replace(/[&<>"]/g, function (char) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[char];
+  function startHomeMonthCountdown(section) {
+    var timer = section.querySelector('[data-bj-month-countdown]');
+    if (!timer) return;
+    var groups = [];
+    ['day', 'hour', 'minute', 'second'].forEach(function (unit) {
+      var group = document.createElement('span');
+      group.className = 'bj-hgp-flip-group';
+      group.setAttribute('data-bj-month-countdown-unit', unit);
+      var digits = [];
+      for (var i = 0; i < 2; i++) {
+        var digit = document.createElement('span');
+        digit.className = 'bj-hgp-flip-digit';
+        digit.textContent = '0';
+        group.appendChild(digit);
+        digits.push(digit);
+      }
+      var label = document.createElement('span');
+      label.className = 'bj-hgp-flip-unit';
+      label.textContent = { day: '일', hour: '시간', minute: '분', second: '초' }[unit];
+      timer.appendChild(group);
+      timer.appendChild(label);
+      groups.push(digits);
     });
-  }
-  function loadLive1CampaignBanner() {
-    return fetch(LIVE1_LANDING_CONFIG_URL)
-      .then(function (response) {
-        if (!response.ok) throw new Error('live1 config HTTP ' + response.status);
-        return response.json();
-      })
-      .then(function (payload) {
-        var banners = payload && payload.heroBanners;
-        if (!Array.isArray(banners)) return null;
-        var banner = banners.slice().sort(function (a, b) {
-          return Number(a && a.order || 0) - Number(b && b.order || 0);
-        }).find(function (item) {
-          return item && /^\/v1\/landing\/hero-assets\/[a-z0-9]+$/i.test(item.imageUrl || '');
-        });
-        if (!banner) return null;
-        return {
-          id: banner.id || '',
-          imageUrl: ADMIN2_PUBLIC_ORIGIN + banner.imageUrl,
-          alt: banner.alt || '빌리조 이번 달 프로모션',
-          month: banner.month || ''
-        };
-      })
-      .catch(function () { return null; });
+    function setValue(index, value) {
+      var text = (value < 10 ? '0' : '') + value;
+      groups[index].forEach(function (digit, i) {
+        if (digit.textContent === text.charAt(i)) return;
+        digit.textContent = text.charAt(i);
+        digit.classList.remove('is-flip');
+        void digit.offsetWidth;
+        digit.classList.add('is-flip');
+      });
+    }
+    function update() {
+      var now = new Date();
+      var end = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      var left = Math.max(0, Math.floor((end - now) / 1000));
+      setValue(0, Math.floor(left / 86400));
+      setValue(1, Math.floor((left % 86400) / 3600));
+      setValue(2, Math.floor((left % 3600) / 60));
+      setValue(3, left % 60);
+      timer.setAttribute('aria-label', '이번 달 특가 마감까지 ' + Math.floor(left / 86400) + '일 ' + Math.floor((left % 86400) / 3600) + '시간 ' + Math.floor((left % 3600) / 60) + '분 ' + (left % 60) + '초');
+    }
+    update();
+    window.setInterval(update, 1000);
   }
   function readHomeCartField(form, name) {
     var input = form && form.querySelector('[name="' + name + '"]');
@@ -3445,7 +3473,7 @@
       });
     });
   }
-  function render(live1Banner) {
+  function render(month) {
     var heading = findHeading();
     if (!heading || document.getElementById('bj-home-gift-promos')) return false;
     var v5 = document.getElementById('bj-v5-injected');
@@ -3479,10 +3507,11 @@
         '<div class="bj-hgp-actions"><a class="bj-hgp-detail" href="/html/dh_prod/prod_view/' + p.productId + '">상세보기</a>' +
         '<button type="button" class="bj-hgp-cart" data-bj-hgp-cart="' + p.productId + '" aria-label="' + p.name + ' 견적비교 담기" aria-pressed="false">담기</button></div></article>';
     }
-    var campaignBanner = live1Banner
-      ? '<div class="bj-hgp-campaign-banner" data-bj-live1-banner-id="' + escapeHomePromoAttribute(live1Banner.id) + '" data-bj-live1-banner-month="' + escapeHomePromoAttribute(live1Banner.month) + '">' +
-        '<img src="' + escapeHomePromoAttribute(live1Banner.imageUrl) + '" alt="' + escapeHomePromoAttribute(live1Banner.alt) + '"></div>'
-      : '';
+    var campaignBanner = '<div class="bj-hgp-half-banner" data-bj-live1-half-banner>' +
+      '<div class="bj-hgp-half-copy"><h2>' + Number(month.split('-')[1]) + '월도 <em>반값습니다!</em></h2>' +
+      '<p>이번주 특가 한정물량, 추가사은품 확인하세요</p>' +
+      '<div class="bj-hgp-month-timer" data-bj-month-countdown aria-label="이번 달 특가 마감까지 남은 시간"></div></div>' +
+      '<div class="bj-hgp-half-visual" aria-hidden="true"><img src="' + LIVE1_HALF_BANNER_MASCOT + '" alt="" loading="eager" decoding="async"></div></div>';
     section.innerHTML =
       campaignBanner +
       TIERS.map(function (tier) {
@@ -3500,6 +3529,7 @@
     });
     bindHomeCartButtons(section);
     v5.appendChild(section);
+    startHomeMonthCountdown(section);
     if (typeof window.__bjHomeReleaseV5 === 'function') {
       window.__bjHomeReleaseV5('promotion-ready');
     }
@@ -3517,14 +3547,9 @@
       settleWithoutPromotion('promotion-month-mismatch');
       return;
     }
-    Promise.all([
-      fetch('https://admin2-api.billyjo.co.kr/v1/promotions/current?month=' + encodeURIComponent(month))
-        .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); }),
-      loadLive1CampaignBanner()
-    ])
-      .then(function (results) {
-        var payload = results[0];
-        var live1Banner = results[1];
+    fetch('https://admin2-api.billyjo.co.kr/v1/promotions/current?month=' + encodeURIComponent(month))
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function (payload) {
         var data = payload && payload.data;
         if (!data || data.year_month !== month) {
           settleWithoutPromotion('promotion-data-mismatch');
@@ -3542,10 +3567,10 @@
           settleWithoutPromotion('promotion-products-missing');
           return;
         }
-        if (render(live1Banner)) return;
+        if (render(month)) return;
         var tries = 0;
         var timer = setInterval(function () {
-          if (render(live1Banner) || ++tries >= 40) clearInterval(timer);
+          if (render(month) || ++tries >= 40) clearInterval(timer);
         }, 250);
       })
       .catch(function () {

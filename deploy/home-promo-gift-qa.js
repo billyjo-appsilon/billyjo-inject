@@ -3,15 +3,7 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'utf8');
-const live1Banner = {
-  id: 'hb_live1_qa',
-  imageUrl: '/v1/landing/hero-assets/qa20261119',
-  alt: '11월 신규고객 정수기 50% 할인 프로모션',
-  order: 1,
-  month: '2026-11',
-};
-const live1BannerUrl = `https://admin2-api.billyjo.co.kr${live1Banner.imageUrl}`;
-const live1BannerSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254" viewBox="0 0 1254 1254"><rect width="1254" height="1254" fill="#0838f8"/><text x="80" y="180" fill="white" font-size="72">11월도 반값습니다!</text></svg>';
+const live1MascotUrl = 'https://live.billyjo.co.kr/images/toss-banner-mascot.webp';
 const logoFiles = [
   'wells-horizontal-20261119.png',
   'lg-electronics-horizontal-20261119.png',
@@ -47,17 +39,6 @@ const logoAssets = new Map(logoFiles.map((file) => [
       if (!body) return route.continue();
       await route.fulfill({ status: 200, contentType: 'image/png', body });
     });
-    await page.route('https://admin2-api.billyjo.co.kr/v1/landing/live1', async (route) => {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json; charset=utf-8',
-        headers: { 'access-control-allow-origin': '*' },
-        body: JSON.stringify({ ok: true, pageKey: 'live1', config: {}, heroBanners: [live1Banner] }),
-      });
-    });
-    await page.route(live1BannerUrl, async (route) => {
-      await route.fulfill({ status: 200, contentType: 'image/svg+xml', body: live1BannerSvg });
-    });
     await page.route('**/html/dh_prod/prod_view/24129', async (route) => {
       await route.fulfill({
         status: 200,
@@ -76,11 +57,12 @@ const logoAssets = new Map(logoFiles.map((file) => [
     });
     await page.goto('https://billyjo.co.kr/', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForSelector('#bj-home-gift-promos', { timeout: 30000 });
+    await page.locator('#bj-home-gift-promos .bj-hgp-half-banner').scrollIntoViewIfNeeded();
     try {
       await page.waitForFunction(() => {
         const products = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-image > img:not(.bj-hgp-brand-logo)')];
         const logos = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-brand-logo')];
-        const banner = document.querySelector('#bj-home-gift-promos .bj-hgp-campaign-banner img');
+        const banner = document.querySelector('#bj-home-gift-promos .bj-hgp-half-visual img');
         return products.length === 24 && logos.length === 24 && banner &&
           products.concat(logos, [banner]).every((image) => image.complete && image.naturalWidth > 0);
       }, null, { timeout: 30000 });
@@ -181,19 +163,21 @@ const logoAssets = new Map(logoFiles.map((file) => [
           cartFontSize: parseFloat(getComputedStyle(card.querySelector('.bj-hgp-cart')).fontSize),
         })),
         campaignBanner: (() => {
-          const wrapper = section.querySelector('.bj-hgp-campaign-banner');
-          const image = wrapper?.querySelector('img');
+          const wrapper = section.querySelector('.bj-hgp-half-banner');
+          const image = wrapper?.querySelector('.bj-hgp-half-visual img');
           const rect = wrapper?.getBoundingClientRect();
           return {
             exists: Boolean(wrapper && image),
-            id: wrapper?.getAttribute('data-bj-live1-banner-id') || '',
-            month: wrapper?.getAttribute('data-bj-live1-banner-month') || '',
+            title: wrapper?.querySelector('h2')?.textContent.replace(/\s+/g, ' ').trim() || '',
+            subcopy: wrapper?.querySelector('p')?.textContent.replace(/\s+/g, ' ').trim() || '',
             src: image?.src || '',
-            alt: image?.alt || '',
             loaded: Boolean(image?.complete && image?.naturalWidth > 0 && image?.naturalHeight > 0),
-            naturalRatio: image?.naturalWidth && image?.naturalHeight ? image.naturalWidth / image.naturalHeight : 0,
-            displayRatio: rect?.width && rect?.height ? rect.width / rect.height : 0,
             visible: Boolean(rect && rect.width > 0 && rect.height > 0 && getComputedStyle(wrapper).display !== 'none'),
+            units: [...wrapper.querySelectorAll('[data-bj-month-countdown-unit]')].map((group) => ({
+              unit: group.getAttribute('data-bj-month-countdown-unit'),
+              value: [...group.querySelectorAll('.bj-hgp-flip-digit')].map((digit) => digit.textContent).join(''),
+            })),
+            aria: wrapper.querySelector('[data-bj-month-countdown]')?.getAttribute('aria-label') || '',
           };
         })(),
         removedWeeklyNodes: section.querySelectorAll('.bj-hgp-head,.bj-hgp-title,.bj-hgp-countdown,.bj-hgp-source,[data-bj-week-countdown],[data-bj-countdown]').length,
@@ -218,12 +202,15 @@ const logoAssets = new Map(logoFiles.map((file) => [
     if (!result.campaignBanner.exists || !result.campaignBanner.visible || !result.campaignBanner.loaded) {
       throw new Error(`${testCase.name}: live1 campaign banner is missing or unloaded`);
     }
-    if (result.campaignBanner.id !== live1Banner.id || result.campaignBanner.month !== live1Banner.month ||
-        result.campaignBanner.src !== live1BannerUrl || result.campaignBanner.alt !== live1Banner.alt) {
+    if (result.campaignBanner.title !== '11월도 반값습니다!' ||
+        result.campaignBanner.subcopy !== '이번주 특가 한정물량, 추가사은품 확인하세요' ||
+        result.campaignBanner.src !== live1MascotUrl) {
       throw new Error(`${testCase.name}: live1 campaign banner contract mismatch (${JSON.stringify(result.campaignBanner)})`);
     }
-    if (Math.abs(result.campaignBanner.naturalRatio - 1) > 0.01 || Math.abs(result.campaignBanner.displayRatio - 1) > 0.02) {
-      throw new Error(`${testCase.name}: live1 campaign banner aspect ratio changed`);
+    if (result.campaignBanner.units.map((item) => item.unit).join(',') !== 'day,hour,minute,second' ||
+        !result.campaignBanner.units.every((item) => /^\d{2}$/.test(item.value)) ||
+        !/^이번 달 특가 마감까지 \d+일 \d+시간 \d+분 \d+초$/.test(result.campaignBanner.aria)) {
+      throw new Error(`${testCase.name}: live1 monthly countdown contract mismatch`);
     }
     if (result.removedWeeklyNodes !== 0) throw new Error(`${testCase.name}: removed weekly header/countdown remains`);
     const expectedTiers = ['1만원 언더', '1만원대', '2만원대', '3만원대', '4만원대', '5만원대'];

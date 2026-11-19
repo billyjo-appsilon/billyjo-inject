@@ -4,9 +4,7 @@ const { chromium } = require('playwright');
 
 const repoRoot = path.join(__dirname, '..');
 const injectSource = fs.readFileSync(path.join(repoRoot, 'inject.js'), 'utf8');
-const live1BannerPath = '/v1/landing/hero-assets/qa20261119';
-const live1BannerUrl = `https://admin2-api.billyjo.co.kr${live1BannerPath}`;
-const live1BannerSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254"><rect width="1254" height="1254" fill="#0838f8"/></svg>';
+const live1MascotUrl = 'https://live.billyjo.co.kr/images/toss-banner-mascot.webp';
 
 for (const required of [
   "HOME_CONFIG_URL = 'https://admin2-api.billyjo.co.kr/v1/landing/home'",
@@ -33,22 +31,6 @@ async function inspect(browser, width, visibility) {
       body: JSON.stringify({ ok: true, pageKey: 'home', config: { sectionVisibility: visibility } }),
     });
   });
-  await page.route('https://admin2-api.billyjo.co.kr/v1/landing/live1', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json; charset=utf-8',
-      headers: { 'access-control-allow-origin': '*' },
-      body: JSON.stringify({
-        ok: true,
-        pageKey: 'live1',
-        config: {},
-        heroBanners: [{ id: 'hb_live1_qa', imageUrl: live1BannerPath, alt: '11월 프로모션', order: 1, month: '2026-11' }],
-      }),
-    });
-  });
-  await page.route(live1BannerUrl, async (route) => {
-    await route.fulfill({ status: 200, contentType: 'image/svg+xml', body: live1BannerSvg });
-  });
   await page.route(/billyjo-inject@[0-9a-f]{7,40}\/inject(?:\.min)?\.js/i, async (route) => {
     injectIntercepts += 1;
     await route.fulfill({
@@ -68,6 +50,11 @@ async function inspect(browser, width, visibility) {
       return consulting?.getAttribute('data-bj-home-visible') === (expected.consultingSteps ? '1' : '0')
         && legacy?.getAttribute('data-bj-home-visible') === (expected.legacyBenefits ? '1' : '0');
     }, visibility, { timeout: 15000 });
+    await page.locator('#bj-home-gift-promos .bj-hgp-half-banner').scrollIntoViewIfNeeded();
+    await page.waitForFunction(() => {
+      const image = document.querySelector('#bj-home-gift-promos .bj-hgp-half-visual img');
+      return Boolean(image?.complete && image?.naturalWidth > 0);
+    }, null, { timeout: 15000 });
     await page.waitForTimeout(4200);
 
     const result = await page.evaluate(() => {
@@ -84,10 +71,13 @@ async function inspect(browser, width, visibility) {
         legacyBenefits: read('legacyBenefits'),
         newBenefitCards: document.querySelectorAll('#bj-home-benefit-cards .bj-hbenefit-card').length,
         campaignBanner: (() => {
-          const image = document.querySelector('#bj-home-gift-promos .bj-hgp-campaign-banner img');
+          const wrapper = document.querySelector('#bj-home-gift-promos .bj-hgp-half-banner');
+          const image = wrapper?.querySelector('.bj-hgp-half-visual img');
           return {
             src: image?.src || '',
             loaded: Boolean(image?.complete && image?.naturalWidth > 0),
+            title: wrapper?.querySelector('h2')?.textContent.replace(/\s+/g, ' ').trim() || '',
+            countdownUnits: wrapper?.querySelectorAll('[data-bj-month-countdown-unit]').length || 0,
           };
         })(),
         removedWeeklyNodes: document.querySelectorAll('#bj-home-gift-promos .bj-hgp-head,#bj-home-gift-promos .bj-hgp-countdown,#bj-home-gift-promos .bj-hgp-source').length,
@@ -111,7 +101,8 @@ async function inspect(browser, width, visibility) {
       }
     }
     if (result.newBenefitCards !== 6) throw new Error(`new 01-06 cards regressed at ${width}px`);
-    if (!result.campaignBanner.loaded || result.campaignBanner.src !== live1BannerUrl) {
+    if (!result.campaignBanner.loaded || result.campaignBanner.src !== live1MascotUrl ||
+        result.campaignBanner.title !== '11월도 반값습니다!' || result.campaignBanner.countdownUnits !== 4) {
       throw new Error(`live1 campaign banner regressed at ${width}px: ${JSON.stringify(result.campaignBanner)}`);
     }
     if (result.removedWeeklyNodes !== 0) throw new Error(`weekly header/countdown remains at ${width}px`);
