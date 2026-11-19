@@ -3,6 +3,15 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'utf8');
+const live1Banner = {
+  id: 'hb_live1_qa',
+  imageUrl: '/v1/landing/hero-assets/qa20261119',
+  alt: '11월 신규고객 정수기 50% 할인 프로모션',
+  order: 1,
+  month: '2026-11',
+};
+const live1BannerUrl = `https://admin2-api.billyjo.co.kr${live1Banner.imageUrl}`;
+const live1BannerSvg = '<svg xmlns="http://www.w3.org/2000/svg" width="1254" height="1254" viewBox="0 0 1254 1254"><rect width="1254" height="1254" fill="#0838f8"/><text x="80" y="180" fill="white" font-size="72">11월도 반값습니다!</text></svg>';
 const logoFiles = [
   'wells-horizontal-20261119.png',
   'lg-electronics-horizontal-20261119.png',
@@ -38,6 +47,17 @@ const logoAssets = new Map(logoFiles.map((file) => [
       if (!body) return route.continue();
       await route.fulfill({ status: 200, contentType: 'image/png', body });
     });
+    await page.route('https://admin2-api.billyjo.co.kr/v1/landing/live1', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json; charset=utf-8',
+        headers: { 'access-control-allow-origin': '*' },
+        body: JSON.stringify({ ok: true, pageKey: 'live1', config: {}, heroBanners: [live1Banner] }),
+      });
+    });
+    await page.route(live1BannerUrl, async (route) => {
+      await route.fulfill({ status: 200, contentType: 'image/svg+xml', body: live1BannerSvg });
+    });
     await page.route('**/html/dh_prod/prod_view/24129', async (route) => {
       await route.fulfill({
         status: 200,
@@ -60,8 +80,9 @@ const logoAssets = new Map(logoFiles.map((file) => [
       await page.waitForFunction(() => {
         const products = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-image > img:not(.bj-hgp-brand-logo)')];
         const logos = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-brand-logo')];
-        return products.length === 24 && logos.length === 24 &&
-          products.concat(logos).every((image) => image.complete && image.naturalWidth > 0);
+        const banner = document.querySelector('#bj-home-gift-promos .bj-hgp-campaign-banner img');
+        return products.length === 24 && logos.length === 24 && banner &&
+          products.concat(logos, [banner]).every((image) => image.complete && image.naturalWidth > 0);
       }, null, { timeout: 30000 });
     } catch (error) {
       const failedImages = await page.evaluate(() => [...document.querySelectorAll('#bj-home-gift-promos img')]
@@ -159,18 +180,23 @@ const logoAssets = new Map(logoFiles.map((file) => [
           detailFontSize: parseFloat(getComputedStyle(card.querySelector('.bj-hgp-detail')).fontSize),
           cartFontSize: parseFloat(getComputedStyle(card.querySelector('.bj-hgp-cart')).fontSize),
         })),
-        title: section.querySelector('.bj-hgp-title').textContent.replace(/\s+/g, ' ').trim(),
-        countdown: [...section.querySelectorAll('[data-bj-countdown]')].map((node) => ({
-          unit: node.getAttribute('data-bj-countdown'),
-          value: node.textContent,
-        })),
-        countdownVisible: (() => {
-          const timer = section.querySelector('[data-bj-week-countdown]');
-          return !!timer && getComputedStyle(timer).display !== 'none' && timer.getBoundingClientRect().height > 0;
+        campaignBanner: (() => {
+          const wrapper = section.querySelector('.bj-hgp-campaign-banner');
+          const image = wrapper?.querySelector('img');
+          const rect = wrapper?.getBoundingClientRect();
+          return {
+            exists: Boolean(wrapper && image),
+            id: wrapper?.getAttribute('data-bj-live1-banner-id') || '',
+            month: wrapper?.getAttribute('data-bj-live1-banner-month') || '',
+            src: image?.src || '',
+            alt: image?.alt || '',
+            loaded: Boolean(image?.complete && image?.naturalWidth > 0 && image?.naturalHeight > 0),
+            naturalRatio: image?.naturalWidth && image?.naturalHeight ? image.naturalWidth / image.naturalHeight : 0,
+            displayRatio: rect?.width && rect?.height ? rect.width / rect.height : 0,
+            visible: Boolean(rect && rect.width > 0 && rect.height > 0 && getComputedStyle(wrapper).display !== 'none'),
+          };
         })(),
-        countdownAria: section.querySelector('[data-bj-week-countdown]')?.getAttribute('aria-label') || '',
-        headingCentered: getComputedStyle(section.querySelector('.bj-hgp-heading')).alignItems === 'center' &&
-          getComputedStyle(section.querySelector('.bj-hgp-head')).textAlign === 'center',
+        removedWeeklyNodes: section.querySelectorAll('.bj-hgp-head,.bj-hgp-title,.bj-hgp-countdown,.bj-hgp-source,[data-bj-week-countdown],[data-bj-countdown]').length,
         bands: bands.map((band) => ({
           tier: band.getAttribute('data-bj-hgp-band'),
           cardCount: band.querySelectorAll('.bj-hgp-card').length,
@@ -189,18 +215,17 @@ const logoAssets = new Map(logoFiles.map((file) => [
     if (result.cards.map((card) => card.id).join(',') !== '24129,11327,3657,35287,34614,32596,10914,23052,32586,32100,28918,27223,32918,33000,22764,10428,35730,32592,27476,27503,29036,33632,31903,32406') {
       throw new Error(`${testCase.name}: promo card order is wrong`);
     }
-    if (result.title !== '빌리조 위크 - 이번주 한정') throw new Error(`${testCase.name}: weekly title is wrong`);
-    if (!result.headingCentered) throw new Error(`${testCase.name}: weekly heading is not centered`);
-    if (!result.countdownVisible) throw new Error(`${testCase.name}: weekly countdown is hidden`);
-    if (result.countdown.map((item) => item.unit).join(',') !== 'day,hour,minute,second') {
-      throw new Error(`${testCase.name}: countdown unit order is wrong`);
+    if (!result.campaignBanner.exists || !result.campaignBanner.visible || !result.campaignBanner.loaded) {
+      throw new Error(`${testCase.name}: live1 campaign banner is missing or unloaded`);
     }
-    if (!result.countdown.every((item) => /^\d{2}$/.test(item.value))) {
-      throw new Error(`${testCase.name}: countdown values must be two digits`);
+    if (result.campaignBanner.id !== live1Banner.id || result.campaignBanner.month !== live1Banner.month ||
+        result.campaignBanner.src !== live1BannerUrl || result.campaignBanner.alt !== live1Banner.alt) {
+      throw new Error(`${testCase.name}: live1 campaign banner contract mismatch (${JSON.stringify(result.campaignBanner)})`);
     }
-    if (!/^이번주 특가 종료까지 \d+일 \d+시간 \d+분 \d+초$/.test(result.countdownAria)) {
-      throw new Error(`${testCase.name}: countdown accessible label is wrong`);
+    if (Math.abs(result.campaignBanner.naturalRatio - 1) > 0.01 || Math.abs(result.campaignBanner.displayRatio - 1) > 0.02) {
+      throw new Error(`${testCase.name}: live1 campaign banner aspect ratio changed`);
     }
+    if (result.removedWeeklyNodes !== 0) throw new Error(`${testCase.name}: removed weekly header/countdown remains`);
     const expectedTiers = ['1만원 언더', '1만원대', '2만원대', '3만원대', '4만원대', '5만원대'];
     if (result.bands.map((band) => band.tier).join(',') !== expectedTiers.join(',')) {
       throw new Error(`${testCase.name}: price band order is wrong`);
