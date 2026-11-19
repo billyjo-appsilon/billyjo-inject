@@ -96,6 +96,21 @@ const wellsLogo = fs.readFileSync(path.join(__dirname, '..', 'images', 'brands',
           })(),
           infoTextAlign: getComputedStyle(card.querySelector('.bj-hgp-info')).textAlign,
           hasPriceBox: !!card.querySelector('.bj-hgp-pricebox'),
+          priceBoxHeight: card.querySelector('.bj-hgp-pricebox').getBoundingClientRect().height,
+          priceRowLayout: (() => {
+            const row = card.querySelector('.bj-hgp-price');
+            const label = row.querySelector('.bj-hgp-price-label').getBoundingClientRect();
+            const value = row.querySelector('.bj-hgp-price-value').getBoundingClientRect();
+            const style = getComputedStyle(row);
+            return {
+              display: style.display,
+              justifyContent: style.justifyContent,
+              labelLeft: label.left,
+              valueRight: value.right,
+              rowLeft: row.getBoundingClientRect().left,
+              rowRight: row.getBoundingClientRect().right,
+            };
+          })(),
           hasActions: !!card.querySelector('.bj-hgp-actions'),
           cartLabel: card.querySelector('.bj-hgp-cart')?.textContent.trim() || '',
           detailLabel: card.querySelector('.bj-hgp-detail')?.textContent.trim() || '',
@@ -208,6 +223,15 @@ const wellsLogo = fs.readFileSync(path.join(__dirname, '..', 'images', 'brands',
     }
     if (!result.cards.every((card) => card.infoTextAlign === 'left' && card.hasPriceBox)) {
       throw new Error(`${testCase.name}: card information hierarchy is not left-aligned`);
+    }
+    if (!result.cards.every((card) => card.priceRowLayout.display === 'flex' &&
+        card.priceRowLayout.justifyContent === 'space-between' &&
+        Math.abs(card.priceRowLayout.labelLeft - card.priceRowLayout.rowLeft) < 1 &&
+        Math.abs(card.priceRowLayout.valueRight - card.priceRowLayout.rowRight) < 1)) {
+      throw new Error(`${testCase.name}: monthly fee label/value must align to opposite edges`);
+    }
+    if (testCase.name === 'mobile' && result.cards.some((card) => card.priceBoxHeight > (card.hasRegularPrice ? 39 : 31))) {
+      throw new Error(`mobile: price box is too tall (${Math.max(...result.cards.map((card) => card.priceBoxHeight))}px)`);
     }
     if (!result.cards.every((card) => card.cardBackground === 'rgb(255, 255, 255)' && card.imageBackground === 'rgb(255, 255, 255)' &&
         card.cardBackgroundImage === 'none' && card.imageBackgroundImage === 'none')) {
