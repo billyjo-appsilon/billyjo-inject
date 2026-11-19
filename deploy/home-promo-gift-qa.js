@@ -13,8 +13,25 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
 
   for (const testCase of cases) {
     const page = await browser.newPage({ viewport: testCase });
+    let cartPostBody = '';
     await page.route(/cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/inject(?:\.min)?\.js/, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: injectSource });
+    });
+    await page.route('**/html/dh_prod/prod_view/24129', async (route) => {
+      await route.fulfill({
+        status: 200,
+        contentType: 'text/html; charset=utf-8',
+        body: '<form name="order">' +
+          '<input name="public_model_no" value="WP610NWA 6개월택배">' +
+          '<input name="prod_model_no" value="WP610NWA 6개월택배">' +
+          '<input name="prod_name" value="웰스 미미 직수 무전원 정수기 (정수)">' +
+          '<input name="cate_no" value="1-8">' +
+          '</form><a class="month_box layer_price" data-supcode="20210222" data-supname="교원웰스" data-month="5년(5년의무)" data-month_key="48" data-price="8,900" data-dcprice="0" data-rebate="126000"></a>',
+      });
+    });
+    await page.route('**/html/dh_order/shop_cart', async (route) => {
+      cartPostBody = route.request().postData() || '';
+      await route.fulfill({ status: 200, contentType: 'text/html; charset=utf-8', body: '<main>cart ok</main>' });
     });
     await page.goto('https://billyjo.co.kr/', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForSelector('#bj-home-gift-promos', { timeout: 30000 });
@@ -40,7 +57,7 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
           text: card.textContent.replace(/\s+/g, ' ').trim(),
           regularText: card.querySelector('.bj-hgp-regular')?.textContent.replace(/\s+/g, ' ').trim() || '',
           priceText: card.querySelector('.bj-hgp-price')?.textContent.replace(/\s+/g, ' ').trim() || '',
-          href: card.href,
+          href: card.querySelector('.bj-hgp-main')?.href || '',
           imageLoaded: card.querySelector('img').naturalWidth > 0,
           verticalLayout: (() => {
             const imageRect = card.querySelector('.bj-hgp-image').getBoundingClientRect();
@@ -54,6 +71,7 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
             return badgeRect.top - imageRect.top;
           })(),
           cardPadding: parseFloat(getComputedStyle(card).paddingTop),
+          cardHeight: card.getBoundingClientRect().height,
           hasRegularPrice: !!card.querySelector('.bj-hgp-regular'),
           hasReviews: !!card.querySelector('.bj-hgp-reviews'),
           reviewText: card.querySelector('.bj-hgp-reviews')?.textContent.replace(/\s+/g, ' ').trim() || '',
@@ -63,6 +81,9 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
           brandLogoAlt: card.querySelector('.bj-hgp-brand-logo')?.alt || '',
           infoTextAlign: getComputedStyle(card.querySelector('.bj-hgp-info')).textAlign,
           hasPriceBox: !!card.querySelector('.bj-hgp-pricebox'),
+          hasActions: !!card.querySelector('.bj-hgp-actions'),
+          cartLabel: card.querySelector('.bj-hgp-cart')?.textContent.trim() || '',
+          detailLabel: card.querySelector('.bj-hgp-detail')?.textContent.trim() || '',
         })),
         title: section.querySelector('.bj-hgp-title').textContent.replace(/\s+/g, ' ').trim(),
         countdown: [...section.querySelectorAll('[data-bj-countdown]')].map((node) => ({
@@ -166,11 +187,23 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     if (!result.cards.every((card) => card.infoTextAlign === 'left' && card.hasPriceBox)) {
       throw new Error(`${testCase.name}: card information hierarchy is not left-aligned`);
     }
-    if (!result.cards.every((card) => card.verticalLayout)) throw new Error(`${testCase.name}: promo cards must keep product image above product info`);
-    const minImageWidth = testCase.name === 'mobile' ? 145 : 300;
+    if (!result.cards.every((card) => card.hasActions && card.cartLabel === '담기' && card.detailLabel === '상세보기')) {
+      throw new Error(`${testCase.name}: compact card actions are missing`);
+    }
+    if (testCase.name === 'mobile' && !result.cards.every((card) => card.verticalLayout)) {
+      throw new Error('mobile: promo cards must keep the product image above product info');
+    }
+    if (testCase.name === 'desktop' && result.cards.some((card) => card.verticalLayout)) {
+      throw new Error('desktop: promo cards must use the compact side-by-side layout');
+    }
+    const maxCardHeight = testCase.name === 'mobile' ? 340 : 300;
+    if (!result.cards.every((card) => card.cardHeight <= maxCardHeight)) {
+      throw new Error(`${testCase.name}: promo card is too tall (${Math.max(...result.cards.map((card) => card.cardHeight))}px)`);
+    }
+    const minImageWidth = testCase.name === 'mobile' ? 145 : 175;
     if (!result.cards.every((card) => card.imageWidth >= minImageWidth)) throw new Error(`${testCase.name}: product thumbnail is too small`);
     if (!result.cards.every((card) => card.badgeTopOffset >= 0 && card.badgeTopOffset <= 8)) throw new Error(`${testCase.name}: badge must stay at the thumbnail top`);
-    const minPadding = testCase.name === 'mobile' ? 9 : 18;
+    const minPadding = testCase.name === 'mobile' ? 8 : 16;
     if (!result.cards.every((card) => card.cardPadding >= minPadding)) throw new Error(`${testCase.name}: card padding is too tight`);
     if (!result.beforeNativeRecommendation) throw new Error(`${testCase.name}: promo cards must precede native recommendations`);
     if (!result.menuLabels.some((label) => label.includes('프로모션/사은품 확인'))) {
@@ -179,6 +212,15 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     if (result.oldVisibleMenuCount !== 0) throw new Error(`${testCase.name}: old menu label remains visible`);
     if (!result.sectionVisible) throw new Error(`${testCase.name}: promo section is hidden`);
     if (result.horizontalOverflow) throw new Error(`${testCase.name}: horizontal overflow detected`);
+    if (testCase.name === 'mobile') {
+      await page.locator('.bj-hgp-cart[data-bj-hgp-cart="24129"]').click();
+      await page.locator('.bj-hgp-cart[data-bj-hgp-cart="24129"]').filter({ hasText: '담김 ✓' }).waitFor({ timeout: 10000 });
+      const posted = new URLSearchParams(cartPostBody);
+      if (posted.get('mode') !== 'cart' || posted.get('public_model_no') !== 'WP610NWA 6개월택배' ||
+          posted.get('sup_code') !== '20210222' || posted.get('month') !== '5년(5년의무)' || posted.get('price') !== '8,900') {
+        throw new Error(`mobile: cart payload mismatch (${cartPostBody})`);
+      }
+    }
     console.log(`${testCase.name}: ok`, JSON.stringify(result));
     await page.close();
   }
