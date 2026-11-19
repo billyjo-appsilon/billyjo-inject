@@ -3,6 +3,7 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'utf8');
+const wellsLogo = fs.readFileSync(path.join(__dirname, '..', 'images', 'brands', 'wells-horizontal-20261119.png'));
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -16,6 +17,9 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     let cartPostBody = '';
     await page.route(/cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/inject(?:\.min)?\.js/, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: injectSource });
+    });
+    await page.route('**/images/brands/wells-horizontal-20261119.png', async (route) => {
+      await route.fulfill({ status: 200, contentType: 'image/png', body: wellsLogo });
     });
     await page.route('**/html/dh_prod/prod_view/24129', async (route) => {
       await route.fulfill({
@@ -79,6 +83,13 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
           officialPromoBadge: !card.querySelector('.bj-hgp-discount').classList.contains('is-benefit'),
           brandLogoLoaded: card.querySelector('.bj-hgp-brand-logo')?.naturalWidth > 0,
           brandLogoAlt: card.querySelector('.bj-hgp-brand-logo')?.alt || '',
+          brandLogoSrc: card.querySelector('.bj-hgp-brand-logo')?.src || '',
+          brandLogoBlendMode: getComputedStyle(card.querySelector('.bj-hgp-brand-logo')).mixBlendMode,
+          nameModelGap: (() => {
+            const nameRect = card.querySelector('.bj-hgp-name').getBoundingClientRect();
+            const modelRect = card.querySelector('.bj-hgp-model').getBoundingClientRect();
+            return modelRect.top - nameRect.bottom;
+          })(),
           infoTextAlign: getComputedStyle(card.querySelector('.bj-hgp-info')).textAlign,
           hasPriceBox: !!card.querySelector('.bj-hgp-pricebox'),
           hasActions: !!card.querySelector('.bj-hgp-actions'),
@@ -143,9 +154,9 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
       }
     }
     const discountedPrices = {
-      '34614': ['정가 월 26,900원 (VAT 별도)', '할인가 월 13,450원~ (VAT 별도)'],
-      '32596': ['정가 월 20,900원 (VAT 별도)', '할인가 월 10,450원~ (VAT 별도)'],
-      '32586': ['정가 월 39,900원 (VAT 별도)', '할인가 월 20,950원~ (VAT 별도)'],
+      '34614': ['정가 월 26,900원', '할인가 월 13,450원~'],
+      '32596': ['정가 월 20,900원', '할인가 월 10,450원~'],
+      '32586': ['정가 월 39,900원', '할인가 월 20,950원~'],
     };
     for (const [id, expected] of Object.entries(discountedPrices)) {
       const card = result.cards.find((item) => item.id === id);
@@ -184,6 +195,13 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     if (!result.cards.every((card) => card.brandLogoLoaded && / 로고$/.test(card.brandLogoAlt))) {
       throw new Error(`${testCase.name}: brand logo failed`);
     }
+    const wellsCard = result.cards.find((card) => card.id === '24129');
+    if (!wellsCard || !wellsCard.brandLogoSrc.includes('wells-horizontal-20261119.png') || wellsCard.brandLogoBlendMode !== 'normal') {
+      throw new Error(`${testCase.name}: transparent Wells logo is not active`);
+    }
+    if (testCase.name === 'mobile' && result.cards.some((card) => card.nameModelGap > 2)) {
+      throw new Error(`mobile: product name/model gap is too large (${Math.max(...result.cards.map((card) => card.nameModelGap))}px)`);
+    }
     if (!result.cards.every((card) => card.infoTextAlign === 'left' && card.hasPriceBox)) {
       throw new Error(`${testCase.name}: card information hierarchy is not left-aligned`);
     }
@@ -213,6 +231,9 @@ const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'u
     if (!result.sectionVisible) throw new Error(`${testCase.name}: promo section is hidden`);
     if (result.horizontalOverflow) throw new Error(`${testCase.name}: horizontal overflow detected`);
     if (testCase.name === 'mobile') {
+      if (process.env.BJ_QA_SCREENSHOT) {
+        await page.locator('.bj-hgp-band').first().screenshot({ path: process.env.BJ_QA_SCREENSHOT });
+      }
       await page.locator('.bj-hgp-cart[data-bj-hgp-cart="24129"]').click();
       await page.locator('.bj-hgp-cart[data-bj-hgp-cart="24129"]').filter({ hasText: '담김 ✓' }).waitFor({ timeout: 10000 });
       const posted = new URLSearchParams(cartPostBody);
