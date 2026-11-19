@@ -3228,14 +3228,14 @@
   })();
   var BRAND_LOGOS = {
     '웰스': 'images/brands/wells-horizontal-20261119.png',
-    'LG전자': 'images/brands/lg-care.jpg',
-    '청호나이스': 'images/brands/chungho.jpg',
-    '쿠쿠': 'images/brands/cuckoo.jpg',
-    '루헨스': 'images/brands/ruhens.jpg',
-    '코웨이': 'images/brands/coway.jpg',
-    '현대렌탈케어': 'images/brands/quming.png',
-    '세스코': 'images/brands/cesco.png',
-    '삼성': 'images/brands/samsung.jpg'
+    'LG전자': 'images/brands/lg-care-horizontal-20261119.png',
+    '청호나이스': 'images/brands/chungho-horizontal-20261119.png',
+    '쿠쿠': 'images/brands/cuckoo-horizontal-20261119.png',
+    '루헨스': 'images/brands/ruhens-horizontal-20261119.png',
+    '코웨이': 'images/brands/coway-horizontal-20261119.png',
+    '현대렌탈케어': 'images/brands/quming-horizontal-20261119.png',
+    '세스코': 'images/brands/cesco-horizontal-20261119.png',
+    '삼성': 'images/brands/samsung-horizontal-20261119.png'
   };
 
   function currentMonthKst() {
@@ -3281,8 +3281,8 @@
       '.bj-hgp-discount{position:absolute;top:5px;left:7px;padding:5px 8px;border-radius:999px;background:#ff3b30;color:#fff;font-size:11px;font-weight:900}' +
       '.bj-hgp-discount.is-benefit{background:#0838f8}' +
       '.bj-hgp-info{display:flex;min-width:0;min-height:0;padding:2px 0;flex:1 1 auto;flex-direction:column;align-items:flex-start;text-align:left}' +
-      '.bj-hgp-brandmark{display:flex;align-items:center;justify-content:flex-start;width:96px;height:28px;margin-bottom:5px}' +
-      '.bj-hgp-brand-logo{display:block;max-width:96px;max-height:28px;object-fit:contain;object-position:left center}' +
+      '.bj-hgp-brandmark{display:flex;align-items:center;justify-content:flex-start;width:120px;height:24px;margin-bottom:5px}' +
+      '.bj-hgp-brand-logo{display:block;width:auto;height:20px;max-width:120px;object-fit:contain;object-position:left center;background:transparent;mix-blend-mode:normal}' +
       '.bj-hgp-brand-fallback{font-size:11px;font-weight:900;color:#475569}' +
       '.bj-hgp-name{font-size:16px;font-weight:900;line-height:1.32;letter-spacing:-.035em;color:#16181d;word-break:keep-all}' +
       '.bj-hgp-model{margin-top:3px;font-size:11px;color:#94a3b8;letter-spacing:.01em}' +
@@ -3304,7 +3304,7 @@
       '.bj-hgp-cart{appearance:none;border:1px solid #0838f8;background:#0838f8;color:#fff;box-shadow:0 6px 14px rgba(8,56,248,.16)}' +
       '.bj-hgp-cart:disabled{cursor:default;opacity:.72}.bj-hgp-cart.is-added{border-color:#0f9f6e;background:#0f9f6e;opacity:1}.bj-hgp-cart.is-error{border-color:#c2410c;background:#c2410c}' +
       '.bj-hgp-note{margin:14px 0 0;font-size:10px;line-height:1.5;color:#64748b}' +
-      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 6px 8px}.bj-hgp-head{margin-bottom:18px;gap:7px}.bj-hgp-heading{width:100%;gap:9px}.bj-hgp-title{font-size:20px}.bj-hgp-countdown{width:100%;gap:6px}.bj-hgp-countdown-unit{flex:1 1 0;gap:4px;font-size:10px}.bj-hgp-countdown-unit strong{min-width:0;width:100%;height:44px;padding:0 4px;border-radius:12px;font-size:18px}.bj-hgp-source{font-size:9px;white-space:normal}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{aspect-ratio:16/10;border-radius:9px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:8px}.bj-hgp-info{min-width:0;padding:5px 1px 0}.bj-hgp-brandmark{width:70px;height:18px;margin-bottom:2px}.bj-hgp-brand-logo{width:70px;max-height:18px;object-fit:contain;object-position:left center;background:transparent;mix-blend-mode:normal}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{display:-webkit-box;min-height:0;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px;line-height:1.35}.bj-hgp-model{max-width:100%;margin-top:1px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-pricebox{margin-top:4px;padding:4px 6px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:7px}.bj-hgp-price b{font-size:15px}.bj-hgp-meta{gap:3px;margin-top:4px}.bj-hgp-reviews{font-size:7px}.bj-hgp-reviews strong{font-size:8px}.bj-hgp-gift{padding:3px 4px;font-size:7px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:32px;border-radius:8px;font-size:9px}}';
+      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 6px 8px}.bj-hgp-head{margin-bottom:18px;gap:7px}.bj-hgp-heading{width:100%;gap:9px}.bj-hgp-title{font-size:20px}.bj-hgp-countdown{width:100%;gap:6px}.bj-hgp-countdown-unit{flex:1 1 0;gap:4px;font-size:10px}.bj-hgp-countdown-unit strong{min-width:0;width:100%;height:44px;padding:0 4px;border-radius:12px;font-size:18px}.bj-hgp-source{font-size:9px;white-space:normal}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{aspect-ratio:16/10;border-radius:9px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:8px}.bj-hgp-info{min-width:0;padding:5px 1px 0}.bj-hgp-brandmark{width:120px;height:22px;margin-bottom:2px}.bj-hgp-brand-logo{width:auto;height:18px;max-width:120px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{display:-webkit-box;min-height:0;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px;line-height:1.35}.bj-hgp-model{max-width:100%;margin-top:1px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-pricebox{margin-top:4px;padding:4px 6px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:7px}.bj-hgp-price b{font-size:15px}.bj-hgp-meta{gap:3px;margin-top:4px}.bj-hgp-reviews{font-size:7px}.bj-hgp-reviews strong{font-size:8px}.bj-hgp-gift{padding:3px 4px;font-size:7px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:32px;border-radius:8px;font-size:9px}}';
     (document.head || document.documentElement).appendChild(style);
   }
   function startWeekCountdown(section) {

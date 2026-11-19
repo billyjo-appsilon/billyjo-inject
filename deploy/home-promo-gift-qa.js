@@ -3,7 +3,21 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'utf8');
-const wellsLogo = fs.readFileSync(path.join(__dirname, '..', 'images', 'brands', 'wells-horizontal-20261119.png'));
+const logoFiles = [
+  'wells-horizontal-20261119.png',
+  'lg-care-horizontal-20261119.png',
+  'chungho-horizontal-20261119.png',
+  'cuckoo-horizontal-20261119.png',
+  'ruhens-horizontal-20261119.png',
+  'coway-horizontal-20261119.png',
+  'quming-horizontal-20261119.png',
+  'cesco-horizontal-20261119.png',
+  'samsung-horizontal-20261119.png',
+];
+const logoAssets = new Map(logoFiles.map((file) => [
+  file,
+  fs.readFileSync(path.join(__dirname, '..', 'images', 'brands', file)),
+]));
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -18,8 +32,11 @@ const wellsLogo = fs.readFileSync(path.join(__dirname, '..', 'images', 'brands',
     await page.route(/cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/inject(?:\.min)?\.js/, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: injectSource });
     });
-    await page.route('**/images/brands/wells-horizontal-20261119.png', async (route) => {
-      await route.fulfill({ status: 200, contentType: 'image/png', body: wellsLogo });
+    await page.route('**/images/brands/*-horizontal-20261119.png', async (route) => {
+      const file = path.basename(new URL(route.request().url()).pathname);
+      const body = logoAssets.get(file);
+      if (!body) return route.continue();
+      await route.fulfill({ status: 200, contentType: 'image/png', body });
     });
     await page.route('**/html/dh_prod/prod_view/24129', async (route) => {
       await route.fulfill({
@@ -89,6 +106,9 @@ const wellsLogo = fs.readFileSync(path.join(__dirname, '..', 'images', 'brands',
           brandLogoAlt: card.querySelector('.bj-hgp-brand-logo')?.alt || '',
           brandLogoSrc: card.querySelector('.bj-hgp-brand-logo')?.src || '',
           brandLogoBlendMode: getComputedStyle(card.querySelector('.bj-hgp-brand-logo')).mixBlendMode,
+          brandLogoHeight: card.querySelector('.bj-hgp-brand-logo').getBoundingClientRect().height,
+          brandLogoWidth: card.querySelector('.bj-hgp-brand-logo').getBoundingClientRect().width,
+          brandLogoWrapperHeight: card.querySelector('.bj-hgp-brandmark').getBoundingClientRect().height,
           nameModelGap: (() => {
             const nameRect = card.querySelector('.bj-hgp-name').getBoundingClientRect();
             const modelRect = card.querySelector('.bj-hgp-model').getBoundingClientRect();
@@ -217,6 +237,17 @@ const wellsLogo = fs.readFileSync(path.join(__dirname, '..', 'images', 'brands',
     const wellsCard = result.cards.find((card) => card.id === '24129');
     if (!wellsCard || !wellsCard.brandLogoSrc.includes('wells-horizontal-20261119.png') || wellsCard.brandLogoBlendMode !== 'normal') {
       throw new Error(`${testCase.name}: transparent Wells logo is not active`);
+    }
+    const qumingCard = result.cards.find((card) => card.id === '35287');
+    if (!qumingCard || !qumingCard.brandLogoSrc.includes('quming-horizontal-20261119.png')) {
+      throw new Error(`${testCase.name}: supplied Quming logo is not active`);
+    }
+    const expectedLogoHeight = testCase.name === 'mobile' ? 18 : 20;
+    const expectedWrapperHeight = testCase.name === 'mobile' ? 22 : 24;
+    if (!result.cards.every((card) => Math.abs(card.brandLogoHeight - expectedLogoHeight) < 0.5 &&
+        Math.abs(card.brandLogoWrapperHeight - expectedWrapperHeight) < 0.5 &&
+        card.brandLogoWidth <= 120.5 && card.brandLogoBlendMode === 'normal')) {
+      throw new Error(`${testCase.name}: brand logo heights are not normalized`);
     }
     if (testCase.name === 'mobile' && result.cards.some((card) => card.nameModelGap > 2)) {
       throw new Error(`mobile: product name/model gap is too large (${Math.max(...result.cards.map((card) => card.nameModelGap))}px)`);
