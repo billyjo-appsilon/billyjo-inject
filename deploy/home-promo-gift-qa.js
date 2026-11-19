@@ -58,6 +58,42 @@ const logoAssets = new Map(logoFiles.map((file) => [
     await page.goto('https://billyjo.co.kr/', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForSelector('#bj-home-gift-promos', { timeout: 30000 });
     await page.locator('#bj-home-gift-promos .bj-hgp-half-banner').scrollIntoViewIfNeeded();
+    const initialPromoState = await page.evaluate(() => {
+      const section = document.querySelector('#bj-home-gift-promos');
+      const cards = [...section.querySelectorAll('.bj-hgp-card')];
+      const visibleCards = cards.filter((card) => !card.hidden && getComputedStyle(card).display !== 'none');
+      const toggle = section.querySelector('[data-bj-hgp-toggle]');
+      const titleLines = [...section.querySelectorAll('.bj-hgp-half-copy h2 > *')].map((line) => ({
+        text: line.textContent.trim(),
+        display: getComputedStyle(line).display,
+        top: Math.round(line.getBoundingClientRect().top),
+      }));
+      return {
+        total: cards.length,
+        visible: visibleCards.length,
+        tierVisible: [...section.querySelectorAll('[data-bj-hgp-band]')].map((band) =>
+          [...band.querySelectorAll('.bj-hgp-card')].filter((card) => !card.hidden && getComputedStyle(card).display !== 'none').length),
+        expanded: toggle.getAttribute('aria-expanded'),
+        label: toggle.textContent.trim(),
+        titleLines,
+      };
+    });
+    if (initialPromoState.total !== 24 || initialPromoState.visible !== 12 ||
+        !initialPromoState.tierVisible.every((count) => count === 2) ||
+        initialPromoState.expanded !== 'false' || initialPromoState.label !== '프로모션 상품 12개 더보기') {
+      throw new Error(`${testCase.name}: initial progressive promo contract mismatch (${JSON.stringify(initialPromoState)})`);
+    }
+    if (initialPromoState.titleLines.length !== 2 ||
+        initialPromoState.titleLines.map((line) => line.text).join('|') !== '11월도|반값습니다!' ||
+        !initialPromoState.titleLines.every((line) => line.display === 'block') ||
+        initialPromoState.titleLines[0].top === initialPromoState.titleLines[1].top) {
+      throw new Error(`${testCase.name}: campaign title must render as two forced lines (${JSON.stringify(initialPromoState.titleLines)})`);
+    }
+    await page.locator('[data-bj-hgp-toggle]').click();
+    const promoBands = page.locator('#bj-home-gift-promos .bj-hgp-band');
+    for (let index = 0; index < await promoBands.count(); index += 1) {
+      await promoBands.nth(index).scrollIntoViewIfNeeded();
+    }
     try {
       await page.waitForFunction(() => {
         const products = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-image > img:not(.bj-hgp-brand-logo)')];
@@ -71,6 +107,19 @@ const logoAssets = new Map(logoFiles.map((file) => [
         .filter((image) => !image.complete || image.naturalWidth === 0)
         .map((image) => image.src));
       throw new Error(`${testCase.name}: image load timeout (${failedImages.join(', ')})`, { cause: error });
+    }
+    const expandedPromoState = await page.evaluate(() => {
+      const section = document.querySelector('#bj-home-gift-promos');
+      const cards = [...section.querySelectorAll('.bj-hgp-card')];
+      const toggle = section.querySelector('[data-bj-hgp-toggle]');
+      return {
+        visible: cards.filter((card) => !card.hidden && getComputedStyle(card).display !== 'none').length,
+        expanded: toggle.getAttribute('aria-expanded'),
+        label: toggle.textContent.trim(),
+      };
+    });
+    if (expandedPromoState.visible !== 24 || expandedPromoState.expanded !== 'true' || expandedPromoState.label !== '프로모션 상품 접기') {
+      throw new Error(`${testCase.name}: expanded promo contract mismatch (${JSON.stringify(expandedPromoState)})`);
     }
     await page.waitForTimeout(10000);
 
