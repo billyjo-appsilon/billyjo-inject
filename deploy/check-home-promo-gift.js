@@ -58,6 +58,7 @@ for (const required of [
   "section.id = 'bj-home-gift-promos'",
   "<b>빌리조 위크</b> - 이번주 한정",
   "var BRAND_LOGOS = {",
+  "'웰스': 'images/brands/wells-horizontal-20261119.png'",
   "'LG전자': 'images/brands/lg-care.jpg'",
   "'청호나이스': 'images/brands/chungho.jpg'",
   "'쿠쿠': 'images/brands/cuckoo.jpg'",
@@ -83,7 +84,6 @@ for (const required of [
   "data-bj-countdown=\"second\"",
   "var daysUntilMonday = weekday === 0 ? 1 : 8 - weekday",
   "window.setInterval(update, 1000)",
-  "(VAT 별도)",
   "data-bj-hgp-tier",
   "grid-template-columns:repeat(2,minmax(0,1fr));gap:8px",
   "flex-direction:column",
@@ -99,6 +99,9 @@ for (const required of [
 ]) {
   if (!source.includes(required)) throw new Error(`missing home promo contract: ${required}`);
 }
+
+if (source.includes('(VAT 별도)')) throw new Error('VAT label must stay hidden on home promo cards');
+if (source.includes('min-height:31px')) throw new Error('mobile product names must not reserve a blank second line');
 
 const numericDiscounts = source.match(/discount:\s*\d+/g) || [];
 if (numericDiscounts.length !== 3) {
