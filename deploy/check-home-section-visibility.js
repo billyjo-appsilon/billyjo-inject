@@ -73,17 +73,50 @@ async function inspect(browser, width, visibility) {
         campaignBanner: (() => {
           const wrapper = document.querySelector('#bj-home-gift-promos .bj-hgp-half-banner');
           const image = wrapper?.querySelector('.bj-hgp-half-visual img');
+          const title = wrapper?.querySelector('h2');
+          const lines = title ? Array.from(title.children).map((line) => {
+            const rect = line.getBoundingClientRect();
+            return { text: line.textContent.trim(), display: getComputedStyle(line).display, top: Math.round(rect.top) };
+          }) : [];
           return {
             src: image?.src || '',
             loaded: Boolean(image?.complete && image?.naturalWidth > 0),
-            title: wrapper?.querySelector('h2')?.textContent.replace(/\s+/g, ' ').trim() || '',
+            title: title?.textContent.replace(/\s+/g, ' ').trim() || '',
+            lines,
             countdownUnits: wrapper?.querySelectorAll('[data-bj-month-countdown-unit]').length || 0,
           };
         })(),
+        promoCards: (() => {
+          const cards = Array.from(document.querySelectorAll('#bj-home-gift-promos .bj-hgp-card'));
+          const visible = cards.filter((card) => !card.hidden && getComputedStyle(card).display !== 'none');
+          const tiers = Array.from(document.querySelectorAll('#bj-home-gift-promos [data-bj-hgp-band]')).map((band) => ({
+            tier: band.getAttribute('data-bj-hgp-band'),
+            total: band.querySelectorAll('.bj-hgp-card').length,
+            visible: Array.from(band.querySelectorAll('.bj-hgp-card')).filter((card) => !card.hidden && getComputedStyle(card).display !== 'none').length,
+          }));
+          const toggle = document.querySelector('[data-bj-hgp-toggle]');
+          return { total: cards.length, visible: visible.length, tiers, expanded: toggle?.getAttribute('aria-expanded'), label: toggle?.textContent.trim() || '' };
+        })(),
         removedWeeklyNodes: document.querySelectorAll('#bj-home-gift-promos .bj-hgp-head,#bj-home-gift-promos .bj-hgp-countdown,#bj-home-gift-promos .bj-hgp-source').length,
-        faqVisible: (() => {
+        faq: (() => {
           const node = document.querySelector('.bj-home-faq-zone');
-          return Boolean(node && getComputedStyle(node).display !== 'none');
+          const section = node?.querySelector('section');
+          const style = section ? getComputedStyle(section) : null;
+          return {
+            visible: Boolean(node && getComputedStyle(node).display !== 'none'),
+            finalInOuter: Boolean(node && node.parentElement?.classList.contains('m_outer') && node === node.parentElement.lastElementChild),
+            beforeFooter: Boolean(node && document.querySelector('footer') && node.getBoundingClientRect().bottom <= document.querySelector('footer').getBoundingClientRect().top + 1),
+            paddingTop: style ? parseFloat(style.paddingTop) : null,
+            paddingBottom: style ? parseFloat(style.paddingBottom) : null,
+          };
+        })(),
+        spacing: (() => {
+          const v5 = document.querySelector('#bj-v5-injected');
+          const promo = document.querySelector('#bj-home-gift-promos');
+          return {
+            v5PaddingBottom: v5 ? parseFloat(getComputedStyle(v5).paddingBottom) : null,
+            promoTail: v5 && promo ? Math.round(v5.getBoundingClientRect().bottom - promo.getBoundingClientRect().bottom) : null,
+          };
         })(),
         viewportWidth: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
@@ -105,14 +138,51 @@ async function inspect(browser, width, visibility) {
         result.campaignBanner.title !== '11월도 반값습니다!' || result.campaignBanner.countdownUnits !== 4) {
       throw new Error(`live1 campaign banner regressed at ${width}px: ${JSON.stringify(result.campaignBanner)}`);
     }
+    if (result.campaignBanner.lines.length !== 2 || result.campaignBanner.lines.some((line) => line.display !== 'block') ||
+        result.campaignBanner.lines[0].text !== '11월도' || result.campaignBanner.lines[1].text !== '반값습니다!' ||
+        result.campaignBanner.lines[0].top >= result.campaignBanner.lines[1].top) {
+      throw new Error(`campaign banner line break regressed at ${width}px: ${JSON.stringify(result.campaignBanner.lines)}`);
+    }
+    if (result.promoCards.total !== 24 || result.promoCards.visible !== 12 || result.promoCards.expanded !== 'false' ||
+        result.promoCards.label !== '프로모션 상품 12개 더보기' ||
+        result.promoCards.tiers.some((tier) => tier.total !== 4 || tier.visible !== 2)) {
+      throw new Error(`collapsed promo contract regressed at ${width}px: ${JSON.stringify(result.promoCards)}`);
+    }
     if (result.removedWeeklyNodes !== 0) throw new Error(`weekly header/countdown remains at ${width}px`);
-    if (!result.faqVisible) throw new Error(`FAQ regressed at ${width}px`);
+    if (!result.faq.visible || !result.faq.finalInOuter || !result.faq.beforeFooter) {
+      throw new Error(`FAQ final placement regressed at ${width}px: ${JSON.stringify(result.faq)}`);
+    }
+    const expectedPadding = width <= 767 ? 32 : 40;
+    if (result.faq.paddingTop !== expectedPadding || result.faq.paddingBottom !== expectedPadding) {
+      throw new Error(`FAQ spacing regressed at ${width}px: ${JSON.stringify(result.faq)}`);
+    }
+    const expectedTail = width <= 767 ? 24 : 32;
+    if (result.spacing.v5PaddingBottom !== expectedTail || result.spacing.promoTail > expectedTail + 1) {
+      throw new Error(`promo tail spacing regressed at ${width}px: ${JSON.stringify(result.spacing)}`);
+    }
     if (result.scrollWidth > result.viewportWidth + 1) {
       throw new Error(`horizontal overflow at ${width}px: ${result.scrollWidth}/${result.viewportWidth}`);
     }
     const relevantErrors = pageErrors.filter((message) => /home-section|SyntaxError|ReferenceError/.test(message));
     if (relevantErrors.length) throw new Error(`relevant page errors: ${relevantErrors.join(' | ')}`);
-    return { width, visibility, ...result };
+    await page.locator('[data-bj-hgp-toggle]').click();
+    const expanded = await page.evaluate(() => ({
+      visible: Array.from(document.querySelectorAll('#bj-home-gift-promos .bj-hgp-card')).filter((card) => !card.hidden && getComputedStyle(card).display !== 'none').length,
+      expanded: document.querySelector('[data-bj-hgp-toggle]')?.getAttribute('aria-expanded'),
+      label: document.querySelector('[data-bj-hgp-toggle]')?.textContent.trim(),
+    }));
+    if (expanded.visible !== 24 || expanded.expanded !== 'true' || expanded.label !== '프로모션 상품 접기') {
+      throw new Error(`expanded promo contract regressed at ${width}px: ${JSON.stringify(expanded)}`);
+    }
+    await page.locator('[data-bj-hgp-toggle]').click();
+    const collapsedAgain = await page.evaluate(() => ({
+      visible: Array.from(document.querySelectorAll('#bj-home-gift-promos .bj-hgp-card')).filter((card) => !card.hidden && getComputedStyle(card).display !== 'none').length,
+      expanded: document.querySelector('[data-bj-hgp-toggle]')?.getAttribute('aria-expanded'),
+    }));
+    if (collapsedAgain.visible !== 12 || collapsedAgain.expanded !== 'false') {
+      throw new Error(`promo recollapse contract regressed at ${width}px: ${JSON.stringify(collapsedAgain)}`);
+    }
+    return { width, visibility, ...result, expanded, collapsedAgain };
   } finally {
     await page.close();
   }
@@ -124,7 +194,7 @@ async function inspect(browser, width, visibility) {
     const hidden = { consultingSteps: false, legacyBenefits: false };
     const visible = { consultingSteps: true, legacyBenefits: true };
     const results = [];
-    for (const width of [320, 390, 1280]) results.push(await inspect(browser, width, hidden));
+    for (const width of [320, 390, 430, 1280]) results.push(await inspect(browser, width, hidden));
     results.push(await inspect(browser, 390, visible));
     console.log(JSON.stringify({ contract: 'ok', results }, null, 2));
   } finally {

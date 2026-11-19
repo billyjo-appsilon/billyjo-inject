@@ -3296,11 +3296,12 @@
     var style = document.createElement('style');
     style.id = 'bj-home-gift-promos-css';
     style.textContent =
-      '#bj-home-gift-promos{margin:0 0 38px;padding:28px 8px 14px;font-family:Pretendard,sans-serif}' +
+      '#bj-home-gift-promos{margin:20px 0 0;padding:16px 8px 0;font-family:Pretendard,sans-serif}' +
       '#bj-home-gift-promos *{box-sizing:border-box}' +
       '.bj-hgp-half-banner{position:relative;display:grid;grid-template-columns:minmax(0,1fr) minmax(210px,42%);align-items:stretch;min-height:230px;margin:0 0 26px;overflow:hidden;border-radius:24px;background:linear-gradient(135deg,#0838f8 0%,#0e55ff 62%,#30a7ff 100%);box-shadow:0 18px 42px rgba(8,56,248,.22)}' +
       '.bj-hgp-half-copy{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:center;padding:34px 12px 34px 40px;color:#fff}' +
       '.bj-hgp-half-copy h2{margin:0;color:#fff;font-size:clamp(30px,4.8vw,48px);font-weight:900;line-height:1.12;letter-spacing:-.045em}' +
+      '.bj-hgp-half-copy h2 .bj-hgp-half-line{display:block;white-space:nowrap}' +
       '.bj-hgp-half-copy h2 em{font-style:normal;color:#ffe500}' +
       '.bj-hgp-half-copy p{margin:12px 0 0;color:rgba(255,255,255,.86);font-size:16px;font-weight:700}' +
       '.bj-hgp-half-visual{position:relative;min-width:0;overflow:hidden}' +
@@ -3346,8 +3347,13 @@
       '.bj-hgp-detail{border:1px solid #cdd8f5;background:#fff;color:#345078}' +
       '.bj-hgp-cart{appearance:none;border:1px solid #0838f8;background:#0838f8;color:#fff;box-shadow:0 6px 14px rgba(8,56,248,.16)}' +
       '.bj-hgp-cart:disabled{cursor:default;opacity:.72}.bj-hgp-cart.is-added{border-color:#0f9f6e;background:#0f9f6e;opacity:1}.bj-hgp-cart.is-error{border-color:#c2410c;background:#c2410c}' +
+      '.bj-hgp-card[hidden]{display:none!important}' +
+      '.bj-hgp-expand-wrap{display:flex;justify-content:center;margin:24px 0 0}' +
+      '.bj-hgp-expand{appearance:none;display:inline-flex;min-width:240px;height:46px;align-items:center;justify-content:center;gap:8px;padding:0 22px;border:1px solid #bfd0ff;border-radius:999px;background:#f6f8ff;color:#0838f8;font:900 14px/1 Pretendard,sans-serif;box-shadow:0 8px 20px rgba(8,56,248,.09);cursor:pointer}' +
+      '.bj-hgp-expand:after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .2s ease}' +
+      '.bj-hgp-expand[aria-expanded="true"]:after{transform:translateY(2px) rotate(-135deg)}' +
       '.bj-hgp-note{margin:14px 0 0;font-size:10px;line-height:1.5;color:#64748b}' +
-      '@media(max-width:780px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 6px 8px}.bj-hgp-half-banner{grid-template-columns:minmax(0,58%) minmax(0,42%);min-height:170px;border-radius:18px;margin-bottom:20px}.bj-hgp-half-copy{padding:24px 4px 24px 20px}.bj-hgp-half-copy h2{font-size:28px}.bj-hgp-half-copy p{margin-top:9px;font-size:13px;line-height:1.45}.bj-hgp-month-timer{margin-top:9px;gap:5px}.bj-hgp-flip-digit{width:19px;height:26px;border-radius:5px;font-size:14px}.bj-hgp-flip-unit{font-size:10px}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{aspect-ratio:16/10;border-radius:9px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:8px}.bj-hgp-info{min-width:0;padding:5px 1px 0}.bj-hgp-brandmark{left:6px;bottom:1px;max-width:102.4px;height:17.6px;padding:1.6px 3.2px}.bj-hgp-image .bj-hgp-brand-logo{width:auto;height:14.4px;max-width:96px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{display:-webkit-box;min-height:0;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px;line-height:1.35}.bj-hgp-model{max-width:100%;margin-top:1px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-pricebox{margin-top:4px;padding:4px 6px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:7px}.bj-hgp-price b{font-size:15px}.bj-hgp-meta{gap:3px;margin-top:4px}.bj-hgp-reviews{font-size:7px}.bj-hgp-reviews strong{font-size:8px}.bj-hgp-gift{padding:3px 4px;font-size:7px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:28px;border-radius:8px;font-size:11px}}';
+      '@media(max-width:780px){#bj-home-gift-promos{margin:18px -2px 0;padding:12px 6px 0}.bj-hgp-half-banner{grid-template-columns:minmax(0,58%) minmax(0,42%);min-height:170px;border-radius:18px;margin-bottom:20px}.bj-hgp-half-copy{padding:24px 4px 24px 20px}.bj-hgp-half-copy h2{font-size:28px}.bj-hgp-half-copy p{margin-top:9px;font-size:13px;line-height:1.45}.bj-hgp-month-timer{margin-top:9px;gap:5px}.bj-hgp-flip-digit{width:19px;height:26px;border-radius:5px;font-size:14px}.bj-hgp-flip-unit{font-size:10px}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{aspect-ratio:16/10;border-radius:9px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:8px}.bj-hgp-info{min-width:0;padding:5px 1px 0}.bj-hgp-brandmark{left:6px;bottom:1px;max-width:102.4px;height:17.6px;padding:1.6px 3.2px}.bj-hgp-image .bj-hgp-brand-logo{width:auto;height:14.4px;max-width:96px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{display:-webkit-box;min-height:0;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px;line-height:1.35}.bj-hgp-model{max-width:100%;margin-top:1px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-pricebox{margin-top:4px;padding:4px 6px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:7px}.bj-hgp-price b{font-size:15px}.bj-hgp-meta{gap:3px;margin-top:4px}.bj-hgp-reviews{font-size:7px}.bj-hgp-reviews strong{font-size:8px}.bj-hgp-gift{padding:3px 4px;font-size:7px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:28px;border-radius:8px;font-size:11px}.bj-hgp-expand-wrap{margin-top:18px}.bj-hgp-expand{width:100%;min-width:0;height:42px;font-size:13px}}';
     (document.head || document.documentElement).appendChild(style);
   }
   function startHomeMonthCountdown(section) {
@@ -3473,6 +3479,32 @@
       });
     });
   }
+  function bindHomePromoToggle(section) {
+    var button = section.querySelector('[data-bj-hgp-toggle]');
+    if (!button) return;
+    var extras = Array.prototype.slice.call(section.querySelectorAll('[data-bj-hgp-extra]'));
+    function apply(expanded) {
+      extras.forEach(function (card) { card.hidden = !expanded; });
+      button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+      button.textContent = expanded ? '프로모션 상품 접기' : '프로모션 상품 12개 더보기';
+      section.setAttribute('data-bj-hgp-expanded', expanded ? '1' : '0');
+    }
+    apply(false);
+    button.addEventListener('click', function () {
+      var expanded = button.getAttribute('aria-expanded') !== 'true';
+      var beforeTop = button.getBoundingClientRect().top;
+      apply(expanded);
+      if (!expanded) {
+        var afterTop = button.getBoundingClientRect().top;
+        window.scrollBy(0, afterTop - beforeTop);
+      }
+      try {
+        if (typeof window.BillyjoJourneyTrack === 'function') {
+          window.BillyjoJourneyTrack('home_promo_toggle', { expanded: expanded });
+        }
+      } catch (_error) {}
+    });
+  }
   function render(month) {
     var heading = findHeading();
     if (!heading || document.getElementById('bj-home-gift-promos')) return false;
@@ -3482,7 +3514,7 @@
     var section = document.createElement('section');
     section.id = 'bj-home-gift-promos';
     section.setAttribute('aria-label', '이번달 가격대별 특가 및 추가 사은품 추천제품');
-    function card(p) {
+    function card(p, isExtra) {
       var badge = p.regularPrice
         ? '<span class="bj-hgp-discount">11월 특가</span>'
         : '<span class="bj-hgp-discount is-benefit">혜택 집중</span>';
@@ -3497,9 +3529,10 @@
       var brand = '<div class="bj-hgp-brandmark">' + (logo && HOME_ASSET_BASE
         ? '<img class="bj-hgp-brand-logo" src="' + HOME_ASSET_BASE + logo + '" alt="' + p.brand + ' 로고"><span class="bj-hgp-brand-fallback" hidden>' + p.brand + '</span>'
         : '<span class="bj-hgp-brand-fallback">' + p.brand + '</span>') + '</div>';
-      return '<article class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" data-bj-hgp-tier="' + p.tier + '">' +
+      return '<article class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" data-bj-hgp-tier="' + p.tier + '"' +
+        (isExtra ? ' data-bj-hgp-extra hidden' : '') + '>' +
         '<a class="bj-hgp-main" href="/html/dh_prod/prod_view/' + p.productId + '">' +
-        '<div class="bj-hgp-image"><img src="' + p.image + '" alt="' + p.name + '">' + badge + brand + '</div>' +
+        '<div class="bj-hgp-image"><img src="' + p.image + '" alt="' + p.name + '" loading="lazy" decoding="async">' + badge + brand + '</div>' +
         '<div class="bj-hgp-info"><div class="bj-hgp-name">' + p.name + '</div>' +
         '<div class="bj-hgp-model">' + p.model + '</div>' +
         price + '<div class="bj-hgp-meta">' + reviews +
@@ -3508,7 +3541,7 @@
         '<button type="button" class="bj-hgp-cart" data-bj-hgp-cart="' + p.productId + '" aria-label="' + p.name + ' 견적비교 담기" aria-pressed="false">담기</button></div></article>';
     }
     var campaignBanner = '<div class="bj-hgp-half-banner" data-bj-live1-half-banner>' +
-      '<div class="bj-hgp-half-copy"><h2>' + Number(month.split('-')[1]) + '월도 <em>반값습니다!</em></h2>' +
+      '<div class="bj-hgp-half-copy"><h2><span class="bj-hgp-half-line">' + Number(month.split('-')[1]) + '월도</span> <em class="bj-hgp-half-line">반값습니다!</em></h2>' +
       '<p>이번주 특가 한정물량, 추가사은품 확인하세요</p>' +
       '<div class="bj-hgp-month-timer" data-bj-month-countdown aria-label="이번 달 특가 마감까지 남은 시간"></div></div>' +
       '<div class="bj-hgp-half-visual" aria-hidden="true"><img src="' + LIVE1_HALF_BANNER_MASCOT + '" alt="" loading="eager" decoding="async"></div></div>';
@@ -3517,8 +3550,9 @@
       TIERS.map(function (tier) {
         var items = PRODUCTS.filter(function (p) { return p.tier === tier; });
         return '<div class="bj-hgp-band" data-bj-hgp-band="' + tier + '"><h3 class="bj-hgp-band-title">' + tier + '</h3>' +
-          '<div class="bj-hgp-grid">' + items.map(card).join('') + '</div></div>';
+          '<div class="bj-hgp-grid">' + items.map(function (item, index) { return card(item, index >= 2); }).join('') + '</div></div>';
       }).join('') +
+      '<div class="bj-hgp-expand-wrap"><button type="button" class="bj-hgp-expand" data-bj-hgp-toggle aria-expanded="false">프로모션 상품 12개 더보기</button></div>' +
       '<p class="bj-hgp-note">월요금·할인·사은품은 약정과 관리방식에 따라 달라질 수 있으며, 할인가와 후기 평점·개수는 2026.11 확인 데이터 기준입니다. 최종 혜택은 상담 시 확인됩니다.</p>';
     section.querySelectorAll('.bj-hgp-brand-logo').forEach(function (image) {
       image.addEventListener('error', function () {
@@ -3528,6 +3562,7 @@
       });
     });
     bindHomeCartButtons(section);
+    bindHomePromoToggle(section);
     v5.appendChild(section);
     startHomeMonthCountdown(section);
     if (typeof window.__bjHomeReleaseV5 === 'function') {
@@ -4823,10 +4858,10 @@
     (document.head || document.documentElement).appendChild(s);
   })();
 
-  // === v5 홈 섹션 세로 여백 축소 (2026-07-07) ===
+  // === v5 홈 섹션 세로 여백 축소 (2026-07-07, 2026-11-19 재조정) ===
   //   배경이 전체 흰색으로 통일된 상태(3062행)라 각 .zone 의 상하 패딩(40/60px = 100px)이
-  //   시각적 구분 없는 순수 빈 공간. 이를 0으로 만들고, 섹션 간 리듬은 이미 존재하는
-  //   #bj-v5-injected 의 flex row-gap(28px) + 각 section 의 margin-bottom(28px)으로 일원화.
+  //   시각적 구분 없는 순수 빈 공간. 이를 0으로 만들고, 직접 자식 zone 사이 간격을
+  //   20px로 고정해 중복 row-gap·section margin이 만드는 과도한 여백을 제거한다.
   //   결과 섹션 간격 ≈ 데스크톱 56px / 모바일 46px (기존 ≈ 128 / 100+). 페이지 높이 데스크톱 −770·모바일 −810px.
   //   (.hero=블루 트러스트 카드의 잉여 하단 마진 제거, 데스크톱 .m_outer 하단 여백 95→48px)
   //   롤백: 이 블록만 제거. .zone/section 내부 여백은 그대로라 헤딩·그리드 간격은 불변.
@@ -4835,12 +4870,15 @@
     var s = document.createElement('style');
     s.id = 'bj-vspace';
     s.textContent =
+      '#bj-v5-injected{padding-bottom:32px !important}' +
       '#bj-v5-injected .zone{padding-top:0 !important;padding-bottom:0 !important}' +
+      '#bj-v5-injected>.zone{margin-top:20px !important}' +
+      '#bj-v5-injected>.zone>section{margin-top:0 !important;margin-bottom:0 !important}' +
       '#bj-v5-injected .hero{margin-bottom:0 !important}' +
       // 히어로 배너↔"오래 사용할 가전인데"(bj-bridge) 사이 축소: 서버 템플릿 상단 스페이서(40px)+모바일 m_outer 상단여백 축소 (2026-07-07)
       '#bj-v5-injected>div[style*="height: 40px"]{height:10px !important}' +
-      '@media(max-width:767px){#bj-v5-injected{row-gap:32px !important}.m_outer{padding-top:22px !important}}' + /* 섹션 간격 18→32 확대 2026-07-23 */
-      '@media(min-width:769px){.m_outer{padding-bottom:48px !important}}';
+      '@media(max-width:767px){#bj-v5-injected{row-gap:0 !important;padding-bottom:24px !important}.m_outer{padding-top:22px !important}}' +
+      '@media(min-width:769px){.m_outer{padding-bottom:24px !important}}';
     (document.head || document.documentElement).appendChild(s);
   })();
 
@@ -7399,30 +7437,30 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var bjFaqCss = document.createElement('style');
       bjFaqCss.id = 'bj-home-faq-css';
       bjFaqCss.textContent =
-        '#bj-v5-injected .bj-home-faq-zone{order:10;background:#f7faff!important}' +
-        '#bj-v5-injected .bj-home-faq-zone section{padding:56px 20px!important}' +
-        '#bj-v5-injected .bj-home-faq-head{text-align:center;margin:0 auto 24px}' +
-        '#bj-v5-injected .bj-home-faq-eye{margin:0 0 7px;color:#0838f8;font-size:13px;font-weight:900;letter-spacing:.08em}' +
-        '#bj-v5-injected .bj-home-faq-title{margin:0;color:#111827;font-size:28px;font-weight:900;line-height:1.28;letter-spacing:0}' +
-        '#bj-v5-injected .bj-home-faq-list{display:grid;gap:9px;max-width:740px;margin:0 auto}' +
-        '#bj-v5-injected .bj-home-faq-item{border:1px solid #dfeaf6;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 8px 22px rgba(21,64,120,.07)}' +
-        '#bj-v5-injected .bj-home-faq-item[open]{border-color:#bfd3ff;box-shadow:0 12px 28px rgba(21,64,120,.1)}' +
-        '#bj-v5-injected .bj-home-faq-item summary{position:relative;display:block;list-style:none;cursor:pointer;padding:17px 50px 17px 18px;color:#17253a;font-size:16px;font-weight:900;line-height:1.35;letter-spacing:0;word-break:keep-all}' +
-        '#bj-v5-injected .bj-home-faq-item summary::-webkit-details-marker{display:none}' +
-        '#bj-v5-injected .bj-home-faq-item summary:after{content:"";position:absolute;right:20px;top:50%;width:9px;height:9px;border-right:2px solid #7d8da3;border-bottom:2px solid #7d8da3;transform:translateY(-70%) rotate(45deg);transition:transform .2s ease,border-color .2s ease}' +
-        '#bj-v5-injected .bj-home-faq-item[open] summary:after{border-color:#0838f8;transform:translateY(-25%) rotate(-135deg)}' +
-        '#bj-v5-injected .bj-home-faq-answer{padding:0 18px 17px;color:#526174;font-size:14px;line-height:1.7;word-break:keep-all}' +
-        '#bj-v5-injected .bj-home-faq-answer b{color:#17253a}' +
-        '#bj-v5-injected .bj-home-faq-note{margin-top:10px;padding:10px 12px;border-radius:10px;background:#eef4ff;color:#17253a;font-weight:800;font-variant-numeric:tabular-nums}' +
-        '#bj-v5-injected .bj-home-faq-steps{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}' +
-        '#bj-v5-injected .bj-home-faq-steps span{display:inline-flex;align-items:center;border-radius:999px;background:#eef4ff;color:#0838f8;padding:6px 11px;font-size:12px;font-weight:900}' +
-        '@media(max-width:767px){#bj-v5-injected .bj-home-faq-zone section{padding:44px 12px!important}#bj-v5-injected .bj-home-faq-title{font-size:22px}#bj-v5-injected .bj-home-faq-item summary{padding:15px 44px 15px 15px;font-size:14px}#bj-v5-injected .bj-home-faq-item summary:after{right:17px}#bj-v5-injected .bj-home-faq-answer{padding:0 15px 15px;font-size:13.5px}}';
+        '.bj-home-faq-zone{display:block;background:#fff!important}' +
+        '.bj-home-faq-zone section{max-width:1280px;margin:0 auto!important;padding:40px 20px!important;text-align:center}' +
+        '.bj-home-faq-head{text-align:center;margin:0 auto 24px}' +
+        '.bj-home-faq-eye{margin:0 0 7px;color:#0838f8;font-size:13px;font-weight:900;letter-spacing:.08em}' +
+        '.bj-home-faq-title{margin:0;color:#111827;font-size:28px;font-weight:900;line-height:1.28;letter-spacing:0}' +
+        '.bj-home-faq-list{display:grid;gap:9px;max-width:740px;margin:0 auto}' +
+        '.bj-home-faq-item{border:1px solid #dfeaf6;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 8px 22px rgba(21,64,120,.07)}' +
+        '.bj-home-faq-item[open]{border-color:#bfd3ff;box-shadow:0 12px 28px rgba(21,64,120,.1)}' +
+        '.bj-home-faq-item summary{position:relative;display:block;list-style:none;cursor:pointer;padding:17px 50px 17px 18px;color:#17253a;font-size:16px;font-weight:900;line-height:1.35;letter-spacing:0;word-break:keep-all;text-align:left}' +
+        '.bj-home-faq-item summary::-webkit-details-marker{display:none}' +
+        '.bj-home-faq-item summary:after{content:"";position:absolute;right:20px;top:50%;width:9px;height:9px;border-right:2px solid #7d8da3;border-bottom:2px solid #7d8da3;transform:translateY(-70%) rotate(45deg);transition:transform .2s ease,border-color .2s ease}' +
+        '.bj-home-faq-item[open] summary:after{border-color:#0838f8;transform:translateY(-25%) rotate(-135deg)}' +
+        '.bj-home-faq-answer{padding:0 18px 17px;color:#526174;font-size:14px;line-height:1.7;word-break:keep-all;text-align:left}' +
+        '.bj-home-faq-answer b{color:#17253a}' +
+        '.bj-home-faq-note{margin-top:10px;padding:10px 12px;border-radius:10px;background:#eef4ff;color:#17253a;font-weight:800;font-variant-numeric:tabular-nums}' +
+        '.bj-home-faq-steps{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}' +
+        '.bj-home-faq-steps span{display:inline-flex;align-items:center;border-radius:999px;background:#eef4ff;color:#0838f8;padding:6px 11px;font-size:12px;font-weight:900}' +
+        '@media(max-width:767px){.bj-home-faq-zone section{padding:32px 12px!important}.bj-home-faq-title{font-size:22px}.bj-home-faq-item summary{padding:15px 44px 15px 15px;font-size:14px}.bj-home-faq-item summary:after{right:17px}.bj-home-faq-answer{padding:0 15px 15px;font-size:13.5px}}';
       (document.head || document.documentElement).appendChild(bjFaqCss);
     }
-    if (!pageEl.querySelector('.bj-home-faq-zone')) {
+    if (!document.querySelector('.bj-home-faq-zone')) {
       var bjHomeFaqZone = document.createElement('div');
       bjHomeFaqZone.className = 'zone bj-home-faq-zone';
-      bjHomeFaqZone.style.order = '10';
+      bjHomeFaqZone.setAttribute('data-bj-home-final-section', 'faq');
       bjHomeFaqZone.innerHTML = '<section>' +
         '<div class="bj-home-faq-head"><div class="bj-home-faq-eye">FAQ</div><h2 class="bj-home-faq-title">많이 묻는 질문</h2></div>' +
         '<div class="bj-home-faq-list">' +
@@ -7433,7 +7471,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         '<details class="bj-home-faq-item"><summary>신용조회를 하나요?</summary><div class="bj-home-faq-answer">렌탈은 할부금융 형태라 가입 시 신용 확인이 필요합니다. 만 19세 이상·정상 신용 고객 대상이며, 조회 전 반드시 사전 동의를 받습니다.</div></details>' +
         '<details class="bj-home-faq-item"><summary>신청하면 어떻게 진행되나요?</summary><div class="bj-home-faq-answer">상담에서 제품과 약정을 확정한 뒤 설치 일정을 잡습니다. 재고·지역에 따라 당일~3일 내 설치가 가능합니다.<div class="bj-home-faq-steps"><span>1 상담</span><span>2 제품·약정 선택</span><span>3 신청서 작성</span><span>4 설치</span></div></div></details>' +
         '</div></section>';
-      pageEl.appendChild(bjHomeFaqZone);
+      var bjHomeFaqHost = pageEl.closest && pageEl.closest('.m_outer');
+      (bjHomeFaqHost || pageEl).appendChild(bjHomeFaqZone);
     }
 
     // 배경 전체 화이트 통일 (하늘색·회색 제거, Jun 요청) — .hero(파란 트러스트 카드)만 제외 (2026-07-03)
@@ -9212,7 +9251,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '#bj-home-mobile-cta button{appearance:none;border:0;border-radius:12px;min-height:46px;padding:9px 10px;font:900 13px/1.18 Pretendard,Arial,sans-serif;letter-spacing:0;cursor:pointer;word-break:keep-all}' +
       '#bj-home-mobile-cta .bj-home-cta-consult{background:#0838f8;color:#fff;box-shadow:0 8px 18px rgba(8,56,248,.24)}' +
       '#bj-home-mobile-cta .bj-home-cta-secret{background:#fff7d6;color:#3b2a00;border:1px solid #ffe27a}' +
-      '@media(max-width:767px){body.bj-home-cta-on{padding-bottom:0!important}#bj-home-mobile-cta{display:none!important}#bj-v5-injected .lead{font-size:20px!important;line-height:1.45!important;word-break:keep-all}#bj-v5-injected .diff-card .t{font-size:15px!important;line-height:1.45!important;font-weight:800!important}#bj-v5-injected .diff-card .d,#bj-v5-injected .review-item p,#bj-v5-injected .highlight-bar,#bj-v5-injected .bj-home-faq-answer{font-size:14px!important;line-height:1.62!important}#bj-v5-injected .bj-trust-cta{font-size:15px!important;min-height:50px!important}.bj-benefit-amount{font-size:1.34em!important}}' +
+      '@media(max-width:767px){body.bj-home-cta-on{padding-bottom:0!important}#bj-home-mobile-cta{display:none!important}#bj-v5-injected .lead{font-size:20px!important;line-height:1.45!important;word-break:keep-all}#bj-v5-injected .diff-card .t{font-size:15px!important;line-height:1.45!important;font-weight:800!important}#bj-v5-injected .diff-card .d,#bj-v5-injected .review-item p,#bj-v5-injected .highlight-bar,.bj-home-faq-zone .bj-home-faq-answer{font-size:14px!important;line-height:1.62!important}#bj-v5-injected .bj-trust-cta{font-size:15px!important;min-height:50px!important}.bj-benefit-amount{font-size:1.34em!important}}' +
       '@media(min-width:768px){#bj-v5-injected .bj-trust-cta{font-size:16px!important;min-height:50px!important}}';
     (document.head || document.documentElement).appendChild(s);
   }
