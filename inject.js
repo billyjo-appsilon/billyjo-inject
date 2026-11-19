@@ -3274,12 +3274,13 @@
       '.bj-hgp-band-title{display:flex;align-items:center;gap:8px;margin:0 0 9px;font-size:15px;font-weight:900;color:#1e293b}' +
       '.bj-hgp-band-title:before{content:"";width:4px;height:15px;border-radius:99px;background:#0838f8}' +
       '.bj-hgp-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}' +
-      '.bj-hgp-card{display:flex;min-width:0;height:100%;padding:18px;flex-direction:column;border:1px solid #dbe4ff;border-radius:18px;background:linear-gradient(145deg,#fff 0%,#f6f8ff 100%);color:inherit;text-decoration:none;box-shadow:0 7px 22px rgba(8,56,248,.07)}' +
-      '.bj-hgp-image{position:relative;display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:16/10;border-radius:12px;background:linear-gradient(145deg,#fff 0%,#edf2ff 100%);overflow:hidden}' +
+      '.bj-hgp-card{display:flex;min-width:0;height:100%;padding:16px;flex-direction:column;border:1px solid #dbe4ff;border-radius:18px;background:linear-gradient(145deg,#fff 0%,#f6f8ff 100%);color:inherit;box-shadow:0 7px 22px rgba(8,56,248,.07)}' +
+      '.bj-hgp-main{display:grid;grid-template-columns:180px minmax(0,1fr);gap:16px;min-width:0;flex:1 1 auto;color:inherit;text-decoration:none}' +
+      '.bj-hgp-image{position:relative;display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:1/1;border-radius:12px;background:linear-gradient(145deg,#fff 0%,#edf2ff 100%);overflow:hidden}' +
       '.bj-hgp-image img{width:100%;height:100%;object-fit:contain;transform:scale(1.08)}' +
       '.bj-hgp-discount{position:absolute;top:5px;left:7px;padding:5px 8px;border-radius:999px;background:#ff3b30;color:#fff;font-size:11px;font-weight:900}' +
       '.bj-hgp-discount.is-benefit{background:#0838f8}' +
-      '.bj-hgp-info{display:flex;min-width:0;min-height:0;height:100%;padding:14px 2px 1px;flex:1 1 auto;flex-direction:column;align-items:flex-start;text-align:left}' +
+      '.bj-hgp-info{display:flex;min-width:0;min-height:0;padding:2px 0;flex:1 1 auto;flex-direction:column;align-items:flex-start;text-align:left}' +
       '.bj-hgp-brandmark{display:flex;align-items:center;justify-content:flex-start;width:96px;height:28px;margin-bottom:5px}' +
       '.bj-hgp-brand-logo{display:block;max-width:96px;max-height:28px;object-fit:contain;object-position:left center}' +
       '.bj-hgp-brand-fallback{font-size:11px;font-weight:900;color:#475569}' +
@@ -3296,9 +3297,13 @@
       '.bj-hgp-reviews{display:flex;align-items:center;gap:4px;font-size:10px;font-weight:800;color:#475569}' +
       '.bj-hgp-reviews strong{color:#f59e0b;font-size:12px}' +
       '.bj-hgp-gift{display:inline-flex;padding:5px 8px;border-radius:8px;background:#fff3e8;color:#b45309;font-size:10px;font-weight:900;line-height:1.35}' +
-      '.bj-hgp-cta{display:flex;align-items:center;width:100%;margin-top:auto;padding-top:9px;border-top:1px solid #e4e9f5;font-size:11px;font-weight:900;color:#0838f8}' +
+      '.bj-hgp-actions{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px;margin-top:12px;padding-top:10px;border-top:1px solid #e4e9f5}' +
+      '.bj-hgp-detail,.bj-hgp-cart{display:flex;min-width:0;height:38px;align-items:center;justify-content:center;border-radius:10px;font:900 12px/1 Pretendard,sans-serif;text-decoration:none;cursor:pointer}' +
+      '.bj-hgp-detail{border:1px solid #cdd8f5;background:#fff;color:#345078}' +
+      '.bj-hgp-cart{appearance:none;border:1px solid #0838f8;background:#0838f8;color:#fff;box-shadow:0 6px 14px rgba(8,56,248,.16)}' +
+      '.bj-hgp-cart:disabled{cursor:default;opacity:.72}.bj-hgp-cart.is-added{border-color:#0f9f6e;background:#0f9f6e;opacity:1}.bj-hgp-cart.is-error{border-color:#c2410c;background:#c2410c}' +
       '.bj-hgp-note{margin:14px 0 0;font-size:10px;line-height:1.5;color:#64748b}' +
-      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 6px 8px}.bj-hgp-head{margin-bottom:18px;gap:7px}.bj-hgp-heading{width:100%;gap:9px}.bj-hgp-title{font-size:20px}.bj-hgp-countdown{width:100%;gap:6px}.bj-hgp-countdown-unit{flex:1 1 0;gap:4px;font-size:10px}.bj-hgp-countdown-unit strong{min-width:0;width:100%;height:44px;padding:0 4px;border-radius:12px;font-size:18px}.bj-hgp-source{font-size:9px;white-space:normal}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{padding:9px;border-radius:14px}.bj-hgp-image{aspect-ratio:1/1;border-radius:9px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:8px}.bj-hgp-info{min-width:0;padding:9px 1px 1px}.bj-hgp-brandmark{width:72px;height:21px;margin-bottom:4px}.bj-hgp-brand-logo{max-width:72px;max-height:21px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{display:-webkit-box;min-height:33px;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:12px;line-height:1.35}.bj-hgp-model{max-width:100%;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-pricebox{margin-top:7px;padding:7px 7px;border-radius:9px}.bj-hgp-regular{font-size:8px;line-height:1.3}.bj-hgp-price{font-size:9px;line-height:1.3}.bj-hgp-price-label{display:block;margin:0 0 1px;font-size:8px}.bj-hgp-price b{font-size:16px}.bj-hgp-vat{display:block;margin:2px 0 0;font-size:7px}.bj-hgp-meta{gap:4px;margin-top:6px}.bj-hgp-reviews{font-size:8px}.bj-hgp-reviews strong{font-size:9px}.bj-hgp-gift{padding:4px 5px;font-size:8px}.bj-hgp-cta{margin-top:auto;padding-top:7px;font-size:8px}}';
+      '@media(max-width:767px){#bj-home-gift-promos{margin:0 -2px 30px;padding:20px 6px 8px}.bj-hgp-head{margin-bottom:18px;gap:7px}.bj-hgp-heading{width:100%;gap:9px}.bj-hgp-title{font-size:20px}.bj-hgp-countdown{width:100%;gap:6px}.bj-hgp-countdown-unit{flex:1 1 0;gap:4px;font-size:10px}.bj-hgp-countdown-unit strong{min-width:0;width:100%;height:44px;padding:0 4px;border-radius:12px;font-size:18px}.bj-hgp-source{font-size:9px;white-space:normal}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{aspect-ratio:16/10;border-radius:9px}.bj-hgp-discount{top:4px;left:5px;padding:4px 6px;font-size:8px}.bj-hgp-info{min-width:0;padding:7px 1px 0}.bj-hgp-brandmark{width:70px;height:18px;margin-bottom:3px}.bj-hgp-brand-logo{max-width:70px;max-height:18px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{display:-webkit-box;min-height:31px;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11px;line-height:1.35}.bj-hgp-model{max-width:100%;margin-top:2px;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bj-hgp-pricebox{margin-top:5px;padding:6px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.25}.bj-hgp-price{font-size:8px;line-height:1.25}.bj-hgp-price-label{display:inline;margin:0 2px 0 0;font-size:7px}.bj-hgp-price b{font-size:15px}.bj-hgp-vat{display:inline;margin-left:2px;font-size:6px}.bj-hgp-meta{gap:3px;margin-top:5px}.bj-hgp-reviews{font-size:7px}.bj-hgp-reviews strong{font-size:8px}.bj-hgp-gift{padding:3px 4px;font-size:7px}.bj-hgp-actions{gap:5px;margin-top:7px;padding-top:7px}.bj-hgp-detail,.bj-hgp-cart{height:32px;border-radius:8px;font-size:9px}}';
     (document.head || document.documentElement).appendChild(style);
   }
   function startWeekCountdown(section) {
@@ -3333,6 +3338,83 @@
     update();
     window.setInterval(update, 1000);
   }
+  function readHomeCartField(form, name) {
+    var input = form && form.querySelector('[name="' + name + '"]');
+    return input ? (input.value || input.getAttribute('value') || '') : '';
+  }
+  function homeCartPayload(doc) {
+    var form = doc.querySelector('form[name="order"], #order');
+    var box = doc.querySelector('.month_box.layer_price');
+    if (!form || !box) return null;
+    var payload = {
+      mode: 'cart',
+      public_model_no: readHomeCartField(form, 'public_model_no'),
+      prod_model_no: readHomeCartField(form, 'prod_model_no'),
+      sup_code: box.getAttribute('data-supcode') || '',
+      sup_name: box.getAttribute('data-supname') || '',
+      month: box.getAttribute('data-month') || '',
+      month_key: box.getAttribute('data-month_key') || '',
+      amt: '1',
+      price: box.getAttribute('data-price') || '',
+      dcprice: box.getAttribute('data-dcprice') || '0',
+      rebate: box.getAttribute('data-rebate') || '0',
+      opt_name: readHomeCartField(form, 'opt_name'),
+      prod_name: readHomeCartField(form, 'prod_name'),
+      cate_no: readHomeCartField(form, 'cate_no')
+    };
+    if (!payload.public_model_no || !payload.prod_name || !payload.sup_code || !payload.month || !payload.price) return null;
+    return payload;
+  }
+  function addHomeProductToCart(productId) {
+    var detailUrl = '/html/dh_prod/prod_view/' + encodeURIComponent(productId);
+    return fetch(detailUrl, { credentials: 'include' })
+      .then(function (response) {
+        if (!response.ok) throw new Error('detail HTTP ' + response.status);
+        return response.text();
+      })
+      .then(function (html) {
+        var doc = new DOMParser().parseFromString(html, 'text/html');
+        var payload = homeCartPayload(doc);
+        if (!payload) throw new Error('missing cart payload');
+        var body = new URLSearchParams();
+        Object.keys(payload).forEach(function (key) { body.append(key, payload[key]); });
+        return fetch('/html/dh_order/shop_cart', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body
+        });
+      })
+      .then(function (response) {
+        if (!response.ok) throw new Error('cart HTTP ' + response.status);
+        return true;
+      });
+  }
+  function bindHomeCartButtons(section) {
+    section.querySelectorAll('.bj-hgp-cart').forEach(function (button) {
+      button.addEventListener('click', function () {
+        if (button.disabled || button.classList.contains('is-added')) return;
+        var productId = button.getAttribute('data-bj-hgp-cart');
+        button.disabled = true;
+        button.classList.remove('is-error');
+        button.textContent = '담는 중…';
+        addHomeProductToCart(productId).then(function () {
+          button.classList.add('is-added');
+          button.setAttribute('aria-pressed', 'true');
+          button.textContent = '담김 ✓';
+          try {
+            if (typeof window.BillyjoJourneyTrack === 'function') {
+              window.BillyjoJourneyTrack('home_promo_cart_add', { productId: productId });
+            }
+          } catch (_error) {}
+        }).catch(function () {
+          button.disabled = false;
+          button.classList.add('is-error');
+          button.textContent = '다시 담기';
+        });
+      });
+    });
+  }
   function render(month) {
     var heading = findHeading();
     if (!heading || document.getElementById('bj-home-gift-promos')) return false;
@@ -3355,13 +3437,15 @@
       var brand = '<div class="bj-hgp-brandmark">' + (logo && HOME_ASSET_BASE
         ? '<img class="bj-hgp-brand-logo" src="' + HOME_ASSET_BASE + logo + '" alt="' + p.brand + ' 로고"><span class="bj-hgp-brand-fallback" hidden>' + p.brand + '</span>'
         : '<span class="bj-hgp-brand-fallback">' + p.brand + '</span>') + '</div>';
-      return '<a class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" data-bj-hgp-tier="' + p.tier + '" href="/html/dh_prod/prod_view/' + p.productId + '">' +
+      return '<article class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" data-bj-hgp-tier="' + p.tier + '">' +
+        '<a class="bj-hgp-main" href="/html/dh_prod/prod_view/' + p.productId + '">' +
         '<div class="bj-hgp-image"><img src="' + p.image + '" alt="' + p.name + '">' + badge + '</div>' +
         '<div class="bj-hgp-info">' + brand + '<div class="bj-hgp-name">' + p.name + '</div>' +
         '<div class="bj-hgp-model">' + p.model + '</div>' +
         price + '<div class="bj-hgp-meta">' + reviews +
-        '<div class="bj-hgp-gift">' + p.gift + '</div></div>' +
-        '<span class="bj-hgp-cta">제품 자세히 보기 →</span></div></a>';
+        '<div class="bj-hgp-gift">' + p.gift + '</div></div></div></a>' +
+        '<div class="bj-hgp-actions"><a class="bj-hgp-detail" href="/html/dh_prod/prod_view/' + p.productId + '">상세보기</a>' +
+        '<button type="button" class="bj-hgp-cart" data-bj-hgp-cart="' + p.productId + '" aria-label="' + p.name + ' 견적비교 담기" aria-pressed="false">담기</button></div></article>';
     }
     section.innerHTML =
       '<div class="bj-hgp-head"><div class="bj-hgp-heading"><h2 class="bj-hgp-title"><b>빌리조 위크</b> - 이번주 한정</h2>' +
@@ -3384,6 +3468,7 @@
         if (fallback) fallback.hidden = false;
       });
     });
+    bindHomeCartButtons(section);
     var v5 = document.getElementById('bj-v5-injected');
     if (v5) v5.appendChild(section);
     else heading.parentNode.insertBefore(section, heading);
