@@ -56,12 +56,19 @@ const logoAssets = new Map(logoFiles.map((file) => [
     });
     await page.goto('https://billyjo.co.kr/', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForSelector('#bj-home-gift-promos', { timeout: 30000 });
-    await page.waitForFunction(() => {
-      const products = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-image img')];
-      const logos = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-brand-logo')];
-      return products.length === 24 && logos.length === 24 &&
-        products.concat(logos).every((image) => image.complete && image.naturalWidth > 0);
-    }, { timeout: 30000 });
+    try {
+      await page.waitForFunction(() => {
+        const products = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-image > img:not(.bj-hgp-brand-logo)')];
+        const logos = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-brand-logo')];
+        return products.length === 24 && logos.length === 24 &&
+          products.concat(logos).every((image) => image.complete && image.naturalWidth > 0);
+      }, null, { timeout: 30000 });
+    } catch (error) {
+      const failedImages = await page.evaluate(() => [...document.querySelectorAll('#bj-home-gift-promos img')]
+        .filter((image) => !image.complete || image.naturalWidth === 0)
+        .map((image) => image.src));
+      throw new Error(`${testCase.name}: image load timeout (${failedImages.join(', ')})`, { cause: error });
+    }
     await page.waitForTimeout(10000);
 
     const result = await page.evaluate(() => {
@@ -109,6 +116,17 @@ const logoAssets = new Map(logoFiles.map((file) => [
           brandLogoHeight: card.querySelector('.bj-hgp-brand-logo').getBoundingClientRect().height,
           brandLogoWidth: card.querySelector('.bj-hgp-brand-logo').getBoundingClientRect().width,
           brandLogoWrapperHeight: card.querySelector('.bj-hgp-brandmark').getBoundingClientRect().height,
+          brandLogoOverlay: (() => {
+            const image = card.querySelector('.bj-hgp-image').getBoundingClientRect();
+            const mark = card.querySelector('.bj-hgp-brandmark').getBoundingClientRect();
+            return {
+              position: getComputedStyle(card.querySelector('.bj-hgp-brandmark')).position,
+              insideImage: mark.left >= image.left && mark.right <= image.right && mark.top >= image.top && mark.bottom <= image.bottom,
+              leftGap: mark.left - image.left,
+              bottomGap: image.bottom - mark.bottom,
+              parentIsImage: card.querySelector('.bj-hgp-brandmark').parentElement.classList.contains('bj-hgp-image'),
+            };
+          })(),
           nameModelGap: (() => {
             const nameRect = card.querySelector('.bj-hgp-name').getBoundingClientRect();
             const modelRect = card.querySelector('.bj-hgp-model').getBoundingClientRect();
@@ -248,6 +266,12 @@ const logoAssets = new Map(logoFiles.map((file) => [
         Math.abs(card.brandLogoWrapperHeight - expectedWrapperHeight) < 0.5 &&
         card.brandLogoWidth <= 120.5 && card.brandLogoBlendMode === 'normal')) {
       throw new Error(`${testCase.name}: brand logo heights are not normalized`);
+    }
+    if (!result.cards.every((card) => card.brandLogoOverlay.position === 'absolute' &&
+        card.brandLogoOverlay.insideImage && card.brandLogoOverlay.parentIsImage &&
+        card.brandLogoOverlay.leftGap >= 0 && card.brandLogoOverlay.leftGap <= 9 &&
+        card.brandLogoOverlay.bottomGap >= 0 && card.brandLogoOverlay.bottomGap <= 8)) {
+      throw new Error(`${testCase.name}: brand logo must overlay the product image`);
     }
     if (testCase.name === 'mobile' && result.cards.some((card) => card.nameModelGap > 2)) {
       throw new Error(`mobile: product name/model gap is too large (${Math.max(...result.cards.map((card) => card.nameModelGap))}px)`);
