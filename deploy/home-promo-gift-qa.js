@@ -76,6 +76,10 @@ const wellsLogo = fs.readFileSync(path.join(__dirname, '..', 'images', 'brands',
           })(),
           cardPadding: parseFloat(getComputedStyle(card).paddingTop),
           cardHeight: card.getBoundingClientRect().height,
+          cardBackground: getComputedStyle(card).backgroundColor,
+          cardBackgroundImage: getComputedStyle(card).backgroundImage,
+          imageBackground: getComputedStyle(card.querySelector('.bj-hgp-image')).backgroundColor,
+          imageBackgroundImage: getComputedStyle(card.querySelector('.bj-hgp-image')).backgroundImage,
           hasRegularPrice: !!card.querySelector('.bj-hgp-regular'),
           hasReviews: !!card.querySelector('.bj-hgp-reviews'),
           reviewText: card.querySelector('.bj-hgp-reviews')?.textContent.replace(/\s+/g, ' ').trim() || '',
@@ -204,6 +208,10 @@ const wellsLogo = fs.readFileSync(path.join(__dirname, '..', 'images', 'brands',
     }
     if (!result.cards.every((card) => card.infoTextAlign === 'left' && card.hasPriceBox)) {
       throw new Error(`${testCase.name}: card information hierarchy is not left-aligned`);
+    }
+    if (!result.cards.every((card) => card.cardBackground === 'rgb(255, 255, 255)' && card.imageBackground === 'rgb(255, 255, 255)' &&
+        card.cardBackgroundImage === 'none' && card.imageBackgroundImage === 'none')) {
+      throw new Error(`${testCase.name}: thumbnail and card backgrounds must use the same solid white`);
     }
     if (!result.cards.every((card) => card.hasActions && card.cartLabel === '담기' && card.detailLabel === '상세보기')) {
       throw new Error(`${testCase.name}: compact card actions are missing`);

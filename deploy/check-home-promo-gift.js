@@ -77,6 +77,8 @@ for (const required of [
   "fetch('/html/dh_order/shop_cart'",
   "button.textContent = '담김 ✓'",
   "align-items:flex-start;text-align:left",
+  "border-radius:18px;background:#fff;color:inherit",
+  "aspect-ratio:1/1;border-radius:12px;background:#fff",
   "data-bj-week-countdown role=\"timer\"",
   "data-bj-countdown=\"day\"",
   "data-bj-countdown=\"hour\"",
