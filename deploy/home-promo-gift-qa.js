@@ -78,9 +78,9 @@ const logoAssets = new Map(logoFiles.map((file) => [
         titleLines,
       };
     });
-    if (initialPromoState.total !== 24 || initialPromoState.visible !== 12 ||
-        !initialPromoState.tierVisible.every((count) => count === 2) ||
-        initialPromoState.expanded !== 'false' || initialPromoState.label !== '프로모션 상품 12개 더보기') {
+    if (initialPromoState.total !== 24 || initialPromoState.visible !== 6 ||
+        !initialPromoState.tierVisible.every((count) => count === 1) ||
+        initialPromoState.expanded !== 'false' || initialPromoState.label !== '프로모션 상품 18개 더보기') {
       throw new Error(`${testCase.name}: initial progressive promo contract mismatch (${JSON.stringify(initialPromoState)})`);
     }
     if (initialPromoState.titleLines.length !== 2 ||
@@ -252,7 +252,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
       throw new Error(`${testCase.name}: live1 campaign banner is missing or unloaded`);
     }
     if (result.campaignBanner.title !== '11월도 반값습니다!' ||
-        result.campaignBanner.subcopy !== '이번주 특가 한정물량, 추가사은품 확인하세요' ||
+        result.campaignBanner.subcopy !== '11월 혜택 종료까지, 추가사은품을 확인하세요' ||
         result.campaignBanner.src !== live1MascotUrl) {
       throw new Error(`${testCase.name}: live1 campaign banner contract mismatch (${JSON.stringify(result.campaignBanner)})`);
     }
@@ -393,7 +393,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
     const minPadding = testCase.name === 'mobile' ? 8 : 16;
     if (!result.cards.every((card) => card.cardPadding >= minPadding)) throw new Error(`${testCase.name}: card padding is too tight`);
     if (!result.beforeNativeRecommendation) throw new Error(`${testCase.name}: promo cards must precede native recommendations`);
-    if (!result.menuLabels.some((label) => label.includes('프로모션/사은품 확인'))) {
+    if (!result.menuLabels.some((label) => label === '혜택')) {
       throw new Error(`${testCase.name}: new menu label is missing`);
     }
     if (result.oldVisibleMenuCount !== 0) throw new Error(`${testCase.name}: old menu label remains visible`);
