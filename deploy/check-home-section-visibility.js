@@ -118,6 +118,17 @@ async function inspect(browser, width, visibility) {
             promoTail: v5 && promo ? Math.round(v5.getBoundingClientRect().bottom - promo.getBoundingClientRect().bottom) : null,
           };
         })(),
+        hierarchy: (() => {
+          const entry = document.querySelector('#bj-home-conversion-entry');
+          const promo = document.querySelector('#bj-home-gift-promos');
+          const category = document.querySelector('#bj-home-cat-links');
+          const benefits = document.querySelector('#bj-home-benefit-cards');
+          return {
+            entryBeforePromo: Boolean(entry && promo && (entry.compareDocumentPosition(promo) & Node.DOCUMENT_POSITION_FOLLOWING)),
+            promoBeforeCategory: Boolean(promo && category && (promo.compareDocumentPosition(category) & Node.DOCUMENT_POSITION_FOLLOWING)),
+            categoryBeforeBenefits: Boolean(category && benefits && category.nextElementSibling === benefits),
+          };
+        })(),
         viewportWidth: document.documentElement.clientWidth,
         scrollWidth: document.documentElement.scrollWidth,
       };
@@ -143,10 +154,13 @@ async function inspect(browser, width, visibility) {
         result.campaignBanner.lines[0].top >= result.campaignBanner.lines[1].top) {
       throw new Error(`campaign banner line break regressed at ${width}px: ${JSON.stringify(result.campaignBanner.lines)}`);
     }
-    if (result.promoCards.total !== 24 || result.promoCards.visible !== 12 || result.promoCards.expanded !== 'false' ||
-        result.promoCards.label !== '프로모션 상품 12개 더보기' ||
-        result.promoCards.tiers.some((tier) => tier.total !== 4 || tier.visible !== 2)) {
+    if (result.promoCards.total !== 24 || result.promoCards.visible !== 6 || result.promoCards.expanded !== 'false' ||
+        result.promoCards.label !== '프로모션 상품 18개 더보기' ||
+        result.promoCards.tiers.some((tier) => tier.total !== 4 || tier.visible !== 1)) {
       throw new Error(`collapsed promo contract regressed at ${width}px: ${JSON.stringify(result.promoCards)}`);
+    }
+    if (!result.hierarchy.entryBeforePromo || !result.hierarchy.promoBeforeCategory || !result.hierarchy.categoryBeforeBenefits) {
+      throw new Error(`home conversion hierarchy regressed at ${width}px: ${JSON.stringify(result.hierarchy)}`);
     }
     if (result.removedWeeklyNodes !== 0) throw new Error(`weekly header/countdown remains at ${width}px`);
     if (!result.faq.visible || !result.faq.finalInOuter || !result.faq.beforeFooter) {
@@ -157,7 +171,7 @@ async function inspect(browser, width, visibility) {
       throw new Error(`FAQ spacing regressed at ${width}px: ${JSON.stringify(result.faq)}`);
     }
     const expectedTail = width <= 767 ? 24 : 32;
-    if (result.spacing.v5PaddingBottom !== expectedTail || result.spacing.promoTail > expectedTail + 1) {
+    if (result.spacing.v5PaddingBottom !== expectedTail) {
       throw new Error(`promo tail spacing regressed at ${width}px: ${JSON.stringify(result.spacing)}`);
     }
     if (result.scrollWidth > result.viewportWidth + 1) {
@@ -179,7 +193,7 @@ async function inspect(browser, width, visibility) {
       visible: Array.from(document.querySelectorAll('#bj-home-gift-promos .bj-hgp-card')).filter((card) => !card.hidden && getComputedStyle(card).display !== 'none').length,
       expanded: document.querySelector('[data-bj-hgp-toggle]')?.getAttribute('aria-expanded'),
     }));
-    if (collapsedAgain.visible !== 12 || collapsedAgain.expanded !== 'false') {
+    if (collapsedAgain.visible !== 6 || collapsedAgain.expanded !== 'false') {
       throw new Error(`promo recollapse contract regressed at ${width}px: ${JSON.stringify(collapsedAgain)}`);
     }
     return { width, visibility, ...result, expanded, collapsedAgain };

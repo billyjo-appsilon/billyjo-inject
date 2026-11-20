@@ -3486,7 +3486,7 @@
     function apply(expanded) {
       extras.forEach(function (card) { card.hidden = !expanded; });
       button.setAttribute('aria-expanded', expanded ? 'true' : 'false');
-      button.textContent = expanded ? '프로모션 상품 접기' : '프로모션 상품 12개 더보기';
+      button.textContent = expanded ? '프로모션 상품 접기' : '프로모션 상품 ' + extras.length + '개 더보기';
       section.setAttribute('data-bj-hgp-expanded', expanded ? '1' : '0');
     }
     apply(false);
@@ -3542,7 +3542,7 @@
     }
     var campaignBanner = '<div class="bj-hgp-half-banner" data-bj-live1-half-banner>' +
       '<div class="bj-hgp-half-copy"><h2><span class="bj-hgp-half-line">' + Number(month.split('-')[1]) + '월도</span> <em class="bj-hgp-half-line">반값습니다!</em></h2>' +
-      '<p>이번주 특가 한정물량, 추가사은품 확인하세요</p>' +
+      '<p>' + Number(month.split('-')[1]) + '월 혜택 종료까지, 추가사은품을 확인하세요</p>' +
       '<div class="bj-hgp-month-timer" data-bj-month-countdown aria-label="이번 달 특가 마감까지 남은 시간"></div></div>' +
       '<div class="bj-hgp-half-visual" aria-hidden="true"><img src="' + LIVE1_HALF_BANNER_MASCOT + '" alt="" loading="eager" decoding="async"></div></div>';
     section.innerHTML =
@@ -3550,9 +3550,9 @@
       TIERS.map(function (tier) {
         var items = PRODUCTS.filter(function (p) { return p.tier === tier; });
         return '<div class="bj-hgp-band" data-bj-hgp-band="' + tier + '"><h3 class="bj-hgp-band-title">' + tier + '</h3>' +
-          '<div class="bj-hgp-grid">' + items.map(function (item, index) { return card(item, index >= 2); }).join('') + '</div></div>';
+          '<div class="bj-hgp-grid">' + items.map(function (item, index) { return card(item, index >= 1); }).join('') + '</div></div>';
       }).join('') +
-      '<div class="bj-hgp-expand-wrap"><button type="button" class="bj-hgp-expand" data-bj-hgp-toggle aria-expanded="false">프로모션 상품 12개 더보기</button></div>' +
+      '<div class="bj-hgp-expand-wrap"><button type="button" class="bj-hgp-expand" data-bj-hgp-toggle aria-expanded="false">프로모션 상품 ' + (PRODUCTS.length - TIERS.length) + '개 더보기</button></div>' +
       '<p class="bj-hgp-note">월요금·할인·사은품은 약정과 관리방식에 따라 달라질 수 있으며, 할인가와 후기 평점·개수는 2026.11 확인 데이터 기준입니다. 최종 혜택은 상담 시 확인됩니다.</p>';
     section.querySelectorAll('.bj-hgp-brand-logo').forEach(function (image) {
       image.addEventListener('error', function () {
@@ -9314,6 +9314,352 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
   else run();
   [500, 1500, 3500].forEach(function(d){ setTimeout(run, d); });
+})();
+
+/* =============================================================================
+ * 홈 전환 위계 정리 (2026-11-20)
+ *   - 첫 화면 안에 기존 상담 퍼널 CTA를 노출하고 상품 탐색을 보조 선택으로 둔다.
+ *   - 히어로 3장, 모바일 상단 3개 의도, PC 핵심 메뉴만 남겨 선택 피로를 낮춘다.
+ *   - 가격대별 대표 상품 6개 → 전체 24개 확장 구조와 월 마감 문구를 사용한다.
+ *   - 모바일 우측 퀵버튼 대신 하단 2액션을 사용하고 긴 네이티브 상품 중복을 접는다.
+ * ========================================================================== */
+(function billyjoHomeConversionHierarchy(){
+  if (window.__bjHomeConversionHierarchy) return;
+  window.__bjHomeConversionHierarchy = true;
+
+  function isHome(){
+    var path = (location.pathname || '/').replace(/\/+$/, '') || '/';
+    return path === '/' || path === '/index.php' || path === '/index.html';
+  }
+  function track(choice){
+    try {
+      if (typeof window.BillyjoJourneyTrack === 'function') {
+        window.BillyjoJourneyTrack('home_entry_click', { choice: choice });
+      }
+      if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+        window.dataLayer.push({ event: 'bj_home_entry_click', choice: choice });
+      }
+    } catch (_error) {}
+  }
+  function ensureStyle(){
+    if (document.getElementById('bj-home-conversion-hierarchy-css')) return;
+    var style = document.createElement('style');
+    style.id = 'bj-home-conversion-hierarchy-css';
+    style.textContent = [
+      '#bj-home-conversion-entry{position:relative;z-index:2;background:linear-gradient(135deg,#f3f7ff 0%,#fff 58%,#fff9d7 100%);border-bottom:1px solid #e7edff;font-family:inherit}',
+      '#bj-home-conversion-entry *{box-sizing:border-box}',
+      '#bj-home-conversion-entry .bj-hce-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:36px;width:min(1280px,100%);margin:0 auto;padding:28px 32px}',
+      '#bj-home-conversion-entry .bj-hce-proof{display:inline-flex;align-items:center;gap:7px;margin:0 0 8px;color:#0838f8;font-size:13px;font-weight:850;letter-spacing:-.02em}',
+      '#bj-home-conversion-entry .bj-hce-proof:before{content:"";width:7px;height:7px;border-radius:50%;background:#17a66b;box-shadow:0 0 0 4px rgba(23,166,107,.11)}',
+      '#bj-home-conversion-entry .bj-hce-title{margin:0;color:#101828;font-size:clamp(28px,2.5vw,40px);font-weight:950;line-height:1.18;letter-spacing:-.045em;word-break:keep-all}',
+      '#bj-home-conversion-entry .bj-hce-title strong{color:#0838f8;font-weight:inherit}',
+      '#bj-home-conversion-entry p{margin:10px 0 0;color:#536178;font-size:16px;font-weight:650;line-height:1.55;letter-spacing:-.025em;word-break:keep-all}',
+      '#bj-home-conversion-entry .bj-hce-actions{display:grid;grid-template-columns:1fr;gap:9px;width:270px}',
+      '#bj-home-conversion-entry .bj-hce-action{display:flex;align-items:center;justify-content:center;min-height:52px;padding:12px 18px;border-radius:12px;text-decoration:none;font-size:15px;font-weight:900;line-height:1.2;letter-spacing:-.02em;cursor:pointer}',
+      '#bj-home-conversion-entry .bj-hce-primary{background:#0838f8;color:#fff;box-shadow:0 12px 28px rgba(8,56,248,.24)}',
+      '#bj-home-conversion-entry .bj-hce-secondary{background:#fff;color:#20304a;border:1px solid #cfdaee}',
+      '#bj-home-conversion-entry .bj-hce-action:focus-visible,#bj-home-sticky-actions a:focus-visible{outline:3px solid rgba(8,56,248,.35);outline-offset:3px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards{padding:14px 20px 28px;overflow:hidden}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-stack{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:1280px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-card{grid-template-columns:minmax(0,1fr) 66px;min-height:104px;padding:12px 12px 12px 14px;border-radius:10px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-icon{width:66px;height:66px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-kicker{font-size:12.5px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-value{font-size:18px;line-height:1.15}',
+      'body.bj-home-promo-ready #bj-v5-injected~h2.m_tit,body.bj-home-promo-ready #bj-v5-injected~.prod_list,body.bj-home-promo-ready .m_outer>.new-mb,body.bj-home-promo-ready .m_outer>.new-mb_m,body.bj-home-promo-ready .m_outer>.prodList_wrap{display:none!important}',
+      'body.bj-home-conversion-ready .new-gnb>.gnb__menu.bj-home-gnb-hidden{display:none!important}',
+      'body.bj-home-conversion-ready .category__wrap>a:not(.gnb__hamburger):not(.bj-cat-ham):not(.bj-newlywed-cat):not(.bj-home-nav-products):not(.bj-home-nav-quote){display:none!important}',
+      'body.bj-home-conversion-ready .mobile__aside .bj-aside-group-label{display:block;padding:18px 20px 7px;background:#f7f9ff;color:#66758d;font-size:11px;font-weight:900;letter-spacing:.04em;line-height:1.2}',
+      'body.bj-home-conversion-ready #bj-home-gift-promos{width:min(1280px,calc(100% - 24px));margin:20px auto 0!important;scroll-margin-top:110px}',
+      '#bj-home-sticky-actions{display:none}',
+      '@media(min-width:1025px){body.bj-home-conversion-ready .new-mv .item,body.bj-home-conversion-ready .new-mv .item .pc{aspect-ratio:24/7!important}}',
+      '@media(max-width:767px){',
+      '#bj-home-conversion-entry .bj-hce-inner{display:block;padding:20px 16px 18px}',
+      '#bj-home-conversion-entry .bj-hce-proof{font-size:12px;margin-bottom:7px}',
+      '#bj-home-conversion-entry .bj-hce-title{font-size:26px;line-height:1.2}',
+      '#bj-home-conversion-entry p{font-size:14px;line-height:1.48;margin-top:7px}',
+      '#bj-home-conversion-entry .bj-hce-actions{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:8px;width:100%;margin-top:15px}',
+      '#bj-home-conversion-entry .bj-hce-action{min-height:48px;padding:10px 8px;border-radius:10px;font-size:13px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards{padding:10px 0 20px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-stack{display:flex;gap:8px;max-width:none;overflow-x:auto;padding:0 12px 5px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-stack::-webkit-scrollbar{display:none}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-card{flex:0 0 min(78vw,270px);scroll-snap-align:start;grid-template-columns:minmax(0,1fr) 62px;min-height:98px;padding:11px 10px 11px 13px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-icon{width:62px;height:62px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-kicker{font-size:11.5px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-value{font-size:16px}',
+      'body.bj-home-conversion-ready .new-qb{display:none!important}',
+      'body.bj-home-conversion-ready #bj-home-gift-promos{width:calc(100% - 16px);margin-top:18px!important}',
+      '#bj-home-sticky-actions{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:10020;display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,.8fr);gap:7px;padding:7px;border:1px solid rgba(8,56,248,.14);border-radius:14px;background:rgba(255,255,255,.96);box-shadow:0 14px 38px rgba(21,38,80,.24);backdrop-filter:blur(12px);transform:translateY(calc(100% + 28px));opacity:0;visibility:hidden;pointer-events:none;transition:transform .2s ease,opacity .2s ease,visibility 0s linear .2s}',
+      '#bj-home-sticky-actions.is-visible{transform:translateY(0);opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}',
+      '#bj-home-sticky-actions a{display:flex;align-items:center;justify-content:center;min-height:46px;padding:8px 10px;border-radius:10px;text-decoration:none;font:900 13px/1.15 Pretendard,Arial,sans-serif;letter-spacing:-.02em}',
+      '#bj-home-sticky-actions .bj-hsa-primary{background:#0838f8;color:#fff}',
+      '#bj-home-sticky-actions .bj-hsa-secondary{background:#f1f5ff;color:#0838f8}',
+      'body.bj-home-conversion-ready{padding-bottom:78px!important}',
+      '}',
+      '@media(max-width:359px){#bj-home-conversion-entry .bj-hce-title{font-size:23px}#bj-home-conversion-entry .bj-hce-action{font-size:12px}}'
+    ].join('\n');
+    (document.head || document.documentElement).appendChild(style);
+  }
+  function buildEntry(){
+    if (!isHome() || !document.body) return null;
+    var existing = document.getElementById('bj-home-conversion-entry');
+    if (existing) return existing;
+    var hero = document.querySelector('.new-mv_wrap') || document.querySelector('.billyjo-video-hero') || document.querySelector('.new-mv');
+    if (!hero || !hero.parentNode) return null;
+    var entry = document.createElement('section');
+    entry.id = 'bj-home-conversion-entry';
+    entry.setAttribute('aria-labelledby', 'bj-home-conversion-title');
+    entry.innerHTML = '<div class="bj-hce-inner"><div class="bj-hce-copy">' +
+      '<span class="bj-hce-proof">본사·파트너사 직계약 · 무료 비교</span>' +
+      '<h2 class="bj-hce-title" id="bj-home-conversion-title">렌탈료·사은품, <strong>내 조건으로 3초 비교</strong></h2>' +
+      '<p>제품·약정·관리방식까지 한 번에 비교해 맞는 혜택만 안내해 드립니다.</p></div>' +
+      '<div class="bj-hce-actions"><a class="bj-hce-action bj-hce-primary" href="/html/dh/counsel" data-bj-consult="1" data-bj-home-choice="consult">내 조건으로 최대혜택 찾기</a>' +
+      '<a class="bj-hce-action bj-hce-secondary" href="/html/dh_prod/prod_list/1-8" data-bj-home-choice="products">상품 먼저 보기</a></div></div>';
+    hero.parentNode.insertBefore(entry, hero.nextSibling);
+    entry.addEventListener('click', function(event){
+      var action = event.target && event.target.closest && event.target.closest('[data-bj-home-choice]');
+      if (!action) return;
+      var choice = action.getAttribute('data-bj-home-choice') || '';
+      if (choice === 'products') {
+        track(choice);
+        var promo = document.getElementById('bj-home-gift-promos');
+        if (promo) { event.preventDefault(); promo.scrollIntoView({ behavior:'smooth', block:'start' }); }
+      }
+    });
+    return entry;
+  }
+  function placeSections(entry){
+    if (!entry || !entry.parentNode) return;
+    var anchor = entry;
+    var promo = document.getElementById('bj-home-gift-promos');
+    var categories = document.getElementById('bj-home-cat-links');
+    var benefits = document.getElementById('bj-home-benefit-cards');
+    [promo, categories, benefits].forEach(function(section){
+      if (!section || !anchor.parentNode) return;
+      if (anchor.nextElementSibling !== section) {
+        anchor.parentNode.insertBefore(section, anchor.nextSibling);
+      }
+      anchor = section;
+    });
+    document.body.classList.toggle('bj-home-promo-ready', Boolean(promo));
+  }
+  function curateHero(){
+    var slider = document.querySelector('.new-mv');
+    if (!slider || slider.getAttribute('data-bj-home-curated')) return;
+    var jq = window.jQuery;
+    if (!jq || !jq.fn || typeof jq.fn.slick !== 'function' || !slider.classList.contains('slick-initialized')) return;
+    var original = Array.prototype.slice.call(slider.querySelectorAll('.slick-slide:not(.slick-cloned)'));
+    var configs = [
+      { key:'hero-loss-138manwon.png', label:'가전렌탈·인터넷·신차렌탈 손해 방지 혜택' },
+      { key:'257819f60f7d71ce6ac88ddcd6f43863.png', label:'나에게 맞춘 무료 렌탈 큐레이션' },
+      { key:'9f88ad8e3e55be589f6e6a1ff97e77e8.png', label:'가전렌탈부터 신차렌탈까지 한 번에 비교' }
+    ];
+    var retained = [];
+    var selectedIndices = [];
+    configs.forEach(function(config){
+      for (var index = 0; index < original.length; index++) {
+        var image = original[index].querySelector('img');
+        var source = (image && image.src) || '';
+        if (source.indexOf(config.key) === -1) continue;
+        retained.push({ slide:original[index], label:config.label });
+        selectedIndices.push(index);
+        break;
+      }
+    });
+    if (retained.length !== configs.length) return;
+    try {
+      jq(slider).slick('slickFilter', function(index){ return selectedIndices.indexOf(index) !== -1; });
+    } catch (_error) { return; }
+    Array.prototype.slice.call(slider.querySelectorAll('.slick-slide')).forEach(function(slide){
+      var image = slide.querySelector('img');
+      var source = (image && image.src) || '';
+      var configIndex = -1;
+      for (var index = 0; index < configs.length; index++) {
+        if (source.indexOf(configs[index].key) !== -1) { configIndex = index; break; }
+      }
+      if (configIndex === -1) return;
+      var item = configs[configIndex];
+      if (image) image.alt = item.label;
+      var link = slide.querySelector('a');
+      if (link) {
+        link.href = '/html/dh/counsel';
+        link.setAttribute('data-bj-consult', '1');
+        link.setAttribute('data-bj-home-choice', 'hero_' + (configIndex + 1));
+        link.setAttribute('aria-label', item.label + ' 상담 시작');
+      }
+    });
+    var total = document.querySelector('.new-mv_nav span');
+    if (total) total.textContent = ' 3';
+    slider.setAttribute('data-bj-home-curated', '1');
+  }
+  function directChildLink(item){
+    if (!item) return null;
+    for (var i = 0; i < item.children.length; i++) {
+      if (item.children[i].tagName === 'A') return item.children[i];
+    }
+    return null;
+  }
+  function scrollPromotion(event, choice){
+    var section = document.getElementById('bj-home-gift-promos');
+    if (!section) return;
+    event.preventDefault();
+    track(choice);
+    section.scrollIntoView({ behavior:'smooth', block:'start' });
+  }
+  function simplifyDesktopNav(){
+    var list = document.querySelector('.new-gnb');
+    if (!list) return;
+    Array.prototype.forEach.call(list.children, function(item){
+      if (!item.classList || !item.classList.contains('gnb__menu')) return;
+      var link = directChildLink(item);
+      var text = ((link && link.textContent) || '').replace(/\s+/g, ' ').trim();
+      var keep = item.classList.contains('bj-best-gnb') || /물·공기·청소가전|제품찾기|패키지|자동차/.test(text);
+      item.classList.toggle('bj-home-gnb-hidden', !keep);
+      if (keep && /물·공기·청소가전/.test(text) && link && link.textContent !== '제품찾기') link.textContent = '제품찾기';
+      if (item.classList.contains('bj-best-gnb') && link) {
+        if (link.textContent !== '혜택') link.textContent = '혜택';
+        link.href = '/html/dh/counsel';
+        if (!link.getAttribute('data-bj-home-benefits')) {
+          link.setAttribute('data-bj-home-benefits', '1');
+          link.onclick = function(event){ scrollPromotion(event, 'desktop_benefits'); };
+        }
+      }
+    });
+    var search = document.querySelector('header input[type="search"],header input[name*="search"],header input[placeholder]');
+    if (search) search.setAttribute('placeholder', '제품·브랜드 검색');
+  }
+  function simplifyMobileNav(){
+    var wrap = document.querySelector('.mobile__gnb .category__wrap, .category__wrap');
+    if (!wrap) return;
+    var promo = wrap.querySelector('.bj-newlywed-cat');
+    if (promo && !promo.getAttribute('data-bj-home-nav-ready')) {
+      promo.setAttribute('data-bj-home-nav-ready', '1');
+      promo.innerHTML = '혜택';
+      promo.href = '/html/dh/counsel';
+      promo.onclick = function(event){ scrollPromotion(event, 'mobile_benefits'); };
+    }
+    if (!wrap.querySelector('.bj-home-nav-products')) {
+      var products = document.createElement('a');
+      products.className = 'bj-home-nav-products';
+      products.href = '/html/dh_prod/prod_list/1-8';
+      products.textContent = '인기상품';
+      products.onclick = function(event){ scrollPromotion(event, 'mobile_products'); };
+      wrap.appendChild(products);
+    }
+    if (!wrap.querySelector('.bj-home-nav-quote')) {
+      var quote = document.createElement('a');
+      quote.className = 'bj-home-nav-quote';
+      quote.href = '/html/dh/counsel';
+      quote.setAttribute('data-bj-consult', '1');
+      quote.setAttribute('data-bj-home-choice', 'mobile_quote');
+      quote.textContent = '3초견적';
+      wrap.appendChild(quote);
+    }
+  }
+  function groupMobileDrawer(){
+    var menu = document.querySelector('.mobile__aside .new_menu');
+    if (!menu || menu.getAttribute('data-bj-home-grouped')) return;
+    var items = Array.prototype.slice.call(menu.children).filter(function(node){ return node.tagName === 'LI'; });
+    if (!items.length) return;
+    menu.setAttribute('data-bj-home-grouped', '1');
+    function label(text, before){
+      if (!before || !before.parentNode) return;
+      var node = document.createElement('li');
+      node.className = 'bj-aside-group-label';
+      node.setAttribute('role', 'presentation');
+      node.textContent = text;
+      before.parentNode.insertBefore(node, before);
+    }
+    label('혜택 · 고객지원', items[0]);
+    if (items[1]) label('렌탈제품', items[1]);
+    var lifestyle = items.find(function(item){
+      var direct = directChildLink(item);
+      return /패키지|자동차|인터넷|모바일/.test((direct && direct.textContent) || '');
+    });
+    if (lifestyle) label('결합 · 라이프', lifestyle);
+  }
+  function enhanceBenefitScroller(){
+    var stack = document.querySelector('#bj-home-benefit-cards .bj-hbenefit-stack');
+    if (!stack || stack.getAttribute('data-bj-a11y-ready')) return;
+    stack.setAttribute('data-bj-a11y-ready', '1');
+    stack.setAttribute('tabindex', '0');
+    stack.setAttribute('role', 'region');
+    stack.setAttribute('aria-label', '빌리조 지원 혜택 6개');
+  }
+  function mountStickyActions(){
+    if (!document.body || document.getElementById('bj-home-sticky-actions')) return;
+    var bar = document.createElement('nav');
+    bar.id = 'bj-home-sticky-actions';
+    bar.setAttribute('aria-label', '빠른 견적과 문의');
+    bar.setAttribute('aria-hidden', 'true');
+    bar.inert = true;
+    bar.innerHTML = '<a class="bj-hsa-primary" href="/html/dh/counsel" data-bj-consult="1" data-bj-hsa="consult">최대혜택 찾기</a>' +
+      '<a class="bj-hsa-secondary" href="/html/dh/counsel" data-bj-text-inquiry="1" data-bj-hsa="inquiry">문의하기</a>';
+    document.body.appendChild(bar);
+    bar.addEventListener('click', function(event){
+      var action = event.target && event.target.closest && event.target.closest('[data-bj-hsa]');
+      if (action && action.getAttribute('data-bj-hsa') !== 'consult') track('sticky_' + action.getAttribute('data-bj-hsa'));
+    });
+    var sync = function(){
+      var visible = window.innerWidth <= 767 && window.scrollY > 380;
+      bar.classList.toggle('is-visible', visible);
+      bar.setAttribute('aria-hidden', visible ? 'false' : 'true');
+      bar.inert = !visible;
+    };
+    window.addEventListener('scroll', sync, { passive:true });
+    window.addEventListener('resize', sync);
+    sync();
+  }
+  function bindConsultTrackingCapture(){
+    if (window.__bjHomeConsultTrackingCapture) return;
+    window.__bjHomeConsultTrackingCapture = true;
+    document.addEventListener('click', function(event){
+      var action = event.target && event.target.closest && event.target.closest('[data-bj-consult]');
+      if (!action) return;
+      var choice = action.getAttribute('data-bj-home-choice');
+      var sticky = action.getAttribute('data-bj-hsa');
+      if (choice) track(choice);
+      else if (sticky) track('sticky_' + sticky);
+    }, true);
+  }
+  function run(){
+    if (!isHome()) return;
+    ensureStyle();
+    if (document.body) document.body.classList.add('bj-home-conversion-ready');
+    var entry = buildEntry();
+    placeSections(entry);
+    curateHero();
+    simplifyDesktopNav();
+    simplifyMobileNav();
+    groupMobileDrawer();
+    enhanceBenefitScroller();
+    bindConsultTrackingCapture();
+    mountStickyActions();
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run);
+  else run();
+  [250, 700, 1400, 3000, 5200].forEach(function(delay){ setTimeout(run, delay); });
+  if (isHome() && window.MutationObserver) {
+    try {
+      var observerTimer = 0;
+      var observer = new MutationObserver(function(mutations){
+        for (var i = 0; i < mutations.length; i++) {
+          var nodes = mutations[i].addedNodes || [];
+          for (var j = 0; j < nodes.length; j++) {
+            var node = nodes[j];
+            if (node.nodeType !== 1) continue;
+            var relevant = node.matches && node.matches('.new-mv_wrap,.new-mv,#bj-home-gift-promos,#bj-home-cat-links,#bj-home-benefit-cards,.new-gnb,.category__wrap,.mobile__aside');
+            if (!relevant && node.querySelector) relevant = Boolean(node.querySelector('.new-mv_wrap,.new-mv,#bj-home-gift-promos,#bj-home-cat-links,#bj-home-benefit-cards,.new-gnb,.category__wrap,.mobile__aside'));
+            if (!relevant) continue;
+            clearTimeout(observerTimer);
+            observerTimer = setTimeout(run, 40);
+            return;
+          }
+        }
+      });
+      observer.observe(document.documentElement, { childList:true, subtree:true });
+      setTimeout(function(){ observer.disconnect(); }, 12000);
+    } catch (_error) {}
+  }
 })();
 
 })();

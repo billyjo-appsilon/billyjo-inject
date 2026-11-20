@@ -85,6 +85,7 @@ async function inspectViewport(browser, width, height) {
     const result = await page.evaluate(() => {
       const category = document.getElementById('bj-home-cat-links');
       const section = document.getElementById('bj-home-benefit-cards');
+      const stack = section.querySelector('.bj-hbenefit-stack');
       const rows = Array.from(section.querySelectorAll('.bj-hbenefit-card')).map((card) => {
         const rect = card.getBoundingClientRect();
         const image = card.querySelector('img');
@@ -102,6 +103,14 @@ async function inspectViewport(browser, width, height) {
       });
       return {
         directAfterCategory: category && category.nextElementSibling === section,
+        scroller: {
+          left: stack.getBoundingClientRect().left,
+          scrollWidth: stack.scrollWidth,
+          clientWidth: stack.clientWidth,
+          tabindex: stack.getAttribute('tabindex'),
+          role: stack.getAttribute('role'),
+          aria: stack.getAttribute('aria-label') || '',
+        },
         homeReleased: document.body.classList.contains('bj-home-cats-ready'),
         count: rows.length,
         rows,
@@ -139,6 +148,9 @@ async function inspectViewport(browser, width, height) {
     if (result.highlight !== '할인+보상교체') throw new Error(`card 05 highlight mismatch at ${width}px`);
     if (!/bj-hbenefit/.test(result.sampleTopElement)) throw new Error(`benefit cards are visually occluded at ${width}px by ${result.sampleTopElement}; rect=${JSON.stringify(result.firstRect)}; scroll=${JSON.stringify(result.scrollDebug)}`);
     if (result.scrollWidth > result.viewportWidth + 1) throw new Error(`horizontal overflow at ${width}px: ${result.scrollWidth}/${result.viewportWidth}`);
+    if (result.scroller.tabindex !== '0' || result.scroller.role !== 'region' || !result.scroller.aria.includes('혜택 6개')) {
+      throw new Error(`benefit scroller accessibility contract regressed at ${width}px: ${JSON.stringify(result.scroller)}`);
+    }
     result.rows.forEach((row, index) => {
       const expected = cards[index];
       const actual = [row.number, row.kicker, row.value, row.image];
@@ -146,7 +158,9 @@ async function inspectViewport(browser, width, height) {
         throw new Error(`card ${index + 1} mismatch at ${width}px: ${JSON.stringify(actual)}`);
       }
       if (row.imageWidth < 1) throw new Error(`card ${row.number} image failed at ${width}px`);
-      if (row.left < row.sectionLeft - 1 || row.right > row.sectionRight + 1) {
+      const exceedsSection = row.left < row.sectionLeft - 1 || row.right > row.sectionRight + 1;
+      const exceedsScroller = row.left < result.scroller.left - 1 || row.right > result.scroller.left + result.scroller.scrollWidth + 1;
+      if ((width > 767 && exceedsSection) || (width <= 767 && exceedsScroller)) {
         throw new Error(`card ${row.number} exceeds section bounds at ${width}px`);
       }
     });
