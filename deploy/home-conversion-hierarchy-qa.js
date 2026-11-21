@@ -30,19 +30,16 @@ async function inspect(browser, width, height) {
       waitUntil: 'domcontentloaded',
       timeout: 60000,
     });
-    await page.locator('#bj-home-conversion-entry').waitFor({ state: 'visible', timeout: 30000 });
+    await page.locator('#bj-home-benefit-cards').waitFor({ state: 'visible', timeout: 30000 });
     await page.locator('#bj-home-gift-promos').waitFor({ state: 'visible', timeout: 30000 });
     await page.waitForFunction(() => document.querySelectorAll('.new-mv .slick-slide:not(.slick-cloned)').length === 4, null, { timeout: 15000 });
     await page.waitForFunction(() => Boolean(document.querySelector('.new-mv .slick-slide.slick-current:not(.slick-cloned) video.billyjo-video-hero__media')), null, { timeout: 3000 });
     await page.waitForTimeout(5600);
 
     const result = await page.evaluate(() => {
-      const entry = document.querySelector('#bj-home-conversion-entry');
       const promo = document.querySelector('#bj-home-gift-promos');
       const category = document.querySelector('#bj-home-cat-links');
       const benefits = document.querySelector('#bj-home-benefit-cards');
-      const primary = entry.querySelector('.bj-hce-primary');
-      const secondary = entry.querySelector('.bj-hce-secondary');
       const promoCards = Array.from(promo.querySelectorAll('.bj-hgp-card'));
       const visiblePromoCards = promoCards.filter((card) => !card.hidden && getComputedStyle(card).display !== 'none');
       const slides = Array.from(document.querySelectorAll('.new-mv .slick-slide:not(.slick-cloned)'));
@@ -55,39 +52,31 @@ async function inspect(browser, width, height) {
           const direct = Array.from(node.children).find((child) => child.tagName === 'A');
           return direct?.textContent.replace(/\s+/g, ' ').trim() || '';
         });
-      const entryRect = entry.getBoundingClientRect();
       const hero = document.querySelector('.new-mv_wrap') || document.querySelector('.new-mv');
-      const styleMetrics = (node) => {
-        const style = getComputedStyle(node);
-        const rect = node.getBoundingClientRect();
-        const lineHeight = parseFloat(style.lineHeight);
-        return { font: parseFloat(style.fontSize), height: Math.round(rect.height), lines: Math.round(rect.height / lineHeight) };
-      };
       const nativeRecommendation = document.querySelector('#bj-v5-injected ~ h2.m_tit');
       const nativeCatalog = document.querySelector('.m_outer > .prodList_wrap');
       return {
-        entryTop: Math.round(entryRect.top + window.scrollY),
-        entryBottom: Math.round(entryRect.bottom + window.scrollY),
-        title: entry.querySelector('.bj-hce-title')?.textContent.replace(/\s+/g, ' ').trim() || '',
-        removedCopyPresent: entry.textContent.includes('제품·약정·관리방식까지 한 번에 비교해 맞는 혜택만 안내해 드립니다.'),
-        primary: {
-          text: primary?.textContent.trim() || '',
-          href: primary?.getAttribute('href') || '',
-          consult: primary?.getAttribute('data-bj-consult') || '',
-        },
-        secondary: {
-          text: secondary?.textContent.trim() || '',
-          href: secondary?.getAttribute('href') || '',
-        },
+        entryPresent: Boolean(document.querySelector('#bj-home-conversion-entry')),
+        redundantEntryCopyPresent: document.body.textContent.includes('렌탈료·사은품, 내 조건으로 3초 비교'),
         hierarchy: {
           heroBeforeCategory: hero?.nextElementSibling === category,
           categoryBeforePromo: category.nextElementSibling === promo,
-          promoBeforeEntry: promo.nextElementSibling === entry,
-          entryBeforeBenefits: entry.nextElementSibling === benefits,
+          promoBeforeBenefits: promo.nextElementSibling === benefits,
         },
-        typography: {
-          title: styleMetrics(entry.querySelector('.bj-hce-title')),
-        },
+        benefitSpacing: (() => {
+          const promoRect = promo.getBoundingClientRect();
+          const benefitRect = benefits.getBoundingClientRect();
+          const stack = benefits.querySelector('.bj-hbenefit-stack');
+          const stackRect = stack.getBoundingClientRect();
+          const next = benefits.nextElementSibling;
+          const nextStyle = next ? getComputedStyle(next) : null;
+          return {
+            gapBefore: Math.round(benefitRect.top - promoRect.bottom),
+            innerTop: Math.round(stackRect.top - benefitRect.top),
+            innerBottom: Math.round(benefitRect.bottom - stackRect.bottom),
+            nextPaddingTop: nextStyle ? Math.round(parseFloat(nextStyle.paddingTop) || 0) : null,
+          };
+        })(),
         category: (() => {
           const cards = Array.from(category.querySelectorAll('.bj-hcat-card'));
           return {
@@ -188,10 +177,7 @@ async function inspect(browser, width, height) {
     });
 
     assert(intercepts > 0, `${width}px: local inject was not intercepted`);
-    assert(result.title === '렌탈료·사은품, 내 조건으로 3초 비교', `${width}px: entry title mismatch`);
-    assert(!result.removedCopyPresent, `${width}px: removed comparison copy is still rendered`);
-    assert(result.primary.text === '내 조건으로 최대혜택 찾기' && result.primary.href === '/html/dh/counsel' && result.primary.consult === '1', `${width}px: primary CTA contract mismatch`);
-    assert(result.secondary.text === '상품 먼저 보기' && result.secondary.href === '/html/dh_prod/prod_list/1-8', `${width}px: secondary CTA contract mismatch`);
+    assert(!result.entryPresent && !result.redundantEntryCopyPresent, `${width}px: redundant comparison entry remains`);
     assert(Object.values(result.hierarchy).every(Boolean), `${width}px: section hierarchy mismatch (${JSON.stringify(result.hierarchy)})`);
     assert(result.category.cards.map((card) => card.name).join('|') === '정수기|공기청정기|세탁기·건조기|비데|인터넷+TV|휴대폰', `${width}px: off-season category order mismatch (${JSON.stringify(result.category.cards)})`);
     assert(result.category.cards[5].href === 'https://premiumm.ptalk.co.kr/73728', `${width}px: phone card destination mismatch (${JSON.stringify(result.category.cards[5])})`);
@@ -199,6 +185,7 @@ async function inspect(browser, width, height) {
     assert(result.category.extraHidden && result.category.extraNames[0] === '에어컨' && result.category.extraNames.filter((name) => name === '에어컨').length === 1, `${width}px: off-season aircon is not confined to category more (${JSON.stringify(result.category)})`);
     assert(result.category.cards.length === 6 && result.category.cards.every((card) => card.name && card.href && card.imageLoaded && !card.contentOverflow), `${width}px: category card content contract mismatch (${JSON.stringify(result.category)})`);
     if (width <= 767) {
+      assert(result.benefitSpacing.gapBefore <= 4 && result.benefitSpacing.innerTop <= 4 && result.benefitSpacing.innerBottom <= 10 && result.benefitSpacing.nextPaddingTop <= 12, `${width}px: benefit spacing is not compact (${JSON.stringify(result.benefitSpacing)})`);
       assert(result.category.height <= 360, `${width}px: compact category section is too tall (${result.category.height}px)`);
       assert(result.category.cards.every((card) => card.direction === 'row' && card.iconBeforeText && card.height <= 90), `${width}px: category cards are not compact horizontal cards (${JSON.stringify(result.category.cards)})`);
       assert(result.category.cards[0].top === result.category.cards[1].top && result.category.cards[2].top > result.category.cards[0].top, `${width}px: category cards are not arranged in two columns`);
@@ -254,7 +241,6 @@ async function inspect(browser, width, height) {
     if (width <= 767) {
       assert(result.mobileNav.length >= 10 && result.mobileNav.includes('물·공기·청소가전') && result.mobileNav.includes('냉장가전') && result.mobileNav.includes('자동차 장기렌트'), `${width}px: previous mobile category menu was not restored (${JSON.stringify(result.mobileNav)})`);
       assert(!result.mobileNav.includes('인기상품') && !result.mobileNav.includes('3초견적') && result.drawerGroups.length === 0, `${width}px: simplified navigation remnants remain (${JSON.stringify({ mobileNav: result.mobileNav, drawerGroups: result.drawerGroups })})`);
-      assert(result.typography.title.font <= 22 && result.typography.title.lines <= 2, `${width}px: compact entry typography regressed (${JSON.stringify(result.typography)})`);
       assert(result.quickDisplay === 'none' && result.stickyExists, `${width}px: mobile floating controls were not consolidated`);
       await page.evaluate(() => window.scrollTo(0, 700));
       await page.waitForFunction(() => document.querySelector('#bj-home-sticky-actions')?.classList.contains('is-visible'));
@@ -269,24 +255,41 @@ async function inspect(browser, width, height) {
           inside: rect.left >= 0 && rect.right <= innerWidth,
           ariaHidden: node.getAttribute('aria-hidden'),
           inert: node.inert,
+          primaryBackground: getComputedStyle(node.querySelector('.bj-hsa-primary')).backgroundImage,
+          primaryShadow: getComputedStyle(node.querySelector('.bj-hsa-primary')).boxShadow,
+          primaryTransform: getComputedStyle(node.querySelector('.bj-hsa-primary')).transform,
         };
       });
-      assert(sticky.primary === '최대혜택 찾기' && sticky.secondary === '문의하기' && sticky.inside && sticky.bottom >= 0 && sticky.ariaHidden === 'false' && !sticky.inert, `${width}px: sticky action contract mismatch (${JSON.stringify(sticky)})`);
+      assert(sticky.primary === '내 지원금 확인하기' && sticky.secondary === '문의하기' && sticky.inside && sticky.bottom >= 0 && sticky.ariaHidden === 'false' && !sticky.inert, `${width}px: sticky action contract mismatch (${JSON.stringify(sticky)})`);
+      assert(sticky.primaryBackground.includes('linear-gradient') && sticky.primaryShadow !== 'none' && sticky.primaryTransform !== 'none', `${width}px: sticky primary is missing pressable depth (${JSON.stringify(sticky)})`);
+      const screenshotPath = String(process.env.BILLYJO_STICKY_SCREENSHOT || '').trim();
+      if (width === 390 && screenshotPath) {
+        await page.evaluate(() => {
+          const benefits = document.querySelector('#bj-home-benefit-cards');
+          window.scrollTo(0, Math.max(0, benefits.getBoundingClientRect().top + window.scrollY - Math.round(window.innerHeight * .58)));
+        });
+        await page.screenshot({ path: screenshotPath });
+      }
     } else {
       assert(result.desktopNav.length >= 10 && result.desktopNav.includes('물·공기·청소가전') && result.desktopNav.includes('냉장가전') && result.desktopNav.includes('자동차 장기렌트'), `${width}px: previous desktop menu was not restored (${JSON.stringify(result.desktopNav)})`);
       assert(result.documentHeight < 7500, `${width}px: desktop page is still excessively long (${result.documentHeight}px)`);
     }
 
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await page.locator('#bj-home-conversion-entry .bj-hce-primary').click();
+    if (width <= 767) {
+      await page.locator('#bj-home-sticky-actions .bj-hsa-primary').click();
+    } else {
+      await page.locator('.new-qb [data-bj-consult="1"]:visible').first().click();
+    }
     await page.locator('[data-bj-lead-step="contact"]').waitFor({ state: 'visible', timeout: 10000 });
     assert((await page.locator('.bj-reserve-title').textContent()).trim() === '3초 견적·제품 추천', `${width}px: primary CTA did not open the existing funnel`);
-    const tracked = await page.evaluate(() => Array.isArray(window.dataLayer) && window.dataLayer.some((item) => item?.event === 'bj_home_entry_click' && item?.choice === 'consult'));
-    assert(tracked, `${width}px: consult CTA diagnostic event was not captured`);
+    if (width <= 767) {
+      const tracked = await page.evaluate(() => Array.isArray(window.dataLayer) && window.dataLayer.some((item) => item?.event === 'bj_home_entry_click' && item?.choice === 'sticky_consult'));
+      assert(tracked, `${width}px: sticky consult CTA diagnostic event was not captured`);
+    }
 
     const relevantErrors = pageErrors.filter((message) => /home-conversion|SyntaxError|ReferenceError|TypeError/.test(message));
     assert(relevantErrors.length === 0, `${width}px: relevant page errors (${relevantErrors.join(' | ')})`);
-    return { width, entryTop: result.entryTop, promoVisible: result.promo.visible, heroSlides: result.hero.count, manualHero, documentHeight: result.documentHeight };
+    return { width, benefitSpacing: result.benefitSpacing, promoVisible: result.promo.visible, heroSlides: result.hero.count, manualHero, documentHeight: result.documentHeight };
   } finally {
     await page.close();
   }
@@ -302,7 +305,7 @@ async function inspectPromotionFallback(browser) {
   });
   try {
     await page.goto('https://billyjo.co.kr/?qa=home-conversion-promo-fallback', { waitUntil: 'domcontentloaded', timeout: 60000 });
-    await page.locator('#bj-home-conversion-entry').waitFor({ state: 'visible', timeout: 30000 });
+    await page.locator('#bj-home-sticky-actions').waitFor({ state: 'attached', timeout: 30000 });
     await page.locator('#bj-v5-injected').waitFor({ state: 'visible', timeout: 30000 });
     await page.waitForTimeout(5600);
     const result = await page.evaluate(() => {
@@ -311,13 +314,13 @@ async function inspectPromotionFallback(browser) {
       return {
         promoExists: Boolean(document.querySelector('#bj-home-gift-promos')),
         promoReady: document.body.classList.contains('bj-home-promo-ready'),
-        productFallback: document.querySelector('#bj-home-conversion-entry .bj-hce-secondary')?.getAttribute('href') || '',
+        supportFallback: document.querySelector('#bj-home-sticky-actions .bj-hsa-primary')?.getAttribute('href') || '',
         nativeRecommendation: heading ? getComputedStyle(heading).display : 'missing',
         nativeCatalog: catalog ? getComputedStyle(catalog).display : 'missing',
       };
     });
     assert(!result.promoExists && !result.promoReady, `fallback: stale promotion state (${JSON.stringify(result)})`);
-    assert(result.productFallback === '/html/dh_prod/prod_list/1-8', `fallback: product link is not a real destination (${JSON.stringify(result)})`);
+    assert(result.supportFallback === '/html/dh/counsel', `fallback: support link is not a real destination (${JSON.stringify(result)})`);
     assert(result.nativeRecommendation !== 'none' && result.nativeCatalog !== 'none', `fallback: native product discovery stayed hidden (${JSON.stringify(result)})`);
     return result;
   } finally {

@@ -119,7 +119,6 @@ async function inspect(browser, width, visibility) {
           };
         })(),
         hierarchy: (() => {
-          const entry = document.querySelector('#bj-home-conversion-entry');
           const promo = document.querySelector('#bj-home-gift-promos');
           const category = document.querySelector('#bj-home-cat-links');
           const benefits = document.querySelector('#bj-home-benefit-cards');
@@ -127,8 +126,8 @@ async function inspect(browser, width, visibility) {
           return {
             heroBeforeCategory: Boolean(hero && category && hero.nextElementSibling === category),
             categoryBeforePromo: Boolean(category && promo && category.nextElementSibling === promo),
-            promoBeforeEntry: Boolean(promo && entry && promo.nextElementSibling === entry),
-            entryBeforeBenefits: Boolean(entry && benefits && entry.nextElementSibling === benefits),
+            promoBeforeBenefits: Boolean(promo && benefits && promo.nextElementSibling === benefits),
+            redundantEntryRemoved: !document.querySelector('#bj-home-conversion-entry'),
           };
         })(),
         viewportWidth: document.documentElement.clientWidth,

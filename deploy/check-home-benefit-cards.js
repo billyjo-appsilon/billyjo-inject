@@ -100,7 +100,7 @@ async function inspectViewport(browser, width, height) {
     const result = await page.evaluate(() => {
       const category = document.getElementById('bj-home-cat-links');
       const section = document.getElementById('bj-home-benefit-cards');
-      const entry = document.getElementById('bj-home-conversion-entry');
+      const promo = document.getElementById('bj-home-gift-promos');
       const stack = section.querySelector('.bj-hbenefit-stack');
       const rows = Array.from(section.querySelectorAll('.bj-hbenefit-card')).map((card) => {
         const rect = card.getBoundingClientRect();
@@ -118,7 +118,8 @@ async function inspectViewport(browser, width, height) {
         };
       });
       return {
-        directAfterEntry: entry && entry.nextElementSibling === section,
+        directAfterPromo: promo && promo.nextElementSibling === section,
+        redundantEntryPresent: Boolean(document.getElementById('bj-home-conversion-entry')),
         scroller: {
           left: stack.getBoundingClientRect().left,
           scrollWidth: stack.scrollWidth,
@@ -159,7 +160,7 @@ async function inspectViewport(browser, width, height) {
 
     if (injectIntercepts < 1) throw new Error(`inject route was not intercepted at ${width}px`);
     if (!result.homeReleased) throw new Error(`home release gate did not open at ${width}px`);
-    if (!result.directAfterEntry) throw new Error(`benefit section is not directly after the compact comparison entry at ${width}px`);
+    if (!result.directAfterPromo || result.redundantEntryPresent) throw new Error(`benefit section is not directly after promos or redundant entry remains at ${width}px`);
     if (result.count !== cards.length) throw new Error(`expected ${cards.length} cards, got ${result.count} at ${width}px`);
     if (result.highlight !== '할인+보상교체') throw new Error(`card 05 highlight mismatch at ${width}px`);
     if (!/bj-hbenefit/.test(result.sampleTopElement)) throw new Error(`benefit cards are visually occluded at ${width}px by ${result.sampleTopElement}; rect=${JSON.stringify(result.firstRect)}; scroll=${JSON.stringify(result.scrollDebug)}`);
@@ -194,7 +195,7 @@ async function inspectViewport(browser, width, height) {
         await page.screenshot({ path: path.join(screenshotDir, `home-benefits-${width}-${index + 1}.png`), clip: box });
       }
     }
-    return { width, count: result.count, directAfterEntry: result.directAfterEntry, overflow: result.scrollWidth - Math.max(result.viewportWidth, width) };
+    return { width, count: result.count, directAfterPromo: result.directAfterPromo, overflow: result.scrollWidth - Math.max(result.viewportWidth, width) };
   } finally {
     await page.close();
   }

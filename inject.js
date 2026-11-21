@@ -9334,10 +9334,10 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 
 /* =============================================================================
  * 홈 전환 위계 정리 (2026-11-20)
- *   - 첫 화면 안에 기존 상담 퍼널 CTA를 노출하고 상품 탐색을 보조 선택으로 둔다.
+ *   - 프로모션 뒤의 중복 비교 CTA는 제거하고 모바일 상담 퍼널은 하단 2액션으로 통합한다.
  *   - 히어로 4장을 수동 전환으로 유지하고 첫 화면의 상담 퍼널을 간결하게 둔다.
  *   - 가격대별 대표 상품 12개 → 전체 24개 확장 구조와 월 마감 문구를 사용한다.
- *   - 모바일 우측 퀵버튼 대신 하단 2액션을 사용하고 긴 네이티브 상품 중복을 접는다.
+ *   - 모바일 우측 퀵버튼 대신 하단 2액션을 사용하고 파란 지원금 CTA를 주 행동으로 둔다.
  * ========================================================================== */
 (function billyjoHomeConversionHierarchy(){
   if (window.__bjHomeConversionHierarchy) return;
@@ -9362,18 +9362,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var style = document.createElement('style');
     style.id = 'bj-home-conversion-hierarchy-css';
     style.textContent = [
-      '#bj-home-conversion-entry{position:relative;z-index:2;background:linear-gradient(135deg,#f3f7ff 0%,#fff 58%,#fff9d7 100%);border-bottom:1px solid #e7edff;font-family:inherit}',
-      '#bj-home-conversion-entry *{box-sizing:border-box}',
-      '#bj-home-conversion-entry .bj-hce-inner{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:36px;width:min(1280px,100%);margin:0 auto;padding:28px 32px}',
-      '#bj-home-conversion-entry .bj-hce-proof{display:inline-flex;align-items:center;gap:7px;margin:0 0 8px;color:#0838f8;font-size:13px;font-weight:850;letter-spacing:-.02em}',
-      '#bj-home-conversion-entry .bj-hce-proof:before{content:"";width:7px;height:7px;border-radius:50%;background:#17a66b;box-shadow:0 0 0 4px rgba(23,166,107,.11)}',
-      '#bj-home-conversion-entry .bj-hce-title{margin:0;color:#101828;font-size:clamp(28px,2.5vw,40px);font-weight:950;line-height:1.18;letter-spacing:-.045em;word-break:keep-all}',
-      '#bj-home-conversion-entry .bj-hce-title strong{color:#0838f8;font-weight:inherit}',
-      '#bj-home-conversion-entry .bj-hce-actions{display:grid;grid-template-columns:1fr;gap:9px;width:270px}',
-      '#bj-home-conversion-entry .bj-hce-action{display:flex;align-items:center;justify-content:center;min-height:52px;padding:12px 18px;border-radius:12px;text-decoration:none;font-size:15px;font-weight:900;line-height:1.2;letter-spacing:-.02em;cursor:pointer}',
-      '#bj-home-conversion-entry .bj-hce-primary{background:#0838f8;color:#fff;box-shadow:0 12px 28px rgba(8,56,248,.24)}',
-      '#bj-home-conversion-entry .bj-hce-secondary{background:#fff;color:#20304a;border:1px solid #cfdaee}',
-      '#bj-home-conversion-entry .bj-hce-action:focus-visible,#bj-home-sticky-actions a:focus-visible{outline:3px solid rgba(8,56,248,.35);outline-offset:3px}',
+      '#bj-home-sticky-actions a:focus-visible{outline:3px solid rgba(8,56,248,.35);outline-offset:3px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards{padding:14px 20px 28px;overflow:hidden}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-stack{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;max-width:1280px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-card{grid-template-columns:minmax(0,1fr) 66px;min-height:104px;padding:12px 12px 12px 14px;border-radius:10px}',
@@ -9385,68 +9374,43 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '#bj-home-sticky-actions{display:none}',
       '@media(min-width:1025px){body.bj-home-conversion-ready .new-mv .item,body.bj-home-conversion-ready .new-mv .item .pc{aspect-ratio:24/7!important}}',
       '@media(max-width:767px){',
-      '#bj-home-conversion-entry .bj-hce-inner{display:block;padding:17px 16px 16px}',
-      '#bj-home-conversion-entry .bj-hce-proof{font-size:11px;margin-bottom:5px}',
-      '#bj-home-conversion-entry .bj-hce-title{font-size:22px;line-height:1.16;letter-spacing:-.055em}',
-      '#bj-home-conversion-entry .bj-hce-actions{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:8px;width:100%;margin-top:12px}',
-      '#bj-home-conversion-entry .bj-hce-action{min-height:48px;padding:10px 8px;border-radius:10px;font-size:13px}',
-      'body.bj-home-conversion-ready #bj-home-benefit-cards{padding:10px 0 20px}',
-      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-stack{display:flex;gap:8px;max-width:none;overflow-x:auto;padding:0 12px 5px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards{padding:4px 0 8px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-stack{display:flex;gap:8px;max-width:none;overflow-x:auto;padding:0 12px 2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-stack::-webkit-scrollbar{display:none}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-card{flex:0 0 min(78vw,270px);scroll-snap-align:start;grid-template-columns:minmax(0,1fr) 62px;min-height:98px;padding:11px 10px 11px 13px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-icon{width:62px;height:62px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-kicker{font-size:11.5px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-value{font-size:16px}',
       'body.bj-home-conversion-ready .new-qb{display:none!important}',
+      'body.bj-home-conversion-ready .m_outer{padding-top:12px!important}',
       'body.bj-home-conversion-ready #bj-home-gift-promos{width:calc(100% - 16px);margin-top:8px!important}',
       'body.bj-home-conversion-ready #bj-home-gift-promos .bj-hgp-band{margin-top:12px}',
       '#bj-home-sticky-actions{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:10020;display:grid;grid-template-columns:minmax(0,1.65fr) minmax(0,.8fr);gap:7px;padding:7px;border:1px solid rgba(8,56,248,.14);border-radius:14px;background:rgba(255,255,255,.96);box-shadow:0 14px 38px rgba(21,38,80,.24);backdrop-filter:blur(12px);transform:translateY(calc(100% + 28px));opacity:0;visibility:hidden;pointer-events:none;transition:transform .2s ease,opacity .2s ease,visibility 0s linear .2s}',
       '#bj-home-sticky-actions.is-visible{transform:translateY(0);opacity:1;visibility:visible;pointer-events:auto;transition-delay:0s}',
       '#bj-home-sticky-actions a{display:flex;align-items:center;justify-content:center;min-height:46px;padding:8px 10px;border-radius:10px;text-decoration:none;font:900 13px/1.15 Pretendard,Arial,sans-serif;letter-spacing:-.02em}',
-      '#bj-home-sticky-actions .bj-hsa-primary{background:#0838f8;color:#fff}',
+      '#bj-home-sticky-actions .bj-hsa-primary{position:relative;overflow:hidden;background:linear-gradient(180deg,#3e70ff 0%,#0b42ff 48%,#052cc8 100%);color:#fff;border:1px solid rgba(0,29,153,.62);box-shadow:0 4px 0 #001d99,0 9px 18px rgba(8,56,248,.31),inset 0 1px 0 rgba(255,255,255,.5),inset 0 -1px 0 rgba(0,0,0,.18);transform:translateY(-2px);transition:transform .14s ease,box-shadow .14s ease,filter .14s ease}',
+      '#bj-home-sticky-actions .bj-hsa-primary:before{content:"";position:absolute;left:10%;right:10%;top:3px;height:38%;border-radius:999px;background:linear-gradient(180deg,rgba(255,255,255,.28),rgba(255,255,255,0));pointer-events:none}',
+      '#bj-home-sticky-actions .bj-hsa-primary:active{transform:translateY(2px);box-shadow:0 1px 0 #001d99,0 5px 10px rgba(8,56,248,.24),inset 0 1px 0 rgba(255,255,255,.34),inset 0 -1px 0 rgba(0,0,0,.2);filter:brightness(.98)}',
       '#bj-home-sticky-actions .bj-hsa-secondary{background:#f1f5ff;color:#0838f8}',
       'body.bj-home-conversion-ready{padding-bottom:78px!important}',
       '}',
-      '@media(max-width:359px){#bj-home-conversion-entry .bj-hce-title{font-size:20px}#bj-home-conversion-entry .bj-hce-action{font-size:12px}}'
+      '@media(max-width:359px){#bj-home-sticky-actions a{font-size:12px}}'
     ].join('\n');
     (document.head || document.documentElement).appendChild(style);
   }
-  function buildEntry(){
-    if (!isHome() || !document.body) return null;
+  function removeRedundantEntry(){
+    if (!isHome() || !document.body) return;
     var existing = document.getElementById('bj-home-conversion-entry');
-    if (existing) return existing;
-    var hero = document.querySelector('.new-mv_wrap') || document.querySelector('.billyjo-video-hero') || document.querySelector('.new-mv');
-    if (!hero || !hero.parentNode) return null;
-    var entry = document.createElement('section');
-    entry.id = 'bj-home-conversion-entry';
-    entry.setAttribute('aria-labelledby', 'bj-home-conversion-title');
-    entry.innerHTML = '<div class="bj-hce-inner"><div class="bj-hce-copy">' +
-      '<span class="bj-hce-proof">본사·파트너사 직계약 · 무료 비교</span>' +
-      '<h2 class="bj-hce-title" id="bj-home-conversion-title">렌탈료·사은품, <strong>내 조건으로 3초 비교</strong></h2></div>' +
-      '<div class="bj-hce-actions"><a class="bj-hce-action bj-hce-primary" href="/html/dh/counsel" data-bj-consult="1" data-bj-home-choice="consult">내 조건으로 최대혜택 찾기</a>' +
-      '<a class="bj-hce-action bj-hce-secondary" href="/html/dh_prod/prod_list/1-8" data-bj-home-choice="products">상품 먼저 보기</a></div></div>';
-    hero.parentNode.insertBefore(entry, hero.nextSibling);
-    entry.addEventListener('click', function(event){
-      var action = event.target && event.target.closest && event.target.closest('[data-bj-home-choice]');
-      if (!action) return;
-      var choice = action.getAttribute('data-bj-home-choice') || '';
-      if (choice === 'products') {
-        track(choice);
-        var promo = document.getElementById('bj-home-gift-promos');
-        if (promo) { event.preventDefault(); promo.scrollIntoView({ behavior:'smooth', block:'start' }); }
-      }
-    });
-    return entry;
+    if (existing && existing.parentNode) existing.parentNode.removeChild(existing);
   }
-  function placeSections(entry){
-    if (!entry || !entry.parentNode) return;
+  function placeSections(){
     var hero = document.querySelector('.new-mv_wrap') || document.querySelector('.billyjo-video-hero') || document.querySelector('.new-mv');
     if (!hero || !hero.parentNode) return;
     var anchor = hero;
     var promo = document.getElementById('bj-home-gift-promos');
     var categories = document.getElementById('bj-home-cat-links');
     var benefits = document.getElementById('bj-home-benefit-cards');
-    [categories, promo, entry, benefits].forEach(function(section){
+    [categories, promo, benefits].forEach(function(section){
       if (!section || !anchor.parentNode) return;
       if (anchor.nextElementSibling !== section) {
         anchor.parentNode.insertBefore(section, anchor.nextSibling);
@@ -9592,7 +9556,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     bar.setAttribute('aria-label', '빠른 견적과 문의');
     bar.setAttribute('aria-hidden', 'true');
     bar.inert = true;
-    bar.innerHTML = '<a class="bj-hsa-primary" href="/html/dh/counsel" data-bj-consult="1" data-bj-hsa="consult">최대혜택 찾기</a>' +
+    bar.innerHTML = '<a class="bj-hsa-primary" href="/html/dh/counsel" data-bj-consult="1" data-bj-hsa="consult">내 지원금 확인하기</a>' +
       '<a class="bj-hsa-secondary" href="/html/dh/counsel" data-bj-text-inquiry="1" data-bj-hsa="inquiry">문의하기</a>';
     document.body.appendChild(bar);
     bar.addEventListener('click', function(event){
@@ -9625,8 +9589,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     if (!isHome()) return;
     ensureStyle();
     if (document.body) document.body.classList.add('bj-home-conversion-ready');
-    var entry = buildEntry();
-    placeSections(entry);
+    removeRedundantEntry();
+    placeSections();
     curateHero();
     enhanceBenefitScroller();
     bindConsultTrackingCapture();
