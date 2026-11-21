@@ -9319,8 +9319,8 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
 /* =============================================================================
  * 홈 전환 위계 정리 (2026-11-20)
  *   - 첫 화면 안에 기존 상담 퍼널 CTA를 노출하고 상품 탐색을 보조 선택으로 둔다.
- *   - 히어로 3장, 모바일 상단 3개 의도, PC 핵심 메뉴만 남겨 선택 피로를 낮춘다.
- *   - 가격대별 대표 상품 6개 → 전체 24개 확장 구조와 월 마감 문구를 사용한다.
+ *   - 히어로 4장을 수동 전환으로 유지하고 첫 화면의 상담 퍼널을 간결하게 둔다.
+ *   - 가격대별 대표 상품 12개 → 전체 24개 확장 구조와 월 마감 문구를 사용한다.
  *   - 모바일 우측 퀵버튼 대신 하단 2액션을 사용하고 긴 네이티브 상품 중복을 접는다.
  * ========================================================================== */
 (function billyjoHomeConversionHierarchy(){
@@ -9353,7 +9353,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '#bj-home-conversion-entry .bj-hce-proof:before{content:"";width:7px;height:7px;border-radius:50%;background:#17a66b;box-shadow:0 0 0 4px rgba(23,166,107,.11)}',
       '#bj-home-conversion-entry .bj-hce-title{margin:0;color:#101828;font-size:clamp(28px,2.5vw,40px);font-weight:950;line-height:1.18;letter-spacing:-.045em;word-break:keep-all}',
       '#bj-home-conversion-entry .bj-hce-title strong{color:#0838f8;font-weight:inherit}',
-      '#bj-home-conversion-entry p{margin:10px 0 0;color:#536178;font-size:16px;font-weight:650;line-height:1.55;letter-spacing:-.025em;word-break:keep-all}',
       '#bj-home-conversion-entry .bj-hce-actions{display:grid;grid-template-columns:1fr;gap:9px;width:270px}',
       '#bj-home-conversion-entry .bj-hce-action{display:flex;align-items:center;justify-content:center;min-height:52px;padding:12px 18px;border-radius:12px;text-decoration:none;font-size:15px;font-weight:900;line-height:1.2;letter-spacing:-.02em;cursor:pointer}',
       '#bj-home-conversion-entry .bj-hce-primary{background:#0838f8;color:#fff;box-shadow:0 12px 28px rgba(8,56,248,.24)}',
@@ -9373,7 +9372,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '#bj-home-conversion-entry .bj-hce-inner{display:block;padding:17px 16px 16px}',
       '#bj-home-conversion-entry .bj-hce-proof{font-size:11px;margin-bottom:5px}',
       '#bj-home-conversion-entry .bj-hce-title{font-size:22px;line-height:1.16;letter-spacing:-.055em}',
-      '#bj-home-conversion-entry p{font-size:12.5px;line-height:1.42;margin-top:5px;letter-spacing:-.035em}',
       '#bj-home-conversion-entry .bj-hce-actions{grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:8px;width:100%;margin-top:12px}',
       '#bj-home-conversion-entry .bj-hce-action{min-height:48px;padding:10px 8px;border-radius:10px;font-size:13px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards{padding:10px 0 20px}',
@@ -9392,7 +9390,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '#bj-home-sticky-actions .bj-hsa-secondary{background:#f1f5ff;color:#0838f8}',
       'body.bj-home-conversion-ready{padding-bottom:78px!important}',
       '}',
-      '@media(max-width:359px){#bj-home-conversion-entry .bj-hce-title{font-size:20px}#bj-home-conversion-entry p{font-size:12px}#bj-home-conversion-entry .bj-hce-action{font-size:12px}}'
+      '@media(max-width:359px){#bj-home-conversion-entry .bj-hce-title{font-size:20px}#bj-home-conversion-entry .bj-hce-action{font-size:12px}}'
     ].join('\n');
     (document.head || document.documentElement).appendChild(style);
   }
@@ -9407,8 +9405,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     entry.setAttribute('aria-labelledby', 'bj-home-conversion-title');
     entry.innerHTML = '<div class="bj-hce-inner"><div class="bj-hce-copy">' +
       '<span class="bj-hce-proof">본사·파트너사 직계약 · 무료 비교</span>' +
-      '<h2 class="bj-hce-title" id="bj-home-conversion-title">렌탈료·사은품, <strong>내 조건으로 3초 비교</strong></h2>' +
-      '<p>제품·약정·관리방식까지 한 번에 비교해 맞는 혜택만 안내해 드립니다.</p></div>' +
+      '<h2 class="bj-hce-title" id="bj-home-conversion-title">렌탈료·사은품, <strong>내 조건으로 3초 비교</strong></h2></div>' +
       '<div class="bj-hce-actions"><a class="bj-hce-action bj-hce-primary" href="/html/dh/counsel" data-bj-consult="1" data-bj-home-choice="consult">내 조건으로 최대혜택 찾기</a>' +
       '<a class="bj-hce-action bj-hce-secondary" href="/html/dh_prod/prod_list/1-8" data-bj-home-choice="products">상품 먼저 보기</a></div></div>';
     hero.parentNode.insertBefore(entry, hero.nextSibling);
@@ -9468,6 +9465,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     try {
       var slick = jq(slider).slick('getSlick');
       var slickOptions = jq.extend(true, {}, slick && slick.options ? slick.options : {});
+      slickOptions.autoplay = false;
       jq(slider).slick('unslick');
       original.forEach(function(slide){
         if (slide.parentNode === slider) slider.removeChild(slide);
@@ -9475,6 +9473,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       retained.forEach(function(item){ slider.appendChild(item.slide); });
       jq(slider).slick(slickOptions);
       jq(slider).slick('slickGoTo', 0, true);
+      jq(slider).slick('slickPause');
     } catch (_error) { return; }
     Array.prototype.slice.call(slider.querySelectorAll('.slick-slide')).forEach(function(slide){
       var video = slide.querySelector('video.billyjo-video-hero__media, video');

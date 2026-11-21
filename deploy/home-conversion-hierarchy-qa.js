@@ -69,6 +69,7 @@ async function inspect(browser, width, height) {
         entryTop: Math.round(entryRect.top + window.scrollY),
         entryBottom: Math.round(entryRect.bottom + window.scrollY),
         title: entry.querySelector('.bj-hce-title')?.textContent.replace(/\s+/g, ' ').trim() || '',
+        removedCopyPresent: entry.textContent.includes('제품·약정·관리방식까지 한 번에 비교해 맞는 혜택만 안내해 드립니다.'),
         primary: {
           text: primary?.textContent.trim() || '',
           href: primary?.getAttribute('href') || '',
@@ -86,7 +87,6 @@ async function inspect(browser, width, height) {
         },
         typography: {
           title: styleMetrics(entry.querySelector('.bj-hce-title')),
-          copy: styleMetrics(entry.querySelector('p')),
         },
         promo: {
           total: promoCards.length,
@@ -105,6 +105,8 @@ async function inspect(browser, width, height) {
         hero: {
           count: slides.length,
           counter: document.querySelector('.new-mv_nav')?.textContent.replace(/\s+/g, ' ').trim() || '',
+          currentIndex: window.jQuery?.('.new-mv')?.slick('slickCurrentSlide'),
+          autoplay: window.jQuery?.('.new-mv')?.slick('getSlick')?.options?.autoplay,
           slides: slides.map((slide) => ({
             video: Boolean(slide.querySelector('video.billyjo-video-hero__media, video')),
             label: slide.querySelector('video')?.getAttribute('aria-label') || slide.querySelector('img')?.alt || '',
@@ -140,6 +142,7 @@ async function inspect(browser, width, height) {
 
     assert(intercepts > 0, `${width}px: local inject was not intercepted`);
     assert(result.title === '렌탈료·사은품, 내 조건으로 3초 비교', `${width}px: entry title mismatch`);
+    assert(!result.removedCopyPresent, `${width}px: removed comparison copy is still rendered`);
     assert(result.primary.text === '내 조건으로 최대혜택 찾기' && result.primary.href === '/html/dh/counsel' && result.primary.consult === '1', `${width}px: primary CTA contract mismatch`);
     assert(result.secondary.text === '상품 먼저 보기' && result.secondary.href === '/html/dh_prod/prod_list/1-8', `${width}px: secondary CTA contract mismatch`);
     assert(Object.values(result.hierarchy).every(Boolean), `${width}px: section hierarchy mismatch (${JSON.stringify(result.hierarchy)})`);
@@ -148,6 +151,7 @@ async function inspect(browser, width, height) {
     assert(result.promo.bounds.left >= 0 && result.promo.bounds.right <= width && result.promo.bounds.width <= 1280, `${width}px: relocated promo bounds mismatch (${JSON.stringify(result.promo.bounds)})`);
     assert(/^11월 혜택 종료까지/.test(result.promo.subcopy), `${width}px: monthly urgency copy mismatch`);
     assert(result.hero.count === 4 && result.hero.counter.endsWith('/ 4'), `${width}px: hero count mismatch (${JSON.stringify(result.hero)})`);
+    assert(result.hero.currentIndex === 0 && result.hero.autoplay === false, `${width}px: hero carousel still advances automatically (${JSON.stringify(result.hero)})`);
     assert(result.hero.slides[0]?.video && result.hero.slides[0]?.label === '빌리조 11월 프로모션 영상', `${width}px: video is not the first hero (${JSON.stringify(result.hero.slides)})`);
     assert(result.hero.slides.slice(1).every((slide) => slide.label && slide.href === '/html/dh/counsel' && slide.consult === '1'), `${width}px: retained image hero destination mismatch (${JSON.stringify(result.hero.slides)})`);
     assert(result.nativeRecommendation === 'none' && result.nativeCatalog === 'none', `${width}px: duplicated native product modules remain`);
@@ -157,7 +161,7 @@ async function inspect(browser, width, height) {
     if (width <= 767) {
       assert(result.mobileNav.length >= 10 && result.mobileNav.includes('물·공기·청소가전') && result.mobileNav.includes('냉장가전') && result.mobileNav.includes('자동차 장기렌트'), `${width}px: previous mobile category menu was not restored (${JSON.stringify(result.mobileNav)})`);
       assert(!result.mobileNav.includes('인기상품') && !result.mobileNav.includes('3초견적') && result.drawerGroups.length === 0, `${width}px: simplified navigation remnants remain (${JSON.stringify({ mobileNav: result.mobileNav, drawerGroups: result.drawerGroups })})`);
-      assert(result.typography.title.font <= 22 && result.typography.title.lines <= 2 && result.typography.copy.font <= 12.5 && result.typography.copy.lines <= 2, `${width}px: compact entry typography regressed (${JSON.stringify(result.typography)})`);
+      assert(result.typography.title.font <= 22 && result.typography.title.lines <= 2, `${width}px: compact entry typography regressed (${JSON.stringify(result.typography)})`);
       assert(result.quickDisplay === 'none' && result.stickyExists, `${width}px: mobile floating controls were not consolidated`);
       await page.evaluate(() => window.scrollTo(0, 700));
       await page.waitForFunction(() => document.querySelector('#bj-home-sticky-actions')?.classList.contains('is-visible'));
