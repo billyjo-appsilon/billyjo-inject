@@ -69,6 +69,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
         top: Math.round(line.getBoundingClientRect().top),
       }));
       return {
+        design: section.getAttribute('data-bj-product-card-design') || '',
         total: cards.length,
         visible: visibleCards.length,
         tierVisible: [...section.querySelectorAll('[data-bj-hgp-band]')].map((band) =>
@@ -78,7 +79,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
         titleLines,
       };
     });
-    if (initialPromoState.total !== 24 || initialPromoState.visible !== 12 ||
+    if (initialPromoState.design !== 'vertical-review-right' || initialPromoState.total !== 24 || initialPromoState.visible !== 12 ||
         !initialPromoState.tierVisible.every((count) => count === 2) ||
         initialPromoState.expanded !== 'false' || initialPromoState.label !== '프로모션 상품 12개 더보기') {
       throw new Error(`${testCase.name}: initial progressive promo contract mismatch (${JSON.stringify(initialPromoState)})`);
@@ -131,6 +132,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
       const menuLabels = [...document.querySelectorAll('.bj-best-gnb, .bj-newlywed-cat')]
         .map((node) => node.textContent.replace(/\s+/g, ' ').trim());
       return {
+        design: section.getAttribute('data-bj-product-card-design') || '',
         cards: cards.map((card) => ({
           id: card.getAttribute('data-bj-hgp-product'),
           tier: card.getAttribute('data-bj-hgp-tier'),
@@ -144,10 +146,18 @@ const logoAssets = new Map(logoFiles.map((file) => [
             const infoRect = card.querySelector('.bj-hgp-info').getBoundingClientRect();
             return imageRect.bottom <= infoRect.top + 1 && Math.abs(imageRect.left - infoRect.left) < 4;
           })(),
+          horizontalLayout: (() => {
+            const imageRect = card.querySelector('.bj-hgp-image').getBoundingClientRect();
+            const infoRect = card.querySelector('.bj-hgp-info').getBoundingClientRect();
+            return imageRect.right <= infoRect.left + 1 && Math.abs(imageRect.top - infoRect.top) < 8;
+          })(),
+          cardWidth: card.getBoundingClientRect().width,
           imageWidth: card.querySelector('.bj-hgp-image').getBoundingClientRect().width,
           badgeTopOffset: (() => {
             const imageRect = card.querySelector('.bj-hgp-image').getBoundingClientRect();
-            const badgeRect = card.querySelector('.bj-hgp-discount').getBoundingClientRect();
+            const badge = card.querySelector('.bj-hgp-discount');
+            if (!badge) return null;
+            const badgeRect = badge.getBoundingClientRect();
             return badgeRect.top - imageRect.top;
           })(),
           cardPadding: parseFloat(getComputedStyle(card).paddingTop),
@@ -156,11 +166,29 @@ const logoAssets = new Map(logoFiles.map((file) => [
           cardBackgroundImage: getComputedStyle(card).backgroundImage,
           imageBackground: getComputedStyle(card.querySelector('.bj-hgp-image')).backgroundColor,
           imageBackgroundImage: getComputedStyle(card.querySelector('.bj-hgp-image')).backgroundImage,
+          imageOverlay: getComputedStyle(card.querySelector('.bj-hgp-image'), '::after').backgroundImage,
           hasRegularPrice: !!card.querySelector('.bj-hgp-regular'),
           hasReviews: !!card.querySelector('.bj-hgp-reviews'),
           reviewText: card.querySelector('.bj-hgp-reviews')?.textContent.replace(/\s+/g, ' ').trim() || '',
-          badgeText: card.querySelector('.bj-hgp-discount').textContent.replace(/\s+/g, ' ').trim(),
-          officialPromoBadge: !card.querySelector('.bj-hgp-discount').classList.contains('is-benefit'),
+          reviewPlacement: (() => {
+            const brandRow = card.querySelector('.bj-hgp-brandrow');
+            const brand = card.querySelector('.bj-hgp-brandmark');
+            const review = card.querySelector('.bj-hgp-reviews');
+            if (!review) return null;
+            const rowRect = brandRow.getBoundingClientRect();
+            const brandRect = brand.getBoundingClientRect();
+            const reviewRect = review.getBoundingClientRect();
+            return {
+              parentIsBrandRow: review.parentElement === brandRow,
+              brandRowInInfo: brandRow.parentElement.classList.contains('bj-hgp-info'),
+              sameRow: Math.abs(brandRect.top - reviewRect.top) < 4,
+              rightOfBrand: reviewRect.left >= brandRect.right - 1,
+              insideRow: reviewRect.right <= rowRect.right + 1,
+              fontSize: parseFloat(getComputedStyle(review).fontSize),
+            };
+          })(),
+          badgeText: card.querySelector('.bj-hgp-discount')?.textContent.replace(/\s+/g, ' ').trim() || '',
+          officialPromoBadge: Boolean(card.querySelector('.bj-hgp-discount')),
           brandLogoLoaded: card.querySelector('.bj-hgp-brand-logo')?.naturalWidth > 0,
           brandLogoAlt: card.querySelector('.bj-hgp-brand-logo')?.alt || '',
           brandLogoSrc: card.querySelector('.bj-hgp-brand-logo')?.src || '',
@@ -169,23 +197,30 @@ const logoAssets = new Map(logoFiles.map((file) => [
           brandLogoWidth: card.querySelector('.bj-hgp-brand-logo').getBoundingClientRect().width,
           brandLogoTransform: getComputedStyle(card.querySelector('.bj-hgp-brand-logo')).transform,
           productImageTransform: getComputedStyle(card.querySelector('.bj-hgp-image > img:not(.bj-hgp-brand-logo)')).transform,
+          productImageBlendMode: getComputedStyle(card.querySelector('.bj-hgp-image > img:not(.bj-hgp-brand-logo)')).mixBlendMode,
           brandLogoWrapperHeight: card.querySelector('.bj-hgp-brandmark').getBoundingClientRect().height,
-          brandLogoOverlay: (() => {
-            const image = card.querySelector('.bj-hgp-image').getBoundingClientRect();
+          brandPlacement: (() => {
             const mark = card.querySelector('.bj-hgp-brandmark').getBoundingClientRect();
+            const name = card.querySelector('.bj-hgp-name').getBoundingClientRect();
             return {
               position: getComputedStyle(card.querySelector('.bj-hgp-brandmark')).position,
-              insideImage: mark.left >= image.left && mark.right <= image.right && mark.top >= image.top && mark.bottom <= image.bottom,
-              leftGap: mark.left - image.left,
-              bottomGap: image.bottom - mark.bottom,
-              parentIsImage: card.querySelector('.bj-hgp-brandmark').parentElement.classList.contains('bj-hgp-image'),
+              parentIsBrandRow: card.querySelector('.bj-hgp-brandmark').parentElement.classList.contains('bj-hgp-brandrow'),
+              brandRowInInfo: card.querySelector('.bj-hgp-brandmark').parentElement.parentElement.classList.contains('bj-hgp-info'),
+              aboveName: mark.bottom <= name.top + 1,
             };
           })(),
-          nameModelGap: (() => {
-            const nameRect = card.querySelector('.bj-hgp-name').getBoundingClientRect();
-            const modelRect = card.querySelector('.bj-hgp-model').getBoundingClientRect();
-            return modelRect.top - nameRect.bottom;
+          modelPlacement: (() => {
+            const image = card.querySelector('.bj-hgp-image').getBoundingClientRect();
+            const model = card.querySelector('.bj-hgp-model').getBoundingClientRect();
+            return {
+              position: getComputedStyle(card.querySelector('.bj-hgp-model')).position,
+              parentIsImage: card.querySelector('.bj-hgp-model').parentElement.classList.contains('bj-hgp-image'),
+              insideImage: model.left >= image.left && model.right <= image.right && model.top >= image.top && model.bottom <= image.bottom,
+              bottomGap: image.bottom - model.bottom,
+            };
           })(),
+          giftBackground: getComputedStyle(card.querySelector('.bj-hgp-gift')).backgroundImage,
+          giftColor: getComputedStyle(card.querySelector('.bj-hgp-gift')).color,
           infoTextAlign: getComputedStyle(card.querySelector('.bj-hgp-info')).textAlign,
           hasPriceBox: !!card.querySelector('.bj-hgp-pricebox'),
           priceBoxHeight: card.querySelector('.bj-hgp-pricebox').getBoundingClientRect().height,
@@ -244,6 +279,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
       };
     });
 
+    if (result.design !== 'vertical-review-right') throw new Error(`${testCase.name}: product card design marker mismatch`);
     if (result.cards.length !== 24) throw new Error(`${testCase.name}: expected twenty-four promo cards`);
     if (result.cards.map((card) => card.id).join(',') !== '24129,11327,3657,35287,34614,32596,10914,23052,32586,32100,28918,27223,32918,33000,22764,10428,35730,32592,27476,27503,29036,33632,31903,32406') {
       throw new Error(`${testCase.name}: promo card order is wrong`);
@@ -269,8 +305,9 @@ const logoAssets = new Map(logoFiles.map((file) => [
     if (!result.bands.every((band) => band.cardCount === 4)) {
       throw new Error(`${testCase.name}: every price band must contain four cards`);
     }
-    if (!result.bands.every((band) => band.columnCount === 2)) {
-      throw new Error(`${testCase.name}: every price band must render two cards per row`);
+    const expectedColumns = 2;
+    if (!result.bands.every((band) => band.columnCount === expectedColumns)) {
+      throw new Error(`${testCase.name}: price-band column count mismatch`);
     }
     for (const expected of ['11월 특가', '4.9 · 후기 23개', '4.9 · 후기 58개', '4.8 · 후기 149개', '4.8 · 후기 173개', '공기청정기 1대 증정 대상', '추가 사은품 증정']) {
       if (!result.cards.some((card) => card.text.includes(expected))) {
@@ -290,6 +327,10 @@ const logoAssets = new Map(logoFiles.map((file) => [
     }
     if (result.cards.filter((card) => card.officialPromoBadge).length !== 3) {
       throw new Error(`${testCase.name}: only three approved promotion badges may render`);
+    }
+    if (result.cards.some((card) => card.badgeText && card.badgeText !== '11월 특가') ||
+        result.cards.some((card) => card.text.includes('혜택 집중'))) {
+      throw new Error(`${testCase.name}: an unapproved benefit badge remains`);
     }
     if (result.cards.filter((card) => card.hasRegularPrice).length !== 3) {
       throw new Error(`${testCase.name}: exactly three cards must show sourced regular prices`);
@@ -332,23 +373,33 @@ const logoAssets = new Map(logoFiles.map((file) => [
       throw new Error(`${testCase.name}: supplied LG Electronics logo is not active`);
     }
     const expectedLogoHeight = testCase.name === 'mobile' ? 14.4 : 16;
-    const expectedWrapperHeight = testCase.name === 'mobile' ? 17.6 : 19.2;
+    const expectedWrapperHeight = testCase.name === 'mobile' ? 17 : 20;
     if (!result.cards.every((card) => Math.abs(card.brandLogoHeight - expectedLogoHeight) < 0.5 &&
         Math.abs(card.brandLogoWrapperHeight - expectedWrapperHeight) < 0.5 &&
-        card.brandLogoWidth <= 96.5 && card.brandLogoBlendMode === 'normal')) {
+        card.brandLogoWidth <= (testCase.name === 'mobile' ? 54.5 : 112.5) && card.brandLogoBlendMode === 'normal')) {
       throw new Error(`${testCase.name}: brand logo heights are not normalized`);
     }
-    if (!result.cards.every((card) => card.brandLogoOverlay.position === 'absolute' &&
-        card.brandLogoOverlay.insideImage && card.brandLogoOverlay.parentIsImage &&
-        card.brandLogoOverlay.leftGap >= 0 && card.brandLogoOverlay.leftGap <= 9 &&
-        Math.abs(card.brandLogoOverlay.bottomGap - (testCase.name === 'mobile' ? 1 : 3)) < 0.5)) {
-      throw new Error(`${testCase.name}: brand logo must overlay the product image`);
+    if (!result.cards.every((card) => card.brandPlacement.position === 'static' &&
+        card.brandPlacement.parentIsBrandRow && card.brandPlacement.brandRowInInfo && card.brandPlacement.aboveName)) {
+      throw new Error(`${testCase.name}: brand logo must sit in the row above the product name`);
     }
-    if (!result.cards.every((card) => card.productImageTransform === 'matrix(1.18, 0, 0, 1.18, 0, 0)' && card.brandLogoTransform === 'none')) {
-      throw new Error(`${testCase.name}: product thumbnails must scale to 1.18 without scaling brand logos`);
+    const reviewFontFloor = testCase.name === 'mobile' ? 9 : 10;
+    if (!result.cards.filter((card) => card.hasReviews).every((card) => card.reviewPlacement?.parentIsBrandRow &&
+        card.reviewPlacement.brandRowInInfo && card.reviewPlacement.sameRow && card.reviewPlacement.rightOfBrand &&
+        card.reviewPlacement.insideRow && card.reviewPlacement.fontSize >= reviewFontFloor)) {
+      throw new Error(`${testCase.name}: review summary must be readable at the right of the brand row`);
     }
-    if (testCase.name === 'mobile' && result.cards.some((card) => card.nameModelGap > 2)) {
-      throw new Error(`mobile: product name/model gap is too large (${Math.max(...result.cards.map((card) => card.nameModelGap))}px)`);
+    if (!result.cards.every((card) => card.modelPlacement.position === 'absolute' &&
+        card.modelPlacement.parentIsImage && card.modelPlacement.insideImage &&
+        Math.abs(card.modelPlacement.bottomGap - (testCase.name === 'mobile' ? 6 : 7)) < 0.5)) {
+      throw new Error(`${testCase.name}: model name must sit at the bottom of the product image`);
+    }
+    const expectedProductTransform = testCase.name === 'mobile' ? 'matrix(1.12, 0, 0, 1.12, 0, 0)' : 'matrix(1.18, 0, 0, 1.18, 0, 0)';
+    if (!result.cards.every((card) => card.productImageTransform === expectedProductTransform && card.productImageBlendMode === 'normal' && card.brandLogoTransform === 'none')) {
+      throw new Error(`${testCase.name}: product thumbnail scale mismatch`);
+    }
+    if (!result.cards.every((card) => card.giftBackground.includes('linear-gradient') && card.giftColor === 'rgb(255, 255, 255)')) {
+      throw new Error(`${testCase.name}: gift badge must use the vivid orange treatment`);
     }
     if (!result.cards.every((card) => card.infoTextAlign === 'left' && card.hasPriceBox)) {
       throw new Error(`${testCase.name}: card information hierarchy is not left-aligned`);
@@ -359,17 +410,17 @@ const logoAssets = new Map(logoFiles.map((file) => [
         Math.abs(card.priceRowLayout.valueRight - card.priceRowLayout.rowRight) < 1)) {
       throw new Error(`${testCase.name}: monthly fee label/value must align to opposite edges`);
     }
-    if (testCase.name === 'mobile' && result.cards.some((card) => card.priceBoxHeight > (card.hasRegularPrice ? 39 : 31))) {
+    if (testCase.name === 'mobile' && result.cards.some((card) => card.priceBoxHeight > 43)) {
       throw new Error(`mobile: price box is too tall (${Math.max(...result.cards.map((card) => card.priceBoxHeight))}px)`);
     }
-    if (!result.cards.every((card) => card.cardBackground === 'rgb(255, 255, 255)' && card.imageBackground === 'rgb(255, 255, 255)' &&
-        card.cardBackgroundImage === 'none' && card.imageBackgroundImage === 'none')) {
-      throw new Error(`${testCase.name}: thumbnail and card backgrounds must use the same solid white`);
+    if (!result.cards.every((card) => card.cardBackground === 'rgb(255, 255, 255)' &&
+        card.cardBackgroundImage === 'none' && card.imageBackgroundImage.includes('radial-gradient') && card.imageOverlay.includes('linear-gradient'))) {
+      throw new Error(`${testCase.name}: B-style blue product background is missing`);
     }
     if (!result.cards.every((card) => card.hasActions && card.cartLabel === '담기' && card.detailLabel === '상세보기')) {
       throw new Error(`${testCase.name}: compact card actions are missing`);
     }
-    const expectedButtonHeight = testCase.name === 'mobile' ? 28 : 34;
+    const expectedButtonHeight = testCase.name === 'mobile' ? 30 : 34;
     const expectedButtonFontSize = testCase.name === 'mobile' ? 11 : 13;
     if (!result.cards.every((card) => Math.abs(card.detailHeight - expectedButtonHeight) < 0.5 &&
         Math.abs(card.cartHeight - expectedButtonHeight) < 0.5 &&
@@ -377,19 +428,19 @@ const logoAssets = new Map(logoFiles.map((file) => [
         Math.abs(card.cartFontSize - expectedButtonFontSize) < 0.1)) {
       throw new Error(`${testCase.name}: action button dimensions are wrong`);
     }
-    if (testCase.name === 'mobile' && !result.cards.every((card) => card.verticalLayout)) {
-      throw new Error('mobile: promo cards must keep the product image above product info');
+    if (testCase.name === 'mobile' && !result.cards.every((card) => card.verticalLayout && !card.horizontalLayout && card.cardWidth >= 140)) {
+      throw new Error('mobile: promo cards must use the approved two-column vertical layout');
     }
     if (testCase.name === 'desktop' && result.cards.some((card) => card.verticalLayout)) {
       throw new Error('desktop: promo cards must use the compact side-by-side layout');
     }
-    const maxCardHeight = testCase.name === 'mobile' ? 340 : 300;
+    const maxCardHeight = testCase.name === 'mobile' ? 295 : 300;
     if (!result.cards.every((card) => card.cardHeight <= maxCardHeight)) {
       throw new Error(`${testCase.name}: promo card is too tall (${Math.max(...result.cards.map((card) => card.cardHeight))}px)`);
     }
-    const minImageWidth = testCase.name === 'mobile' ? 145 : 175;
+    const minImageWidth = testCase.name === 'mobile' ? 140 : 175;
     if (!result.cards.every((card) => card.imageWidth >= minImageWidth)) throw new Error(`${testCase.name}: product thumbnail is too small`);
-    if (!result.cards.every((card) => card.badgeTopOffset >= 0 && card.badgeTopOffset <= 8)) throw new Error(`${testCase.name}: badge must stay at the thumbnail top`);
+    if (!result.cards.filter((card) => card.badgeTopOffset !== null).every((card) => card.badgeTopOffset >= 0 && card.badgeTopOffset <= 8)) throw new Error(`${testCase.name}: badge must stay at the thumbnail top`);
     const minPadding = testCase.name === 'mobile' ? 8 : 16;
     if (!result.cards.every((card) => card.cardPadding >= minPadding)) throw new Error(`${testCase.name}: card padding is too tight`);
     if (!result.beforeNativeRecommendation) throw new Error(`${testCase.name}: promo cards must precede native recommendations`);
