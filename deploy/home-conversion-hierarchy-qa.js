@@ -158,6 +158,26 @@ async function inspect(browser, width, height) {
     assert(result.benefitsA11y.tabindex === '0' && result.benefitsA11y.role === 'region' && result.benefitsA11y.aria.includes('혜택 6개'), `${width}px: benefit scroller accessibility mismatch`);
     assert(result.scrollWidth <= Math.max(result.viewportWidth, width) + 1, `${width}px: horizontal overflow (${result.scrollWidth}/${result.viewportWidth}; requested ${width})`);
 
+    let manualHero = null;
+    if (width === 390) {
+      await page.evaluate(() => window.jQuery('.new-mv').slick('slickNext'));
+      await page.waitForTimeout(3200);
+      manualHero = await page.evaluate(() => {
+        const slick = window.jQuery('.new-mv').slick('getSlick');
+        return { currentIndex: slick.currentSlide, autoplay: slick.options.autoplay, paused: slick.paused, timer: Boolean(slick.autoPlayTimer) };
+      });
+      assert(manualHero.currentIndex === 1 && manualHero.autoplay === false && manualHero.paused && !manualHero.timer, `390px: manual hero navigation restarted automatic scrolling (${JSON.stringify(manualHero)})`);
+      await page.evaluate(() => {
+        const slider = window.jQuery('.new-mv');
+        slider.slick('slickGoTo', 0, true);
+        const video = document.querySelector('.new-mv .slick-current video.billyjo-video-hero__media, .new-mv .slick-current video');
+        if (video) video.dispatchEvent(new Event('ended'));
+      });
+      await page.waitForTimeout(800);
+      const endedState = await page.evaluate(() => window.jQuery('.new-mv').slick('slickCurrentSlide'));
+      assert(endedState === 0, `390px: video end advanced the hero automatically (${endedState})`);
+    }
+
     if (width <= 767) {
       assert(result.mobileNav.length >= 10 && result.mobileNav.includes('물·공기·청소가전') && result.mobileNav.includes('냉장가전') && result.mobileNav.includes('자동차 장기렌트'), `${width}px: previous mobile category menu was not restored (${JSON.stringify(result.mobileNav)})`);
       assert(!result.mobileNav.includes('인기상품') && !result.mobileNav.includes('3초견적') && result.drawerGroups.length === 0, `${width}px: simplified navigation remnants remain (${JSON.stringify({ mobileNav: result.mobileNav, drawerGroups: result.drawerGroups })})`);
@@ -193,7 +213,7 @@ async function inspect(browser, width, height) {
 
     const relevantErrors = pageErrors.filter((message) => /home-conversion|SyntaxError|ReferenceError|TypeError/.test(message));
     assert(relevantErrors.length === 0, `${width}px: relevant page errors (${relevantErrors.join(' | ')})`);
-    return { width, entryTop: result.entryTop, promoVisible: result.promo.visible, heroSlides: result.hero.count, documentHeight: result.documentHeight };
+    return { width, entryTop: result.entryTop, promoVisible: result.promo.visible, heroSlides: result.hero.count, manualHero, documentHeight: result.documentHeight };
   } finally {
     await page.close();
   }

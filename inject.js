@@ -9438,23 +9438,41 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     });
     document.body.classList.toggle('bj-home-promo-ready', Boolean(promo));
   }
-  function curateHero(){
-    var slider = document.querySelector('.new-mv');
-    if (!slider) return;
-    var jq = window.jQuery;
-    if (!jq || !jq.fn || typeof jq.fn.slick !== 'function' || !slider.classList.contains('slick-initialized')) return;
+  function enforceManualHero(slider, jq){
     try {
       var heroSlick = jq(slider).slick('getSlick');
       if (heroSlick) {
         if (heroSlick.options) heroSlick.options.autoplay = false;
         if (heroSlick.originalSettings) heroSlick.originalSettings.autoplay = false;
         Object.keys(heroSlick.breakpointSettings || {}).forEach(function(breakpoint){
-          if (heroSlick.breakpointSettings[breakpoint]) heroSlick.breakpointSettings[breakpoint].autoplay = false;
+          var settings = heroSlick.breakpointSettings[breakpoint];
+          if (settings && typeof settings === 'object') settings.autoplay = false;
         });
+        heroSlick.autoPlay = function(){ this.autoPlayClear(); this.paused = true; };
+        heroSlick.play = function(){
+          this.autoPlayClear();
+          this.paused = true;
+          if (this.options) this.options.autoplay = false;
+          if (this.originalSettings) this.originalSettings.autoplay = false;
+        };
+        heroSlick.slickPlay = heroSlick.play;
       }
       jq(slider).slick('slickSetOption', 'autoplay', false, false);
       jq(slider).slick('slickPause');
-    } catch (_autoplayError) { return; }
+      var videos = jq(slider).find('video.billyjo-video-hero__media, video');
+      videos.off('ended.billyjoVideo ended.bjManualHero').on('ended.bjManualHero', function(){
+        this.pause();
+        try { this.currentTime = 0; } catch (_seekError) {}
+      });
+      return true;
+    } catch (_autoplayError) { return false; }
+  }
+  function curateHero(){
+    var slider = document.querySelector('.new-mv');
+    if (!slider) return;
+    var jq = window.jQuery;
+    if (!jq || !jq.fn || typeof jq.fn.slick !== 'function' || !slider.classList.contains('slick-initialized')) return;
+    if (!enforceManualHero(slider, jq)) return;
     if (slider.getAttribute('data-bj-home-curated')) return;
     var original = Array.prototype.slice.call(slider.querySelectorAll('.slick-slide:not(.slick-cloned)'));
     var configs = [
@@ -9486,7 +9504,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       retained.forEach(function(item){ slider.appendChild(item.slide); });
       jq(slider).slick(slickOptions);
       jq(slider).slick('slickGoTo', 0, true);
-      jq(slider).slick('slickPause');
+      enforceManualHero(slider, jq);
     } catch (_error) { return; }
     Array.prototype.slice.call(slider.querySelectorAll('.slick-slide')).forEach(function(slide){
       var video = slide.querySelector('video.billyjo-video-hero__media, video');
