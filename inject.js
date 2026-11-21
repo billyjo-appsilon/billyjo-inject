@@ -3352,8 +3352,9 @@
       '.bj-hgp-name-copy[aria-hidden="true"]{display:none}' +
       '.bj-hgp-name.is-rolling .bj-hgp-name-track{min-width:0;will-change:transform;animation:bj-hgp-name-roll var(--bj-hgp-roll-duration,9s) linear infinite}' +
       '.bj-hgp-name.is-rolling .bj-hgp-name-copy[aria-hidden="true"]{display:block;margin-left:var(--bj-hgp-roll-gap,24px)}' +
+      '.bj-hgp-name:hover .bj-hgp-name-track,.bj-hgp-main:focus-visible .bj-hgp-name-track{animation-play-state:paused}' +
       '@keyframes bj-hgp-name-roll{0%,14%{transform:translate3d(0,0,0)}86%,100%{transform:translate3d(calc(-1 * var(--bj-hgp-roll-distance)),0,0)}}' +
-      '@media(prefers-reduced-motion:reduce){.bj-hgp-name.is-rolling .bj-hgp-name-track{animation:none}.bj-hgp-name.is-rolling .bj-hgp-name-copy[aria-hidden="true"]{display:none}}' +
+      '@media(prefers-reduced-motion:reduce){.bj-hgp-name.is-rolling .bj-hgp-name-track{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;animation:none}.bj-hgp-name.is-rolling .bj-hgp-name-copy:first-child{width:100%;overflow:hidden;text-overflow:ellipsis}.bj-hgp-name.is-rolling .bj-hgp-name-copy[aria-hidden="true"]{display:none}}' +
       '.bj-hgp-model{position:absolute;z-index:3;left:8px;right:8px;bottom:7px;width:max-content;max-width:calc(100% - 16px);padding:3px 6px;border:1px solid rgba(148,163,184,.2);border-radius:6px;background:rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(15,23,42,.07);color:#64748b;font-size:10px;font-weight:700;line-height:1.2;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;backdrop-filter:blur(4px)}' +
       '.bj-hgp-pricebox{width:100%;margin-top:10px;padding:7px 10px;border:1px solid #dbe5ff;border-radius:11px;background:#eef3ff}' +
       '.bj-hgp-regular,.bj-hgp-price{display:flex;width:100%;align-items:baseline;justify-content:space-between;gap:6px}' +
@@ -3558,6 +3559,9 @@
     } else {
       window.addEventListener('resize', refreshAll, { passive: true });
     }
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(refreshAll).catch(function () {});
+    }
     window.requestAnimationFrame(refreshAll);
   }
   function render(month) {
@@ -3587,7 +3591,7 @@
         (isExtra ? ' data-bj-hgp-extra hidden' : '') + '>' +
         '<a class="bj-hgp-main" href="/html/dh_prod/prod_view/' + p.productId + '">' +
         '<div class="bj-hgp-image"><img src="' + p.image + '" alt="' + p.name + '" loading="lazy" decoding="async">' + badge + '<div class="bj-hgp-model">' + p.model + '</div></div>' +
-        '<div class="bj-hgp-info"><div class="bj-hgp-brandrow">' + brand + reviews + '</div><div class="bj-hgp-name" aria-label="' + p.name + '" title="' + p.name + '"><span class="bj-hgp-name-track"><span class="bj-hgp-name-copy">' + p.name + '</span><span class="bj-hgp-name-copy" aria-hidden="true">' + p.name + '</span></span></div>' +
+        '<div class="bj-hgp-info"><div class="bj-hgp-brandrow">' + brand + reviews + '</div><div class="bj-hgp-name" title="' + p.name + '"><span class="bj-hgp-name-track"><span class="bj-hgp-name-copy">' + p.name + '</span><span class="bj-hgp-name-copy" aria-hidden="true">' + p.name + '</span></span></div>' +
         price + '<div class="bj-hgp-meta"><div class="bj-hgp-gift">' + p.gift + '</div></div></div></a>' +
         '<div class="bj-hgp-actions"><a class="bj-hgp-detail" href="/html/dh_prod/prod_view/' + p.productId + '">상세보기</a>' +
         '<button type="button" class="bj-hgp-cart" data-bj-hgp-cart="' + p.productId + '" aria-label="' + p.name + ' 견적비교 담기" aria-pressed="false">담기</button></div></article>';

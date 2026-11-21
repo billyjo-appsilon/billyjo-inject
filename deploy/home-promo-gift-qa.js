@@ -237,6 +237,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
               firstText: first.textContent.trim(),
               duplicateText: duplicate.textContent.trim(),
               duplicateAriaHidden: duplicate.getAttribute('aria-hidden'),
+              title: name.getAttribute('title'),
               animationName: getComputedStyle(name.querySelector('.bj-hgp-name-track')).animationName,
             };
           })(),
@@ -423,6 +424,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
     if (!result.cards.every((card) => card.nameLayout.whiteSpace === 'nowrap' &&
         card.nameLayout.height <= card.nameLayout.lineHeight + 1 &&
         card.nameLayout.firstText === card.nameLayout.duplicateText &&
+        card.nameLayout.title === card.nameLayout.firstText &&
         card.nameLayout.duplicateAriaHidden === 'true')) {
       throw new Error(`${testCase.name}: product names must remain on one accessible line`);
     }
@@ -509,6 +511,10 @@ const logoAssets = new Map(logoFiles.map((file) => [
       if (rollTransformBefore === rollTransformAfter || rollTransformAfter === 'none') {
         throw new Error(`mobile-320: product name is marked rolling but does not move (${rollTransformBefore} -> ${rollTransformAfter})`);
       }
+      await page.locator('[data-bj-hgp-product="33632"] .bj-hgp-name').hover();
+      const hoverPlayState = await page.locator('[data-bj-hgp-product="33632"] .bj-hgp-name-track').evaluate((node) => getComputedStyle(node).animationPlayState);
+      if (hoverPlayState !== 'paused') throw new Error(`mobile-320: rolling product name does not pause on hover (${hoverPlayState})`);
+      await page.mouse.move(0, 0);
       if (process.env.BJ_QA_SCREENSHOT) {
         await page.locator('.bj-hgp-band').first().screenshot({ path: process.env.BJ_QA_SCREENSHOT });
       }
@@ -516,11 +522,16 @@ const logoAssets = new Map(logoFiles.map((file) => [
       const reducedMotionState = await page.locator('[data-bj-hgp-product="33632"] .bj-hgp-name').evaluate((name) => ({
         animationName: getComputedStyle(name.querySelector('.bj-hgp-name-track')).animationName,
         duplicateDisplay: getComputedStyle(name.querySelector('.bj-hgp-name-copy[aria-hidden="true"]')).display,
+        textOverflow: getComputedStyle(name.querySelector('.bj-hgp-name-copy:first-child')).textOverflow,
         oneLine: name.getBoundingClientRect().height <= parseFloat(getComputedStyle(name).lineHeight) + 1,
       }));
-      if (reducedMotionState.animationName !== 'none' || reducedMotionState.duplicateDisplay !== 'none' || !reducedMotionState.oneLine) {
+      if (reducedMotionState.animationName !== 'none' || reducedMotionState.duplicateDisplay !== 'none' ||
+          reducedMotionState.textOverflow !== 'ellipsis' || !reducedMotionState.oneLine) {
         throw new Error(`mobile-320: reduced-motion fallback is wrong (${JSON.stringify(reducedMotionState)})`);
       }
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.waitForFunction(() => !document.querySelector('[data-bj-hgp-product="33632"] .bj-hgp-name').classList.contains('is-rolling'), null, { timeout: 5000 });
       await page.locator('.bj-hgp-cart[data-bj-hgp-cart="24129"]').click();
       await page.locator('.bj-hgp-cart[data-bj-hgp-cart="24129"]').filter({ hasText: '담김 ✓' }).waitFor({ timeout: 10000 });
       const posted = new URLSearchParams(cartPostBody);
