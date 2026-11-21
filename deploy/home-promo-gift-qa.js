@@ -252,7 +252,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
       throw new Error(`${testCase.name}: live1 campaign banner is missing or unloaded`);
     }
     if (result.campaignBanner.title !== '11월도 반값습니다!' ||
-        result.campaignBanner.subcopy !== '선착순, 재고/추가 사은품 소진시 종료' ||
+        result.campaignBanner.subcopy !== '선착순, 재고/사은품 소진시 종료' ||
         result.campaignBanner.src !== live1MascotUrl) {
       throw new Error(`${testCase.name}: live1 campaign banner contract mismatch (${JSON.stringify(result.campaignBanner)})`);
     }

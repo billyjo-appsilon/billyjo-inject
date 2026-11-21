@@ -88,11 +88,50 @@ async function inspect(browser, width, height) {
         typography: {
           title: styleMetrics(entry.querySelector('.bj-hce-title')),
         },
+        category: (() => {
+          const cards = Array.from(category.querySelectorAll('.bj-hcat-card'));
+          return {
+            height: Math.round(category.getBoundingClientRect().height),
+            cards: cards.map((card) => {
+              const rect = card.getBoundingClientRect();
+              const media = card.querySelector('.bj-hcat-media').getBoundingClientRect();
+              const text = card.querySelector('.bj-hcat-text').getBoundingClientRect();
+              const image = card.querySelector('img');
+              return {
+                name: card.querySelector('.bj-hcat-name')?.textContent.trim() || '',
+                href: card.getAttribute('href') || '',
+                width: Math.round(rect.width),
+                height: Math.round(rect.height),
+                top: Math.round(rect.top),
+                direction: getComputedStyle(card).flexDirection,
+                iconBeforeText: Math.round(media.right) <= Math.round(text.left) + 1,
+                contentOverflow: card.scrollWidth > card.clientWidth + 1,
+                imageLoaded: Boolean(image?.complete && image?.naturalWidth > 0),
+              };
+            }),
+          };
+        })(),
         promo: {
           total: promoCards.length,
           visible: visiblePromoCards.length,
           toggle: promo.querySelector('[data-bj-hgp-toggle]')?.textContent.trim() || '',
           subcopy: promo.querySelector('.bj-hgp-half-copy p')?.textContent.trim() || '',
+          banner: (() => {
+            const banner = promo.querySelector('.bj-hgp-half-banner');
+            const firstBand = promo.querySelector('.bj-hgp-band');
+            const rect = banner.getBoundingClientRect();
+            const categoryRect = category.getBoundingClientRect();
+            const bandRect = firstBand.getBoundingClientRect();
+            const lines = Array.from(banner.querySelectorAll('.bj-hgp-half-line'));
+            const subcopy = banner.querySelector('.bj-hgp-half-copy p');
+            return {
+              height: Math.round(rect.height),
+              gapBefore: Math.round(rect.top - categoryRect.bottom),
+              gapAfter: Math.round(bandRect.top - rect.bottom),
+              subcopyOverflow: subcopy.scrollWidth > subcopy.clientWidth + 1,
+              lines: lines.map((line) => ({ text: line.textContent.trim(), color: getComputedStyle(line).color })),
+            };
+          })(),
           bounds: (() => {
             const rect = promo.getBoundingClientRect();
             return { left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width) };
@@ -146,10 +185,23 @@ async function inspect(browser, width, height) {
     assert(result.primary.text === '내 조건으로 최대혜택 찾기' && result.primary.href === '/html/dh/counsel' && result.primary.consult === '1', `${width}px: primary CTA contract mismatch`);
     assert(result.secondary.text === '상품 먼저 보기' && result.secondary.href === '/html/dh_prod/prod_list/1-8', `${width}px: secondary CTA contract mismatch`);
     assert(Object.values(result.hierarchy).every(Boolean), `${width}px: section hierarchy mismatch (${JSON.stringify(result.hierarchy)})`);
+    assert(result.category.cards.length === 7 && result.category.cards.every((card) => card.name && card.href && card.imageLoaded && !card.contentOverflow), `${width}px: category card content contract mismatch (${JSON.stringify(result.category)})`);
+    if (width <= 767) {
+      assert(result.category.height <= 450, `${width}px: compact category section is too tall (${result.category.height}px)`);
+      assert(result.category.cards.slice(0, 6).every((card) => card.direction === 'row' && card.iconBeforeText && card.height <= 90), `${width}px: category cards are not compact horizontal cards (${JSON.stringify(result.category.cards)})`);
+      assert(result.category.cards[0].top === result.category.cards[1].top && result.category.cards[2].top > result.category.cards[0].top, `${width}px: category cards are not arranged in two columns`);
+      assert(result.category.cards[6].direction === 'row' && result.category.cards[6].iconBeforeText && result.category.cards[6].height <= 84 && result.category.cards[6].width > result.category.cards[0].width * 1.9, `${width}px: final category card layout mismatch (${JSON.stringify(result.category.cards[6])})`);
+    } else {
+      assert(result.category.cards.every((card) => card.direction === 'column'), `${width}px: desktop category card layout changed unexpectedly`);
+    }
     assert(result.promo.total === 24 && result.promo.visible === 12 && result.promo.toggle === '프로모션 상품 12개 더보기', `${width}px: progressive promo mismatch (${JSON.stringify(result.promo)})`);
     assert(result.promo.firstRows[0].top === result.promo.firstRows[1].top && result.promo.firstRows[0].left < result.promo.firstRows[1].left && result.promo.firstRows[2].top > result.promo.firstRows[0].top, `${width}px: promotion products are not two per row (${JSON.stringify(result.promo.firstRows)})`);
     assert(result.promo.bounds.left >= 0 && result.promo.bounds.right <= width && result.promo.bounds.width <= 1280, `${width}px: relocated promo bounds mismatch (${JSON.stringify(result.promo.bounds)})`);
-    assert(result.promo.subcopy === '선착순, 재고/추가 사은품 소진시 종료', `${width}px: monthly urgency copy mismatch`);
+    assert(result.promo.subcopy === '선착순, 재고/사은품 소진시 종료', `${width}px: monthly urgency copy mismatch`);
+    assert(result.promo.banner.lines.map((line) => line.text).join('|') === '11월도|반값습니다!' && result.promo.banner.lines[1].color === 'rgb(255, 229, 0)', `${width}px: campaign title/color mismatch (${JSON.stringify(result.promo.banner.lines)})`);
+    if (width <= 780) {
+      assert(result.promo.banner.height <= 156 && result.promo.banner.gapBefore <= 15 && result.promo.banner.gapAfter <= 13 && !result.promo.banner.subcopyOverflow, `${width}px: campaign banner is not compact enough (${JSON.stringify(result.promo.banner)})`);
+    }
     assert(result.hero.count === 4 && result.hero.counter.endsWith('/ 4'), `${width}px: hero count mismatch (${JSON.stringify(result.hero)})`);
     assert(result.hero.currentIndex === 0 && result.hero.autoplay === false, `${width}px: hero carousel still advances automatically (${JSON.stringify(result.hero)})`);
     assert(result.hero.slides[0]?.video && result.hero.slides[0]?.label === '빌리조 11월 프로모션 영상', `${width}px: video is not the first hero (${JSON.stringify(result.hero.slides)})`);
