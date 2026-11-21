@@ -252,7 +252,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
       throw new Error(`${testCase.name}: live1 campaign banner is missing or unloaded`);
     }
     if (result.campaignBanner.title !== '11월도 반값습니다!' ||
-        result.campaignBanner.subcopy !== '11월 혜택 종료까지, 추가사은품을 확인하세요' ||
+        result.campaignBanner.subcopy !== '선착순, 재고/추가 사은품 소진시 종료' ||
         result.campaignBanner.src !== live1MascotUrl) {
       throw new Error(`${testCase.name}: live1 campaign banner contract mismatch (${JSON.stringify(result.campaignBanner)})`);
     }
@@ -393,7 +393,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
     const minPadding = testCase.name === 'mobile' ? 8 : 16;
     if (!result.cards.every((card) => card.cardPadding >= minPadding)) throw new Error(`${testCase.name}: card padding is too tight`);
     if (!result.beforeNativeRecommendation) throw new Error(`${testCase.name}: promo cards must precede native recommendations`);
-    if (!result.menuLabels.some((label) => label.includes('프로모션/사은품 확인'))) {
+    if (!result.menuLabels.some((label) => label === '🎁교체지원금/사은품 확인')) {
       throw new Error(`${testCase.name}: restored promotion menu label is missing`);
     }
     if (result.menuLabels.some((label) => label === '혜택')) throw new Error(`${testCase.name}: simplified menu label remains visible`);
