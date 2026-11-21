@@ -2910,6 +2910,8 @@
       { key: 'internet', name: '인터넷+TV', reviews: '후기 231개', href: '/html/dh_prod/prod_list/6-1198', img: 'images/category-icons/internet-tv.webp' },
       { name: '휴대폰', reviews: '결합 혜택 상담', href: 'https://premiumm.ptalk.co.kr/73728', img: 'images/category-icons/mobile-phone.webp' }
     ];
+    // 2026-11-21 비시즌 비노출. 2027-05-01 00:00 KST부터 별도 배포 없이 자동 복귀한다.
+    var AIRCON_RELAUNCH_AT = Date.UTC(2027, 3, 30, 15, 0, 0);
     /* img: 상단 7개 카드와 같은 3D 렌더 스타일 아이콘 (API Pass nano-banana-2 생성,
        water-purifier.png 를 스타일 레퍼런스로 넣어 같은 룩으로 맞춤 — 2026-09-09) */
     var MORE_ITEMS = [
@@ -2951,6 +2953,15 @@
         }
       } catch (e) {}
       return 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/' + path.replace(/^\/+/, '');
+    }
+    function visibleItems(nowMs) {
+      return ITEMS.filter(function (item) {
+        return item.key !== 'aircon' || nowMs >= AIRCON_RELAUNCH_AT;
+      });
+    }
+    function visibleMoreItems(nowMs) {
+      if (nowMs >= AIRCON_RELAUNCH_AT) return MORE_ITEMS;
+      return [{ key: 'aircon', name: '에어컨', meta: '후기 1,426개', href: '/html/dh_prod/prod_list/1-87', img: 'images/category-icons/air-conditioner.webp' }].concat(MORE_ITEMS);
     }
     function addStyle() {
       if (document.getElementById('bj-home-cat-style')) return;
@@ -3016,12 +3027,16 @@
       var section = document.createElement('section');
       section.id = 'bj-home-cat-links';
       section.setAttribute('aria-label', '렌탈 카테고리 빠른 비교');
-      section.innerHTML = '<div class="bj-hcat-inner"><div class="bj-hcat-grid">' + ITEMS.map(function (it) {
+      var renderedItems = visibleItems(Date.now());
+      var renderedMoreItems = visibleMoreItems(Date.now());
+      section.setAttribute('data-bj-aircon-live-at', '2027-05-01T00:00:00+09:00');
+      section.setAttribute('data-bj-aircon-visible', renderedItems.some(function (item) { return item.key === 'aircon'; }) ? '1' : '0');
+      section.innerHTML = '<div class="bj-hcat-inner"><div class="bj-hcat-grid">' + renderedItems.map(function (it) {
         return '<a class="bj-hcat-card" href="' + esc(it.href) + '" data-bjct-key="' + esc(it.key || '') + '" aria-label="' + esc(it.name + ' ' + it.reviews + ' 최저가 지원금 비교') + '">'
           + '<span class="bj-hcat-media"><img class="bj-hcat-img" src="' + esc(asset(it.img)) + '" alt="' + esc(it.name) + '" loading="eager"></span>'
           + '<span class="bj-hcat-text"><strong class="bj-hcat-name">' + esc(it.name) + '</strong><span class="bj-hcat-reviews">' + esc(it.reviews) + '</span><span class="bj-hcat-action">최저가 · 지원금 비교</span></span>'
           + '</a>';
-      }).join('') + '</div><div class="bj-hcat-more-wrap"><button type="button" class="bj-hcat-more-btn" aria-expanded="false" aria-controls="bj-hcat-extra">카테고리 더보기<span class="bj-hcat-more-plus" aria-hidden="true">+</span></button></div><div id="bj-hcat-extra" class="bj-hcat-extra" hidden>' + MORE_ITEMS.map(function (it) {
+      }).join('') + '</div><div class="bj-hcat-more-wrap"><button type="button" class="bj-hcat-more-btn" aria-expanded="false" aria-controls="bj-hcat-extra">카테고리 더보기<span class="bj-hcat-more-plus" aria-hidden="true">+</span></button></div><div id="bj-hcat-extra" class="bj-hcat-extra" hidden>' + renderedMoreItems.map(function (it) {
         return '<a class="bj-hcat-extra-chip" href="' + esc(it.href) + '" data-bjct-key="' + esc(it.key || '') + '" aria-label="' + esc(it.name + ' ' + it.meta) + '">'
           + (it.img ? '<span class="bj-hcat-extra-media"><img class="bj-hcat-extra-img" src="' + esc(asset(it.img)) + '" alt="" loading="lazy"></span>' : '')
           + '<span class="bj-hcat-extra-text">'
@@ -9462,10 +9477,39 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       jq(slider).slick('slickSetOption', 'autoplay', false, false);
       jq(slider).slick('slickPause');
       var videos = jq(slider).find('video.billyjo-video-hero__media, video');
-      videos.off('ended.billyjoVideo ended.bjManualHero').on('ended.bjManualHero', function(){
-        this.pause();
-        try { this.currentTime = 0; } catch (_seekError) {}
+      videos.each(function(){
+        if (this.getAttribute('data-bj-hero-autoplay-ready') === '1') return;
+        this.setAttribute('data-bj-hero-autoplay-ready', '1');
+        this.autoplay = true;
+        this.loop = true;
+        this.muted = true;
+        this.defaultMuted = true;
+        this.playsInline = true;
+        this.preload = 'auto';
+        this.setAttribute('autoplay', '');
+        this.setAttribute('loop', '');
+        this.setAttribute('muted', '');
+        this.setAttribute('playsinline', '');
       });
+      function syncVideoPlayback(){
+        videos.each(function(){
+          var active = Boolean(this.closest('.slick-current'));
+          if (!active) { this.pause(); return; }
+          var play = this.play();
+          if (play && typeof play.catch === 'function') play.catch(function(){});
+        });
+      }
+      jq(slider).off('afterChange.bjHeroVideo reInit.bjHeroVideo').on('afterChange.bjHeroVideo reInit.bjHeroVideo', function(){
+        setTimeout(syncVideoPlayback, 0);
+      });
+      videos.off('ended.billyjoVideo ended.bjManualHero').on('ended.bjManualHero', function(){
+        try { this.currentTime = 0; } catch (_seekError) {}
+        if (this.closest('.slick-current')) {
+          var replay = this.play();
+          if (replay && typeof replay.catch === 'function') replay.catch(function(){});
+        }
+      });
+      syncVideoPlayback();
       return true;
     } catch (_autoplayError) { return false; }
   }
