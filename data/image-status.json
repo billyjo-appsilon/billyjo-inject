@@ -1,10 +1,8 @@
 {
- "generated_at": "2026-11-20T19:32:12+00:00",
+ "generated_at": "2026-11-21T19:32:14+00:00",
  "baseline": "2026-07-29",
  "new_listed": [],
- "delisted_today": [
-  "32880"
- ],
+ "delisted_today": [],
  "source": "billyjo prod_list (ajax_prod_list) — 목록 노출 + 썸네일 보유 여부",
  "catalog": 8821,
  "listed": 6736,
