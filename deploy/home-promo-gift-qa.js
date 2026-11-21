@@ -177,6 +177,15 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
             const badgeRect = badge.getBoundingClientRect();
             return badgeRect.top - imageRect.top;
           })(),
+          badgeLeftOffset: (() => {
+            const imageRect = card.querySelector('.bj-hgp-image').getBoundingClientRect();
+            const badge = card.querySelector('.bj-hgp-discount');
+            if (!badge) return null;
+            return badge.getBoundingClientRect().left - imageRect.left;
+          })(),
+          badgeBorderRadius: card.querySelector('.bj-hgp-discount')
+            ? getComputedStyle(card.querySelector('.bj-hgp-discount')).borderRadius
+            : '',
           cardPadding: parseFloat(getComputedStyle(card).paddingTop),
           cardHeight: card.getBoundingClientRect().height,
           cardBackground: getComputedStyle(card).backgroundColor,
@@ -230,16 +239,32 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
           })(),
           modelPlacement: (() => {
             const image = card.querySelector('.bj-hgp-image').getBoundingClientRect();
-            const model = card.querySelector('.bj-hgp-model').getBoundingClientRect();
+            const node = card.querySelector('.bj-hgp-model');
+            const model = node.getBoundingClientRect();
             return {
-              position: getComputedStyle(card.querySelector('.bj-hgp-model')).position,
-              parentIsImage: card.querySelector('.bj-hgp-model').parentElement.classList.contains('bj-hgp-image'),
+              position: getComputedStyle(node).position,
+              parentIsImage: node.parentElement.classList.contains('bj-hgp-image'),
               insideImage: model.left >= image.left && model.right <= image.right && model.top >= image.top && model.bottom <= image.bottom,
               bottomGap: image.bottom - model.bottom,
+              rightGap: image.right - model.right,
+              text: node.textContent.replace(/\s+/g, ' ').trim(),
+              ariaLabel: node.getAttribute('aria-label') || '',
             };
           })(),
           giftBackground: getComputedStyle(card.querySelector('.bj-hgp-gift')).backgroundImage,
           giftColor: getComputedStyle(card.querySelector('.bj-hgp-gift')).color,
+          giftLayout: (() => {
+            const gift = card.querySelector('.bj-hgp-gift');
+            const price = card.querySelector('.bj-hgp-pricebox');
+            const style = getComputedStyle(gift);
+            return {
+              width: gift.getBoundingClientRect().width,
+              priceWidth: price.getBoundingClientRect().width,
+              fontSize: parseFloat(style.fontSize),
+              textAlign: style.textAlign,
+              justifyContent: style.justifyContent,
+            };
+          })(),
           nameLayout: (() => {
             const name = card.querySelector('.bj-hgp-name');
             const first = name.querySelector('.bj-hgp-name-copy:not([aria-hidden="true"])');
@@ -430,8 +455,10 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
     }
     if (!result.cards.every((card) => card.modelPlacement.position === 'absolute' &&
         card.modelPlacement.parentIsImage && card.modelPlacement.insideImage &&
-        Math.abs(card.modelPlacement.bottomGap - (testCase.name === 'mobile' ? 6 : 7)) < 0.5)) {
-      throw new Error(`${testCase.name}: model name must sit at the bottom of the product image`);
+        Math.abs(card.modelPlacement.bottomGap - (testCase.name === 'mobile' ? 6 : 7)) < 0.5 &&
+        Math.abs(card.modelPlacement.rightGap - (testCase.name === 'mobile' ? 6 : 8)) < 0.5 &&
+        /^\(i\)\S/.test(card.modelPlacement.text) && /^모델명 \S/.test(card.modelPlacement.ariaLabel))) {
+      throw new Error(`${testCase.name}: (i) model name must sit at the bottom-right of the product image`);
     }
     const expectedProductTransform = testCase.name === 'mobile' ? 'matrix(1.12, 0, 0, 1.12, 0, 0)' : 'matrix(1.18, 0, 0, 1.18, 0, 0)';
     if (!result.cards.every((card) => card.productImageTransform === expectedProductTransform && card.productImageBlendMode === 'normal' && card.brandLogoTransform === 'none')) {
@@ -443,6 +470,12 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
     }
     if (!result.cards.every((card) => card.giftBackground.includes('linear-gradient') && card.giftColor === 'rgb(255, 255, 255)')) {
       throw new Error(`${testCase.name}: gift badge must use the vivid orange treatment`);
+    }
+    const expectedGiftFontSize = testCase.name === 'mobile' ? 10 : 12;
+    if (!result.cards.every((card) => Math.abs(card.giftLayout.width - card.giftLayout.priceWidth) < 1 &&
+        card.giftLayout.fontSize >= expectedGiftFontSize && card.giftLayout.textAlign === 'center' &&
+        card.giftLayout.justifyContent === 'center')) {
+      throw new Error(`${testCase.name}: gift box must match the price box width and use the larger centered label`);
     }
     if (!result.cards.every((card) => card.nameLayout.whiteSpace === 'nowrap' &&
         card.nameLayout.height <= card.nameLayout.lineHeight + 1 &&
@@ -496,7 +529,11 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
     }
     const minImageWidth = testCase.name === 'mobile' ? 140 : 175;
     if (!result.cards.every((card) => card.imageWidth >= minImageWidth)) throw new Error(`${testCase.name}: product thumbnail is too small`);
-    if (!result.cards.filter((card) => card.badgeTopOffset !== null).every((card) => card.badgeTopOffset >= 0 && card.badgeTopOffset <= 8)) throw new Error(`${testCase.name}: badge must stay at the thumbnail top`);
+    if (!result.cards.filter((card) => card.badgeTopOffset !== null).every((card) =>
+      Math.abs(card.badgeTopOffset) < 0.5 && Math.abs(card.badgeLeftOffset) < 0.5 &&
+      card.badgeBorderRadius === (testCase.name === 'mobile' ? '10px 0px 8px' : '12px 0px 9px'))) {
+      throw new Error(`${testCase.name}: promotion badge must align flush with the rounded thumbnail corner`);
+    }
     const minPadding = testCase.name === 'mobile' ? 8 : 16;
     if (!result.cards.every((card) => card.cardPadding >= minPadding)) throw new Error(`${testCase.name}: card padding is too tight`);
     if (!result.beforeNativeRecommendation) throw new Error(`${testCase.name}: promo cards must precede native recommendations`);
