@@ -92,6 +92,10 @@ async function inspect(browser, width, height) {
           const cards = Array.from(category.querySelectorAll('.bj-hcat-card'));
           return {
             height: Math.round(category.getBoundingClientRect().height),
+            airconVisible: category.getAttribute('data-bj-aircon-visible'),
+            airconLiveAt: category.getAttribute('data-bj-aircon-live-at'),
+            extraHidden: category.querySelector('#bj-hcat-extra')?.hidden,
+            extraNames: Array.from(category.querySelectorAll('.bj-hcat-extra-name')).map((node) => node.textContent.trim()),
             cards: cards.map((card) => {
               const rect = card.getBoundingClientRect();
               const media = card.querySelector('.bj-hcat-media').getBoundingClientRect();
@@ -146,6 +150,10 @@ async function inspect(browser, width, height) {
           counter: document.querySelector('.new-mv_nav')?.textContent.replace(/\s+/g, ' ').trim() || '',
           currentIndex: window.jQuery?.('.new-mv')?.slick('slickCurrentSlide'),
           autoplay: window.jQuery?.('.new-mv')?.slick('getSlick')?.options?.autoplay,
+          videoPlayback: (() => {
+            const video = document.querySelector('.new-mv .slick-current video.billyjo-video-hero__media, .new-mv .slick-current video');
+            return video ? { autoplay: video.autoplay, loop: video.loop, muted: video.muted, playsInline: video.playsInline, paused: video.paused } : null;
+          })(),
           slides: slides.map((slide) => ({
             video: Boolean(slide.querySelector('video.billyjo-video-hero__media, video')),
             label: slide.querySelector('video')?.getAttribute('aria-label') || slide.querySelector('img')?.alt || '',
@@ -185,12 +193,15 @@ async function inspect(browser, width, height) {
     assert(result.primary.text === '내 조건으로 최대혜택 찾기' && result.primary.href === '/html/dh/counsel' && result.primary.consult === '1', `${width}px: primary CTA contract mismatch`);
     assert(result.secondary.text === '상품 먼저 보기' && result.secondary.href === '/html/dh_prod/prod_list/1-8', `${width}px: secondary CTA contract mismatch`);
     assert(Object.values(result.hierarchy).every(Boolean), `${width}px: section hierarchy mismatch (${JSON.stringify(result.hierarchy)})`);
-    assert(result.category.cards.length === 7 && result.category.cards.every((card) => card.name && card.href && card.imageLoaded && !card.contentOverflow), `${width}px: category card content contract mismatch (${JSON.stringify(result.category)})`);
+    assert(result.category.cards.map((card) => card.name).join('|') === '정수기|공기청정기|세탁기·건조기|비데|인터넷+TV|휴대폰', `${width}px: off-season category order mismatch (${JSON.stringify(result.category.cards)})`);
+    assert(result.category.cards[5].href === 'https://premiumm.ptalk.co.kr/73728', `${width}px: phone card destination mismatch (${JSON.stringify(result.category.cards[5])})`);
+    assert(result.category.airconVisible === '0' && result.category.airconLiveAt === '2027-05-01T00:00:00+09:00', `${width}px: aircon season gate mismatch (${JSON.stringify(result.category)})`);
+    assert(result.category.extraHidden && result.category.extraNames[0] === '에어컨' && result.category.extraNames.filter((name) => name === '에어컨').length === 1, `${width}px: off-season aircon is not confined to category more (${JSON.stringify(result.category)})`);
+    assert(result.category.cards.length === 6 && result.category.cards.every((card) => card.name && card.href && card.imageLoaded && !card.contentOverflow), `${width}px: category card content contract mismatch (${JSON.stringify(result.category)})`);
     if (width <= 767) {
-      assert(result.category.height <= 450, `${width}px: compact category section is too tall (${result.category.height}px)`);
-      assert(result.category.cards.slice(0, 6).every((card) => card.direction === 'row' && card.iconBeforeText && card.height <= 90), `${width}px: category cards are not compact horizontal cards (${JSON.stringify(result.category.cards)})`);
+      assert(result.category.height <= 360, `${width}px: compact category section is too tall (${result.category.height}px)`);
+      assert(result.category.cards.every((card) => card.direction === 'row' && card.iconBeforeText && card.height <= 90), `${width}px: category cards are not compact horizontal cards (${JSON.stringify(result.category.cards)})`);
       assert(result.category.cards[0].top === result.category.cards[1].top && result.category.cards[2].top > result.category.cards[0].top, `${width}px: category cards are not arranged in two columns`);
-      assert(result.category.cards[6].direction === 'row' && result.category.cards[6].iconBeforeText && result.category.cards[6].height <= 84 && result.category.cards[6].width > result.category.cards[0].width * 1.9, `${width}px: final category card layout mismatch (${JSON.stringify(result.category.cards[6])})`);
     } else {
       assert(result.category.cards.every((card) => card.direction === 'column'), `${width}px: desktop category card layout changed unexpectedly`);
     }
@@ -204,6 +215,7 @@ async function inspect(browser, width, height) {
     }
     assert(result.hero.count === 4 && result.hero.counter.endsWith('/ 4'), `${width}px: hero count mismatch (${JSON.stringify(result.hero)})`);
     assert(result.hero.currentIndex === 0 && result.hero.autoplay === false, `${width}px: hero carousel still advances automatically (${JSON.stringify(result.hero)})`);
+    assert(result.hero.videoPlayback?.autoplay && result.hero.videoPlayback?.loop && result.hero.videoPlayback?.muted && result.hero.videoPlayback?.playsInline && !result.hero.videoPlayback?.paused, `${width}px: hero video is not muted autoplay (${JSON.stringify(result.hero.videoPlayback)})`);
     assert(result.hero.slides[0]?.video && result.hero.slides[0]?.label === '빌리조 11월 프로모션 영상', `${width}px: video is not the first hero (${JSON.stringify(result.hero.slides)})`);
     assert(result.hero.slides.slice(1).every((slide) => slide.label && slide.href === '/html/dh/counsel' && slide.consult === '1'), `${width}px: retained image hero destination mismatch (${JSON.stringify(result.hero.slides)})`);
     assert(result.nativeRecommendation === 'none' && result.nativeCatalog === 'none', `${width}px: duplicated native product modules remain`);
@@ -212,6 +224,15 @@ async function inspect(browser, width, height) {
 
     let manualHero = null;
     if (width === 390) {
+      await page.locator('#bj-home-cat-links .bj-hcat-more-btn').click();
+      const expandedAircon = await page.evaluate(() => {
+        const section = document.querySelector('#bj-home-cat-links');
+        const extra = section.querySelector('#bj-hcat-extra');
+        const aircon = extra.querySelector('[data-bjct-key="aircon"]');
+        return { expanded: section.classList.contains('bj-hcat-open'), hidden: extra.hidden, visible: Boolean(aircon && getComputedStyle(aircon).display !== 'none') };
+      });
+      assert(expandedAircon.expanded && !expandedAircon.hidden && expandedAircon.visible, `390px: category more did not reveal aircon (${JSON.stringify(expandedAircon)})`);
+      await page.locator('#bj-home-cat-links .bj-hcat-more-btn').click();
       await page.evaluate(() => window.jQuery('.new-mv').slick('slickNext'));
       await page.waitForTimeout(3200);
       manualHero = await page.evaluate(() => {
@@ -298,6 +319,51 @@ async function inspectPromotionFallback(browser) {
     assert(!result.promoExists && !result.promoReady, `fallback: stale promotion state (${JSON.stringify(result)})`);
     assert(result.productFallback === '/html/dh_prod/prod_list/1-8', `fallback: product link is not a real destination (${JSON.stringify(result)})`);
     assert(result.nativeRecommendation !== 'none' && result.nativeCatalog !== 'none', `fallback: native product discovery stayed hidden (${JSON.stringify(result)})`);
+    return result;
+  } finally {
+    await page.close();
+  }
+}
+
+async function inspectAirconRelaunch(browser) {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  let intercepts = 0;
+  await page.addInitScript(() => {
+    const relaunchTime = Date.UTC(2027, 3, 30, 15, 0, 1);
+    Date.now = () => relaunchTime;
+  });
+  await page.route(CORE_RE, async (route) => {
+    intercepts += 1;
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/javascript; charset=utf-8',
+      headers: { 'access-control-allow-origin': '*' },
+      body: injectSource,
+    });
+  });
+  try {
+    await page.goto('https://billyjo.co.kr/?qa=aircon-relaunch-2027-05-01', { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.locator('#bj-home-cat-links').waitFor({ state: 'visible', timeout: 30000 });
+    const result = await page.evaluate(() => {
+      const section = document.querySelector('#bj-home-cat-links');
+      const cards = Array.from(section.querySelectorAll('.bj-hcat-card'));
+      return {
+        visible: section.getAttribute('data-bj-aircon-visible'),
+        names: cards.map((card) => card.querySelector('.bj-hcat-name')?.textContent.trim() || ''),
+        extraNames: Array.from(section.querySelectorAll('.bj-hcat-extra-name')).map((node) => node.textContent.trim()),
+        phone: (() => {
+          const card = cards.find((item) => item.querySelector('.bj-hcat-name')?.textContent.trim() === '휴대폰');
+          const rect = card.getBoundingClientRect();
+          return { height: Math.round(rect.height), width: Math.round(rect.width), direction: getComputedStyle(card).flexDirection };
+        })(),
+      };
+    });
+    assert(intercepts > 0, 'aircon relaunch: local inject was not intercepted');
+    assert(result.visible === '1', `aircon relaunch: visibility flag mismatch (${JSON.stringify(result)})`);
+    assert(result.names.join('|') === '정수기|공기청정기|에어컨|세탁기·건조기|비데|인터넷+TV|휴대폰', `aircon relaunch: primary order mismatch (${JSON.stringify(result)})`);
+    assert(!result.extraNames.includes('에어컨'), `aircon relaunch: duplicate aircon remains in category more (${JSON.stringify(result)})`);
+    assert(result.names.indexOf('휴대폰') === result.names.indexOf('인터넷+TV') + 1, `aircon relaunch: phone is not immediately after internet+TV (${JSON.stringify(result)})`);
+    assert(result.phone.direction === 'row' && result.phone.height <= 84 && result.phone.width >= 350, `aircon relaunch: final phone card layout mismatch (${JSON.stringify(result.phone)})`);
     return result;
   } finally {
     await page.close();
@@ -402,8 +468,9 @@ async function inspectHeroIncompleteFixture(browser) {
     }
     const heroSourceOrderFixture = await inspectHeroSourceOrderFixture(browser);
     const heroIncompleteFixture = await inspectHeroIncompleteFixture(browser);
+    const airconRelaunch = await inspectAirconRelaunch(browser);
     const fallback = await inspectPromotionFallback(browser);
-    console.log(JSON.stringify({ contract: 'ok', results, heroSourceOrderFixture, heroIncompleteFixture, fallback }, null, 2));
+    console.log(JSON.stringify({ contract: 'ok', results, heroSourceOrderFixture, heroIncompleteFixture, airconRelaunch, fallback }, null, 2));
   } finally {
     await browser.close();
   }
