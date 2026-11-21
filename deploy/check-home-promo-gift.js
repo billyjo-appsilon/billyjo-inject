@@ -59,7 +59,7 @@ for (const required of [
   "var LIVE1_HALF_BANNER_MASCOT = 'https://live.billyjo.co.kr/images/toss-banner-mascot.webp'",
   "class=\"bj-hgp-half-banner\" data-bj-live1-half-banner",
   "class=\"bj-hgp-half-line\">' + Number(month.split('-')[1]) + '월도</span> <em class=\"bj-hgp-half-line\">반값습니다!</em>",
-  "선착순, 재고/추가 사은품 소진시 종료",
+  "선착순, 재고/사은품 소진시 종료",
   "data-bj-month-countdown aria-label=\"이번 달 특가 마감까지 남은 시간\"",
   "function startHomeMonthCountdown(section)",
   "var BRAND_LOGOS = {",
