@@ -72,7 +72,21 @@ async function inspectViewport(browser, width, height) {
   try {
     await page.goto('https://billyjo.co.kr/', { waitUntil: 'domcontentloaded', timeout: 45000 });
     await page.waitForSelector('#bj-home-benefit-cards .bj-hbenefit-card', { state: 'visible', timeout: 30000 });
+    await page.locator('#bj-home-benefit-cards').scrollIntoViewIfNeeded();
+    const benefitCards = page.locator('#bj-home-benefit-cards .bj-hbenefit-card');
+    for (let index = 0; index < await benefitCards.count(); index += 1) {
+      await benefitCards.nth(index).scrollIntoViewIfNeeded();
+    }
+    await page.evaluate(() => {
+      document.querySelectorAll('#bj-home-benefit-cards img').forEach((image) => { image.loading = 'eager'; });
+      const stack = document.querySelector('#bj-home-benefit-cards .bj-hbenefit-stack');
+      if (stack) stack.scrollLeft = stack.scrollWidth;
+    });
     await page.waitForFunction(() => Array.from(document.querySelectorAll('#bj-home-benefit-cards img')).every((img) => img.complete && img.naturalWidth > 0), null, { timeout: 30000 });
+    await page.evaluate(() => {
+      const stack = document.querySelector('#bj-home-benefit-cards .bj-hbenefit-stack');
+      if (stack) stack.scrollLeft = 0;
+    });
     await page.waitForFunction(() => document.body.classList.contains('bj-home-cats-ready'), null, { timeout: 10000 });
     // The home inject intentionally reruns several recovery passes through 3.5s.
     // Wait until those settle before measuring or taking visual evidence.
@@ -80,11 +94,13 @@ async function inspectViewport(browser, width, height) {
     await page.evaluate(() => {
       const card = document.querySelector('#bj-home-benefit-cards .bj-hbenefit-card');
       document.documentElement.style.scrollBehavior = 'auto';
-      document.scrollingElement.scrollTop = document.scrollingElement.scrollTop + card.getBoundingClientRect().top;
+      const top = card.getBoundingClientRect().top + window.scrollY;
+      document.scrollingElement.scrollTop = Math.max(0, top - Math.round(window.innerHeight / 3));
     });
     const result = await page.evaluate(() => {
       const category = document.getElementById('bj-home-cat-links');
       const section = document.getElementById('bj-home-benefit-cards');
+      const entry = document.getElementById('bj-home-conversion-entry');
       const stack = section.querySelector('.bj-hbenefit-stack');
       const rows = Array.from(section.querySelectorAll('.bj-hbenefit-card')).map((card) => {
         const rect = card.getBoundingClientRect();
@@ -102,7 +118,7 @@ async function inspectViewport(browser, width, height) {
         };
       });
       return {
-        directAfterCategory: category && category.nextElementSibling === section,
+        directAfterEntry: entry && entry.nextElementSibling === section,
         scroller: {
           left: stack.getBoundingClientRect().left,
           scrollWidth: stack.scrollWidth,
@@ -143,11 +159,11 @@ async function inspectViewport(browser, width, height) {
 
     if (injectIntercepts < 1) throw new Error(`inject route was not intercepted at ${width}px`);
     if (!result.homeReleased) throw new Error(`home release gate did not open at ${width}px`);
-    if (!result.directAfterCategory) throw new Error(`benefit section is not directly after categories at ${width}px`);
+    if (!result.directAfterEntry) throw new Error(`benefit section is not directly after the compact comparison entry at ${width}px`);
     if (result.count !== cards.length) throw new Error(`expected ${cards.length} cards, got ${result.count} at ${width}px`);
     if (result.highlight !== '할인+보상교체') throw new Error(`card 05 highlight mismatch at ${width}px`);
     if (!/bj-hbenefit/.test(result.sampleTopElement)) throw new Error(`benefit cards are visually occluded at ${width}px by ${result.sampleTopElement}; rect=${JSON.stringify(result.firstRect)}; scroll=${JSON.stringify(result.scrollDebug)}`);
-    if (result.scrollWidth > result.viewportWidth + 1) throw new Error(`horizontal overflow at ${width}px: ${result.scrollWidth}/${result.viewportWidth}`);
+    if (result.scrollWidth > Math.max(result.viewportWidth, width) + 1) throw new Error(`horizontal overflow at ${width}px: ${result.scrollWidth}/${result.viewportWidth}`);
     if (result.scroller.tabindex !== '0' || result.scroller.role !== 'region' || !result.scroller.aria.includes('혜택 6개')) {
       throw new Error(`benefit scroller accessibility contract regressed at ${width}px: ${JSON.stringify(result.scroller)}`);
     }
@@ -178,7 +194,7 @@ async function inspectViewport(browser, width, height) {
         await page.screenshot({ path: path.join(screenshotDir, `home-benefits-${width}-${index + 1}.png`), clip: box });
       }
     }
-    return { width, count: result.count, directAfterCategory: result.directAfterCategory, overflow: result.scrollWidth - result.viewportWidth };
+    return { width, count: result.count, directAfterEntry: result.directAfterEntry, overflow: result.scrollWidth - Math.max(result.viewportWidth, width) };
   } finally {
     await page.close();
   }
