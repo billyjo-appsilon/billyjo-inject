@@ -3346,7 +3346,14 @@
       '.bj-hgp-brandmark{display:flex;min-width:0;max-width:120px;height:20px;margin:0;padding:0;align-items:center;justify-content:flex-start;flex:0 1 auto;background:transparent}' +
       '.bj-hgp-brand-logo{display:block;width:auto;height:16px;max-width:112px;object-fit:contain;object-position:left center;background:transparent;mix-blend-mode:normal;transform:none}' +
       '.bj-hgp-brand-fallback{font-size:11px;font-weight:900;color:#475569}' +
-      '.bj-hgp-name{font-size:16px;font-weight:900;line-height:1.32;letter-spacing:-.035em;color:#16181d;word-break:keep-all}' +
+      '.bj-hgp-name{position:relative;width:100%;min-width:0;overflow:hidden;font-size:16px;font-weight:900;line-height:1.32;letter-spacing:-.035em;color:#16181d;white-space:nowrap}' +
+      '.bj-hgp-name-track{display:inline-flex;width:max-content;min-width:100%;align-items:center;white-space:nowrap;transform:translate3d(0,0,0)}' +
+      '.bj-hgp-name-copy{display:block;flex:0 0 auto}' +
+      '.bj-hgp-name-copy[aria-hidden="true"]{display:none}' +
+      '.bj-hgp-name.is-rolling .bj-hgp-name-track{min-width:0;will-change:transform;animation:bj-hgp-name-roll var(--bj-hgp-roll-duration,9s) linear infinite}' +
+      '.bj-hgp-name.is-rolling .bj-hgp-name-copy[aria-hidden="true"]{display:block;margin-left:var(--bj-hgp-roll-gap,24px)}' +
+      '@keyframes bj-hgp-name-roll{0%,14%{transform:translate3d(0,0,0)}86%,100%{transform:translate3d(calc(-1 * var(--bj-hgp-roll-distance)),0,0)}}' +
+      '@media(prefers-reduced-motion:reduce){.bj-hgp-name.is-rolling .bj-hgp-name-track{animation:none}.bj-hgp-name.is-rolling .bj-hgp-name-copy[aria-hidden="true"]{display:none}}' +
       '.bj-hgp-model{position:absolute;z-index:3;left:8px;right:8px;bottom:7px;width:max-content;max-width:calc(100% - 16px);padding:3px 6px;border:1px solid rgba(148,163,184,.2);border-radius:6px;background:rgba(255,255,255,.9);box-shadow:0 2px 8px rgba(15,23,42,.07);color:#64748b;font-size:10px;font-weight:700;line-height:1.2;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;backdrop-filter:blur(4px)}' +
       '.bj-hgp-pricebox{width:100%;margin-top:10px;padding:7px 10px;border:1px solid #dbe5ff;border-radius:11px;background:#eef3ff}' +
       '.bj-hgp-regular,.bj-hgp-price{display:flex;width:100%;align-items:baseline;justify-content:space-between;gap:6px}' +
@@ -3371,7 +3378,7 @@
       '.bj-hgp-expand:after{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:translateY(-2px) rotate(45deg);transition:transform .2s ease}' +
       '.bj-hgp-expand[aria-expanded="true"]:after{transform:translateY(2px) rotate(-135deg)}' +
       '.bj-hgp-note{margin:14px 0 0;font-size:10px;line-height:1.5;color:#64748b}' +
-      '@media(max-width:780px){#bj-home-gift-promos{margin:8px -2px 0;padding:6px 6px 0}.bj-hgp-half-banner{grid-template-columns:minmax(0,63%) minmax(0,37%);min-height:146px;border-radius:18px;margin-bottom:12px}.bj-hgp-half-copy{padding:14px 4px 14px 16px}.bj-hgp-half-copy h2{font-size:28px}.bj-hgp-half-copy p{margin-top:6px;font-size:11.5px;line-height:1.45;letter-spacing:-.03em;white-space:nowrap}.bj-hgp-month-timer{margin-top:5px;gap:4px}.bj-hgp-flip-digit{width:18px;height:24px;border-radius:5px;font-size:13px}.bj-hgp-flip-unit{font-size:9.5px}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{display:flex;padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{min-height:0;aspect-ratio:16/10;border-radius:10px}.bj-hgp-image>img:not(.bj-hgp-brand-logo){transform:scale(1.12)}.bj-hgp-discount{top:6px;left:6px;padding:4px 7px;font-size:8px}.bj-hgp-info{min-width:0;padding:6px 1px 0}.bj-hgp-brandrow{gap:3px;margin-bottom:4px}.bj-hgp-brandmark{max-width:54px;height:17px}.bj-hgp-brand-logo{width:auto;height:14.4px;max-width:54px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{display:-webkit-box;min-height:32px;overflow:hidden;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:11.5px;line-height:1.38}.bj-hgp-model{left:6px;right:6px;bottom:6px;max-width:calc(100% - 12px);padding:3px 5px;font-size:8px}.bj-hgp-pricebox{margin-top:5px;padding:5px 7px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:7px}.bj-hgp-price b{font-size:16px}.bj-hgp-meta{gap:3px;margin-top:5px}.bj-hgp-reviews{gap:2px;font-size:9.5px;letter-spacing:-.04em}.bj-hgp-reviews strong{font-size:10px}.bj-hgp-gift{padding:4px 6px;font-size:7.5px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:30px;border-radius:8px;font-size:11px}.bj-hgp-expand-wrap{margin-top:18px}.bj-hgp-expand{width:100%;min-width:0;height:42px;font-size:13px}}' +
+      '@media(max-width:780px){#bj-home-gift-promos{margin:8px -2px 0;padding:6px 6px 0}.bj-hgp-half-banner{grid-template-columns:minmax(0,63%) minmax(0,37%);min-height:146px;border-radius:18px;margin-bottom:12px}.bj-hgp-half-copy{padding:14px 4px 14px 16px}.bj-hgp-half-copy h2{font-size:28px}.bj-hgp-half-copy p{margin-top:6px;font-size:11.5px;line-height:1.45;letter-spacing:-.03em;white-space:nowrap}.bj-hgp-month-timer{margin-top:5px;gap:4px}.bj-hgp-flip-digit{width:18px;height:24px;border-radius:5px;font-size:13px}.bj-hgp-flip-unit{font-size:9.5px}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;font-size:13px}.bj-hgp-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.bj-hgp-card{display:flex;padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{min-height:0;aspect-ratio:16/10;border-radius:10px}.bj-hgp-image>img:not(.bj-hgp-brand-logo){transform:scale(1.12)}.bj-hgp-discount{top:6px;left:6px;padding:4px 7px;font-size:8px}.bj-hgp-info{min-width:0;padding:6px 1px 0}.bj-hgp-brandrow{gap:3px;margin-bottom:4px}.bj-hgp-brandmark{max-width:54px;height:17px}.bj-hgp-brand-logo{width:auto;height:14.4px;max-width:54px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{font-size:11.5px;line-height:1.38}.bj-hgp-model{left:6px;right:6px;bottom:6px;max-width:calc(100% - 12px);padding:3px 5px;font-size:8px}.bj-hgp-pricebox{margin-top:5px;padding:5px 7px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:7px}.bj-hgp-price b{font-size:16px}.bj-hgp-meta{gap:3px;margin-top:5px}.bj-hgp-reviews{gap:2px;font-size:9.5px;letter-spacing:-.04em}.bj-hgp-reviews strong{font-size:10px}.bj-hgp-gift{padding:4px 6px;font-size:7.5px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:30px;border-radius:8px;font-size:11px}.bj-hgp-expand-wrap{margin-top:18px}.bj-hgp-expand{width:100%;min-width:0;height:42px;font-size:13px}}' +
       '@media(max-width:350px){.bj-hgp-brandmark{max-width:46px}.bj-hgp-brand-logo{max-width:46px;height:13px}.bj-hgp-reviews{font-size:9px}.bj-hgp-reviews strong{font-size:9.5px}}';
     (document.head || document.documentElement).appendChild(style);
   }
@@ -3524,6 +3531,35 @@
       } catch (_error) {}
     });
   }
+  function bindHomeProductNameRoll(section) {
+    var names = Array.prototype.slice.call(section.querySelectorAll('.bj-hgp-name'));
+    function refresh(name) {
+      var first = name.querySelector('.bj-hgp-name-copy:not([aria-hidden="true"])');
+      if (!first || !name.clientWidth) return;
+      name.classList.remove('is-rolling');
+      name.style.removeProperty('--bj-hgp-roll-distance');
+      name.style.removeProperty('--bj-hgp-roll-duration');
+      var textWidth = Math.ceil(first.getBoundingClientRect().width);
+      if (textWidth <= name.clientWidth + 1) return;
+      var gap = 24;
+      var distance = textWidth + gap;
+      name.style.setProperty('--bj-hgp-roll-gap', gap + 'px');
+      name.style.setProperty('--bj-hgp-roll-distance', distance + 'px');
+      name.style.setProperty('--bj-hgp-roll-duration', Math.max(8, 3 + distance / 28).toFixed(2) + 's');
+      name.classList.add('is-rolling');
+    }
+    function refreshAll() { names.forEach(refresh); }
+    if (typeof ResizeObserver === 'function') {
+      var observer = new ResizeObserver(function (entries) {
+        entries.forEach(function (entry) { refresh(entry.target); });
+      });
+      names.forEach(function (name) { observer.observe(name); });
+      section.__bjHomeProductNameObserver = observer;
+    } else {
+      window.addEventListener('resize', refreshAll, { passive: true });
+    }
+    window.requestAnimationFrame(refreshAll);
+  }
   function render(month) {
     var heading = findHeading();
     if (!heading || document.getElementById('bj-home-gift-promos')) return false;
@@ -3551,7 +3587,7 @@
         (isExtra ? ' data-bj-hgp-extra hidden' : '') + '>' +
         '<a class="bj-hgp-main" href="/html/dh_prod/prod_view/' + p.productId + '">' +
         '<div class="bj-hgp-image"><img src="' + p.image + '" alt="' + p.name + '" loading="lazy" decoding="async">' + badge + '<div class="bj-hgp-model">' + p.model + '</div></div>' +
-        '<div class="bj-hgp-info"><div class="bj-hgp-brandrow">' + brand + reviews + '</div><div class="bj-hgp-name">' + p.name + '</div>' +
+        '<div class="bj-hgp-info"><div class="bj-hgp-brandrow">' + brand + reviews + '</div><div class="bj-hgp-name" aria-label="' + p.name + '" title="' + p.name + '"><span class="bj-hgp-name-track"><span class="bj-hgp-name-copy">' + p.name + '</span><span class="bj-hgp-name-copy" aria-hidden="true">' + p.name + '</span></span></div>' +
         price + '<div class="bj-hgp-meta"><div class="bj-hgp-gift">' + p.gift + '</div></div></div></a>' +
         '<div class="bj-hgp-actions"><a class="bj-hgp-detail" href="/html/dh_prod/prod_view/' + p.productId + '">상세보기</a>' +
         '<button type="button" class="bj-hgp-cart" data-bj-hgp-cart="' + p.productId + '" aria-label="' + p.name + ' 견적비교 담기" aria-pressed="false">담기</button></div></article>';
@@ -3580,6 +3616,7 @@
     bindHomeCartButtons(section);
     bindHomePromoToggle(section);
     v5.appendChild(section);
+    bindHomeProductNameRoll(section);
     startHomeMonthCountdown(section);
     if (typeof window.__bjHomeReleaseV5 === 'function') {
       window.__bjHomeReleaseV5('promotion-ready');

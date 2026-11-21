@@ -221,6 +221,25 @@ const logoAssets = new Map(logoFiles.map((file) => [
           })(),
           giftBackground: getComputedStyle(card.querySelector('.bj-hgp-gift')).backgroundImage,
           giftColor: getComputedStyle(card.querySelector('.bj-hgp-gift')).color,
+          nameLayout: (() => {
+            const name = card.querySelector('.bj-hgp-name');
+            const first = name.querySelector('.bj-hgp-name-copy:not([aria-hidden="true"])');
+            const duplicate = name.querySelector('.bj-hgp-name-copy[aria-hidden="true"]');
+            const style = getComputedStyle(name);
+            return {
+              whiteSpace: style.whiteSpace,
+              lineHeight: parseFloat(style.lineHeight),
+              height: name.getBoundingClientRect().height,
+              viewportWidth: name.clientWidth,
+              textWidth: first.getBoundingClientRect().width,
+              isRolling: name.classList.contains('is-rolling'),
+              textOverflows: first.getBoundingClientRect().width > name.clientWidth + 1,
+              firstText: first.textContent.trim(),
+              duplicateText: duplicate.textContent.trim(),
+              duplicateAriaHidden: duplicate.getAttribute('aria-hidden'),
+              animationName: getComputedStyle(name.querySelector('.bj-hgp-name-track')).animationName,
+            };
+          })(),
           infoTextAlign: getComputedStyle(card.querySelector('.bj-hgp-info')).textAlign,
           hasPriceBox: !!card.querySelector('.bj-hgp-pricebox'),
           priceBoxHeight: card.querySelector('.bj-hgp-pricebox').getBoundingClientRect().height,
@@ -401,6 +420,18 @@ const logoAssets = new Map(logoFiles.map((file) => [
     if (!result.cards.every((card) => card.giftBackground.includes('linear-gradient') && card.giftColor === 'rgb(255, 255, 255)')) {
       throw new Error(`${testCase.name}: gift badge must use the vivid orange treatment`);
     }
+    if (!result.cards.every((card) => card.nameLayout.whiteSpace === 'nowrap' &&
+        card.nameLayout.height <= card.nameLayout.lineHeight + 1 &&
+        card.nameLayout.firstText === card.nameLayout.duplicateText &&
+        card.nameLayout.duplicateAriaHidden === 'true')) {
+      throw new Error(`${testCase.name}: product names must remain on one accessible line`);
+    }
+    if (result.cards.some((card) => card.nameLayout.textOverflows !== card.nameLayout.isRolling)) {
+      throw new Error(`${testCase.name}: only overflowing product names may roll`);
+    }
+    if (result.cards.filter((card) => card.nameLayout.isRolling).some((card) => card.nameLayout.animationName !== 'bj-hgp-name-roll')) {
+      throw new Error(`${testCase.name}: overflowing product name roll animation is inactive`);
+    }
     if (!result.cards.every((card) => card.infoTextAlign === 'left' && card.hasPriceBox)) {
       throw new Error(`${testCase.name}: card information hierarchy is not left-aligned`);
     }
@@ -451,8 +482,44 @@ const logoAssets = new Map(logoFiles.map((file) => [
     if (!result.sectionVisible) throw new Error(`${testCase.name}: promo section is hidden`);
     if (result.horizontalOverflow) throw new Error(`${testCase.name}: horizontal overflow detected`);
     if (testCase.name === 'mobile') {
+      await page.setViewportSize({ width: 320, height: 844 });
+      await page.waitForFunction(() => document.querySelectorAll('.bj-hgp-name.is-rolling').length > 0, null, { timeout: 5000 });
+      const narrowNameState = await page.evaluate(() => {
+        const cards = [...document.querySelectorAll('.bj-hgp-card')];
+        return {
+          rollingIds: cards.filter((card) => card.querySelector('.bj-hgp-name').classList.contains('is-rolling'))
+            .map((card) => card.getAttribute('data-bj-hgp-product')),
+          staticIds: cards.filter((card) => !card.querySelector('.bj-hgp-name').classList.contains('is-rolling'))
+            .map((card) => card.getAttribute('data-bj-hgp-product')),
+          oneLine: cards.every((card) => {
+            const name = card.querySelector('.bj-hgp-name');
+            return name.getBoundingClientRect().height <= parseFloat(getComputedStyle(name).lineHeight) + 1;
+          }),
+          horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+        };
+      });
+      if (!narrowNameState.rollingIds.includes('33632') || !narrowNameState.staticIds.includes('23052') ||
+          !narrowNameState.oneLine || narrowNameState.horizontalOverflow) {
+        throw new Error(`mobile-320: long names must roll while short names remain still (${JSON.stringify(narrowNameState)})`);
+      }
+      await page.waitForTimeout(1600);
+      const rollTransformBefore = await page.locator('[data-bj-hgp-product="33632"] .bj-hgp-name-track').evaluate((node) => getComputedStyle(node).transform);
+      await page.waitForTimeout(350);
+      const rollTransformAfter = await page.locator('[data-bj-hgp-product="33632"] .bj-hgp-name-track').evaluate((node) => getComputedStyle(node).transform);
+      if (rollTransformBefore === rollTransformAfter || rollTransformAfter === 'none') {
+        throw new Error(`mobile-320: product name is marked rolling but does not move (${rollTransformBefore} -> ${rollTransformAfter})`);
+      }
       if (process.env.BJ_QA_SCREENSHOT) {
         await page.locator('.bj-hgp-band').first().screenshot({ path: process.env.BJ_QA_SCREENSHOT });
+      }
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      const reducedMotionState = await page.locator('[data-bj-hgp-product="33632"] .bj-hgp-name').evaluate((name) => ({
+        animationName: getComputedStyle(name.querySelector('.bj-hgp-name-track')).animationName,
+        duplicateDisplay: getComputedStyle(name.querySelector('.bj-hgp-name-copy[aria-hidden="true"]')).display,
+        oneLine: name.getBoundingClientRect().height <= parseFloat(getComputedStyle(name).lineHeight) + 1,
+      }));
+      if (reducedMotionState.animationName !== 'none' || reducedMotionState.duplicateDisplay !== 'none' || !reducedMotionState.oneLine) {
+        throw new Error(`mobile-320: reduced-motion fallback is wrong (${JSON.stringify(reducedMotionState)})`);
       }
       await page.locator('.bj-hgp-cart[data-bj-hgp-cart="24129"]').click();
       await page.locator('.bj-hgp-cart[data-bj-hgp-cart="24129"]').filter({ hasText: '담김 ✓' }).waitFor({ timeout: 10000 });
