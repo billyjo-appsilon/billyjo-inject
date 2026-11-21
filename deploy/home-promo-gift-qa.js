@@ -19,6 +19,7 @@ const logoAssets = new Map(logoFiles.map((file) => [
   file,
   fs.readFileSync(path.join(__dirname, '..', 'images', 'brands', file)),
 ]));
+const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout-20261121');
 
 (async () => {
   const browser = await chromium.launch({ headless: true });
@@ -38,6 +39,13 @@ const logoAssets = new Map(logoFiles.map((file) => [
       const body = logoAssets.get(file);
       if (!body) return route.continue();
       await route.fulfill({ status: 200, contentType: 'image/png', body });
+    });
+    await page.route('**/images/products/cutout-20261121/*', async (route) => {
+      const file = path.basename(new URL(route.request().url()).pathname);
+      const localPath = path.join(productAssetDir, file);
+      if (!fs.existsSync(localPath)) return route.continue();
+      const contentType = path.extname(file).toLowerCase() === '.webp' ? 'image/webp' : 'image/png';
+      await route.fulfill({ status: 200, contentType, body: fs.readFileSync(localPath) });
     });
     await page.route('**/html/dh_prod/prod_view/24129', async (route) => {
       await route.fulfill({
@@ -108,6 +116,15 @@ const logoAssets = new Map(logoFiles.map((file) => [
         .filter((image) => !image.complete || image.naturalWidth === 0)
         .map((image) => image.src));
       throw new Error(`${testCase.name}: image load timeout (${failedImages.join(', ')})`, { cause: error });
+    }
+    const cutoutScreenshotDir = String(process.env.BILLYJO_CUTOUT_SCREENSHOT_DIR || '').trim();
+    if (testCase.name === 'mobile' && cutoutScreenshotDir) {
+      fs.mkdirSync(cutoutScreenshotDir, { recursive: true });
+      const bands = page.locator('#bj-home-gift-promos .bj-hgp-band');
+      for (let index = 0; index < await bands.count(); index += 1) {
+        await bands.nth(index).scrollIntoViewIfNeeded();
+        await page.screenshot({ path: path.join(cutoutScreenshotDir, `band-${index + 1}.png`) });
+      }
     }
     const expandedPromoState = await page.evaluate(() => {
       const section = document.querySelector('#bj-home-gift-promos');
@@ -198,6 +215,8 @@ const logoAssets = new Map(logoFiles.map((file) => [
           brandLogoTransform: getComputedStyle(card.querySelector('.bj-hgp-brand-logo')).transform,
           productImageTransform: getComputedStyle(card.querySelector('.bj-hgp-image > img:not(.bj-hgp-brand-logo)')).transform,
           productImageBlendMode: getComputedStyle(card.querySelector('.bj-hgp-image > img:not(.bj-hgp-brand-logo)')).mixBlendMode,
+          productImageSrc: card.querySelector('.bj-hgp-image > img:not(.bj-hgp-brand-logo)').src,
+          productImageCutoutMarker: card.querySelector('.bj-hgp-image').getAttribute('data-bj-product-cutout'),
           brandLogoWrapperHeight: card.querySelector('.bj-hgp-brandmark').getBoundingClientRect().height,
           brandPlacement: (() => {
             const mark = card.querySelector('.bj-hgp-brandmark').getBoundingClientRect();
@@ -417,6 +436,10 @@ const logoAssets = new Map(logoFiles.map((file) => [
     const expectedProductTransform = testCase.name === 'mobile' ? 'matrix(1.12, 0, 0, 1.12, 0, 0)' : 'matrix(1.18, 0, 0, 1.18, 0, 0)';
     if (!result.cards.every((card) => card.productImageTransform === expectedProductTransform && card.productImageBlendMode === 'normal' && card.brandLogoTransform === 'none')) {
       throw new Error(`${testCase.name}: product thumbnail scale mismatch`);
+    }
+    if (!result.cards.every((card) => card.productImageCutoutMarker === 'true' &&
+        /\/images\/products\/cutout-20261121\/.+\.(?:png|webp)(?:\?|$)/.test(card.productImageSrc))) {
+      throw new Error(`${testCase.name}: transparent cutout product assets are not active`);
     }
     if (!result.cards.every((card) => card.giftBackground.includes('linear-gradient') && card.giftColor === 'rgb(255, 255, 255)')) {
       throw new Error(`${testCase.name}: gift badge must use the vivid orange treatment`);

@@ -4,6 +4,17 @@ const { chromium } = require('playwright');
 
 const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'utf8');
 const CORE_RE = /cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/inject(?:\.min)?\.js/;
+const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout-20261121');
+
+async function routeProductCutouts(page) {
+  await page.route('**/images/products/cutout-20261121/*', async (route) => {
+    const file = path.basename(new URL(route.request().url()).pathname);
+    const localPath = path.join(productAssetDir, file);
+    if (!fs.existsSync(localPath)) return route.continue();
+    const contentType = path.extname(file).toLowerCase() === '.webp' ? 'image/webp' : 'image/png';
+    await route.fulfill({ status: 200, contentType, body: fs.readFileSync(localPath) });
+  });
+}
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
@@ -24,6 +35,7 @@ async function inspect(browser, width, height) {
       body: injectSource,
     });
   });
+  await routeProductCutouts(page);
 
   try {
     await page.goto(`https://billyjo.co.kr/?qa=home-conversion-${width}`, {
@@ -263,10 +275,16 @@ async function inspect(browser, width, height) {
           primaryBackground: getComputedStyle(node.querySelector('.bj-hsa-primary')).backgroundImage,
           primaryShadow: getComputedStyle(node.querySelector('.bj-hsa-primary')).boxShadow,
           primaryTransform: getComputedStyle(node.querySelector('.bj-hsa-primary')).transform,
+          secondaryBackground: getComputedStyle(node.querySelector('.bj-hsa-secondary')).backgroundColor,
+          secondaryShadow: getComputedStyle(node.querySelector('.bj-hsa-secondary')).boxShadow,
+          primaryHeight: node.querySelector('.bj-hsa-primary').getBoundingClientRect().height,
+          secondaryHeight: node.querySelector('.bj-hsa-secondary').getBoundingClientRect().height,
+          iconCount: node.querySelectorAll('.bj-hsa-icon svg').length,
         };
       });
       assert(sticky.primary === '내 지원금 확인하기' && sticky.secondary === '문의하기' && sticky.inside && sticky.bottom >= 0 && sticky.ariaHidden === 'false' && !sticky.inert, `${width}px: sticky action contract mismatch (${JSON.stringify(sticky)})`);
       assert(sticky.primaryBackground.includes('linear-gradient') && sticky.primaryShadow !== 'none' && sticky.primaryTransform !== 'none', `${width}px: sticky primary is missing pressable depth (${JSON.stringify(sticky)})`);
+      assert(sticky.secondaryBackground === 'rgb(255, 255, 255)' && sticky.secondaryShadow !== 'none' && sticky.primaryHeight >= 48 && sticky.secondaryHeight >= 48 && sticky.iconCount === 2, `${width}px: sticky action redesign contract mismatch (${JSON.stringify(sticky)})`);
       const screenshotPath = String(process.env.BILLYJO_STICKY_SCREENSHOT || '').trim();
       if (width === 390 && screenshotPath) {
         await page.evaluate(() => {
@@ -308,6 +326,7 @@ async function inspectPromotionFallback(browser) {
   await page.route(CORE_RE, async (route) => {
     await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', headers: { 'access-control-allow-origin': '*' }, body: injectSource });
   });
+  await routeProductCutouts(page);
   try {
     await page.goto('https://billyjo.co.kr/?qa=home-conversion-promo-fallback', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.locator('#bj-home-sticky-actions').waitFor({ state: 'attached', timeout: 30000 });
@@ -349,6 +368,7 @@ async function inspectAirconRelaunch(browser) {
       body: injectSource,
     });
   });
+  await routeProductCutouts(page);
   try {
     await page.goto('https://billyjo.co.kr/?qa=aircon-relaunch-2027-05-01', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.locator('#bj-home-cat-links').waitFor({ state: 'visible', timeout: 30000 });
