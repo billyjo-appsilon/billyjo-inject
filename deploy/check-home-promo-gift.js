@@ -105,7 +105,7 @@ for (const required of [
   "data-bj-hgp-extra hidden",
   "data-bj-hgp-toggle aria-expanded=\"false\"",
   "extras.length + '개 더보기'",
-  "PRODUCTS.length - TIERS.length",
+  "PRODUCTS.length - TIERS.length * 2",
   "function bindHomePromoToggle(section)",
   "grid-template-columns:repeat(2,minmax(0,1fr));gap:8px",
   "flex-direction:column",

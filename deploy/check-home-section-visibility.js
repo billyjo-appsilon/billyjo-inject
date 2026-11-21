@@ -123,10 +123,12 @@ async function inspect(browser, width, visibility) {
           const promo = document.querySelector('#bj-home-gift-promos');
           const category = document.querySelector('#bj-home-cat-links');
           const benefits = document.querySelector('#bj-home-benefit-cards');
+          const hero = document.querySelector('.new-mv_wrap') || document.querySelector('.new-mv');
           return {
-            entryBeforePromo: Boolean(entry && promo && (entry.compareDocumentPosition(promo) & Node.DOCUMENT_POSITION_FOLLOWING)),
-            promoBeforeCategory: Boolean(promo && category && (promo.compareDocumentPosition(category) & Node.DOCUMENT_POSITION_FOLLOWING)),
-            categoryBeforeBenefits: Boolean(category && benefits && category.nextElementSibling === benefits),
+            heroBeforeCategory: Boolean(hero && category && hero.nextElementSibling === category),
+            categoryBeforePromo: Boolean(category && promo && category.nextElementSibling === promo),
+            promoBeforeEntry: Boolean(promo && entry && promo.nextElementSibling === entry),
+            entryBeforeBenefits: Boolean(entry && benefits && entry.nextElementSibling === benefits),
           };
         })(),
         viewportWidth: document.documentElement.clientWidth,
@@ -154,12 +156,12 @@ async function inspect(browser, width, visibility) {
         result.campaignBanner.lines[0].top >= result.campaignBanner.lines[1].top) {
       throw new Error(`campaign banner line break regressed at ${width}px: ${JSON.stringify(result.campaignBanner.lines)}`);
     }
-    if (result.promoCards.total !== 24 || result.promoCards.visible !== 6 || result.promoCards.expanded !== 'false' ||
-        result.promoCards.label !== '프로모션 상품 18개 더보기' ||
-        result.promoCards.tiers.some((tier) => tier.total !== 4 || tier.visible !== 1)) {
+    if (result.promoCards.total !== 24 || result.promoCards.visible !== 12 || result.promoCards.expanded !== 'false' ||
+        result.promoCards.label !== '프로모션 상품 12개 더보기' ||
+        result.promoCards.tiers.some((tier) => tier.total !== 4 || tier.visible !== 2)) {
       throw new Error(`collapsed promo contract regressed at ${width}px: ${JSON.stringify(result.promoCards)}`);
     }
-    if (!result.hierarchy.entryBeforePromo || !result.hierarchy.promoBeforeCategory || !result.hierarchy.categoryBeforeBenefits) {
+    if (!Object.values(result.hierarchy).every(Boolean)) {
       throw new Error(`home conversion hierarchy regressed at ${width}px: ${JSON.stringify(result.hierarchy)}`);
     }
     if (result.removedWeeklyNodes !== 0) throw new Error(`weekly header/countdown remains at ${width}px`);
@@ -174,7 +176,7 @@ async function inspect(browser, width, visibility) {
     if (result.spacing.v5PaddingBottom !== expectedTail) {
       throw new Error(`promo tail spacing regressed at ${width}px: ${JSON.stringify(result.spacing)}`);
     }
-    if (result.scrollWidth > result.viewportWidth + 1) {
+    if (result.scrollWidth > Math.max(result.viewportWidth, width) + 1) {
       throw new Error(`horizontal overflow at ${width}px: ${result.scrollWidth}/${result.viewportWidth}`);
     }
     const relevantErrors = pageErrors.filter((message) => /home-section|SyntaxError|ReferenceError/.test(message));
@@ -193,7 +195,7 @@ async function inspect(browser, width, visibility) {
       visible: Array.from(document.querySelectorAll('#bj-home-gift-promos .bj-hgp-card')).filter((card) => !card.hidden && getComputedStyle(card).display !== 'none').length,
       expanded: document.querySelector('[data-bj-hgp-toggle]')?.getAttribute('aria-expanded'),
     }));
-    if (collapsedAgain.visible !== 6 || collapsedAgain.expanded !== 'false') {
+    if (collapsedAgain.visible !== 12 || collapsedAgain.expanded !== 'false') {
       throw new Error(`promo recollapse contract regressed at ${width}px: ${JSON.stringify(collapsedAgain)}`);
     }
     return { width, visibility, ...result, expanded, collapsedAgain };

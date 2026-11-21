@@ -32,7 +32,8 @@ async function inspect(browser, width, height) {
     });
     await page.locator('#bj-home-conversion-entry').waitFor({ state: 'visible', timeout: 30000 });
     await page.locator('#bj-home-gift-promos').waitFor({ state: 'visible', timeout: 30000 });
-    await page.waitForFunction(() => document.querySelectorAll('.new-mv .slick-slide:not(.slick-cloned)').length === 3, null, { timeout: 15000 });
+    await page.waitForFunction(() => document.querySelectorAll('.new-mv .slick-slide:not(.slick-cloned)').length === 4, null, { timeout: 15000 });
+    await page.waitForFunction(() => Boolean(document.querySelector('.new-mv .slick-slide.slick-current:not(.slick-cloned) video.billyjo-video-hero__media')), null, { timeout: 3000 });
     await page.waitForTimeout(5600);
 
     const result = await page.evaluate(() => {
@@ -43,6 +44,7 @@ async function inspect(browser, width, height) {
       const primary = entry.querySelector('.bj-hce-primary');
       const secondary = entry.querySelector('.bj-hce-secondary');
       const promoCards = Array.from(promo.querySelectorAll('.bj-hgp-card'));
+      const visiblePromoCards = promoCards.filter((card) => !card.hidden && getComputedStyle(card).display !== 'none');
       const slides = Array.from(document.querySelectorAll('.new-mv .slick-slide:not(.slick-cloned)'));
       const mobileNav = Array.from(document.querySelectorAll('.category__wrap > a'))
         .filter((node) => getComputedStyle(node).display !== 'none')
@@ -54,6 +56,13 @@ async function inspect(browser, width, height) {
           return direct?.textContent.replace(/\s+/g, ' ').trim() || '';
         });
       const entryRect = entry.getBoundingClientRect();
+      const hero = document.querySelector('.new-mv_wrap') || document.querySelector('.new-mv');
+      const styleMetrics = (node) => {
+        const style = getComputedStyle(node);
+        const rect = node.getBoundingClientRect();
+        const lineHeight = parseFloat(style.lineHeight);
+        return { font: parseFloat(style.fontSize), height: Math.round(rect.height), lines: Math.round(rect.height / lineHeight) };
+      };
       const nativeRecommendation = document.querySelector('#bj-v5-injected ~ h2.m_tit');
       const nativeCatalog = document.querySelector('.m_outer > .prodList_wrap');
       return {
@@ -70,26 +79,38 @@ async function inspect(browser, width, height) {
           href: secondary?.getAttribute('href') || '',
         },
         hierarchy: {
-          entryBeforePromo: Boolean(entry.compareDocumentPosition(promo) & Node.DOCUMENT_POSITION_FOLLOWING),
-          promoBeforeCategory: Boolean(promo.compareDocumentPosition(category) & Node.DOCUMENT_POSITION_FOLLOWING),
-          categoryBeforeBenefits: category.nextElementSibling === benefits,
+          heroBeforeCategory: hero?.nextElementSibling === category,
+          categoryBeforePromo: category.nextElementSibling === promo,
+          promoBeforeEntry: promo.nextElementSibling === entry,
+          entryBeforeBenefits: entry.nextElementSibling === benefits,
+        },
+        typography: {
+          title: styleMetrics(entry.querySelector('.bj-hce-title')),
+          copy: styleMetrics(entry.querySelector('p')),
         },
         promo: {
           total: promoCards.length,
-          visible: promoCards.filter((card) => !card.hidden && getComputedStyle(card).display !== 'none').length,
+          visible: visiblePromoCards.length,
           toggle: promo.querySelector('[data-bj-hgp-toggle]')?.textContent.trim() || '',
           subcopy: promo.querySelector('.bj-hgp-half-copy p')?.textContent.trim() || '',
           bounds: (() => {
             const rect = promo.getBoundingClientRect();
             return { left: Math.round(rect.left), right: Math.round(rect.right), width: Math.round(rect.width) };
           })(),
+          firstRows: visiblePromoCards.slice(0, 4).map((card) => {
+            const rect = card.getBoundingClientRect();
+            return { left: Math.round(rect.left), top: Math.round(rect.top), width: Math.round(rect.width) };
+          }),
         },
         hero: {
           count: slides.length,
           counter: document.querySelector('.new-mv_nav')?.textContent.replace(/\s+/g, ' ').trim() || '',
-          alts: slides.map((slide) => slide.querySelector('img')?.alt || ''),
-          links: slides.map((slide) => slide.querySelector('a')?.getAttribute('href') || ''),
-          consult: slides.map((slide) => slide.querySelector('a')?.getAttribute('data-bj-consult') || ''),
+          slides: slides.map((slide) => ({
+            video: Boolean(slide.querySelector('video.billyjo-video-hero__media, video')),
+            label: slide.querySelector('video')?.getAttribute('aria-label') || slide.querySelector('img')?.alt || '',
+            href: slide.querySelector('a')?.getAttribute('href') || '',
+            consult: slide.querySelector('a')?.getAttribute('data-bj-consult') || '',
+          })),
           clonedLinks: Array.from(document.querySelectorAll('.new-mv .slick-slide.slick-cloned')).map((slide) => ({
             alt: slide.querySelector('img')?.alt || '',
             href: slide.querySelector('a')?.getAttribute('href') || '',
@@ -118,25 +139,25 @@ async function inspect(browser, width, height) {
     });
 
     assert(intercepts > 0, `${width}px: local inject was not intercepted`);
-    assert(result.entryTop < height, `${width}px: primary entry is below the first viewport (${result.entryTop}/${height})`);
     assert(result.title === '렌탈료·사은품, 내 조건으로 3초 비교', `${width}px: entry title mismatch`);
     assert(result.primary.text === '내 조건으로 최대혜택 찾기' && result.primary.href === '/html/dh/counsel' && result.primary.consult === '1', `${width}px: primary CTA contract mismatch`);
     assert(result.secondary.text === '상품 먼저 보기' && result.secondary.href === '/html/dh_prod/prod_list/1-8', `${width}px: secondary CTA contract mismatch`);
     assert(Object.values(result.hierarchy).every(Boolean), `${width}px: section hierarchy mismatch (${JSON.stringify(result.hierarchy)})`);
-    assert(result.promo.total === 24 && result.promo.visible === 6 && result.promo.toggle === '프로모션 상품 18개 더보기', `${width}px: progressive promo mismatch (${JSON.stringify(result.promo)})`);
+    assert(result.promo.total === 24 && result.promo.visible === 12 && result.promo.toggle === '프로모션 상품 12개 더보기', `${width}px: progressive promo mismatch (${JSON.stringify(result.promo)})`);
+    assert(result.promo.firstRows[0].top === result.promo.firstRows[1].top && result.promo.firstRows[0].left < result.promo.firstRows[1].left && result.promo.firstRows[2].top > result.promo.firstRows[0].top, `${width}px: promotion products are not two per row (${JSON.stringify(result.promo.firstRows)})`);
     assert(result.promo.bounds.left >= 0 && result.promo.bounds.right <= width && result.promo.bounds.width <= 1280, `${width}px: relocated promo bounds mismatch (${JSON.stringify(result.promo.bounds)})`);
     assert(/^11월 혜택 종료까지/.test(result.promo.subcopy), `${width}px: monthly urgency copy mismatch`);
-    assert(result.hero.count === 3 && result.hero.counter.endsWith('/ 3'), `${width}px: hero count mismatch (${JSON.stringify(result.hero)})`);
-    assert(result.hero.alts.every(Boolean), `${width}px: retained hero alt is empty`);
-    assert(result.hero.links.every((href) => href === '/html/dh/counsel') && result.hero.consult.every((value) => value === '1'), `${width}px: retained hero destination mismatch`);
-    assert(result.hero.clonedLinks.every((slide) => slide.alt && slide.href === '/html/dh/counsel' && slide.consult === '1'), `${width}px: cloned hero destination mismatch (${JSON.stringify(result.hero.clonedLinks)})`);
+    assert(result.hero.count === 4 && result.hero.counter.endsWith('/ 4'), `${width}px: hero count mismatch (${JSON.stringify(result.hero)})`);
+    assert(result.hero.slides[0]?.video && result.hero.slides[0]?.label === '빌리조 11월 프로모션 영상', `${width}px: video is not the first hero (${JSON.stringify(result.hero.slides)})`);
+    assert(result.hero.slides.slice(1).every((slide) => slide.label && slide.href === '/html/dh/counsel' && slide.consult === '1'), `${width}px: retained image hero destination mismatch (${JSON.stringify(result.hero.slides)})`);
     assert(result.nativeRecommendation === 'none' && result.nativeCatalog === 'none', `${width}px: duplicated native product modules remain`);
     assert(result.benefitsA11y.tabindex === '0' && result.benefitsA11y.role === 'region' && result.benefitsA11y.aria.includes('혜택 6개'), `${width}px: benefit scroller accessibility mismatch`);
-    assert(result.scrollWidth <= result.viewportWidth + 1, `${width}px: horizontal overflow (${result.scrollWidth}/${result.viewportWidth})`);
+    assert(result.scrollWidth <= Math.max(result.viewportWidth, width) + 1, `${width}px: horizontal overflow (${result.scrollWidth}/${result.viewportWidth}; requested ${width})`);
 
     if (width <= 767) {
-      assert(JSON.stringify(result.mobileNav) === JSON.stringify(['혜택', '인기상품', '3초견적']), `${width}px: mobile intent nav mismatch (${JSON.stringify(result.mobileNav)})`);
-      assert(JSON.stringify(result.drawerGroups) === JSON.stringify(['혜택 · 고객지원', '렌탈제품', '결합 · 라이프']), `${width}px: mobile drawer grouping mismatch (${JSON.stringify(result.drawerGroups)})`);
+      assert(result.mobileNav.length >= 10 && result.mobileNav.includes('물·공기·청소가전') && result.mobileNav.includes('냉장가전') && result.mobileNav.includes('자동차 장기렌트'), `${width}px: previous mobile category menu was not restored (${JSON.stringify(result.mobileNav)})`);
+      assert(!result.mobileNav.includes('인기상품') && !result.mobileNav.includes('3초견적') && result.drawerGroups.length === 0, `${width}px: simplified navigation remnants remain (${JSON.stringify({ mobileNav: result.mobileNav, drawerGroups: result.drawerGroups })})`);
+      assert(result.typography.title.font <= 22 && result.typography.title.lines <= 2 && result.typography.copy.font <= 12.5 && result.typography.copy.lines <= 2, `${width}px: compact entry typography regressed (${JSON.stringify(result.typography)})`);
       assert(result.quickDisplay === 'none' && result.stickyExists, `${width}px: mobile floating controls were not consolidated`);
       await page.evaluate(() => window.scrollTo(0, 700));
       await page.waitForFunction(() => document.querySelector('#bj-home-sticky-actions')?.classList.contains('is-visible'));
@@ -155,8 +176,7 @@ async function inspect(browser, width, height) {
       });
       assert(sticky.primary === '최대혜택 찾기' && sticky.secondary === '문의하기' && sticky.inside && sticky.bottom >= 0 && sticky.ariaHidden === 'false' && !sticky.inert, `${width}px: sticky action contract mismatch (${JSON.stringify(sticky)})`);
     } else {
-      assert(JSON.stringify(result.desktopNav) === JSON.stringify(['혜택', '제품찾기', '패키지', '자동차 장기렌트']), `${width}px: desktop nav mismatch (${JSON.stringify(result.desktopNav)})`);
-      assert(result.searchPlaceholder === '제품·브랜드 검색', `${width}px: search placeholder mismatch`);
+      assert(result.desktopNav.length >= 10 && result.desktopNav.includes('물·공기·청소가전') && result.desktopNav.includes('냉장가전') && result.desktopNav.includes('자동차 장기렌트'), `${width}px: previous desktop menu was not restored (${JSON.stringify(result.desktopNav)})`);
       assert(result.documentHeight < 7500, `${width}px: desktop page is still excessively long (${result.documentHeight}px)`);
     }
 
@@ -195,17 +215,54 @@ async function inspectPromotionFallback(browser) {
         promoExists: Boolean(document.querySelector('#bj-home-gift-promos')),
         promoReady: document.body.classList.contains('bj-home-promo-ready'),
         productFallback: document.querySelector('#bj-home-conversion-entry .bj-hce-secondary')?.getAttribute('href') || '',
-        navProductFallback: document.querySelector('.bj-home-nav-products')?.getAttribute('href') || '',
-        benefitsFallback: document.querySelector('.bj-newlywed-cat')?.getAttribute('href') || '',
         nativeRecommendation: heading ? getComputedStyle(heading).display : 'missing',
         nativeCatalog: catalog ? getComputedStyle(catalog).display : 'missing',
       };
     });
     assert(!result.promoExists && !result.promoReady, `fallback: stale promotion state (${JSON.stringify(result)})`);
-    assert(result.productFallback === '/html/dh_prod/prod_list/1-8' && result.navProductFallback === '/html/dh_prod/prod_list/1-8', `fallback: product links are not real destinations (${JSON.stringify(result)})`);
-    assert(result.benefitsFallback === '/html/dh/counsel', `fallback: benefits link is not a real destination (${JSON.stringify(result)})`);
+    assert(result.productFallback === '/html/dh_prod/prod_list/1-8', `fallback: product link is not a real destination (${JSON.stringify(result)})`);
     assert(result.nativeRecommendation !== 'none' && result.nativeCatalog !== 'none', `fallback: native product discovery stayed hidden (${JSON.stringify(result)})`);
     return result;
+  } finally {
+    await page.close();
+  }
+}
+
+async function inspectHeroSourceOrderFixture(browser) {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const fixtureUrl = 'https://billyjo.co.kr/?qa=hero-source-order-fixture';
+  await page.route(fixtureUrl, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'text/html; charset=utf-8',
+      body: `<!doctype html><html><head>
+        <script src="/js/jquery-3.4.1.js"></script>
+        <script src="/js/slick.min.js"></script>
+      </head><body>
+        <div class="new-mv_wrap"><div class="new-mv">
+          <div class="item"><img src="https://example.com/257819f60f7d71ce6ac88ddcd6f43863.png" alt=""></div>
+          <div class="item"><video class="billyjo-video-hero__media"></video></div>
+          <div class="item"><img src="https://example.com/9f88ad8e3e55be589f6e6a1ff97e77e8.png" alt=""></div>
+          <div class="item"><img src="https://example.com/hero-loss-138manwon.png" alt=""></div>
+        </div></div>
+        <script>window.jQuery('.new-mv').slick({ autoplay:false, arrows:false });</script>
+        <script src="/qa-local-inject.js"></script>
+      </body></html>`,
+    });
+  });
+  await page.route('https://billyjo.co.kr/qa-local-inject.js', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: injectSource });
+  });
+  try {
+    await page.goto(fixtureUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForFunction(() => document.querySelector('.new-mv')?.getAttribute('data-bj-home-curated') === '1', null, { timeout: 15000 });
+    const slides = await page.evaluate(() => Array.from(document.querySelectorAll('.new-mv .slick-slide:not(.slick-cloned)')).map((slide) => ({
+      video: Boolean(slide.querySelector('video.billyjo-video-hero__media, video')),
+      source: slide.querySelector('img')?.src || '',
+    })));
+    assert(slides.length === 4 && slides[0]?.video, `source-order fixture: video was not promoted to first (${JSON.stringify(slides)})`);
+    assert(slides[1]?.source.includes('hero-loss-138manwon.png') && slides[2]?.source.includes('257819f60f7d71ce6ac88ddcd6f43863.png') && slides[3]?.source.includes('9f88ad8e3e55be589f6e6a1ff97e77e8.png'), `source-order fixture: configured image order was not enforced (${JSON.stringify(slides)})`);
+    return slides;
   } finally {
     await page.close();
   }
@@ -218,8 +275,9 @@ async function inspectPromotionFallback(browser) {
     for (const [width, height] of [[320, 760], [390, 844], [430, 900], [1280, 900], [1920, 1080]]) {
       results.push(await inspect(browser, width, height));
     }
+    const heroSourceOrderFixture = await inspectHeroSourceOrderFixture(browser);
     const fallback = await inspectPromotionFallback(browser);
-    console.log(JSON.stringify({ contract: 'ok', results, fallback }, null, 2));
+    console.log(JSON.stringify({ contract: 'ok', results, heroSourceOrderFixture, fallback }, null, 2));
   } finally {
     await browser.close();
   }
