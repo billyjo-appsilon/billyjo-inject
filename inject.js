@@ -9440,9 +9440,22 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
   function curateHero(){
     var slider = document.querySelector('.new-mv');
-    if (!slider || slider.getAttribute('data-bj-home-curated')) return;
+    if (!slider) return;
     var jq = window.jQuery;
     if (!jq || !jq.fn || typeof jq.fn.slick !== 'function' || !slider.classList.contains('slick-initialized')) return;
+    try {
+      var heroSlick = jq(slider).slick('getSlick');
+      if (heroSlick) {
+        if (heroSlick.options) heroSlick.options.autoplay = false;
+        if (heroSlick.originalSettings) heroSlick.originalSettings.autoplay = false;
+        Object.keys(heroSlick.breakpointSettings || {}).forEach(function(breakpoint){
+          if (heroSlick.breakpointSettings[breakpoint]) heroSlick.breakpointSettings[breakpoint].autoplay = false;
+        });
+      }
+      jq(slider).slick('slickSetOption', 'autoplay', false, false);
+      jq(slider).slick('slickPause');
+    } catch (_autoplayError) { return; }
+    if (slider.getAttribute('data-bj-home-curated')) return;
     var original = Array.prototype.slice.call(slider.querySelectorAll('.slick-slide:not(.slick-cloned)'));
     var configs = [
       { video:true, label:'빌리조 11월 프로모션 영상' },

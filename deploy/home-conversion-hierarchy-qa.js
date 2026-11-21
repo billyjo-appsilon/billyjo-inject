@@ -272,6 +272,55 @@ async function inspectHeroSourceOrderFixture(browser) {
   }
 }
 
+async function inspectHeroIncompleteFixture(browser) {
+  const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+  const fixtureUrl = 'https://billyjo.co.kr/?qa=hero-incomplete-fixture';
+  await page.route(fixtureUrl, async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'text/html; charset=utf-8',
+      body: `<!doctype html><html><head>
+        <script src="/js/jquery-3.4.1.js"></script>
+        <script src="/js/slick.min.js"></script>
+      </head><body>
+        <div class="new-mv_wrap"><div class="new-mv">
+          <div class="item"><video class="billyjo-video-hero__media"></video></div>
+          <div class="item"><img src="https://example.com/hero-loss-138manwon.png" alt=""></div>
+          <div class="item"><img src="https://example.com/257819f60f7d71ce6ac88ddcd6f43863.png" alt=""></div>
+        </div></div>
+        <script>window.jQuery('.new-mv').slick({ autoplay:true, autoplaySpeed:100, arrows:false, responsive:[{ breakpoint:640, settings:{ dots:false } }] });</script>
+        <script src="/qa-local-inject.js"></script>
+      </body></html>`,
+    });
+  });
+  await page.route('https://billyjo.co.kr/qa-local-inject.js', async (route) => {
+    await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: injectSource });
+  });
+  try {
+    await page.goto(fixtureUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    await page.waitForFunction(() => window.jQuery?.('.new-mv')?.slick('getSlick')?.options?.autoplay === false, null, { timeout: 15000 });
+    await page.waitForTimeout(900);
+    const result = await page.evaluate(() => ({
+      curated: document.querySelector('.new-mv')?.getAttribute('data-bj-home-curated') || '',
+      slideCount: document.querySelectorAll('.new-mv .slick-slide:not(.slick-cloned)').length,
+      currentIndex: window.jQuery('.new-mv').slick('slickCurrentSlide'),
+      autoplay: window.jQuery('.new-mv').slick('getSlick').options.autoplay,
+    }));
+    assert(!result.curated && result.slideCount === 3, `incomplete fixture: original slides were not preserved (${JSON.stringify(result)})`);
+    assert(result.currentIndex === 0 && result.autoplay === false, `incomplete fixture: hero still auto-advances (${JSON.stringify(result)})`);
+    await page.setViewportSize({ width: 800, height: 844 });
+    await page.waitForTimeout(900);
+    const afterResize = await page.evaluate(() => ({
+      currentIndex: window.jQuery('.new-mv').slick('slickCurrentSlide'),
+      autoplay: window.jQuery('.new-mv').slick('getSlick').options.autoplay,
+    }));
+    assert(afterResize.currentIndex === 0 && afterResize.autoplay === false, `incomplete fixture: responsive refresh restored autoplay (${JSON.stringify(afterResize)})`);
+    return { ...result, afterResize };
+  } finally {
+    await page.close();
+  }
+}
+
 (async () => {
   const browser = await chromium.launch({ headless: true });
   try {
@@ -280,8 +329,9 @@ async function inspectHeroSourceOrderFixture(browser) {
       results.push(await inspect(browser, width, height));
     }
     const heroSourceOrderFixture = await inspectHeroSourceOrderFixture(browser);
+    const heroIncompleteFixture = await inspectHeroIncompleteFixture(browser);
     const fallback = await inspectPromotionFallback(browser);
-    console.log(JSON.stringify({ contract: 'ok', results, heroSourceOrderFixture, fallback }, null, 2));
+    console.log(JSON.stringify({ contract: 'ok', results, heroSourceOrderFixture, heroIncompleteFixture, fallback }, null, 2));
   } finally {
     await browser.close();
   }
