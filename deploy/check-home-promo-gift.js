@@ -3,10 +3,10 @@ const path = require('path');
 
 const source = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'utf8');
 
-if (!/bestA\.innerHTML\s*=\s*'[^']*프로모션\/사은품 확인'/.test(source)) {
+if (!/bestA\.innerHTML\s*=\s*'[^']*🎁<\/span>교체지원금\/사은품 확인'/.test(source)) {
   throw new Error('desktop GNB label is missing');
 }
-const mobileMatches = source.match(/link\.innerHTML\s*=\s*'[^']*프로모션\/사은품 확인'/g) || [];
+const mobileMatches = source.match(/link\.innerHTML\s*=\s*'[^']*🎁<\/span>교체지원금\/사은품 확인'/g) || [];
 if (mobileMatches.length !== 2) throw new Error(`expected two mobile/fallback labels, got ${mobileMatches.length}`);
 
 for (const required of [
@@ -59,7 +59,7 @@ for (const required of [
   "var LIVE1_HALF_BANNER_MASCOT = 'https://live.billyjo.co.kr/images/toss-banner-mascot.webp'",
   "class=\"bj-hgp-half-banner\" data-bj-live1-half-banner",
   "class=\"bj-hgp-half-line\">' + Number(month.split('-')[1]) + '월도</span> <em class=\"bj-hgp-half-line\">반값습니다!</em>",
-  "월 혜택 종료까지, 추가사은품을 확인하세요",
+  "선착순, 재고/추가 사은품 소진시 종료",
   "data-bj-month-countdown aria-label=\"이번 달 특가 마감까지 남은 시간\"",
   "function startHomeMonthCountdown(section)",
   "var BRAND_LOGOS = {",

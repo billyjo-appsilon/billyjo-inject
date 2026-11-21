@@ -149,7 +149,7 @@ async function inspect(browser, width, height) {
     assert(result.promo.total === 24 && result.promo.visible === 12 && result.promo.toggle === '프로모션 상품 12개 더보기', `${width}px: progressive promo mismatch (${JSON.stringify(result.promo)})`);
     assert(result.promo.firstRows[0].top === result.promo.firstRows[1].top && result.promo.firstRows[0].left < result.promo.firstRows[1].left && result.promo.firstRows[2].top > result.promo.firstRows[0].top, `${width}px: promotion products are not two per row (${JSON.stringify(result.promo.firstRows)})`);
     assert(result.promo.bounds.left >= 0 && result.promo.bounds.right <= width && result.promo.bounds.width <= 1280, `${width}px: relocated promo bounds mismatch (${JSON.stringify(result.promo.bounds)})`);
-    assert(/^11월 혜택 종료까지/.test(result.promo.subcopy), `${width}px: monthly urgency copy mismatch`);
+    assert(result.promo.subcopy === '선착순, 재고/추가 사은품 소진시 종료', `${width}px: monthly urgency copy mismatch`);
     assert(result.hero.count === 4 && result.hero.counter.endsWith('/ 4'), `${width}px: hero count mismatch (${JSON.stringify(result.hero)})`);
     assert(result.hero.currentIndex === 0 && result.hero.autoplay === false, `${width}px: hero carousel still advances automatically (${JSON.stringify(result.hero)})`);
     assert(result.hero.slides[0]?.video && result.hero.slides[0]?.label === '빌리조 11월 프로모션 영상', `${width}px: video is not the first hero (${JSON.stringify(result.hero.slides)})`);

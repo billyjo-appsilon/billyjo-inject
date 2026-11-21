@@ -3542,7 +3542,7 @@
     }
     var campaignBanner = '<div class="bj-hgp-half-banner" data-bj-live1-half-banner>' +
       '<div class="bj-hgp-half-copy"><h2><span class="bj-hgp-half-line">' + Number(month.split('-')[1]) + '월도</span> <em class="bj-hgp-half-line">반값습니다!</em></h2>' +
-      '<p>' + Number(month.split('-')[1]) + '월 혜택 종료까지, 추가사은품을 확인하세요</p>' +
+      '<p>선착순, 재고/추가 사은품 소진시 종료</p>' +
       '<div class="bj-hgp-month-timer" data-bj-month-countdown aria-label="이번 달 특가 마감까지 남은 시간"></div></div>' +
       '<div class="bj-hgp-half-visual" aria-hidden="true"><img src="' + LIVE1_HALF_BANNER_MASCOT + '" alt="" loading="eager" decoding="async"></div></div>';
     section.innerHTML =
@@ -5415,7 +5415,7 @@ function bjHeaderMainInit() {
         bestLi.className = 'gnb__menu bj-best-gnb';
         var bestA = document.createElement('a');
         bestA.href = '#';
-        bestA.innerHTML = '<span style="margin-right:4px;line-height:1;display:inline-flex;align-items:center">🎯</span>프로모션/사은품 확인';
+        bestA.innerHTML = '<span style="margin-right:4px;line-height:1;display:inline-flex;align-items:center">🎁</span>교체지원금/사은품 확인';
         bestA.style.cssText = 'display:inline-flex;align-items:center;font:800 15px Pretendard,sans-serif;line-height:23.25px;color:#0838F8;text-decoration:none;white-space:nowrap;cursor:pointer;padding:2px 9px;border-radius:999px;background:rgba(8,56,248,.055);box-shadow:0 0 0 1px rgba(8,56,248,.12),0 0 14px rgba(8,56,248,.16);transition:background .16s,box-shadow .16s,transform .16s';
         bestA.onmouseenter = function(){ bestA.style.background = 'rgba(8,56,248,.09)'; bestA.style.boxShadow = '0 0 0 1px rgba(8,56,248,.18),0 0 18px rgba(8,56,248,.22)'; bestA.style.transform = 'translateY(-1px)'; };
         bestA.onmouseleave = function(){ bestA.style.background = 'rgba(8,56,248,.055)'; bestA.style.boxShadow = '0 0 0 1px rgba(8,56,248,.12),0 0 14px rgba(8,56,248,.16)'; bestA.style.transform = 'translateY(0)'; };
@@ -9753,7 +9753,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         var link = document.createElement('a');
         link.className = 'bj-newlywed-cat';
         link.href = '#';
-        link.innerHTML = '<span style="margin-right:3px;line-height:1;display:inline-flex;align-items:center">🎯</span>프로모션/사은품 확인';
+        link.innerHTML = '<span style="margin-right:3px;line-height:1;display:inline-flex;align-items:center">🎁</span>교체지원금/사은품 확인';
         /* 다른 카테고리 항목(.category__wrap a = 14px / line-height:1.5 / padding:0)과
            동일한 박스 모델로 맞춰 수직 정렬. 기존 13px·padding:2px·line-height:1.4 차이로
            형제 항목보다 위로 떠 보이던 문제 해소. 브랜드 파랑(#0838F8)만 강조 유지. */
@@ -14581,7 +14581,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     var link = document.createElement('a');
     link.className = 'bj-newlywed-cat';
     link.href = '#';
-    link.innerHTML = '<span style="margin-right:3px">🎯</span>프로모션/사은품 확인';
+    link.innerHTML = '<span style="margin-right:3px">🎁</span>교체지원금/사은품 확인';
     link.style.cssText = 'flex:0 0 auto;display:inline-flex;align-items:center;padding:0;font:800 14px Pretendard,sans-serif;color:#0838F8;text-decoration:none;background:transparent;border:0;border-radius:0;box-shadow:none;white-space:nowrap;cursor:pointer;line-height:1.5';
     link.onclick = function(e){
       e.preventDefault();
