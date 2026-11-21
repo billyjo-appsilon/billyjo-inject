@@ -105,6 +105,7 @@ async function inspect(browser, width, height) {
           };
         })(),
         promo: {
+          design: promo.getAttribute('data-bj-product-card-design') || '',
           total: promoCards.length,
           visible: visiblePromoCards.length,
           toggle: promo.querySelector('[data-bj-hgp-toggle]')?.textContent.trim() || '',
@@ -192,8 +193,12 @@ async function inspect(browser, width, height) {
     } else {
       assert(result.category.cards.every((card) => card.direction === 'column'), `${width}px: desktop category card layout changed unexpectedly`);
     }
-    assert(result.promo.total === 24 && result.promo.visible === 12 && result.promo.toggle === '프로모션 상품 12개 더보기', `${width}px: progressive promo mismatch (${JSON.stringify(result.promo)})`);
-    assert(result.promo.firstRows[0].top === result.promo.firstRows[1].top && result.promo.firstRows[0].left < result.promo.firstRows[1].left && result.promo.firstRows[2].top > result.promo.firstRows[0].top, `${width}px: promotion products are not two per row (${JSON.stringify(result.promo.firstRows)})`);
+    assert(result.promo.design === 'vertical-review-right' && result.promo.total === 24 && result.promo.visible === 12 && result.promo.toggle === '프로모션 상품 12개 더보기', `${width}px: progressive promo mismatch (${JSON.stringify(result.promo)})`);
+    if (width <= 780) {
+      assert(result.promo.firstRows[0].top === result.promo.firstRows[1].top && result.promo.firstRows[0].left < result.promo.firstRows[1].left && result.promo.firstRows[2].top > result.promo.firstRows[0].top, `${width}px: promotion products are not two-column vertical cards (${JSON.stringify(result.promo.firstRows)})`);
+    } else {
+      assert(result.promo.firstRows[0].top === result.promo.firstRows[1].top && result.promo.firstRows[0].left < result.promo.firstRows[1].left && result.promo.firstRows[2].top > result.promo.firstRows[0].top, `${width}px: desktop promotion products are not two per row (${JSON.stringify(result.promo.firstRows)})`);
+    }
     assert(result.promo.bounds.left >= 0 && result.promo.bounds.right <= width && result.promo.bounds.width <= 1280, `${width}px: relocated promo bounds mismatch (${JSON.stringify(result.promo.bounds)})`);
     assert(result.promo.subcopy === '선착순, 재고/사은품 소진시 종료', `${width}px: monthly urgency copy mismatch`);
     assert(result.promo.banner.lines.map((line) => line.text).join('|') === '11월도|반값습니다!' && result.promo.banner.lines[1].color === 'rgb(255, 229, 0)', `${width}px: campaign title/color mismatch (${JSON.stringify(result.promo.banner.lines)})`);
