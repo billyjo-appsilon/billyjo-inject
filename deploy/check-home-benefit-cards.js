@@ -47,6 +47,14 @@ if (!injectSource.includes("section.parentNode.insertBefore(benefits, section.ne
 if (!injectSource.includes("var ref = benefits ? benefits.nextSibling")) {
   throw new Error('category product module must preserve the benefit section position');
 }
+for (const sliderContract of [
+  "stack.setAttribute('data-bj-slider-ready', '1')",
+  "margin-left:20px",
+  "goTo((currentIndex + 1) % cards.length, 'smooth')",
+  "window.matchMedia('(prefers-reduced-motion: reduce)')"
+]) {
+  if (!injectSource.includes(sliderContract)) throw new Error(`missing benefit slider contract: ${sliderContract}`);
+}
 
 async function inspectViewport(browser, width, height) {
   const page = await browser.newPage({ viewport: { width, height } });
@@ -72,7 +80,11 @@ async function inspectViewport(browser, width, height) {
   try {
     await page.goto('https://billyjo.co.kr/', { waitUntil: 'domcontentloaded', timeout: 45000 });
     await page.waitForSelector('#bj-home-benefit-cards .bj-hbenefit-card', { state: 'visible', timeout: 30000 });
+    await page.waitForSelector('#bj-home-benefit-cards .bj-hbenefit-stack[data-bj-slider-ready="1"]', { state: 'visible', timeout: 30000 });
     await page.locator('#bj-home-benefit-cards').scrollIntoViewIfNeeded();
+    if (width <= 767 && width !== 390) {
+      await page.locator('#bj-home-benefit-cards .bj-hbenefit-toggle').click();
+    }
     const benefitCards = page.locator('#bj-home-benefit-cards .bj-hbenefit-card');
     for (let index = 0; index < await benefitCards.count(); index += 1) {
       await benefitCards.nth(index).scrollIntoViewIfNeeded();
@@ -97,6 +109,92 @@ async function inspectViewport(browser, width, height) {
       const top = card.getBoundingClientRect().top + window.scrollY;
       document.scrollingElement.scrollTop = Math.max(0, top - Math.round(window.innerHeight / 3));
     });
+    if (width === 390) {
+      await page.waitForTimeout(250);
+      const toggle = page.locator('#bj-home-benefit-cards .bj-hbenefit-toggle');
+      const firstDot = page.locator('#bj-home-benefit-cards .bj-hbenefit-dot').first();
+      await toggle.click();
+      await firstDot.click();
+      await page.waitForTimeout(100);
+      await toggle.click();
+      const initialBenefit = await page.locator('#bj-home-benefit-cards').getAttribute('data-bj-active-benefit');
+      try {
+        await page.waitForFunction((initial) => {
+          const section = document.getElementById('bj-home-benefit-cards');
+          return section && section.getAttribute('data-bj-active-benefit') !== initial;
+        }, initialBenefit, { timeout: 6000 });
+      } catch (_autoplayError) {
+        const autoplayDebug = await page.evaluate(() => {
+          const section = document.getElementById('bj-home-benefit-cards');
+          const stack = section && section.querySelector('.bj-hbenefit-stack');
+          const rect = section && section.getBoundingClientRect();
+          return {
+            active: section && section.getAttribute('data-bj-active-benefit'),
+            autoplay: section && section.getAttribute('data-bj-benefit-autoplay'),
+            scrollLeft: stack && stack.scrollLeft,
+            viewport: [innerWidth, innerHeight],
+            sectionRect: rect && { top: rect.top, bottom: rect.bottom, height: rect.height },
+            scroll: { y: scrollY, top: document.scrollingElement && document.scrollingElement.scrollTop },
+            hidden: document.hidden,
+            reduced: matchMedia('(prefers-reduced-motion: reduce)').matches
+          };
+        });
+        throw new Error(`benefit autoplay did not advance from ${initialBenefit}: ${JSON.stringify(autoplayDebug)}`);
+      }
+      await page.waitForTimeout(800);
+      const autoplayState = await page.locator('#bj-home-benefit-cards').evaluate((section) => {
+        const active = section.getAttribute('data-bj-active-benefit');
+        const card = section.querySelector(`[data-bj-benefit-number="${active}"]`);
+        const stack = section.querySelector('.bj-hbenefit-stack');
+        return {
+          active,
+          activeLeft: card && card.getBoundingClientRect().left,
+          scrollLeft: stack.scrollLeft,
+          stackLeft: stack.getBoundingClientRect().left
+        };
+      });
+      if (autoplayState.active === initialBenefit || autoplayState.scrollLeft < 1 || Math.abs(autoplayState.activeLeft - autoplayState.stackLeft) > 1) {
+        throw new Error(`benefit autoplay did not settle on the next padded card: ${JSON.stringify(autoplayState)}`);
+      }
+      const sectionScreenshotPath = String(process.env.BILLYJO_BENEFIT_SECTION_SCREENSHOT || '').trim();
+      if (sectionScreenshotPath) {
+        fs.mkdirSync(path.dirname(sectionScreenshotPath), { recursive: true });
+        await page.locator('#bj-home-benefit-cards').screenshot({ path: sectionScreenshotPath });
+      }
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      await page.waitForTimeout(700);
+      const reducedBefore = await page.locator('#bj-home-benefit-cards .bj-hbenefit-stack').evaluate((stack) => stack.scrollLeft);
+      await page.waitForTimeout(2600);
+      const reducedState = await page.locator('#bj-home-benefit-cards').evaluate((section) => ({
+        autoplay: section.getAttribute('data-bj-benefit-autoplay'),
+        scrollLeft: section.querySelector('.bj-hbenefit-stack').scrollLeft,
+        scrollBehavior: getComputedStyle(section.querySelector('.bj-hbenefit-stack')).scrollBehavior,
+        toggleDisplay: getComputedStyle(section.querySelector('.bj-hbenefit-toggle')).display
+      }));
+      if (reducedState.autoplay !== 'reduced-motion' || Math.abs(reducedState.scrollLeft - reducedBefore) > 1 || reducedState.scrollBehavior !== 'auto' || reducedState.toggleDisplay !== 'none') {
+        throw new Error(`reduced-motion benefit slider contract regressed: ${JSON.stringify({ reducedBefore, reducedState })}`);
+      }
+      await page.locator('#bj-home-benefit-cards .bj-hbenefit-dot').last().click();
+      await page.waitForTimeout(100);
+      const lastCardState = await page.locator('#bj-home-benefit-cards').evaluate((section) => {
+        const stack = section.querySelector('.bj-hbenefit-stack');
+        const cards = Array.from(section.querySelectorAll('.bj-hbenefit-card'));
+        const stackRect = stack.getBoundingClientRect();
+        const lastRect = cards[cards.length - 1].getBoundingClientRect();
+        const previousRect = cards[cards.length - 2].getBoundingClientRect();
+        return {
+          active: section.getAttribute('data-bj-active-benefit'),
+          stackLeft: stackRect.left,
+          lastLeft: lastRect.left,
+          previousRight: previousRect.right,
+          maxScrollReached: Math.abs(stack.scrollLeft - (stack.scrollWidth - stack.clientWidth)) <= 1
+        };
+      });
+      if (lastCardState.active !== '06' || Math.abs(lastCardState.lastLeft - lastCardState.stackLeft) > 1 || lastCardState.previousRight > lastCardState.stackLeft + 1) {
+        throw new Error(`last benefit card does not align cleanly at the left inset: ${JSON.stringify(lastCardState)}`);
+      }
+      await page.locator('#bj-home-benefit-cards .bj-hbenefit-stack').evaluate((stack) => { stack.scrollLeft = 0; });
+    }
     const result = await page.evaluate(() => {
       const category = document.getElementById('bj-home-cat-links');
       const section = document.getElementById('bj-home-benefit-cards');
@@ -127,6 +225,16 @@ async function inspectViewport(browser, width, height) {
           tabindex: stack.getAttribute('tabindex'),
           role: stack.getAttribute('role'),
           aria: stack.getAttribute('aria-label') || '',
+          sliderReady: stack.getAttribute('data-bj-slider-ready'),
+          paddingLeft: parseFloat(getComputedStyle(stack).paddingLeft) || 0,
+          scrollPaddingLeft: parseFloat(getComputedStyle(stack).scrollPaddingLeft) || 0,
+        },
+        slider: {
+          controls: section.querySelectorAll('.bj-hbenefit-controls').length,
+          dots: section.querySelectorAll('.bj-hbenefit-dot').length,
+          currentDots: section.querySelectorAll('.bj-hbenefit-dot[aria-current="true"]').length,
+          autoplay: section.getAttribute('data-bj-benefit-autoplay'),
+          active: section.getAttribute('data-bj-active-benefit')
         },
         homeReleased: document.body.classList.contains('bj-home-cats-ready'),
         count: rows.length,
@@ -167,6 +275,12 @@ async function inspectViewport(browser, width, height) {
     if (result.scrollWidth > Math.max(result.viewportWidth, width) + 1) throw new Error(`horizontal overflow at ${width}px: ${result.scrollWidth}/${result.viewportWidth}`);
     if (result.scroller.tabindex !== '0' || result.scroller.role !== 'region' || !result.scroller.aria.includes('혜택 6개')) {
       throw new Error(`benefit scroller accessibility contract regressed at ${width}px: ${JSON.stringify(result.scroller)}`);
+    }
+    if (result.scroller.sliderReady !== '1' || result.slider.controls !== 1 || result.slider.dots !== cards.length || result.slider.currentDots !== 1) {
+      throw new Error(`benefit slider controls regressed at ${width}px: ${JSON.stringify(result.slider)}`);
+    }
+    if (width <= 767 && (result.scroller.left < 19 || result.rows[0].left < 19)) {
+      throw new Error(`mobile benefit slider must preserve visible left padding at ${width}px: ${JSON.stringify({ scroller:result.scroller, first:result.rows[0] })}`);
     }
     result.rows.forEach((row, index) => {
       const expected = cards[index];
