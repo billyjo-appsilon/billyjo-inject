@@ -9505,18 +9505,26 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-icon{width:66px;height:66px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-kicker{font-size:12.5px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-value{font-size:18px;line-height:1.15}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-controls{display:none}',
       'body.bj-home-promo-ready #bj-v5-injected~h2.m_tit,body.bj-home-promo-ready #bj-v5-injected~.prod_list,body.bj-home-promo-ready .m_outer>.new-mb,body.bj-home-promo-ready .m_outer>.new-mb_m,body.bj-home-promo-ready .m_outer>.prodList_wrap{display:none!important}',
       'body.bj-home-conversion-ready #bj-home-gift-promos{width:min(1280px,calc(100% - 24px));margin:14px auto 0!important;scroll-margin-top:110px}',
       '#bj-home-sticky-actions{display:none}',
       '@media(min-width:1025px){body.bj-home-conversion-ready .new-mv .item,body.bj-home-conversion-ready .new-mv .item .pc{aspect-ratio:24/7!important}}',
       '@media(max-width:767px){',
-      'body.bj-home-conversion-ready #bj-home-benefit-cards{padding:4px 0 8px}',
-      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-stack{display:flex;gap:8px;max-width:none;overflow-x:auto;padding:0 12px 2px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch;scrollbar-width:none}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards{position:relative;padding:4px 0 8px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-stack{--bj-benefit-card-width:min(82vw,300px);position:relative;display:flex;gap:8px;width:calc(100% - 20px);max-width:none;margin-left:20px;overflow-x:auto;clip-path:inset(0);isolation:isolate;padding:0 max(20px,calc(100% - var(--bj-benefit-card-width))) 32px 0;scroll-padding-right:20px;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-stack::-webkit-scrollbar{display:none}',
-      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-card{flex:0 0 min(78vw,270px);scroll-snap-align:start;grid-template-columns:minmax(0,1fr) 62px;min-height:98px;padding:11px 10px 11px 13px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-card{flex:0 0 var(--bj-benefit-card-width);scroll-snap-align:start;scroll-snap-stop:always;grid-template-columns:minmax(0,1fr) 62px;min-height:98px;padding:11px 10px 11px 13px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-icon{width:62px;height:62px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-kicker{font-size:11.5px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-value{font-size:16px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-controls{position:absolute;left:20px;right:20px;bottom:8px;display:flex;align-items:center;justify-content:center;gap:10px;min-height:28px;margin:0}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-dots{display:flex;align-items:center;justify-content:center;gap:1px}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-dot{appearance:none;position:relative;width:24px;height:24px;padding:0;border:0;border-radius:999px;background:transparent;cursor:pointer}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-dot:before{content:"";position:absolute;left:50%;top:50%;width:7px;height:7px;border-radius:999px;background:#c8d4ed;transform:translate(-50%,-50%);transition:width .18s ease,background-color .18s ease}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-dot[aria-current="true"]:before{width:20px;background:#0838f8}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-toggle{appearance:none;display:inline-flex;width:27px;height:27px;align-items:center;justify-content:center;padding:0;border:1px solid #c9d6f2;border-radius:999px;background:#fff;color:#0838f8;font:900 11px/1 Pretendard,Arial,sans-serif;cursor:pointer}',
+      'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-dot:focus-visible,body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-toggle:focus-visible{outline:3px solid rgba(8,56,248,.28);outline-offset:2px}',
       'body.bj-home-conversion-ready .new-qb{display:none!important}',
       'body.bj-home-conversion-ready .m_outer{padding-top:12px!important}',
       'body.bj-home-conversion-ready #bj-home-gift-promos{width:calc(100% - 16px);margin-top:8px!important}',
@@ -9537,7 +9545,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       '#bj-home-sticky-actions a:focus-visible{outline:3px solid rgba(8,56,248,.28);outline-offset:2px}',
       'body.bj-home-conversion-ready{padding-bottom:78px!important}',
       '}',
-      '@media(prefers-reduced-motion:reduce){#bj-home-sticky-actions,#bj-home-sticky-actions a{transition:none}}',
+      '@media(prefers-reduced-motion:reduce){#bj-home-sticky-actions,#bj-home-sticky-actions a,#bj-home-benefit-cards .bj-hbenefit-dot:before{transition:none}#bj-home-benefit-cards .bj-hbenefit-stack{scroll-behavior:auto!important}#bj-home-benefit-cards .bj-hbenefit-toggle{display:none!important}}',
       '@media(max-width:359px){#bj-home-sticky-actions{left:6px;right:6px;grid-template-columns:minmax(0,1.55fr) minmax(0,.9fr);gap:5px;padding:6px}#bj-home-sticky-actions a{gap:5px;padding:7px 6px;font-size:11.5px}#bj-home-sticky-actions .bj-hsa-icon{width:20px;height:20px;flex-basis:20px}#bj-home-sticky-actions .bj-hsa-icon svg{width:13px;height:13px}}'
     ].join('\n');
     (document.head || document.documentElement).appendChild(style);
@@ -9687,11 +9695,176 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
   }
   function enhanceBenefitScroller(){
     var stack = document.querySelector('#bj-home-benefit-cards .bj-hbenefit-stack');
-    if (!stack || stack.getAttribute('data-bj-a11y-ready')) return;
-    stack.setAttribute('data-bj-a11y-ready', '1');
-    stack.setAttribute('tabindex', '0');
-    stack.setAttribute('role', 'region');
-    stack.setAttribute('aria-label', '빌리조 지원 혜택 6개');
+    if (!stack) return;
+    if (!stack.getAttribute('data-bj-a11y-ready')) {
+      stack.setAttribute('data-bj-a11y-ready', '1');
+      stack.setAttribute('tabindex', '0');
+      stack.setAttribute('role', 'region');
+      stack.setAttribute('aria-label', '빌리조 지원 혜택 6개');
+      stack.setAttribute('aria-live', 'off');
+    }
+    if (stack.getAttribute('data-bj-slider-ready')) return;
+    var section = stack.closest('#bj-home-benefit-cards');
+    var cards = Array.prototype.slice.call(stack.querySelectorAll('.bj-hbenefit-card'));
+    if (!section || cards.length < 2) return;
+    stack.setAttribute('data-bj-slider-ready', '1');
+
+    var controls = document.createElement('div');
+    controls.className = 'bj-hbenefit-controls';
+    controls.setAttribute('role', 'group');
+    controls.setAttribute('aria-label', '혜택 슬라이드 제어');
+    var dots = document.createElement('div');
+    dots.className = 'bj-hbenefit-dots';
+    var dotButtons = cards.map(function(card, index){
+      var button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'bj-hbenefit-dot';
+      button.setAttribute('aria-label', '혜택 ' + (index + 1) + ' 보기');
+      button.setAttribute('data-bj-benefit-target', card.getAttribute('data-bj-benefit-number') || String(index + 1));
+      dots.appendChild(button);
+      return button;
+    });
+    var toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'bj-hbenefit-toggle';
+    toggle.setAttribute('aria-label', '혜택 자동 넘김 멈춤');
+    toggle.textContent = 'Ⅱ';
+    controls.appendChild(dots);
+    controls.appendChild(toggle);
+    section.appendChild(controls);
+
+    var reducedMotion = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null;
+    var currentIndex = 0;
+    var autoplayTimer = 0;
+    var resumeTimer = 0;
+    var scrollTimer = 0;
+    var inView = !window.IntersectionObserver;
+    var pausedByUser = false;
+    var interactionPaused = false;
+    var lastViewportWidth = window.innerWidth;
+
+    function isMobile(){ return window.innerWidth <= 767; }
+    function isReduced(){ return Boolean(reducedMotion && reducedMotion.matches); }
+    function paddingStart(){ return parseFloat(window.getComputedStyle(stack).paddingLeft) || 0; }
+    function cardScrollLeft(index){ return Math.max(0, cards[index].offsetLeft - paddingStart()); }
+    function nearestIndex(){
+      var target = stack.scrollLeft + paddingStart();
+      var nearest = 0;
+      var distance = Infinity;
+      cards.forEach(function(card, index){
+        var nextDistance = Math.abs(card.offsetLeft - target);
+        if (nextDistance < distance) { distance = nextDistance; nearest = index; }
+      });
+      return nearest;
+    }
+    function syncControls(){
+      var number = cards[currentIndex].getAttribute('data-bj-benefit-number') || String(currentIndex + 1);
+      section.setAttribute('data-bj-active-benefit', number);
+      dotButtons.forEach(function(button, index){
+        if (index === currentIndex) button.setAttribute('aria-current', 'true');
+        else button.removeAttribute('aria-current');
+      });
+      var running = !pausedByUser && !isReduced();
+      toggle.textContent = running ? 'Ⅱ' : '▶';
+      toggle.setAttribute('aria-label', running ? '혜택 자동 넘김 멈춤' : '혜택 자동 넘김 재생');
+      section.setAttribute('data-bj-benefit-autoplay', isReduced() ? 'reduced-motion' : (pausedByUser ? 'paused' : 'ready'));
+    }
+    function clearAutoplay(){
+      if (autoplayTimer) clearTimeout(autoplayTimer);
+      autoplayTimer = 0;
+    }
+    function canAutoplay(){
+      return isMobile() && inView && !document.hidden && !pausedByUser && !interactionPaused && !isReduced();
+    }
+    function schedule(delay){
+      clearAutoplay();
+      if (!canAutoplay()) return;
+      autoplayTimer = setTimeout(function(){
+        goTo((currentIndex + 1) % cards.length, 'smooth');
+      }, delay || 3400);
+    }
+    function goTo(index, behavior){
+      currentIndex = (index + cards.length) % cards.length;
+      stack.scrollTo({ left: cardScrollLeft(currentIndex), behavior: isReduced() ? 'auto' : (behavior || 'smooth') });
+      syncControls();
+      schedule();
+    }
+    function pauseForInteraction(){
+      interactionPaused = true;
+      clearAutoplay();
+      if (resumeTimer) clearTimeout(resumeTimer);
+      var focusHeld = stack.contains(document.activeElement);
+      var hoverHeld = false;
+      try { hoverHeld = stack.matches(':hover'); } catch (_hoverError) {}
+      if (!pausedByUser && !focusHeld && !hoverHeld) {
+        resumeTimer = setTimeout(function(){ interactionPaused = false; schedule(); }, 6000);
+      }
+    }
+    function holdInteraction(){
+      interactionPaused = true;
+      clearAutoplay();
+      if (resumeTimer) clearTimeout(resumeTimer);
+    }
+    function releaseInteraction(){
+      interactionPaused = false;
+      schedule();
+    }
+
+    dotButtons.forEach(function(button, index){
+      button.addEventListener('click', function(){ pauseForInteraction(); goTo(index, 'smooth'); });
+    });
+    toggle.addEventListener('click', function(){
+      pausedByUser = !pausedByUser;
+      interactionPaused = false;
+      if (resumeTimer) clearTimeout(resumeTimer);
+      if (pausedByUser) clearAutoplay();
+      else schedule(1000);
+      syncControls();
+    });
+    stack.addEventListener('keydown', function(event){
+      if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+      event.preventDefault();
+      pauseForInteraction();
+      goTo(currentIndex + (event.key === 'ArrowRight' ? 1 : -1), 'smooth');
+    });
+    stack.addEventListener('pointerdown', pauseForInteraction, { passive:true });
+    stack.addEventListener('touchstart', pauseForInteraction, { passive:true });
+    stack.addEventListener('mouseenter', holdInteraction);
+    stack.addEventListener('mouseleave', releaseInteraction);
+    stack.addEventListener('focusin', holdInteraction);
+    stack.addEventListener('focusout', function(){ setTimeout(function(){ if (!section.contains(document.activeElement)) releaseInteraction(); }, 0); });
+    stack.addEventListener('scroll', function(){
+      if (scrollTimer) clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(function(){
+        currentIndex = nearestIndex();
+        syncControls();
+      }, 120);
+    }, { passive:true });
+    document.addEventListener('visibilitychange', function(){ if (document.hidden) clearAutoplay(); else schedule(); });
+    window.addEventListener('resize', function(){
+      if (window.innerWidth === lastViewportWidth) return;
+      lastViewportWidth = window.innerWidth;
+      currentIndex = nearestIndex();
+      syncControls();
+      schedule();
+    }, { passive:true });
+    if (reducedMotion) {
+      var onMotionChange = function(){ syncControls(); schedule(); };
+      if (typeof reducedMotion.addEventListener === 'function') reducedMotion.addEventListener('change', onMotionChange);
+      else if (typeof reducedMotion.addListener === 'function') reducedMotion.addListener(onMotionChange);
+    }
+    if (window.IntersectionObserver) {
+      var visibilityObserver = new IntersectionObserver(function(entries){
+        var entry = entries[entries.length - 1];
+        inView = Boolean(entry && entry.isIntersecting && entry.intersectionRatio >= 0.25);
+        if (inView) schedule(2200);
+        else clearAutoplay();
+      }, { threshold:[0, 0.25, 0.6] });
+      visibilityObserver.observe(section);
+    }
+    stack.scrollLeft = 0;
+    syncControls();
+    schedule(2200);
   }
   function mountStickyActions(){
     if (!document.body || document.getElementById('bj-home-sticky-actions')) return;
