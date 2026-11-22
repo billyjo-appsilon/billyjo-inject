@@ -43,4 +43,14 @@ function inspectHomeRender(content) {
   };
 }
 
-module.exports = { configureHomeRender, inspectHomeRender, HOME_RENDER_GATE_STYLE };
+function pinInjectLoader(content, releaseHash) {
+  if (!/^[0-9a-f]{7,40}$/i.test(String(releaseHash || ''))) {
+    throw new Error('releaseHash must be a 7-40 character git hash');
+  }
+  return String(content || '').replace(
+    /billyjo-inject(?:@[0-9a-f]{7,40})?\/inject(\.min)?\.js/gi,
+    (_match, minSuffix) => `billyjo-inject@${releaseHash}/inject${minSuffix || ''}.js`
+  );
+}
+
+module.exports = { configureHomeRender, inspectHomeRender, pinInjectLoader, HOME_RENDER_GATE_STYLE };

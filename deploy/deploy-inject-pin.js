@@ -1,5 +1,5 @@
 const { chromium } = require('playwright');
-const { configureHomeRender, inspectHomeRender } = require('./home-render-logscript');
+const { configureHomeRender, inspectHomeRender, pinInjectLoader } = require('./home-render-logscript');
 
 const ADMIN_USER = process.env.BILLYJO_ADMIN_USER || process.env.ADMIN1_USERNAME;
 const ADMIN_PASS = process.env.BILLYJO_ADMIN_PASS || process.env.ADMIN1_PASSWORD;
@@ -32,14 +32,14 @@ if (homeRenderGate && homeRenderGate !== '1' && homeRenderGate !== '0') {
       if (!field) throw new Error('logscript_base not found');
       return field.value;
     });
-    const pinsBefore = Array.from(before.matchAll(/billyjo-inject@([0-9a-f]{7,40})\/inject(?:\.min)?\.js/gi), (m) => m[1]);
+    const loaderRefsBefore = Array.from(
+      before.matchAll(/billyjo-inject(?:@([0-9a-f]{7,40}))?\/inject(?:\.min)?\.js/gi),
+      (m) => m[1] || 'main'
+    );
     const naverLoadersBefore = (before.match(/data-bj-naver-loader/g) || []).length;
-    if (!pinsBefore.length) throw new Error('inject.js or inject.min.js pin not found in current admin logscript');
+    if (!loaderRefsBefore.length) throw new Error('inject.js or inject.min.js loader not found in current admin logscript');
 
-    const after = configureHomeRender(before.replace(
-      /billyjo-inject@[0-9a-f]{7,40}\/inject(\.min)?\.js/gi,
-      (_match, minSuffix) => `billyjo-inject@${releaseHash}/inject${minSuffix || ''}.js`
-    ), homeRenderGate);
+    const after = configureHomeRender(pinInjectLoader(before, releaseHash), homeRenderGate);
     const preflight = inspectHomeRender(after);
     const expectedGateCount = homeRenderGate === '1' ? 1 : homeRenderGate === '0' ? 0 : preflight.gateCount;
     if (!preflight.preloadAnonymous || !preflight.scriptAnonymous || preflight.gateCount !== expectedGateCount) {
@@ -76,7 +76,7 @@ if (homeRenderGate && homeRenderGate !== '1' && homeRenderGate !== '0') {
     if (!verified.exact || !verified.hasExpectedHash || !verified.hasGtm || !verified.preloadCrossorigin || !verified.coreScriptCrossorigin || !gateOk || verified.naverLoaders !== naverLoadersBefore) {
       throw new Error(`Inject pin verification failed: ${JSON.stringify(verified)}`);
     }
-    console.log(JSON.stringify({ pinsBefore, naverLoadersBefore, verified }, null, 2));
+    console.log(JSON.stringify({ loaderRefsBefore, naverLoadersBefore, verified }, null, 2));
   } finally {
     await browser.close();
   }

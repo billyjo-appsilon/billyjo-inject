@@ -1,11 +1,21 @@
 'use strict';
 
-const { configureHomeRender, inspectHomeRender } = require('./home-render-logscript');
+const { configureHomeRender, inspectHomeRender, pinInjectLoader } = require('./home-render-logscript');
 
 const hash = '79c8b3f';
 const preload = `<link rel="preload" as="script" href="https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@${hash}/inject.min.js" crossorigin>`;
 const script = `<script src="https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@${hash}/inject.min.js" onerror="fallback()"></script>`;
 const input = `<style id="keep">x</style>${preload}${script}`;
+
+const unpinned = '<link rel="preload" as="script" href="https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject/inject.min.js"><script src="https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject/inject.min.js"></script>';
+const pinnedFromMain = pinInjectLoader(unpinned, hash);
+if ((pinnedFromMain.match(new RegExp(`billyjo-inject@${hash}/inject\\.min\\.js`, 'g')) || []).length !== 2) {
+  throw new Error('unpinned main loaders must be promoted to the immutable release hash');
+}
+const repinned = pinInjectLoader(input, 'cf8a415');
+if ((repinned.match(/billyjo-inject@cf8a415\/inject\.min\.js/g) || []).length !== 2) {
+  throw new Error('existing immutable loaders must be promoted to the new release hash');
+}
 
 const enabled = configureHomeRender(input, '1');
 if ((enabled.match(/id="bj-home-render-gate"/g) || []).length !== 1) throw new Error('home render gate must be inserted exactly once');
