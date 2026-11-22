@@ -6,7 +6,7 @@ const { chromium } = require('playwright');
 const { HOME_RENDER_GATE_STYLE } = require('./home-render-logscript');
 
 const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'utf8');
-const CORE_RE = /cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/inject(?:\.min)?\.js/;
+const CORE_RE = /cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject(?:@[^/]+)?\/inject(?:\.min)?\.js/;
 const V5_RE = /cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@4c8fe10\/preview-detail-page-v5\.html/;
 
 async function runCase(browser, name, options) {

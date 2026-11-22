@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
 
 const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'utf8');
 const FIXED_NOW = new Date('2026-11-19T05:00:00.000Z').getTime();
-const CORE_RE = /cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/inject(?:\.min)?\.js/;
+const CORE_RE = /cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject(?:@[^/]+)?\/inject(?:\.min)?\.js/;
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);

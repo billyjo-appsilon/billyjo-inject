@@ -70,7 +70,7 @@ for (const required of [
   "section.id = 'bj-home-gift-promos'",
   "var LIVE1_HALF_BANNER_MASCOT = 'https://live.billyjo.co.kr/images/toss-banner-mascot.webp'",
   "function homeAssetUrl(path)",
-  "src.match(/^(https?:\\/\\/[^/]+\\/gh\\/billyjo-appsilon\\/billyjo-inject@[^/]+\\/)/)",
+  "src.match(/^(https?:\\/\\/[^/]+\\/gh\\/billyjo-appsilon\\/billyjo-inject)(?:@([^/]+))?\\/inject(?:\\.min)?\\.js(?:[?#].*)?$/)",
   "HOME_ASSET_BASE || 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/'",
   "image: 'images/products/cutout-20261121/WP610NWA6.png'",
   "image: 'images/products/cutout-20261121/AP1125G.webp'",

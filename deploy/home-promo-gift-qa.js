@@ -31,7 +31,7 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
   for (const testCase of cases) {
     const page = await browser.newPage({ viewport: testCase });
     let cartPostBody = '';
-    await page.route(/cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/inject(?:\.min)?\.js/, async (route) => {
+    await page.route(/cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject(?:@[^/]+)?\/inject(?:\.min)?\.js/, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: injectSource });
     });
     await page.route('**/images/brands/*-horizontal-20261119.png', async (route) => {
@@ -112,10 +112,20 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
           products.concat(logos, [banner]).every((image) => image.complete && image.naturalWidth > 0);
       }, null, { timeout: 30000 });
     } catch (error) {
-      const failedImages = await page.evaluate(() => [...document.querySelectorAll('#bj-home-gift-promos img')]
-        .filter((image) => !image.complete || image.naturalWidth === 0)
-        .map((image) => image.src));
-      throw new Error(`${testCase.name}: image load timeout (${failedImages.join(', ')})`, { cause: error });
+      const imageState = await page.evaluate(() => {
+        const products = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-image > img:not(.bj-hgp-brand-logo)')];
+        const logos = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-brand-logo')];
+        const banner = document.querySelector('#bj-home-gift-promos .bj-hgp-half-visual img');
+        return {
+          products: products.length,
+          logos: logos.length,
+          banner: Boolean(banner),
+          failed: products.concat(logos, banner ? [banner] : [])
+            .filter((image) => !image.complete || image.naturalWidth === 0)
+            .map((image) => image.src),
+        };
+      });
+      throw new Error(`${testCase.name}: image load timeout (${JSON.stringify(imageState)})`, { cause: error });
     }
     const cutoutScreenshotDir = String(process.env.BILLYJO_CUTOUT_SCREENSHOT_DIR || '').trim();
     if (testCase.name === 'mobile' && cutoutScreenshotDir) {
@@ -607,7 +617,7 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
   // 공식 공기청정기 증정 혜택이 철회되면 가격 할인 문구가 남아 있어도
   // 증정 카드가 포함된 섹션 전체를 fail-closed로 숨긴다.
   const withdrawnGift = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-  await withdrawnGift.route(/cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/inject(?:\.min)?\.js/, async (route) => {
+  await withdrawnGift.route(/cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject(?:@[^/]+)?\/inject(?:\.min)?\.js/, async (route) => {
     await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: injectSource });
   });
   await withdrawnGift.route('https://admin2-api.billyjo.co.kr/v1/promotions/current**', async (route) => {

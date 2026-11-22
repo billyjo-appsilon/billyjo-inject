@@ -53,7 +53,7 @@ async function inspectViewport(browser, width, height) {
   let injectIntercepts = 0;
   const pageErrors = [];
   page.on('pageerror', (error) => pageErrors.push(String(error && error.message || error)));
-  await page.route(/billyjo-inject@[0-9a-f]{7,40}\/inject(?:\.min)?\.js/i, async (route) => {
+  await page.route(/billyjo-inject(?:@[0-9a-f]{7,40})?\/inject(?:\.min)?\.js/i, async (route) => {
     injectIntercepts += 1;
     await route.fulfill({
       status: 200,
@@ -62,7 +62,7 @@ async function inspectViewport(browser, width, height) {
       body: injectSource
     });
   });
-  await page.route(/billyjo-inject@[0-9a-f]{7,40}\/images\/live1\/icons\/([^?]+)/i, async (route) => {
+  await page.route(/billyjo-inject(?:@[^/]+)?\/images\/live1\/icons\/([^?]+)/i, async (route) => {
     const filename = path.basename(new URL(route.request().url()).pathname);
     const assetPath = path.join(repoRoot, 'images', 'live1', 'icons', filename);
     if (!fs.existsSync(assetPath)) return route.continue();
