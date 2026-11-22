@@ -2901,6 +2901,13 @@
 
     var CARD_BG = '#fbfdff';
     var CARD_BORDER = '#dfeaf6';
+    var ASSET_BASE = (function () {
+      try {
+        var src = (document.currentScript && document.currentScript.src) || '';
+        var match = src.match(/^(https?:\/\/(?:cdn|fastly)\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject)(?:@([^/]+))?\/inject(?:\.min)?\.js(?:[?#].*)?$/);
+        return match ? match[1] + '@' + (match[2] || 'main') + '/' : '';
+      } catch (_error) { return ''; }
+    })();
     var ITEMS = [
       { key: 'water', name: '정수기', reviews: '후기 8,119개', href: '/html/dh_prod/prod_list/1-8', img: 'images/category-icons/water-purifier.webp' },
       { key: 'air', name: '공기청정기', reviews: '후기 2,274개', href: '/html/dh_prod/prod_list/1-6', img: 'images/category-icons/air-purifier.webp' },
@@ -2944,12 +2951,16 @@
         .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
     function asset(path) {
+      if (ASSET_BASE) return ASSET_BASE + path.replace(/^\/+/, '');
       try {
         var scripts = document.getElementsByTagName('script');
         for (var i = scripts.length - 1; i >= 0; i--) {
           var src = scripts[i].src || '';
-          var m = src.match(/^(https?:\/\/(?:cdn|fastly)\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/)/);
-          if (m) return m[1] + path.replace(/^\/+/, '');
+          // Only derive assets from this loader. Tracking scripts live in the same
+          // repository and may carry unrelated immutable refs; accepting any repo
+          // script makes an unpinned inject.min.js borrow the tracking ref and 404.
+          var m = src.match(/^(https?:\/\/(?:cdn|fastly)\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject)(?:@([^/]+))?\/inject(?:\.min)?\.js(?:[?#].*)?$/);
+          if (m) return m[1] + '@' + (m[2] || 'main') + '/' + path.replace(/^\/+/, '');
         }
       } catch (e) {}
       return 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/' + path.replace(/^\/+/, '');
@@ -3275,8 +3286,8 @@
   var HOME_ASSET_BASE = (function () {
     try {
       var src = (document.currentScript && document.currentScript.src) || '';
-      var match = src.match(/^(https?:\/\/[^/]+\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/)/);
-      return match ? match[1] : '';
+      var match = src.match(/^(https?:\/\/[^/]+\/gh\/billyjo-appsilon\/billyjo-inject)(?:@([^/]+))?\/inject(?:\.min)?\.js(?:[?#].*)?$/);
+      return match ? match[1] + '@' + (match[2] || 'main') + '/' : '';
     } catch (_error) { return ''; }
   })();
   function homeAssetUrl(path) {
@@ -3589,8 +3600,8 @@
         ? '<div class="bj-hgp-reviews" aria-label="평점 ' + p.rating + '점, 후기 ' + p.reviewCount + '개"><strong aria-hidden="true">★</strong><span>' + p.rating + ' · 후기 ' + won(p.reviewCount) + '개</span></div>'
         : '';
       var logo = BRAND_LOGOS[p.brand];
-      var brand = '<div class="bj-hgp-brandmark">' + (logo && HOME_ASSET_BASE
-        ? '<img class="bj-hgp-brand-logo" src="' + HOME_ASSET_BASE + logo + '" alt="' + p.brand + ' 로고"><span class="bj-hgp-brand-fallback" hidden>' + p.brand + '</span>'
+      var brand = '<div class="bj-hgp-brandmark">' + (logo
+        ? '<img class="bj-hgp-brand-logo" src="' + homeAssetUrl(logo) + '" alt="' + p.brand + ' 로고"><span class="bj-hgp-brand-fallback" hidden>' + p.brand + '</span>'
         : '<span class="bj-hgp-brand-fallback">' + p.brand + '</span>') + '</div>';
       return '<article class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" data-bj-hgp-tier="' + p.tier + '"' +
         (isExtra ? ' data-bj-hgp-extra hidden' : '') + '>' +
@@ -7279,6 +7290,17 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         ".bj-brand-track .brand-cell{flex:0 0 auto !important;width:132px !important;height:60px !important;margin:0 !important}" +
         "@keyframes bjBrandScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}" +
         "@keyframes bjBrandScrollReverse{from{transform:translateX(-50%)}to{transform:translateX(0)}}" +
+        // 고객 후기는 브랜드 마퀴처럼 2행으로 나누고 두 행을 반대 방향으로 흘린다.
+        "#bj-v5-injected .review-section[data-bj-review-rows='2']{display:grid !important;gap:8px !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-wrap{padding:4px 0 8px !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track{display:flex !important;gap:0 !important;width:max-content !important;animation:bjReviewScroll 52s linear infinite !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track.bj-review-track-reverse{animation-name:bjReviewScrollReverse !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-set{display:flex !important;flex:none !important;gap:16px !important;padding-right:16px !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track:hover,#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-wrap:focus-within .review-track{animation-play-state:paused !important}" +
+        "@keyframes bjReviewScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}" +
+        "@keyframes bjReviewScrollReverse{from{transform:translateX(-50%)}to{transform:translateX(0)}}" +
+        "@media(max-width:767px){#bj-v5-injected .review-section[data-bj-review-rows='2']{gap:4px !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-set{gap:12px !important;padding-right:12px !important}}" +
+        "@media(prefers-reduced-motion:reduce){#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track,#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track.bj-review-track-reverse{animation:none !important;transform:none !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-wrap{overflow-x:auto !important;-webkit-mask-image:none !important;mask-image:none !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-set[aria-hidden='true']{display:none !important}}" +
         // PC 홈 하단 콘텐츠 폭을 히어로/상단 카테고리와 같은 1280px 기준으로 통일 (2026-08-12)
         "@media(min-width:1280px){#bj-v5-injected{width:1280px !important;max-width:1280px !important;margin-left:auto !important;margin-right:auto !important;padding-left:0 !important;padding-right:0 !important}#bj-v5-injected>.hero,#bj-v5-injected>div:not(.zone){width:1280px !important;max-width:1280px !important;margin-left:auto !important;margin-right:auto !important}#bj-v5-injected .zone{width:100vw !important;margin-left:calc((1280px - 100vw)/2) !important;margin-right:calc((1280px - 100vw)/2) !important;padding-left:0 !important;padding-right:0 !important}#bj-v5-injected .zone>section{width:1280px !important;max-width:1280px !important;margin-left:auto !important;margin-right:auto !important}}" +
         // 신뢰도 섹션: 마퀴↔보장바 사이 헤딩 + 2번째 보장 바 (시안 Image #14 맞춤) (2026-07-02)
@@ -7463,7 +7485,75 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         author.textContent = '(코웨이 공식) ' + product + ' · 구매자후기';
       });
     }
+    function bjBuildTwoRowReviewMarquee() {
+      var reviewSection = pageEl.querySelector('.review-section');
+      if (!reviewSection || reviewSection.getAttribute('data-bj-review-rows') === '2') return;
+      var originalWrap = reviewSection.querySelector('.review-track-wrap');
+      var originalTrack = originalWrap && originalWrap.querySelector('.review-track');
+      if (!originalWrap || !originalTrack) return;
+      var items = Array.prototype.slice.call(originalTrack.children).filter(function (node) {
+        return node.classList && node.classList.contains('review-item');
+      });
+      if (items.length < 4) return;
+
+      function signature(item) {
+        var photo = item.querySelector('.rv-photo');
+        var quote = item.querySelector('.quote');
+        var author = item.querySelector('.author');
+        return [photo && photo.getAttribute('src'), quote && quote.textContent, author && author.textContent].join('|');
+      }
+      var sourceItems = items;
+      if (items.length % 2 === 0) {
+        var half = items.length / 2;
+        var repeated = true;
+        for (var i = 0; i < half; i++) {
+          if (signature(items[i]) !== signature(items[i + half])) { repeated = false; break; }
+        }
+        if (repeated) sourceItems = items.slice(0, half);
+      }
+      if (sourceItems.length < 2) return;
+
+      var splitAt = Math.ceil(sourceItems.length / 2);
+      var rows = [sourceItems.slice(0, splitAt), sourceItems.slice(splitAt)];
+      if (rows[0].length < 5 || rows[1].length < 5) return;
+
+      function createRow(rowItems, reverse, rowNumber) {
+        var wrap = originalWrap.cloneNode(false);
+        wrap.setAttribute('data-bj-review-row', String(rowNumber));
+        wrap.setAttribute('tabindex', '0');
+        wrap.setAttribute('aria-label', '고객 후기 ' + rowNumber + '행 슬라이드');
+        var track = document.createElement('div');
+        track.className = 'review-track' + (reverse ? ' bj-review-track-reverse' : '');
+        track.setAttribute('role', 'list');
+        track.setAttribute('aria-label', '고객 후기 ' + rowNumber + '행');
+        track.setAttribute('aria-live', 'off');
+        var firstSet = document.createElement('div');
+        firstSet.className = 'review-track-set';
+        rowItems.forEach(function (item) {
+          var clone = item.cloneNode(true);
+          clone.setAttribute('role', 'listitem');
+          firstSet.appendChild(clone);
+        });
+        var duplicateSet = firstSet.cloneNode(true);
+        duplicateSet.setAttribute('aria-hidden', 'true');
+        Array.prototype.forEach.call(duplicateSet.querySelectorAll('[role="listitem"]'), function (item) {
+          item.removeAttribute('role');
+        });
+        track.appendChild(firstSet);
+        track.appendChild(duplicateSet);
+        wrap.appendChild(track);
+        return wrap;
+      }
+
+      var firstRow = createRow(rows[0], false, 1);
+      var secondRow = createRow(rows[1], true, 2);
+      originalWrap.parentNode.insertBefore(firstRow, originalWrap);
+      originalWrap.parentNode.insertBefore(secondRow, originalWrap);
+      originalWrap.parentNode.removeChild(originalWrap);
+      reviewSection.setAttribute('data-bj-review-rows', '2');
+    }
     function bjNormalizeHomeReviews() {
+      bjBuildTwoRowReviewMarquee();
       bjRenameHomeReviewBenefits();
       bjRenameHomeReviewAuthors();
     }

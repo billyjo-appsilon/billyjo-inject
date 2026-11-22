@@ -31,7 +31,7 @@ async function inspect(browser, width, visibility) {
       body: JSON.stringify({ ok: true, pageKey: 'home', config: { sectionVisibility: visibility } }),
     });
   });
-  await page.route(/billyjo-inject@[0-9a-f]{7,40}\/inject(?:\.min)?\.js/i, async (route) => {
+  await page.route(/billyjo-inject(?:@[0-9a-f]{7,40})?\/inject(?:\.min)?\.js/i, async (route) => {
     injectIntercepts += 1;
     await route.fulfill({
       status: 200,

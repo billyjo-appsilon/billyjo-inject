@@ -3,7 +3,7 @@ const path = require('node:path');
 const { chromium } = require('playwright');
 
 const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'utf8');
-const CORE_RE = /cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject@[^/]+\/inject(?:\.min)?\.js/;
+const CORE_RE = /cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject(?:@[^/]+)?\/inject(?:\.min)?\.js/;
 const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout-20261121');
 
 async function routeProductCutouts(page) {
@@ -112,6 +112,32 @@ async function inspect(browser, width, height) {
                 iconBeforeText: Math.round(media.right) <= Math.round(text.left) + 1,
                 contentOverflow: card.scrollWidth > card.clientWidth + 1,
                 imageLoaded: Boolean(image?.complete && image?.naturalWidth > 0),
+                imageSrc: image?.currentSrc || image?.src || '',
+              };
+            }),
+            loaderRef: (() => {
+              const loader = Array.from(document.scripts).map((script) => script.src || '').find((src) =>
+                /\/billyjo-inject(?:@[^/]+)?\/inject(?:\.min)?\.js(?:[?#].*)?$/.test(src));
+              const match = loader?.match(/\/billyjo-inject(?:@([^/]+))?\/inject(?:\.min)?\.js/);
+              return match?.[1] || 'main';
+            })(),
+          };
+        })(),
+        reviews: (() => {
+          const section = document.querySelector('#bj-v5-injected .review-section');
+          const rows = Array.from(section?.querySelectorAll('.review-track-wrap') || []);
+          return {
+            marker: section?.getAttribute('data-bj-review-rows') || '',
+            rows: rows.map((wrap) => {
+              const track = wrap.querySelector('.review-track');
+              const sets = Array.from(track?.querySelectorAll(':scope > .review-track-set') || []);
+              return {
+                row: wrap.getAttribute('data-bj-review-row') || '',
+                animation: track ? getComputedStyle(track).animationName : '',
+                sets: sets.length,
+                itemsPerSet: sets.map((set) => set.querySelectorAll('.review-item').length),
+                duplicateHidden: sets[1]?.getAttribute('aria-hidden') || '',
+                wrapTabindex: wrap.getAttribute('tabindex') || '',
               };
             }),
           };
@@ -197,6 +223,25 @@ async function inspect(browser, width, height) {
     assert(result.category.airconVisible === '0' && result.category.airconLiveAt === '2027-05-01T00:00:00+09:00', `${width}px: aircon season gate mismatch (${JSON.stringify(result.category)})`);
     assert(result.category.extraHidden && result.category.extraNames[0] === '에어컨' && result.category.extraNames.filter((name) => name === '에어컨').length === 1, `${width}px: off-season aircon is not confined to category more (${JSON.stringify(result.category)})`);
     assert(result.category.cards.length === 6 && result.category.cards.every((card) => card.name && card.href && card.imageLoaded && !card.contentOverflow), `${width}px: category card content contract mismatch (${JSON.stringify(result.category)})`);
+    assert(result.category.cards.every((card) => card.imageSrc.includes(`/billyjo-inject@${result.category.loaderRef}/images/category-icons/`)), `${width}px: category icons do not use the loader ref (${JSON.stringify(result.category)})`);
+    assert(result.reviews.marker === '2' && result.reviews.rows.length === 2, `${width}px: customer reviews are not split into two rows (${JSON.stringify(result.reviews)})`);
+    assert(result.reviews.rows[0].animation === 'bjReviewScroll' && result.reviews.rows[1].animation === 'bjReviewScrollReverse', `${width}px: customer review rows do not move in opposite directions (${JSON.stringify(result.reviews)})`);
+    assert(result.reviews.rows.every((row) => row.sets === 2 && row.itemsPerSet.length === 2 && row.itemsPerSet[0] >= 5 && row.itemsPerSet[0] === row.itemsPerSet[1] && row.duplicateHidden === 'true' && row.wrapTabindex === '0'), `${width}px: customer review marquee loop contract mismatch (${JSON.stringify(result.reviews)})`);
+    const reviewScreenshotPath = String(process.env.BILLYJO_REVIEW_SCREENSHOT || '').trim();
+    if (width === 390 && reviewScreenshotPath) {
+      await page.locator('#bj-v5-injected .review-section').screenshot({ path: reviewScreenshotPath });
+    }
+    if (width === 390) {
+      await page.emulateMedia({ reducedMotion: 'reduce' });
+      const reducedReviews = await page.evaluate(() => Array.from(document.querySelectorAll('#bj-v5-injected .review-track-wrap')).map((wrap) => ({
+        animation: getComputedStyle(wrap.querySelector('.review-track')).animationName,
+        duplicateDisplay: getComputedStyle(wrap.querySelector('.review-track-set[aria-hidden="true"]')).display,
+        overflowX: getComputedStyle(wrap).overflowX,
+        tabindex: wrap.getAttribute('tabindex') || '',
+      })));
+      assert(reducedReviews.length === 2 && reducedReviews.every((row) => row.animation === 'none' && row.duplicateDisplay === 'none' && row.overflowX === 'auto' && row.tabindex === '0'), `390px: reduced-motion review fallback mismatch (${JSON.stringify(reducedReviews)})`);
+      await page.emulateMedia({ reducedMotion: 'no-preference' });
+    }
     if (width <= 767) {
       assert(result.benefitSpacing.gapBefore <= 4 && result.benefitSpacing.innerTop <= 4 && result.benefitSpacing.innerBottom <= 10 && result.benefitSpacing.nextPaddingTop <= 12, `${width}px: benefit spacing is not compact (${JSON.stringify(result.benefitSpacing)})`);
       assert(result.category.height <= 360, `${width}px: compact category section is too tall (${result.category.height}px)`);
