@@ -7290,16 +7290,25 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         ".bj-brand-track .brand-cell{flex:0 0 auto !important;width:132px !important;height:60px !important;margin:0 !important}" +
         "@keyframes bjBrandScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}" +
         "@keyframes bjBrandScrollReverse{from{transform:translateX(-50%)}to{transform:translateX(0)}}" +
-        // 고객 후기는 브랜드 마퀴처럼 2행으로 나누고 두 행을 반대 방향으로 흘린다.
-        "#bj-v5-injected .review-section[data-bj-review-rows='2']{display:grid !important;gap:8px !important}" +
-        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-wrap{padding:4px 0 8px !important}" +
+        // 고객 후기는 2행 가로형 카드로 압축하고, 위 보장 카드와 같은 넓은 여백 체계를 쓴다.
+        "#bj-v5-injected .zone[data-bj-wide-card-section='1']>section{box-sizing:border-box !important;width:calc(100% - 32px) !important;max-width:1280px !important;margin-left:auto !important;margin-right:auto !important;padding-left:0 !important;padding-right:0 !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2']{display:grid !important;width:100% !important;max-width:none !important;margin:20px auto 0 !important;gap:10px !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-wrap{padding:4px 0 6px !important;-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 2%,#000 98%,transparent 100%) !important;mask-image:linear-gradient(90deg,transparent 0%,#000 2%,#000 98%,transparent 100%) !important}" +
         "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track{display:flex !important;gap:0 !important;width:max-content !important;animation:bjReviewScroll 52s linear infinite !important}" +
         "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track.bj-review-track-reverse{animation-name:bjReviewScrollReverse !important}" +
-        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-set{display:flex !important;flex:none !important;gap:16px !important;padding-right:16px !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-set{display:flex !important;flex:none !important;gap:14px !important;padding-right:14px !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item{box-sizing:border-box !important;flex:0 0 clamp(460px,42vw,540px) !important;width:auto !important;height:176px !important;min-height:0 !important;padding:12px !important;border-radius:18px !important;overflow:hidden !important;display:grid !important;grid-template-columns:148px minmax(0,1fr) !important;grid-template-rows:minmax(0,1fr) !important;gap:14px !important;align-items:stretch !important;justify-content:initial !important;text-align:left !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .rv-photo{width:100% !important;height:100% !important;max-height:100% !important;min-width:0 !important;min-height:0 !important;margin:0 !important;border-radius:12px !important;object-fit:cover !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .rv-body{display:grid !important;grid-template-columns:auto minmax(0,1fr) !important;grid-template-areas:'badge stars' 'quote quote' 'gift gift' 'author author' !important;grid-template-rows:auto minmax(0,1fr) auto auto !important;column-gap:8px !important;row-gap:4px !important;align-items:center !important;align-content:stretch !important;width:auto !important;min-width:0 !important;min-height:0 !important;overflow:hidden !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .cat-badge{grid-area:badge !important;align-self:center !important;justify-self:start !important;margin:0 !important;padding:4px 9px !important;font-size:11px !important;line-height:1.2 !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .stars{grid-area:stars !important;justify-self:end !important;margin:0 !important;font-size:14px !important;line-height:1 !important;letter-spacing:1px !important;white-space:nowrap !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .quote{grid-area:quote !important;align-self:center !important;margin:0 !important;min-width:0 !important;overflow:hidden !important;display:-webkit-box !important;-webkit-box-orient:vertical !important;-webkit-line-clamp:2 !important;font-size:13.5px !important;line-height:1.45 !important;text-align:left !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .rv-gift{grid-area:gift !important;justify-self:start !important;margin:0 !important;padding:4px 9px !important;font-size:11px !important;line-height:1.2 !important;white-space:nowrap !important}" +
+        "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .author{box-sizing:border-box !important;grid-area:author !important;justify-self:stretch !important;display:block !important;width:100% !important;max-width:100% !important;margin:0 !important;padding:5px 8px !important;overflow:hidden !important;text-overflow:ellipsis !important;white-space:nowrap !important;font-size:10.5px !important;line-height:1.2 !important;text-align:left !important}" +
         "#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track:hover,#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-wrap:focus-within .review-track{animation-play-state:paused !important}" +
         "@keyframes bjReviewScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}" +
         "@keyframes bjReviewScrollReverse{from{transform:translateX(-50%)}to{transform:translateX(0)}}" +
-        "@media(max-width:767px){#bj-v5-injected .review-section[data-bj-review-rows='2']{gap:4px !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-set{gap:12px !important;padding-right:12px !important}}" +
+        "@media(max-width:767px){#bj-v5-injected .zone[data-bj-wide-card-section='1']>section{width:calc(100% + 44px) !important;margin-left:-22px !important;margin-right:-22px !important}#bj-v5-injected .review-section[data-bj-review-rows='2']{margin-top:16px !important;gap:6px !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-set{gap:10px !important;padding-right:10px !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item{flex-basis:clamp(288px,calc(100svw - 32px),520px) !important;height:158px !important;padding:10px !important;border-radius:16px !important;grid-template-columns:clamp(92px,29vw,114px) minmax(0,1fr) !important;gap:10px !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .rv-photo{border-radius:10px !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .rv-body{column-gap:5px !important;row-gap:3px !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .cat-badge{padding:3px 7px !important;font-size:10px !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .stars{font-size:12px !important;letter-spacing:.4px !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .quote{font-size:12px !important;line-height:1.4 !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .rv-gift{padding:3px 7px !important;font-size:10px !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-item .author{padding:4px 6px !important;font-size:9.5px !important}}" +
         "@media(prefers-reduced-motion:reduce){#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track,#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track.bj-review-track-reverse{animation:none !important;transform:none !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-wrap{overflow-x:auto !important;-webkit-mask-image:none !important;mask-image:none !important}#bj-v5-injected .review-section[data-bj-review-rows='2'] .review-track-set[aria-hidden='true']{display:none !important}}" +
         // PC 홈 하단 콘텐츠 폭을 히어로/상단 카테고리와 같은 1280px 기준으로 통일 (2026-08-12)
         "@media(min-width:1280px){#bj-v5-injected{width:1280px !important;max-width:1280px !important;margin-left:auto !important;margin-right:auto !important;padding-left:0 !important;padding-right:0 !important}#bj-v5-injected>.hero,#bj-v5-injected>div:not(.zone){width:1280px !important;max-width:1280px !important;margin-left:auto !important;margin-right:auto !important}#bj-v5-injected .zone{width:100vw !important;margin-left:calc((1280px - 100vw)/2) !important;margin-right:calc((1280px - 100vw)/2) !important;padding-left:0 !important;padding-right:0 !important}#bj-v5-injected .zone>section{width:1280px !important;max-width:1280px !important;margin-left:auto !important;margin-right:auto !important}}" +
@@ -7480,6 +7489,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         if (!product || product.indexOf('공식') !== -1) return;
         product = product.replace(/^코웨이\s+/, '');
         author.textContent = '(코웨이 공식) ' + product + ' · 구매자후기';
+        author.setAttribute('title', author.textContent);
       });
     }
     function bjBuildTwoRowReviewMarquee() {
@@ -7543,11 +7553,14 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       }
 
       var firstRow = createRow(rows[0], false, 1);
-      var secondRow = createRow(rows[1], true, 2);
+      var secondRow = createRow(rows[1], false, 2);
       originalWrap.parentNode.insertBefore(firstRow, originalWrap);
       originalWrap.parentNode.insertBefore(secondRow, originalWrap);
       originalWrap.parentNode.removeChild(originalWrap);
       reviewSection.setAttribute('data-bj-review-rows', '2');
+      reviewSection.setAttribute('data-bj-review-layout', 'landscape');
+      var reviewZone = reviewSection.closest && reviewSection.closest('.zone');
+      if (reviewZone) reviewZone.setAttribute('data-bj-wide-card-section', '1');
     }
     function bjNormalizeHomeReviews() {
       bjBuildTwoRowReviewMarquee();
@@ -7718,6 +7731,9 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjBarsRow.appendChild(bjBar1);
       bjBarsRow.appendChild(bjBar2);
     }
+    var bjBarsRowReady = pageEl.querySelector('.bj-bars-row');
+    var bjBarsZone = bjBarsRowReady && bjBarsRowReady.closest && bjBarsRowReady.closest('.zone');
+    if (bjBarsZone) bjBarsZone.setAttribute('data-bj-wide-card-section', '1');
 
     // 중복 설명이던 레거시 서비스 4카드 섹션은 홈에서 제거한다. 신규 혜택 01~04 카드는 유지한다. (2026-11-22)
     Array.prototype.forEach.call(pageEl.querySelectorAll('.diff-grid:not([data-bj-svc])'), function (grid) {
