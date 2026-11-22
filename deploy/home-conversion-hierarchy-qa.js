@@ -128,6 +128,7 @@ async function inspect(browser, width, height) {
           const rows = Array.from(section?.querySelectorAll('.review-track-wrap') || []);
           return {
             marker: section?.getAttribute('data-bj-review-rows') || '',
+            layout: section?.getAttribute('data-bj-review-layout') || '',
             rows: rows.map((wrap) => {
               const track = wrap.querySelector('.review-track');
               const sets = Array.from(track?.querySelectorAll(':scope > .review-track-set') || []);
@@ -224,8 +225,8 @@ async function inspect(browser, width, height) {
     assert(result.category.extraHidden && result.category.extraNames[0] === '에어컨' && result.category.extraNames.filter((name) => name === '에어컨').length === 1, `${width}px: off-season aircon is not confined to category more (${JSON.stringify(result.category)})`);
     assert(result.category.cards.length === 6 && result.category.cards.every((card) => card.name && card.href && card.imageLoaded && !card.contentOverflow), `${width}px: category card content contract mismatch (${JSON.stringify(result.category)})`);
     assert(result.category.cards.every((card) => card.imageSrc.includes(`/billyjo-inject@${result.category.loaderRef}/images/category-icons/`)), `${width}px: category icons do not use the loader ref (${JSON.stringify(result.category)})`);
-    assert(result.reviews.marker === '2' && result.reviews.rows.length === 2, `${width}px: customer reviews are not split into two rows (${JSON.stringify(result.reviews)})`);
-    assert(result.reviews.rows[0].animation === 'bjReviewScroll' && result.reviews.rows[1].animation === 'bjReviewScrollReverse', `${width}px: customer review rows do not move in opposite directions (${JSON.stringify(result.reviews)})`);
+    assert(result.reviews.marker === '2' && result.reviews.layout === 'landscape' && result.reviews.rows.length === 2, `${width}px: customer reviews are not split into two landscape rows (${JSON.stringify(result.reviews)})`);
+    assert(result.reviews.rows.every((row) => row.animation === 'bjReviewScroll'), `${width}px: customer review rows do not progress in one direction (${JSON.stringify(result.reviews)})`);
     assert(result.reviews.rows.every((row) => row.sets === 2 && row.itemsPerSet.length === 2 && row.itemsPerSet[0] >= 5 && row.itemsPerSet[0] === row.itemsPerSet[1] && row.duplicateHidden === 'true' && row.wrapTabindex === '0'), `${width}px: customer review marquee loop contract mismatch (${JSON.stringify(result.reviews)})`);
     const reviewScreenshotPath = String(process.env.BILLYJO_REVIEW_SCREENSHOT || '').trim();
     if (width === 390 && reviewScreenshotPath) {
