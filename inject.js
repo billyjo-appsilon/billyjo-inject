@@ -7317,7 +7317,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "#bj-v5-injected .bj-bars-row{display:flex !important;gap:14px !important;align-items:stretch !important}" +
         "#bj-v5-injected .bj-bars-row .highlight-bar{flex:1 1 0 !important;min-width:0 !important;margin:0 !important}" +
         "@media(max-width:767px){#bj-v5-injected .bj-bars-row{flex-direction:column !important;gap:10px !important}}" +
-        // 서비스 섹션(본사보다 빌리조가 좋은 점)을 시안 2×2 4카드로 재구성 (2026-07-03)
+        // 혜택 2×2 카드 공통 스타일 (2026-07-03)
         "#bj-v5-injected .diff-grid[data-bj-svc]{grid-template-columns:1fr 1fr !important;gap:14px !important;grid-auto-rows:1fr !important}" +
         "#bj-v5-injected .diff-grid[data-bj-svc] .diff-card{padding:24px 18px !important;gap:10px !important}" +
         "#bj-v5-injected .diff-grid[data-bj-svc] .diff-card .icon{margin:2px 0 !important}" +
@@ -7328,8 +7328,6 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
         "#bj-v5-injected .diff-grid[data-bj-svc] .num-circle{letter-spacing:-.01em !important}" +
         "#bj-v5-injected .bj-svc-card{justify-content:center !important}" +
         "#bj-v5-injected .bj-svc-card .d{margin-top:6px !important}" +
-        "#bj-v5-injected .bj-svc-blue{color:#0838f8 !important}" +
-        "#bj-v5-injected .bj-svc-mini{display:inline-block !important;margin-top:12px !important;padding:5px 13px !important;background:#eaf0ff !important;color:#0838f8 !important;font-size:12px !important;font-weight:700 !important;border-radius:999px !important;letter-spacing:-.01em !important}" +
         // 혜택 2×2 섹션 헤딩(텍스트) — 이모지 제거, 다른 섹션 헤더(.lead 28/19px 중앙)와 크기·정렬 통일 (2026-07-06)
         "#bj-v5-injected .bj-ben-hd{display:flex !important;align-items:center !important;justify-content:center !important;margin-bottom:22px !important}" +
         "#bj-v5-injected .bj-ben-h{text-align:center !important;font-size:28px !important;font-weight:800 !important;line-height:1.34 !important;letter-spacing:-.02em !important;color:#1a1a1e !important}" +
@@ -7348,12 +7346,11 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       ['같은 가격, 더 풍성한 혜택', 4],
       ['부담없이 시작하세요', 5],
       ['빌리조만의 컨설팅', 6],
-      ['본사보다 빌리조가 좋은', 7],
       ['렌탈 신청 방법', 9],
       ['자주 묻는 질문', 11]
     ];
     // 시안에 없는 섹션 = 숨김 (이사·신혼 / 광고전화없음(개인정보로 통합) / 위약금 중도해지 / 제휴카드 추가혜택)
-    var HIDE = ['이사·신혼도 안심하세요', '광고 전화 없습니다', '위약금, 숨기지 않습니다', '제휴카드 추가 혜택'];
+    var HIDE = ['이사·신혼도 안심하세요', '광고 전화 없습니다', '위약금, 숨기지 않습니다', '제휴카드 추가 혜택', '본사보다 빌리조가 좋은'];
     Array.prototype.slice.call(pageEl.children).forEach(function(z) {
       // textContent 사용(innerText 아님): eyebrow(.pill)를 display:none 처리해도
       // ORDER/HIDE 매칭 문자열(=eyebrow 텍스트)이 유지되도록. innerText는 숨긴 텍스트 제외 → 매칭 전멸. (2026-07-03)
@@ -7589,24 +7586,28 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       var bjFaqCss = document.createElement('style');
       bjFaqCss.id = 'bj-home-faq-css';
       bjFaqCss.textContent =
-        '.bj-home-faq-zone{display:block;background:#fff!important}' +
-        '.bj-home-faq-zone section{max-width:1280px;margin:0 auto!important;padding:40px 20px!important;text-align:center}' +
+        '.bj-home-faq-zone{display:block;width:100%!important;max-width:none!important;margin-left:0!important;margin-right:0!important;padding-left:0!important;padding-right:0!important;background:#fff!important}' +
+        'body .m_outer>.bj-home-faq-zone>section,#bj-v5-injected>.bj-home-faq-zone>section{width:calc(100% - 32px)!important;max-width:920px!important;box-sizing:border-box;margin:0 auto!important;padding:40px 0!important;text-align:center}' +
         '.bj-home-faq-head{text-align:center;margin:0 auto 24px}' +
         '.bj-home-faq-eye{margin:0 0 7px;color:#0838f8;font-size:13px;font-weight:900;letter-spacing:.08em}' +
         '.bj-home-faq-title{margin:0;color:#111827;font-size:28px;font-weight:900;line-height:1.28;letter-spacing:0}' +
-        '.bj-home-faq-list{display:grid;gap:9px;max-width:740px;margin:0 auto}' +
+        '.bj-home-faq-list{display:grid;gap:9px;width:100%;margin:0 auto}' +
         '.bj-home-faq-item{border:1px solid #dfeaf6;border-radius:14px;background:#fff;overflow:hidden;box-shadow:0 8px 22px rgba(21,64,120,.07)}' +
         '.bj-home-faq-item[open]{border-color:#bfd3ff;box-shadow:0 12px 28px rgba(21,64,120,.1)}' +
-        '.bj-home-faq-item summary{position:relative;display:block;list-style:none;cursor:pointer;padding:17px 50px 17px 18px;color:#17253a;font-size:16px;font-weight:900;line-height:1.35;letter-spacing:0;word-break:keep-all;text-align:left}' +
+        '.bj-home-faq-item summary{position:relative;display:grid;grid-template-columns:30px minmax(0,1fr);align-items:start;gap:10px;list-style:none;cursor:pointer;padding:17px 50px 17px 18px;color:#17253a;font-size:16px;font-weight:900;line-height:1.35;letter-spacing:0;word-break:keep-all;text-align:left}' +
         '.bj-home-faq-item summary::-webkit-details-marker{display:none}' +
+        '.bj-home-faq-item summary:focus-visible{outline:3px solid rgba(8,56,248,.28);outline-offset:-3px;border-radius:13px}' +
         '.bj-home-faq-item summary:after{content:"";position:absolute;right:20px;top:50%;width:9px;height:9px;border-right:2px solid #7d8da3;border-bottom:2px solid #7d8da3;transform:translateY(-70%) rotate(45deg);transition:transform .2s ease,border-color .2s ease}' +
         '.bj-home-faq-item[open] summary:after{border-color:#0838f8;transform:translateY(-25%) rotate(-135deg)}' +
-        '.bj-home-faq-answer{padding:0 18px 17px;color:#526174;font-size:14px;line-height:1.7;word-break:keep-all;text-align:left}' +
+        '.bj-home-faq-label{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;box-sizing:border-box;background:#0838f8;color:#fff;font-size:14px;font-weight:900;line-height:1;letter-spacing:0}' +
+        '.bj-home-faq-answer{display:grid;grid-template-columns:30px minmax(0,1fr);align-items:start;gap:10px;padding:0 18px 17px;color:#526174;font-size:14px;line-height:1.7;word-break:keep-all;text-align:left}' +
+        '.bj-home-faq-answer>.bj-home-faq-label{background:#eef4ff;color:#0838f8;border:1px solid #c9d8ff}' +
+        '.bj-home-faq-answer-body{min-width:0;padding-top:3px}' +
         '.bj-home-faq-answer b{color:#17253a}' +
         '.bj-home-faq-note{margin-top:10px;padding:10px 12px;border-radius:10px;background:#eef4ff;color:#17253a;font-weight:800;font-variant-numeric:tabular-nums}' +
         '.bj-home-faq-steps{display:flex;flex-wrap:wrap;gap:7px;margin-top:12px}' +
         '.bj-home-faq-steps span{display:inline-flex;align-items:center;border-radius:999px;background:#eef4ff;color:#0838f8;padding:6px 11px;font-size:12px;font-weight:900}' +
-        '@media(max-width:767px){.bj-home-faq-zone section{padding:32px 12px!important}.bj-home-faq-title{font-size:22px}.bj-home-faq-item summary{padding:15px 44px 15px 15px;font-size:14px}.bj-home-faq-item summary:after{right:17px}.bj-home-faq-answer{padding:0 15px 15px;font-size:13.5px}}';
+        '@media(max-width:767px){body .m_outer>.bj-home-faq-zone>section,#bj-v5-injected>.bj-home-faq-zone>section{width:calc(100% - 16px)!important;padding:32px 0!important}.bj-home-faq-title{font-size:22px}.bj-home-faq-item summary{grid-template-columns:28px minmax(0,1fr);gap:9px;padding:15px 44px 15px 15px;font-size:14px}.bj-home-faq-item summary:after{right:17px}.bj-home-faq-label{width:28px;height:28px;font-size:13px;border-radius:8px}.bj-home-faq-answer{grid-template-columns:28px minmax(0,1fr);gap:9px;padding:0 15px 15px;font-size:13.5px}}';
       (document.head || document.documentElement).appendChild(bjFaqCss);
     }
     if (!document.querySelector('.bj-home-faq-zone')) {
@@ -7616,12 +7617,12 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjHomeFaqZone.innerHTML = '<section>' +
         '<div class="bj-home-faq-head"><div class="bj-home-faq-eye">FAQ</div><h2 class="bj-home-faq-title">많이 묻는 질문</h2></div>' +
         '<div class="bj-home-faq-list">' +
-        '<details class="bj-home-faq-item" open><summary>본사에서 신청하는 것보다 비싼가요?</summary><div class="bj-home-faq-answer">아닙니다. <b>월 렌탈료는 제조사가 정한 금액</b>이라 어디에서 신청하셔도 약정별 요금은 같습니다. 제품·품질·설치·A/S 모두 본사를 통해 동일하게 진행됩니다. 차이가 나는 건 <b>가입 시 받는 혜택</b>뿐입니다.</div></details>' +
-        '<details class="bj-home-faq-item"><summary>중도 해지하면 위약금이 얼마인가요?</summary><div class="bj-home-faq-answer">의무사용기간 내 해지 시 아래 기준으로 발생합니다. 브랜드마다 차이가 있어, 상담 시 해당 제품의 정확한 금액을 먼저 알려드린 뒤 진행합니다.<div class="bj-home-faq-note">잔여 렌탈료의 10% + 면제받은 등록비·설치비</div></div></details>' +
-        '<details class="bj-home-faq-item"><summary>약정이 끝나면 제품은 제 것이 되나요?</summary><div class="bj-home-faq-answer">인수형 렌탈은 약정 종료 후 추가 비용 없이 소유권이 이전됩니다. 다만 <b>소유권 이전 전에 해지</b>하면 위약금이 없더라도 철거 비용이 발생할 수 있습니다. 소유권 이전형이 아닌 상품도 있어 상담 시 구분해 안내드립니다.</div></details>' +
-        '<details class="bj-home-faq-item"><summary>제휴카드는 꼭 만들어야 하나요?</summary><div class="bj-home-faq-answer">아닙니다. 제휴카드 없이도 가입할 수 있으며 이 경우 정상 렌탈료가 적용됩니다. 카드 할인은 <b>전월 실적 조건</b>이 있어 실적 미달 시 할인 폭이 줄어듭니다.</div></details>' +
-        '<details class="bj-home-faq-item"><summary>신용조회를 하나요?</summary><div class="bj-home-faq-answer">렌탈은 할부금융 형태라 가입 시 신용 확인이 필요합니다. 만 19세 이상·정상 신용 고객 대상이며, 조회 전 반드시 사전 동의를 받습니다.</div></details>' +
-        '<details class="bj-home-faq-item"><summary>신청하면 어떻게 진행되나요?</summary><div class="bj-home-faq-answer">상담에서 제품과 약정을 확정한 뒤 설치 일정을 잡습니다. 재고·지역에 따라 당일~3일 내 설치가 가능합니다.<div class="bj-home-faq-steps"><span>1 상담</span><span>2 제품·약정 선택</span><span>3 신청서 작성</span><span>4 설치</span></div></div></details>' +
+        '<details class="bj-home-faq-item" open><summary><span class="bj-home-faq-label" aria-hidden="true">Q.</span><span>본사에서 신청하는 것보다 비싼가요?</span></summary><div class="bj-home-faq-answer"><span class="bj-home-faq-label" aria-hidden="true">A.</span><div class="bj-home-faq-answer-body">아닙니다. <b>월 렌탈료는 제조사가 정한 금액</b>이라 어디에서 신청하셔도 약정별 요금은 같습니다. 제품·품질·설치·A/S 모두 본사를 통해 동일하게 진행됩니다. 차이가 나는 건 <b>가입 시 받는 혜택</b>뿐입니다.</div></div></details>' +
+        '<details class="bj-home-faq-item"><summary><span class="bj-home-faq-label" aria-hidden="true">Q.</span><span>중도 해지하면 위약금이 얼마인가요?</span></summary><div class="bj-home-faq-answer"><span class="bj-home-faq-label" aria-hidden="true">A.</span><div class="bj-home-faq-answer-body">의무사용기간 내 해지 시 아래 기준으로 발생합니다. 브랜드마다 차이가 있어, 상담 시 해당 제품의 정확한 금액을 먼저 알려드린 뒤 진행합니다.<div class="bj-home-faq-note">잔여 렌탈료의 10% + 면제받은 등록비·설치비</div></div></div></details>' +
+        '<details class="bj-home-faq-item"><summary><span class="bj-home-faq-label" aria-hidden="true">Q.</span><span>약정이 끝나면 제품은 제 것이 되나요?</span></summary><div class="bj-home-faq-answer"><span class="bj-home-faq-label" aria-hidden="true">A.</span><div class="bj-home-faq-answer-body">인수형 렌탈은 약정 종료 후 추가 비용 없이 소유권이 이전됩니다. 다만 <b>소유권 이전 전에 해지</b>하면 위약금이 없더라도 철거 비용이 발생할 수 있습니다. 소유권 이전형이 아닌 상품도 있어 상담 시 구분해 안내드립니다.</div></div></details>' +
+        '<details class="bj-home-faq-item"><summary><span class="bj-home-faq-label" aria-hidden="true">Q.</span><span>제휴카드는 꼭 만들어야 하나요?</span></summary><div class="bj-home-faq-answer"><span class="bj-home-faq-label" aria-hidden="true">A.</span><div class="bj-home-faq-answer-body">아닙니다. 제휴카드 없이도 가입할 수 있으며 이 경우 정상 렌탈료가 적용됩니다. 카드 할인은 <b>전월 실적 조건</b>이 있어 실적 미달 시 할인 폭이 줄어듭니다.</div></div></details>' +
+        '<details class="bj-home-faq-item"><summary><span class="bj-home-faq-label" aria-hidden="true">Q.</span><span>신용조회를 하나요?</span></summary><div class="bj-home-faq-answer"><span class="bj-home-faq-label" aria-hidden="true">A.</span><div class="bj-home-faq-answer-body">렌탈은 할부금융 형태라 가입 시 신용 확인이 필요합니다. 만 19세 이상·정상 신용 고객 대상이며, 조회 전 반드시 사전 동의를 받습니다.</div></div></details>' +
+        '<details class="bj-home-faq-item"><summary><span class="bj-home-faq-label" aria-hidden="true">Q.</span><span>신청하면 어떻게 진행되나요?</span></summary><div class="bj-home-faq-answer"><span class="bj-home-faq-label" aria-hidden="true">A.</span><div class="bj-home-faq-answer-body">상담에서 제품과 약정을 확정한 뒤 설치 일정을 잡습니다. 재고·지역에 따라 당일~3일 내 설치가 가능합니다.<div class="bj-home-faq-steps"><span>1 상담</span><span>2 제품·약정 선택</span><span>3 신청서 작성</span><span>4 설치</span></div></div></div></details>' +
         '</div></section>';
       var bjHomeFaqHost = pageEl.closest && pageEl.closest('.m_outer');
       (bjHomeFaqHost || pageEl).appendChild(bjHomeFaqZone);
@@ -7718,28 +7719,16 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       bjBarsRow.appendChild(bjBar2);
     }
 
-    // 서비스 섹션(본사보다 빌리조가 좋은 점)을 시안(Image #16)대로 2×2 4카드로 재구성 (2026-07-03)
-    var bjSvcGrid = pageEl.querySelector('.diff-grid');
-    if (bjSvcGrid && !bjSvcGrid.getAttribute('data-bj-svc')) {
-      bjSvcGrid.setAttribute('data-bj-svc', '1');
-      var bjSvcLead = bjSvcGrid.parentElement.querySelector('.lead');
-      if (bjSvcLead) bjSvcLead.innerHTML = '<strong>고객 신뢰도 100%</strong><br>빌리조만의 제공 서비스';
-      var bjSvc = [
-        { no: '01', lb: '비교', ic: '#i-search', t: '독자적인<br>최저가 비교 시스템' },
-        { no: '02', lb: '보안', ic: '#i-shield', t: '고객 개인정보<br>안전 보장' },
-        { no: '03', lb: '큐레이션', ic: '#i-message', t: '1:1 맞춤<br>큐레이션 제공' },
-        { no: '04', lb: '투명', ic: '#i-clipboard', t: '위약금 사전 계산<br>투명 공개' }
-      ];
-      bjSvcGrid.innerHTML = '';
-      bjSvc.forEach(function (c) {
-        var card = document.createElement('div');
-        card.className = 'diff-card bj-svc-card';
-        card.innerHTML = '<div class="num-circle">' + c.no + ' ' + c.lb + '</div>' +
-          '<div class="icon"><svg class="ico" data-bj-lot-loop="1"><use href="' + c.ic + '"></use></svg></div>' +
-          '<div class="t">' + c.t + '</div>';
-        bjSvcGrid.appendChild(card);
-      });
-    }
+    // 중복 설명이던 레거시 서비스 4카드 섹션은 홈에서 제거한다. 신규 혜택 01~04 카드는 유지한다. (2026-11-22)
+    Array.prototype.forEach.call(pageEl.querySelectorAll('.diff-grid:not([data-bj-svc])'), function (grid) {
+      if (grid.closest && grid.closest('.bj-ben-zone')) return;
+      var legacyZone = grid.closest && grid.closest('.zone');
+      var legacySection = grid.closest && grid.closest('section');
+      var removalTarget = legacyZone && legacyZone.parentElement === pageEl ? legacyZone :
+        (legacySection && legacySection.parentElement === pageEl ? legacySection : null);
+      if (!removalTarget || (removalTarget.textContent || '').indexOf('본사보다 빌리조가 좋은') === -1) return;
+      removalTarget.remove();
+    });
 
     // 큐레이션 섹션(빌리조만의 컨설팅) 헤딩+설명을 시안(Image #18)대로 교체 (2026-07-03)
     var bjCurZone = null;
