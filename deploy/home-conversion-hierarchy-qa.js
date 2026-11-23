@@ -102,6 +102,8 @@ async function inspect(browser, width, height) {
               const media = card.querySelector('.bj-hcat-media').getBoundingClientRect();
               const text = card.querySelector('.bj-hcat-text').getBoundingClientRect();
               const image = card.querySelector('img');
+              const imageRect = image?.getBoundingClientRect();
+              const renderedCopy = `${card.textContent || ''} ${card.getAttribute('aria-label') || ''}`;
               return {
                 name: card.querySelector('.bj-hcat-name')?.textContent.trim() || '',
                 href: card.getAttribute('href') || '',
@@ -110,6 +112,12 @@ async function inspect(browser, width, height) {
                 top: Math.round(rect.top),
                 direction: getComputedStyle(card).flexDirection,
                 iconBeforeText: Math.round(media.right) <= Math.round(text.left) + 1,
+                iconWidth: Math.round(imageRect?.width || 0),
+                iconHeight: Math.round(imageRect?.height || 0),
+                mediaWidth: Math.round(media.width),
+                mediaHeight: Math.round(media.height),
+                actionCount: card.querySelectorAll('.bj-hcat-action').length,
+                hasRepeatedComparisonCopy: /최저가\s*[·・]?\s*지원금\s*비교/.test(renderedCopy),
                 contentOverflow: card.scrollWidth > card.clientWidth + 1,
                 imageLoaded: Boolean(image?.complete && image?.naturalWidth > 0),
                 imageSrc: image?.currentSrc || image?.src || '',
@@ -224,10 +232,15 @@ async function inspect(browser, width, height) {
     assert(result.category.airconVisible === '0' && result.category.airconLiveAt === '2027-05-01T00:00:00+09:00', `${width}px: aircon season gate mismatch (${JSON.stringify(result.category)})`);
     assert(result.category.extraHidden && result.category.extraNames[0] === '에어컨' && result.category.extraNames.filter((name) => name === '에어컨').length === 1, `${width}px: off-season aircon is not confined to category more (${JSON.stringify(result.category)})`);
     assert(result.category.cards.length === 6 && result.category.cards.every((card) => card.name && card.href && card.imageLoaded && !card.contentOverflow), `${width}px: category card content contract mismatch (${JSON.stringify(result.category)})`);
+    assert(result.category.cards.every((card) => card.actionCount === 0 && !card.hasRepeatedComparisonCopy), `${width}px: repeated comparison copy remains in category cards (${JSON.stringify(result.category.cards)})`);
     assert(result.category.cards.every((card) => card.imageSrc.includes(`/billyjo-inject@${result.category.loaderRef}/images/category-icons/`)), `${width}px: category icons do not use the loader ref (${JSON.stringify(result.category)})`);
     assert(result.reviews.marker === '2' && result.reviews.layout === 'landscape' && result.reviews.rows.length === 2, `${width}px: customer reviews are not split into two landscape rows (${JSON.stringify(result.reviews)})`);
     assert(result.reviews.rows.every((row) => row.animation === 'bjReviewScroll'), `${width}px: customer review rows do not progress in one direction (${JSON.stringify(result.reviews)})`);
     assert(result.reviews.rows.every((row) => row.sets === 2 && row.itemsPerSet.length === 2 && row.itemsPerSet[0] >= 5 && row.itemsPerSet[0] === row.itemsPerSet[1] && row.duplicateHidden === 'true' && row.wrapTabindex === '0'), `${width}px: customer review marquee loop contract mismatch (${JSON.stringify(result.reviews)})`);
+    const categoryScreenshotPath = String(process.env.BILLYJO_CATEGORY_SCREENSHOT || '').trim();
+    if (width === 390 && categoryScreenshotPath) {
+      await page.locator('#bj-home-cat-links').screenshot({ path: categoryScreenshotPath });
+    }
     const reviewScreenshotPath = String(process.env.BILLYJO_REVIEW_SCREENSHOT || '').trim();
     if (width === 390 && reviewScreenshotPath) {
       await page.locator('#bj-v5-injected .review-section').screenshot({ path: reviewScreenshotPath });
@@ -247,6 +260,7 @@ async function inspect(browser, width, height) {
       assert(result.benefitSpacing.gapBefore <= 4 && result.benefitSpacing.innerTop <= 4 && result.benefitSpacing.innerBottom <= 10 && result.benefitSpacing.nextPaddingTop <= 12, `${width}px: benefit spacing is not compact (${JSON.stringify(result.benefitSpacing)})`);
       assert(result.category.height <= 360, `${width}px: compact category section is too tall (${result.category.height}px)`);
       assert(result.category.cards.every((card) => card.direction === 'row' && card.iconBeforeText && card.height <= 90), `${width}px: category cards are not compact horizontal cards (${JSON.stringify(result.category.cards)})`);
+      assert(result.category.cards.every((card) => card.iconWidth >= 56 && card.iconHeight >= 64 && card.mediaWidth >= 56 && card.mediaHeight >= 64), `${width}px: category icons are not visibly enlarged (${JSON.stringify(result.category.cards)})`);
       assert(result.category.cards[0].top === result.category.cards[1].top && result.category.cards[2].top > result.category.cards[0].top, `${width}px: category cards are not arranged in two columns`);
     } else {
       assert(result.category.cards.every((card) => card.direction === 'column'), `${width}px: desktop category card layout changed unexpectedly`);
