@@ -1222,9 +1222,9 @@
   } catch (_) { }
 })();
 
-/* Native footer identity lockup — keep the footer in one deliberate reading
-   order instead of splitting brand, legal links, partners and contact details
-   across the platform footer's separate mobile/desktop columns. */
+/* Native footer → live1 footer parity.
+   The homepage and live1 are two entrances to the same service, so the final
+   company/legal block must not change depending on which entrance was used. */
 (function bjNativeFooterBrandLockup() {
   'use strict';
   if (window.__bjNativeFooterPartners) return;
@@ -1256,34 +1256,26 @@
     var style = document.createElement('style');
     style.id = 'bj-native-footer-partners-css';
     style.textContent =
-      '.bj-native-partners{box-sizing:border-box;width:320px;max-width:calc(100% - 40px);margin:0 0 18px max(20px,calc((100vw - 1200px)/2));padding:18px 20px;border-radius:14px;background:#fff;display:flex;flex-direction:column;align-items:flex-start;color:#202735}' +
-      '.bj-native-brand-link{display:inline-flex;align-items:center;line-height:0;text-decoration:none}' +
-      '.bj-native-brand{display:block;width:94px;height:auto;object-fit:contain;object-position:left center}' +
-      '.bj-native-company{margin-top:9px;font-size:12px;font-weight:800;line-height:1.35;letter-spacing:.08em;color:#303846}' +
-      '.bj-native-links{display:flex;align-items:center;gap:0;margin-top:7px;font-size:12px;line-height:1.5}' +
-      '.bj-native-links a{color:#5d6675;text-decoration:none}' +
-      '.bj-native-links a+a::before{content:"";display:inline-block;width:1px;height:10px;margin:0 8px;background:#cfd5de;vertical-align:-1px}' +
-      '.bj-native-partner-row{display:flex;align-items:center;gap:8px;margin-top:15px}' +
-      '.bj-native-partner-card{box-sizing:border-box;height:46px;padding:8px 12px;border:1px solid #e1e6ee;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center}' +
-      '.bj-native-partner-card--meta{width:148px}' +
-      '.bj-native-partner-card--toss{width:122px}' +
+      'footer.new-footer{box-sizing:border-box;background:#15171f!important;color:#fff!important;padding:36px 0 96px!important}' +
+      'footer.new-footer>:not(.bj-native-partners){display:none!important}' +
+      '.bj-native-partners{box-sizing:border-box;width:100%;max-width:1080px;margin:0 auto;padding:0 20px;color:#fff;text-align:left}' +
+      '.bj-native-brand{display:block;height:22px;width:auto;max-width:100%;filter:brightness(0) invert(1);opacity:.9;margin:0 0 14px;object-fit:contain;object-position:left center}' +
+      '.bj-native-partner-row{display:flex;justify-content:flex-start;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px}' +
+      '.bj-native-partner-card{box-sizing:border-box;width:148px;height:54px;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 24px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center}' +
       '.bj-native-partner-card img{display:block;width:100%;height:100%;object-fit:contain}' +
-      '.bj-native-contact{display:flex;flex-direction:column;align-items:flex-start;gap:3px;margin-top:14px}' +
-      '.bj-native-phone{font-size:18px;font-weight:800;line-height:1.35;color:#202735;text-decoration:none}' +
-      '.bj-native-hours{font-size:13px;line-height:1.45;color:#687180}' +
-      'footer.new-footer .footer__logo,footer.new-footer .footer__info .info__top,footer.new-footer .footer__cs,footer.new-footer .cs__sns{display:none!important}' +
-      '@media(max-width:767px){' +
-        '.bj-home-faq-zone{padding-bottom:0!important}' +
-        'footer.new-footer{padding-top:20px!important}' +
-        '.bj-native-partners{width:100%;max-width:none;margin:0 0 12px;padding:0 20px;border-radius:0;background:transparent}' +
-        '.bj-native-brand{width:88px}' +
-        '.bj-native-partner-row{margin-top:14px}' +
-        '.bj-native-partner-card{height:44px;padding:8px 11px}' +
-        '.bj-native-partner-card--meta{width:145px}' +
-        '.bj-native-partner-card--toss{width:118px}' +
-        'footer.new-footer .footer__info .info__more{margin-top:12px!important}' +
-      '}' +
-      '@media(min-width:768px){.bj-native-partners{box-shadow:0 12px 30px rgba(0,0,0,.16)}}';
+      '.bj-native-phone{display:inline-flex;align-items:center;gap:6px;margin:0 0 12px;color:#fff;text-decoration:none;font-size:17px;font-weight:800;line-height:1.55}' +
+      '.bj-native-phone svg{display:block;flex:0 0 auto}' +
+      '.bj-native-phone-number{font-variant-numeric:tabular-nums;letter-spacing:-.01em}' +
+      '.bj-native-row{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:11.5px;color:rgba(255,255,255,.56);line-height:1.7}' +
+      '.bj-native-row b,.bj-native-business b{color:rgba(255,255,255,.86);font-weight:600}' +
+      '.bj-native-row a,.bj-native-business a,.bj-native-legal a{color:inherit;text-decoration:underline;text-underline-offset:2px}' +
+      '.bj-native-business{margin-top:16px;padding-top:15px;border-top:1px solid rgba(255,255,255,.1);font-size:11px;color:rgba(255,255,255,.56);line-height:1.75}' +
+      '.bj-native-business p{margin:0}' +
+      '.bj-native-business a{color:rgba(255,255,255,.76)}' +
+      '.bj-native-legal{margin-top:16px;padding-top:15px;border-top:1px solid rgba(255,255,255,.1);font-size:11px;color:rgba(255,255,255,.4);line-height:1.75}' +
+      '@media(min-width:768px){.bj-native-partners{padding-left:32px;padding-right:32px}}' +
+      '@media(min-width:940px){footer.new-footer{padding-bottom:40px!important}}' +
+      '@media(max-width:420px){.bj-native-partner-row{gap:8px}.bj-native-partner-card{width:min(43vw,148px);height:50px;padding:9px 11px}}';
     (document.head || document.documentElement).appendChild(style);
   }
 
@@ -1301,25 +1293,35 @@
       block = document.createElement('div');
       block.className = 'bj-native-partners';
     }
-    if (block.getAttribute('data-bj-footer-layout') !== 'identity-v2') {
-      block.setAttribute('data-bj-footer-layout', 'identity-v2');
+    if (block.getAttribute('data-bj-footer-layout') !== 'live1-v1') {
+      block.setAttribute('data-bj-footer-layout', 'live1-v1');
       block.setAttribute('aria-label', '빌리조 회사 및 고객센터 정보');
       block.innerHTML =
-        '<a class="bj-native-brand-link" href="/" aria-label="빌리조 홈">' +
-          '<img class="bj-native-brand" src="' + asset('images/logo/billyjo-ko.webp') + '" width="288" height="92" alt="빌리조" loading="lazy" decoding="async">' +
-        '</a>' +
-        '<div class="bj-native-company">APPSILON CORP.</div>' +
-        '<nav class="bj-native-links" aria-label="푸터 메뉴">' +
-          '<a href="/html/dh/privacy_policy">개인정보처리방침</a>' +
-          '<a href="/_dhadm" target="_blank" rel="noopener">사이트관리</a>' +
-        '</nav>' +
-        '<div class="bj-native-partner-row" role="list" aria-label="공식 파트너">' +
+        '<img class="bj-native-brand" src="' + asset('images/logo/billyjo-ko.webp') + '" width="288" height="92" alt="빌리조" loading="lazy" decoding="async">' +
+        '<div class="bj-native-partner-row" role="list" aria-label="공식 파트너 및 결제 로고">' +
           '<div class="bj-native-partner-card bj-native-partner-card--meta" role="listitem"><img src="' + asset('images/meta-business-partner.webp') + '" width="960" height="390" alt="Meta Business Partner" loading="lazy" decoding="async"></div>' +
           '<div class="bj-native-partner-card bj-native-partner-card--toss" role="listitem"><img src="' + asset('images/toss-logo.webp') + '" width="820" height="280" alt="toss" loading="lazy" decoding="async"></div>' +
         '</div>' +
-        '<div class="bj-native-contact" aria-label="고객센터">' +
-          '<a class="bj-native-phone" href="tel:07049187683">070-4918-7683</a>' +
-          '<div class="bj-native-hours">09:00-19:00</div>' +
+        '<a class="bj-native-phone" href="tel:070-4918-7683">' +
+          '<svg viewBox="0 0 24 24" fill="none" width="17" height="17" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>' +
+          '<span class="bj-native-phone-number">070-4918-7683</span>' +
+        '</a>' +
+        '<div class="bj-native-row">' +
+          '<span><b>상담시간</b> 평일 09:00–18:00</span>' +
+          '<span><b>공식몰</b> <a href="https://www.billyjo.co.kr/" target="_blank" rel="noopener noreferrer">https://www.billyjo.co.kr</a></span>' +
+        '</div>' +
+        '<div class="bj-native-business" aria-label="사업자 정보">' +
+          '<p><b>회사명</b> 앱실론코퍼레이션(주) <span aria-hidden="true">|</span> <b>대표</b> 온재현</p>' +
+          '<p><b>소재지주소</b> 서울 강남구 영동대로128길 15 (삼성동, 아크로삼성)</p>' +
+          '<p><b>전산센터 주소</b> 인천 연수구 송도과학로 56 (송도동, 송도테크노파크 BT센터) 2205호</p>' +
+          '<p><b>통신판매신고번호</b> 2021-서울강남-04074</p>' +
+          '<p><b>사업자등록번호</b> 810-81-01685 <span aria-hidden="true">·</span> <a href="https://www.ftc.go.kr/info/bizinfo/communicationViewPopup.jsp?wrkr_no=8108101685" target="_blank" rel="noopener noreferrer">사업자등록정보 확인</a></p>' +
+        '</div>' +
+        '<div class="bj-native-legal">' +
+          '표시 금액은 <b>제휴카드 최대 할인 적용 기준</b>이며 카드 전월 실적·약정 기간·제휴사 정책에 따라 달라질 수 있습니다. ' +
+          '현금 사은품은 제품·시기별 예상 범위로 실제 지급액과 지급 시점은 상담 시 확정됩니다. ' +
+          '브랜드 공식 채널 및 판매처<br>' +
+          '© 2026 Billyjo. 공식몰: <a href="https://www.billyjo.co.kr/" target="_blank" rel="noopener noreferrer">https://www.billyjo.co.kr</a>' +
         '</div>';
     }
     Array.prototype.slice.call(footer.querySelectorAll('.cs__sns')).forEach(function (social) {
