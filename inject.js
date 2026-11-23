@@ -1222,17 +1222,86 @@
   } catch (_) { }
 })();
 
-/* Partner badge cleanup — older builds mounted Meta/toss logos in the native footer.
-   The logos now live in the home trust card where the message has context. */
-(function () {
+/* Native footer brand lockup — keep the BillyJo wordmark with the same
+   Meta/toss partner badges used by live1. The old home trust card was removed,
+   so the footer is now the durable brand/partner surface. */
+(function bjNativeFooterBrandLockup() {
   'use strict';
   if (window.__bjNativeFooterPartners) return;
   window.__bjNativeFooterPartners = 1;
 
+  var assetBase = (function () {
+    try {
+      var src = (document.currentScript && document.currentScript.src) || '';
+      if (!src) {
+        var scripts = document.getElementsByTagName('script');
+        for (var i = scripts.length - 1; i >= 0; i--) {
+          if (/billyjo-inject(?:@[^/]+)?\/inject(?:\.min)?\.js(?:[?#].*)?$/i.test(scripts[i].src || '')) {
+            src = scripts[i].src || '';
+            break;
+          }
+        }
+      }
+      var match = src.match(/^(https?:\/\/[^/]+\/gh\/billyjo-appsilon\/billyjo-inject)(?:@([^/]+))?\/inject(?:\.min)?\.js(?:[?#].*)?$/i);
+      return match ? match[1] + '@' + (match[2] || 'main') + '/' : '';
+    } catch (_) { return ''; }
+  })();
+
+  function asset(path) {
+    return (assetBase || 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/') + path;
+  }
+
+  function ensureStyle() {
+    if (document.getElementById('bj-native-footer-partners-css')) return;
+    var style = document.createElement('style');
+    style.id = 'bj-native-footer-partners-css';
+    style.textContent =
+      '.bj-native-partners{box-sizing:border-box;width:100%;max-width:1200px;margin:0 auto 20px;padding:0 20px}' +
+      '.bj-native-brand-link{display:inline-flex;align-items:center;line-height:0;text-decoration:none}' +
+      '.bj-native-brand{display:block;width:94px;height:auto;object-fit:contain;object-position:left center}' +
+      '.bj-native-partner-row{display:flex;align-items:center;gap:10px;margin-top:12px}' +
+      '.bj-native-partner-card{box-sizing:border-box;width:150px;height:54px;padding:10px 14px;border:1px solid #dfe6ef;border-radius:12px;background:#fff;box-shadow:0 8px 22px rgba(21,64,120,.08);display:flex;align-items:center;justify-content:center}' +
+      '.bj-native-partner-card img{display:block;width:100%;height:100%;object-fit:contain}' +
+      '@media(max-width:767px){' +
+        '.bj-home-faq-zone{padding-bottom:0!important}' +
+        'footer.new-footer{padding-top:20px!important}' +
+        '.bj-native-partners{max-width:none;margin-bottom:12px;padding:0 20px}' +
+        '.bj-native-brand{width:88px}' +
+        '.bj-native-partner-row{gap:8px;margin-top:10px}' +
+        '.bj-native-partner-card{flex:1 1 0;width:auto;max-width:none;height:50px;padding:9px 11px}' +
+        'footer.new-footer .footer__info .info__top{position:static!important;margin:0 0 12px!important}' +
+        'footer.new-footer .footer__info .footer__cs.show-767{margin-top:12px!important}' +
+        'footer.new-footer .footer__info .show-767 .cs__sns{margin-top:12px!important}' +
+        'footer.new-footer .footer__info .info__more{margin-top:12px!important}' +
+      '}' +
+      '@media(min-width:768px){.bj-native-partners{padding-left:0;padding-right:0}}';
+    (document.head || document.documentElement).appendChild(style);
+  }
+
   function mount() {
-    Array.prototype.forEach.call(document.querySelectorAll('.bj-native-partners'), function (el) {
-      if (el && el.parentNode) el.parentNode.removeChild(el);
+    var footer = document.querySelector('footer.new-footer');
+    if (!footer) return false;
+    ensureStyle();
+
+    var blocks = Array.prototype.slice.call(document.querySelectorAll('.bj-native-partners'));
+    var block = blocks.shift() || null;
+    blocks.forEach(function (duplicate) {
+      if (duplicate.parentNode) duplicate.parentNode.removeChild(duplicate);
     });
+    if (!block) {
+      block = document.createElement('div');
+      block.className = 'bj-native-partners';
+      block.setAttribute('aria-label', '빌리조 및 공식 파트너');
+      block.innerHTML =
+        '<a class="bj-native-brand-link" href="/" aria-label="빌리조 홈">' +
+          '<img class="bj-native-brand" src="' + asset('images/logo/billyjo-ko.webp') + '" width="288" height="92" alt="빌리조" loading="lazy" decoding="async">' +
+        '</a>' +
+        '<div class="bj-native-partner-row" role="list" aria-label="공식 파트너">' +
+          '<div class="bj-native-partner-card" role="listitem"><img src="' + asset('images/meta-business-partner.webp') + '" width="960" height="390" alt="Meta Business Partner" loading="lazy" decoding="async"></div>' +
+          '<div class="bj-native-partner-card" role="listitem"><img src="' + asset('images/toss-logo.webp') + '" width="820" height="280" alt="toss" loading="lazy" decoding="async"></div>' +
+        '</div>';
+    }
+    if (footer.firstElementChild !== block) footer.insertBefore(block, footer.firstChild);
     return true;
   }
 
