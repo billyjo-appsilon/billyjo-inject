@@ -70,7 +70,6 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
       const section = document.querySelector('#bj-home-gift-promos');
       const cards = [...section.querySelectorAll('.bj-hgp-card')];
       const visibleCards = cards.filter((card) => !card.hidden && getComputedStyle(card).display !== 'none');
-      const toggle = section.querySelector('[data-bj-hgp-toggle]');
       const titleLines = [...section.querySelectorAll('.bj-hgp-half-copy h2 > *')].map((line) => ({
         text: line.textContent.trim(),
         display: getComputedStyle(line).display,
@@ -82,23 +81,19 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
         visible: visibleCards.length,
         tierVisible: [...section.querySelectorAll('[data-bj-hgp-band]')].map((band) =>
           [...band.querySelectorAll('.bj-hgp-card')].filter((card) => !card.hidden && getComputedStyle(card).display !== 'none').length),
-        expanded: toggle.getAttribute('aria-expanded'),
-        label: toggle.textContent.trim(),
         titleLines,
       };
     });
-    if (initialPromoState.design !== 'vertical-review-right' || initialPromoState.total !== 24 || initialPromoState.visible !== 12 ||
-        !initialPromoState.tierVisible.every((count) => count === 2) ||
-        initialPromoState.expanded !== 'false' || initialPromoState.label !== '프로모션 상품 12개 더보기') {
-      throw new Error(`${testCase.name}: initial progressive promo contract mismatch (${JSON.stringify(initialPromoState)})`);
+    if (initialPromoState.design !== 'vertical-review-right' || initialPromoState.total !== 26 || initialPromoState.visible !== 26 ||
+        initialPromoState.tierVisible.join(',') !== '2,4,4,4,4,4,4') {
+      throw new Error(`${testCase.name}: horizontal promo contract mismatch (${JSON.stringify(initialPromoState)})`);
     }
     if (initialPromoState.titleLines.length !== 2 ||
-        initialPromoState.titleLines.map((line) => line.text).join('|') !== '11월도|반값습니다!' ||
+        initialPromoState.titleLines.map((line) => line.text).join('|') !== '11월 한정수량|반값습니다!' ||
         !initialPromoState.titleLines.every((line) => line.display === 'block') ||
         initialPromoState.titleLines[0].top === initialPromoState.titleLines[1].top) {
       throw new Error(`${testCase.name}: campaign title must render as two forced lines (${JSON.stringify(initialPromoState.titleLines)})`);
     }
-    await page.locator('[data-bj-hgp-toggle]').click();
     const promoBands = page.locator('#bj-home-gift-promos .bj-hgp-band');
     for (let index = 0; index < await promoBands.count(); index += 1) {
       await promoBands.nth(index).scrollIntoViewIfNeeded();
@@ -108,7 +103,7 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
         const products = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-image > img:not(.bj-hgp-brand-logo)')];
         const logos = [...document.querySelectorAll('#bj-home-gift-promos .bj-hgp-brand-logo')];
         const banner = document.querySelector('#bj-home-gift-promos .bj-hgp-half-visual img');
-        return products.length === 24 && logos.length === 24 && banner &&
+        return products.length === 26 && logos.length === 26 && banner &&
           products.concat(logos, [banner]).every((image) => image.complete && image.naturalWidth > 0);
       }, null, { timeout: 30000 });
     } catch (error) {
@@ -136,37 +131,39 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
         await page.screenshot({ path: path.join(cutoutScreenshotDir, `band-${index + 1}.png`) });
       }
     }
-    const expandedPromoState = await page.evaluate(() => {
-      const section = document.querySelector('#bj-home-gift-promos');
-      const cards = [...section.querySelectorAll('.bj-hgp-card')];
-      const toggle = section.querySelector('[data-bj-hgp-toggle]');
-      return {
-        visible: cards.filter((card) => !card.hidden && getComputedStyle(card).display !== 'none').length,
-        expanded: toggle.getAttribute('aria-expanded'),
-        label: toggle.textContent.trim(),
-      };
-    });
-    if (expandedPromoState.visible !== 24 || expandedPromoState.expanded !== 'true' || expandedPromoState.label !== '프로모션 상품 접기') {
-      throw new Error(`${testCase.name}: expanded promo contract mismatch (${JSON.stringify(expandedPromoState)})`);
-    }
+    const firstModelToggle = page.locator('.bj-hgp-band:not(.bj-hgp-band--featured) .bj-hgp-model-toggle').first();
+    const firstModelId = await firstModelToggle.getAttribute('aria-controls');
+    if (!firstModelId || !(await page.locator('#' + firstModelId).isHidden())) throw new Error(`${testCase.name}: model must start hidden`);
+    await firstModelToggle.click();
+    if (await page.locator('#' + firstModelId).isHidden()) throw new Error(`${testCase.name}: model does not open from info button`);
+    await firstModelToggle.click();
+    if (!(await page.locator('#' + firstModelId).isHidden())) throw new Error(`${testCase.name}: model does not close from info button`);
+    const firstPriceBand = page.locator('.bj-hgp-band:not(.bj-hgp-band--featured)').first();
+    const firstTrack = firstPriceBand.locator('.bj-hgp-grid');
+    const beforeSlide = await firstTrack.evaluate((track) => track.scrollLeft);
+    await firstPriceBand.locator('.bj-hgp-slide-button--next').click();
+    await page.waitForTimeout(700);
+    const afterSlide = await firstTrack.evaluate((track) => track.scrollLeft);
+    if (afterSlide <= beforeSlide + 10) throw new Error(`${testCase.name}: next product control did not move the horizontal slider`);
     await page.waitForTimeout(10000);
 
     const result = await page.evaluate(() => {
       const section = document.querySelector('#bj-home-gift-promos');
       const heading = [...document.querySelectorAll('h2')].find((node) => node.textContent.includes('이달의 추천제품'));
-      const cards = [...document.querySelectorAll('.bj-hgp-card')];
+      const cards = [...document.querySelectorAll('.bj-hgp-band:not(.bj-hgp-band--featured) .bj-hgp-card')];
       const bands = [...document.querySelectorAll('.bj-hgp-band')];
       const menuLabels = [...document.querySelectorAll('.bj-best-gnb, .bj-newlywed-cat')]
         .map((node) => node.textContent.replace(/\s+/g, ' ').trim());
       return {
         design: section.getAttribute('data-bj-product-card-design') || '',
+        featuredIds: [...section.querySelectorAll('.bj-hgp-band--featured .bj-hgp-card')].map((card) => card.getAttribute('data-bj-hgp-product')),
         cards: cards.map((card) => ({
           id: card.getAttribute('data-bj-hgp-product'),
           tier: card.getAttribute('data-bj-hgp-tier'),
           text: card.textContent.replace(/\s+/g, ' ').trim(),
           regularText: card.querySelector('.bj-hgp-regular')?.textContent.replace(/\s+/g, ' ').trim() || '',
           priceText: card.querySelector('.bj-hgp-price')?.textContent.replace(/\s+/g, ' ').trim() || '',
-          href: card.querySelector('.bj-hgp-main')?.href || '',
+          href: card.querySelector('.bj-hgp-image')?.href || '',
           imageLoaded: card.querySelector('img').naturalWidth > 0,
           verticalLayout: (() => {
             const imageRect = card.querySelector('.bj-hgp-image').getBoundingClientRect();
@@ -248,17 +245,16 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
             };
           })(),
           modelPlacement: (() => {
-            const image = card.querySelector('.bj-hgp-image').getBoundingClientRect();
             const node = card.querySelector('.bj-hgp-model');
-            const model = node.getBoundingClientRect();
+            const button = card.querySelector('.bj-hgp-model-toggle');
             return {
               position: getComputedStyle(node).position,
-              parentIsImage: node.parentElement.classList.contains('bj-hgp-image'),
-              insideImage: model.left >= image.left && model.right <= image.right && model.top >= image.top && model.bottom <= image.bottom,
-              bottomGap: image.bottom - model.bottom,
-              rightGap: image.right - model.right,
+              parentIsShell: node.parentElement.classList.contains('bj-hgp-image-shell'),
+              hidden: node.hidden,
               text: node.textContent.replace(/\s+/g, ' ').trim(),
-              ariaLabel: node.getAttribute('aria-label') || '',
+              buttonText: button.textContent.trim(),
+              expanded: button.getAttribute('aria-expanded'),
+              controls: button.getAttribute('aria-controls'),
             };
           })(),
           giftBackground: getComputedStyle(card.querySelector('.bj-hgp-gift')).backgroundImage,
@@ -341,8 +337,10 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
         removedWeeklyNodes: section.querySelectorAll('.bj-hgp-head,.bj-hgp-title,.bj-hgp-countdown,.bj-hgp-source,[data-bj-week-countdown],[data-bj-countdown]').length,
         bands: bands.map((band) => ({
           tier: band.getAttribute('data-bj-hgp-band'),
+          title: band.querySelector('.bj-hgp-band-title')?.textContent.trim() || '',
           cardCount: band.querySelectorAll('.bj-hgp-card').length,
-          columnCount: getComputedStyle(band.querySelector('.bj-hgp-grid')).gridTemplateColumns.split(' ').length,
+          sliderOverflow: band.querySelector('.bj-hgp-grid').scrollWidth > band.querySelector('.bj-hgp-grid').clientWidth + 1,
+          visibleWidthRatio: band.querySelector('.bj-hgp-card').getBoundingClientRect().width / band.querySelector('.bj-hgp-grid').clientWidth,
         })),
         beforeNativeRecommendation: !!(section.compareDocumentPosition(heading) & Node.DOCUMENT_POSITION_FOLLOWING),
         menuLabels,
@@ -354,6 +352,7 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
     });
 
     if (result.design !== 'vertical-review-right') throw new Error(`${testCase.name}: product card design marker mismatch`);
+    if (result.featuredIds.join(',') !== '34614,32596') throw new Error(`${testCase.name}: top two verified discount products are wrong`);
     if (result.cards.length !== 24) throw new Error(`${testCase.name}: expected twenty-four promo cards`);
     if (result.cards.map((card) => card.id).join(',') !== '24129,11327,3657,35287,34614,32596,10914,23052,32586,32100,28918,27223,32918,33000,22764,10428,35730,32592,27476,27503,29036,33632,31903,32406') {
       throw new Error(`${testCase.name}: promo card order is wrong`);
@@ -361,7 +360,7 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
     if (!result.campaignBanner.exists || !result.campaignBanner.visible || !result.campaignBanner.loaded) {
       throw new Error(`${testCase.name}: live1 campaign banner is missing or unloaded`);
     }
-    if (result.campaignBanner.title !== '11월도 반값습니다!' ||
+    if (result.campaignBanner.title !== '11월 한정수량 반값습니다!' ||
         result.campaignBanner.subcopy !== '선착순, 재고/사은품 소진시 종료' ||
         result.campaignBanner.src !== live1MascotUrl) {
       throw new Error(`${testCase.name}: live1 campaign banner contract mismatch (${JSON.stringify(result.campaignBanner)})`);
@@ -372,18 +371,20 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
       throw new Error(`${testCase.name}: live1 monthly countdown contract mismatch`);
     }
     if (result.removedWeeklyNodes !== 0) throw new Error(`${testCase.name}: removed weekly header/countdown remains`);
-    const expectedTiers = ['1만원 언더', '1만원대', '2만원대', '3만원대', '4만원대', '5만원대'];
+    const expectedTiers = ['이번달 최고 혜택', '1만원 언더', '1만원대', '2만원대', '3만원대', '4만원대', '5만원대'];
     if (result.bands.map((band) => band.tier).join(',') !== expectedTiers.join(',')) {
       throw new Error(`${testCase.name}: price band order is wrong`);
     }
-    if (!result.bands.every((band) => band.cardCount === 4)) {
-      throw new Error(`${testCase.name}: every price band must contain four cards`);
+    if (result.bands.map((band) => band.cardCount).join(',') !== '2,4,4,4,4,4,4') {
+      throw new Error(`${testCase.name}: featured/price band card counts are wrong`);
     }
-    const expectedColumns = 2;
-    if (!result.bands.every((band) => band.columnCount === expectedColumns)) {
-      throw new Error(`${testCase.name}: price-band column count mismatch`);
+    if (result.bands.map((band) => band.title).join('|') !== '이번달 최고 혜택|1만 원 미만|1만 원대|2만 원대|3만 원대|4만 원대|5만 원대') {
+      throw new Error(`${testCase.name}: price band display labels are wrong`);
     }
-    for (const expected of ['11월 특가', '4.9 · 후기 23개', '4.9 · 후기 58개', '4.8 · 후기 149개', '4.8 · 후기 173개', '공기청정기 1대 증정 대상', '추가 사은품 증정']) {
+    if (!result.bands.slice(1).every((band) => band.sliderOverflow && band.visibleWidthRatio > 0.45 && band.visibleWidthRatio < 0.52)) {
+      throw new Error(`${testCase.name}: price bands must show two cards with more available by horizontal slide`);
+    }
+    for (const expected of ['4.9 · 후기 23개', '4.9 · 후기 58개', '4.8 · 후기 149개', '4.8 · 후기 173개', '공기청정기 1대 증정 대상', '추가 사은품 증정']) {
       if (!result.cards.some((card) => card.text.includes(expected))) {
         throw new Error(`${testCase.name}: missing ${expected}`);
       }
@@ -399,12 +400,9 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
         throw new Error(`${testCase.name}: sourced regular/sale price mismatch for ${id}`);
       }
     }
-    if (result.cards.filter((card) => card.officialPromoBadge).length !== 3) {
-      throw new Error(`${testCase.name}: only three approved promotion badges may render`);
-    }
-    if (result.cards.some((card) => card.badgeText && card.badgeText !== '11월 특가') ||
-        result.cards.some((card) => card.text.includes('혜택 집중'))) {
-      throw new Error(`${testCase.name}: an unapproved benefit badge remains`);
+    if (result.cards.some((card) => card.officialPromoBadge || card.badgeText) ||
+        result.cards.some((card) => card.text.includes('11월 특가') || card.text.includes('혜택 집중'))) {
+      throw new Error(`${testCase.name}: redundant per-product promotion badge remains`);
     }
     if (result.cards.filter((card) => card.hasRegularPrice).length !== 3) {
       throw new Error(`${testCase.name}: exactly three cards must show sourced regular prices`);
@@ -464,11 +462,10 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
       throw new Error(`${testCase.name}: review summary must be readable at the right of the brand row`);
     }
     if (!result.cards.every((card) => card.modelPlacement.position === 'absolute' &&
-        card.modelPlacement.parentIsImage && card.modelPlacement.insideImage &&
-        Math.abs(card.modelPlacement.bottomGap - (testCase.name === 'mobile' ? 6 : 7)) < 0.5 &&
-        Math.abs(card.modelPlacement.rightGap - (testCase.name === 'mobile' ? 6 : 8)) < 0.5 &&
-        /^\(i\)\S/.test(card.modelPlacement.text) && /^모델명 \S/.test(card.modelPlacement.ariaLabel))) {
-      throw new Error(`${testCase.name}: (i) model name must sit at the bottom-right of the product image`);
+        card.modelPlacement.parentIsShell && card.modelPlacement.hidden &&
+        card.modelPlacement.buttonText === 'ⓘ' && card.modelPlacement.expanded === 'false' &&
+        /^모델명 \S/.test(card.modelPlacement.text) && card.modelPlacement.controls)) {
+      throw new Error(`${testCase.name}: model name must stay hidden behind an accessible info button`);
     }
     const expectedProductTransform = testCase.name === 'mobile' ? 'matrix(1.12, 0, 0, 1.12, 0, 0)' : 'matrix(1.18, 0, 0, 1.18, 0, 0)';
     if (!result.cards.every((card) => card.productImageTransform === expectedProductTransform && card.productImageBlendMode === 'normal' && card.brandLogoTransform === 'none')) {
@@ -539,11 +536,7 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
     }
     const minImageWidth = testCase.name === 'mobile' ? 140 : 175;
     if (!result.cards.every((card) => card.imageWidth >= minImageWidth)) throw new Error(`${testCase.name}: product thumbnail is too small`);
-    if (!result.cards.filter((card) => card.badgeTopOffset !== null).every((card) =>
-      Math.abs(card.badgeTopOffset) < 0.5 && Math.abs(card.badgeLeftOffset) < 0.5 &&
-      card.badgeBorderRadius === (testCase.name === 'mobile' ? '10px 0px 8px' : '12px 0px 9px'))) {
-      throw new Error(`${testCase.name}: promotion badge must align flush with the rounded thumbnail corner`);
-    }
+    if (result.cards.some((card) => card.badgeTopOffset !== null)) throw new Error(`${testCase.name}: promotion badge remains`);
     const minPadding = testCase.name === 'mobile' ? 8 : 16;
     if (!result.cards.every((card) => card.cardPadding >= minPadding)) throw new Error(`${testCase.name}: card padding is too tight`);
     if (!result.beforeNativeRecommendation) throw new Error(`${testCase.name}: promo cards must precede native recommendations`);
