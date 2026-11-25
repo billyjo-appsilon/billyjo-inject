@@ -1259,7 +1259,7 @@
       'footer.new-footer{box-sizing:border-box;background:#15171f!important;color:#fff!important;padding:36px 0 96px!important}' +
       'footer.new-footer>:not(.bj-native-partners){display:none!important}' +
       '.bj-native-partners{box-sizing:border-box;width:100%;max-width:1080px;margin:0 auto;padding:0 20px;color:#fff;text-align:left}' +
-      '.bj-native-brand{display:block;box-sizing:border-box;height:54px;width:auto;max-width:100%;padding:10px 14px;border-radius:12px;background:#fff;box-shadow:0 10px 24px rgba(0,0,0,.18);margin:0 0 14px;object-fit:contain;object-position:center}' +
+      '.bj-native-brand{display:block;box-sizing:border-box;height:54px;width:148px;max-width:100%;padding:10px 14px;border-radius:12px;background:#fff;box-shadow:0 10px 24px rgba(0,0,0,.18);margin:0 0 14px;object-fit:contain;object-position:center}' +
       '.bj-native-partner-row{display:flex;justify-content:flex-start;align-items:center;gap:10px;flex-wrap:wrap;margin:0 0 18px}' +
       '.bj-native-partner-card{box-sizing:border-box;width:148px;height:54px;padding:10px 14px;border-radius:12px;background:#fff;border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 24px rgba(0,0,0,.18);display:flex;align-items:center;justify-content:center}' +
       '.bj-native-partner-card img{display:block;width:100%;height:100%;object-fit:contain}' +
@@ -1275,7 +1275,7 @@
       '.bj-native-legal{margin-top:16px;padding-top:15px;border-top:1px solid rgba(255,255,255,.1);font-size:11px;color:rgba(255,255,255,.4);line-height:1.75}' +
       '@media(min-width:768px){.bj-native-partners{padding-left:32px;padding-right:32px}}' +
       '@media(min-width:940px){footer.new-footer{padding-bottom:40px!important}}' +
-      '@media(max-width:420px){.bj-native-partner-row{gap:8px}.bj-native-partner-card{width:min(43vw,148px);height:50px;padding:9px 11px}.bj-native-brand{height:50px;padding:9px 11px}}';
+      '@media(max-width:420px){.bj-native-partner-row{gap:8px}.bj-native-partner-card{width:min(43vw,148px);height:50px;padding:9px 11px}.bj-native-brand{width:min(43vw,148px);height:50px;padding:9px 11px}}';
     (document.head || document.documentElement).appendChild(style);
   }
 
