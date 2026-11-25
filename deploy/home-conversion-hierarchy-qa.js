@@ -189,7 +189,7 @@ async function inspect(browser, width, height) {
           autoplay: window.jQuery?.('.new-mv')?.slick('getSlick')?.options?.autoplay,
           videoPlayback: (() => {
             const video = document.querySelector('.new-mv .slick-current video.billyjo-video-hero__media, .new-mv .slick-current video');
-            return video ? { autoplay: video.autoplay, loop: video.loop, muted: video.muted, playsInline: video.playsInline, paused: video.paused } : null;
+            return video ? { autoplay: video.autoplay, loop: video.loop, muted: video.muted, playsInline: video.playsInline, paused: video.paused, objectFit: getComputedStyle(video).objectFit } : null;
           })(),
           slides: slides.map((slide) => ({
             video: Boolean(slide.querySelector('video.billyjo-video-hero__media, video')),
@@ -265,7 +265,7 @@ async function inspect(browser, width, height) {
     } else {
       assert(result.category.cards.every((card) => card.direction === 'column'), `${width}px: desktop category card layout changed unexpectedly`);
     }
-    assert(result.promo.design === 'vertical-review-right' && result.promo.total === 24 && result.promo.visible === 12 && result.promo.toggle === '프로모션 상품 12개 더보기', `${width}px: progressive promo mismatch (${JSON.stringify(result.promo)})`);
+    assert(result.promo.design === 'vertical-review-right' && result.promo.total === 26 && result.promo.visible === 26 && result.promo.toggle === '', `${width}px: horizontal promo mismatch (${JSON.stringify(result.promo)})`);
     if (width <= 780) {
       assert(result.promo.firstRows[0].top === result.promo.firstRows[1].top && result.promo.firstRows[0].left < result.promo.firstRows[1].left && result.promo.firstRows[2].top > result.promo.firstRows[0].top, `${width}px: promotion products are not two-column vertical cards (${JSON.stringify(result.promo.firstRows)})`);
     } else {
@@ -273,13 +273,14 @@ async function inspect(browser, width, height) {
     }
     assert(result.promo.bounds.left >= 0 && result.promo.bounds.right <= width && result.promo.bounds.width <= 1280, `${width}px: relocated promo bounds mismatch (${JSON.stringify(result.promo.bounds)})`);
     assert(result.promo.subcopy === '선착순, 재고/사은품 소진시 종료', `${width}px: monthly urgency copy mismatch`);
-    assert(result.promo.banner.lines.map((line) => line.text).join('|') === '11월도|반값습니다!' && result.promo.banner.lines[1].color === 'rgb(255, 229, 0)', `${width}px: campaign title/color mismatch (${JSON.stringify(result.promo.banner.lines)})`);
+    assert(result.promo.banner.lines.map((line) => line.text).join('|') === '11월 한정수량|반값습니다!' && result.promo.banner.lines[1].color === 'rgb(255, 229, 0)', `${width}px: campaign title/color mismatch (${JSON.stringify(result.promo.banner.lines)})`);
     if (width <= 780) {
       assert(result.promo.banner.height <= 156 && result.promo.banner.gapBefore <= 15 && result.promo.banner.gapAfter <= 13 && !result.promo.banner.subcopyOverflow, `${width}px: campaign banner is not compact enough (${JSON.stringify(result.promo.banner)})`);
     }
     assert(result.hero.count === 4 && result.hero.counter.endsWith('/ 4'), `${width}px: hero count mismatch (${JSON.stringify(result.hero)})`);
     assert(result.hero.currentIndex === 0 && result.hero.autoplay === false, `${width}px: hero carousel still advances automatically (${JSON.stringify(result.hero)})`);
     assert(result.hero.videoPlayback?.autoplay && result.hero.videoPlayback?.loop && result.hero.videoPlayback?.muted && result.hero.videoPlayback?.playsInline && !result.hero.videoPlayback?.paused, `${width}px: hero video is not muted autoplay (${JSON.stringify(result.hero.videoPlayback)})`);
+    if (width > 1024) assert(result.hero.videoPlayback.objectFit === 'contain', `${width}px: desktop hero video is cropped (${JSON.stringify(result.hero.videoPlayback)})`);
     assert(result.hero.slides[0]?.video && result.hero.slides[0]?.label === '빌리조 11월 프로모션 영상', `${width}px: video is not the first hero (${JSON.stringify(result.hero.slides)})`);
     assert(result.hero.slides.slice(1).every((slide) => slide.label && slide.href === '/html/dh/counsel' && slide.consult === '1'), `${width}px: retained image hero destination mismatch (${JSON.stringify(result.hero.slides)})`);
     assert(result.nativeRecommendation === 'none' && result.nativeCatalog === 'none', `${width}px: duplicated native product modules remain`);

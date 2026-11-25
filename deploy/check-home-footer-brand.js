@@ -21,6 +21,8 @@ for (const required of [
   '제휴카드 최대 할인 적용 기준',
   '현금 사은품은 제품·시기별 예상 범위',
   'footer.new-footer>:not(.bj-native-partners){display:none!important}',
+  'background:transparent;box-shadow:none',
+  'filter:brightness(0) invert(1)',
 ]) {
   if (!injectSource.includes(required)) throw new Error(`missing live1 footer source contract: ${required}`);
 }
@@ -64,6 +66,11 @@ async function inspect(browser, width) {
         footerPaddingBottom: parseFloat(style(footer)?.paddingBottom || '0'),
         block: rect(block),
         images: images.map((image) => ({ alt: image.alt, loaded: image.complete && image.naturalWidth > 0 })),
+        brandStyle: (() => {
+          const brand = block?.querySelector('.bj-native-brand');
+          const computed = style(brand);
+          return computed ? { background: computed.backgroundColor, filter: computed.filter, boxShadow: computed.boxShadow } : null;
+        })(),
         cards: cards.map(rect),
         phone: block?.querySelector('.bj-native-phone-number')?.textContent?.trim() || '',
         row: block?.querySelector('.bj-native-row')?.textContent?.replace(/\s+/g, ' ').trim() || '',
@@ -78,6 +85,7 @@ async function inspect(browser, width) {
     if (result.layout !== 'live1-v1' || result.blockCount !== 1 || !result.firstChild || result.nativeVisible !== 0) throw new Error(`footer placement regressed at ${width}px: ${JSON.stringify(result)}`);
     if (result.background !== 'rgb(21, 23, 31)' || result.footerPaddingTop !== 36 || result.footerPaddingBottom !== (width >= 940 ? 40 : 96)) throw new Error(`footer shell differs from live1 at ${width}px: ${JSON.stringify(result)}`);
     if (result.images.map((image) => image.alt).join('|') !== '빌리조|Meta Business Partner|toss' || result.images.some((image) => !image.loaded)) throw new Error(`footer images regressed at ${width}px: ${JSON.stringify(result.images)}`);
+    if (!result.brandStyle || result.brandStyle.background !== 'rgba(0, 0, 0, 0)' || result.brandStyle.filter === 'none' || result.brandStyle.boxShadow !== 'none') throw new Error(`BillyJo footer logo must be white on transparent background at ${width}px: ${JSON.stringify(result.brandStyle)}`);
     if (result.cards.length !== 2 || result.cards.some((card) => card.width <= 0 || card.height <= 0)) throw new Error(`footer partner cards regressed at ${width}px: ${JSON.stringify(result.cards)}`);
     if (result.phone !== '070-4918-7683' || !result.row.includes('평일 09:00–18:00') || !result.row.includes('https://www.billyjo.co.kr')) throw new Error(`footer contact differs from live1 at ${width}px: ${JSON.stringify(result)}`);
     for (const copy of ['앱실론코퍼레이션(주)', '온재현', '2021-서울강남-04074', '810-81-01685']) if (!result.business.includes(copy)) throw new Error(`missing live1 business copy at ${width}px: ${copy}`);
