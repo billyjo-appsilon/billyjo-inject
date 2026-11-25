@@ -9,7 +9,7 @@ const screenshotDir = process.env.FOOTER_SCREENSHOT_DIR || '';
 for (const required of [
   'function bjNativeFooterBrandLockup()',
   "block.setAttribute('data-bj-footer-layout', 'live1-v1')",
-  "asset('images/logo/billyjo-ko.webp')",
+  "asset('images/logo/billyjo-ko-transparent.webp')",
   "asset('images/meta-business-partner.webp')",
   "asset('images/toss-logo.webp')",
   '평일 09:00–18:00',
