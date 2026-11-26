@@ -117,16 +117,25 @@ async function routeLocalAssets(page) {
         nextControl: (() => {
           const button = firstGeneralBand.querySelector('.bj-hgp-slide-button--next');
           const icon = button.querySelector('svg');
+          const firstCard = firstGeneralBand.querySelector('.bj-hgp-card');
           const pathBounds = icon.querySelector('path').getBBox();
           const buttonRect = button.getBoundingClientRect();
           const iconRect = icon.getBoundingClientRect();
+          const cardRect = firstCard.getBoundingClientRect();
+          const style = getComputedStyle(button);
           return {
             width: buttonRect.width,
             height: buttonRect.height,
             centerDeltaX: Math.abs((buttonRect.left + buttonRect.width / 2) - (iconRect.left + iconRect.width / 2)),
             centerDeltaY: Math.abs((buttonRect.top + buttonRect.height / 2) - (iconRect.top + iconRect.height / 2)),
             pathCenterDeltaX: Math.abs(12 - (pathBounds.x + pathBounds.width / 2)),
-            boxShadow: getComputedStyle(button).boxShadow,
+            iconWidth: iconRect.width,
+            iconHeight: iconRect.height,
+            boxShadow: style.boxShadow,
+            background: style.backgroundColor,
+            borderWidth: style.borderTopWidth,
+            borderRadius: style.borderRadius,
+            overlapsCard: buttonRect.left < cardRect.right && buttonRect.right > cardRect.left && buttonRect.top < cardRect.bottom && buttonRect.bottom > cardRect.top,
             iconAriaHidden: icon.getAttribute('aria-hidden'),
           };
         })(),
@@ -196,10 +205,18 @@ async function routeLocalAssets(page) {
     assert(result.promoById['32586'] === '47% 할인 · 공기청정기 1대 증정', `${width}: 32586 promo mismatch (${result.promoById['32586']})`);
     assert(result.promoStyles.every((style) => style.background === 'rgb(47, 102, 189)' && style.color === 'rgb(255, 255, 255)' && style.borderTop === 'rgb(24, 75, 155)'), `${width}: promotion strip contrast drift ${JSON.stringify(result.promoStyles)}`);
     assert(result.deadlineLayouts.length > 0 && result.deadlineLayouts.every((layout) => layout.fontSize === 11.5 && layout.justify === 'space-between' && layout.align === 'center' && Math.abs(layout.leftInset - 7) < 0.75 && Math.abs(layout.rightInset - 7) < 0.75 && layout.centerDelta < 0.75), `${width}: promo deadline alignment drift ${JSON.stringify(result.deadlineLayouts)}`);
-    const expectedControlSize = width <= 780 ? 36 : 40;
+    const expectedControlSize = 40;
     assert(Math.abs(result.nextControl.width - expectedControlSize) < 0.5 && Math.abs(result.nextControl.height - expectedControlSize) < 0.5 &&
-      result.nextControl.centerDeltaX < 0.5 && result.nextControl.centerDeltaY < 0.5 && result.nextControl.pathCenterDeltaX < 0.05 && result.nextControl.iconAriaHidden === 'true' &&
-      result.nextControl.boxShadow.includes('rgba(8, 56, 248'), `${width}: next control size/glow/centering mismatch ${JSON.stringify(result.nextControl)}`);
+      result.nextControl.centerDeltaX < 0.5 && result.nextControl.centerDeltaY < 0.5 && result.nextControl.pathCenterDeltaX < 0.05 && result.nextControl.iconAriaHidden === 'true',
+      `${width}: next control size/centering mismatch ${JSON.stringify(result.nextControl)}`);
+    if (width <= 780) {
+      assert(Math.abs(result.nextControl.iconWidth - 12) < 0.5 && Math.abs(result.nextControl.iconHeight - 18) < 0.5 &&
+        result.nextControl.boxShadow === 'none' && result.nextControl.background === 'rgba(0, 0, 0, 0)' && result.nextControl.borderWidth === '0px' &&
+        result.nextControl.borderRadius === '0px' && !result.nextControl.overlapsCard,
+        `${width}: mobile next control must be a bare chevron outside the cards ${JSON.stringify(result.nextControl)}`);
+    } else {
+      assert(result.nextControl.boxShadow.includes('rgba(8, 56, 248'), `${width}: desktop next control glow mismatch ${JSON.stringify(result.nextControl)}`);
+    }
     assert(result.cards.every((card) => Math.abs(card.visibleLogoHeight - 14) < 0.15), `${width}: visible logo height is not 14px`);
     assert(result.cards.every((card) => card.logoInfoCenterDelta < 0.75), `${width}: logo/info centers are not aligned`);
     assert(result.cards.every((card) => Math.abs(card.visibleLogoLeftDelta - 6) < 0.5 && Math.abs(card.reviewLeftDelta - 6) < 0.5), `${width}: visible logo/review left alignment drift ${JSON.stringify(result.cards)}`);
