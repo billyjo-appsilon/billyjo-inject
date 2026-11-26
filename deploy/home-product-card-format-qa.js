@@ -7,15 +7,15 @@ const injectSource = fs.readFileSync(path.join(root, 'inject.js'), 'utf8');
 const logoDir = path.join(root, 'images', 'brands');
 const productDir = path.join(root, 'images', 'products', 'cutout-20261121');
 const alpha = {
-  '웰스': { total: 136, top: 4, visible: 128 },
-  'LG전자': { total: 340, top: 0, visible: 340 },
-  '청호나이스': { total: 34, top: 4, visible: 26 },
-  '쿠쿠': { total: 25, top: 4, visible: 17 },
-  '루헨스': { total: 26, top: 4, visible: 18 },
-  '코웨이': { total: 27, top: 4, visible: 19 },
-  '현대렌탈케어': { total: 153, top: 4, visible: 145 },
-  '세스코': { total: 109, top: 0, visible: 109 },
-  '삼성': { total: 25, top: 4, visible: 17 },
+  '웰스': { total: 136, top: 4, visible: 128, width: 520, left: 4 },
+  'LG전자': { total: 340, top: 0, visible: 340, width: 1280, left: 0 },
+  '청호나이스': { total: 34, top: 4, visible: 26, width: 145, left: 1 },
+  '쿠쿠': { total: 25, top: 4, visible: 17, width: 103, left: 4 },
+  '루헨스': { total: 26, top: 4, visible: 18, width: 145, left: 4 },
+  '코웨이': { total: 27, top: 4, visible: 19, width: 114, left: 4 },
+  '현대렌탈케어': { total: 153, top: 4, visible: 145, width: 486, left: 4 },
+  '세스코': { total: 109, top: 0, visible: 109, width: 186, left: 0 },
+  '삼성': { total: 25, top: 4, visible: 17, width: 95, left: 4 },
 };
 
 function assert(condition, message) {
@@ -141,16 +141,27 @@ async function routeLocalAssets(page) {
           const infoRect = shell.querySelector('.bj-hgp-model-toggle').getBoundingClientRect();
           const cardRect = card.getBoundingClientRect();
           const imageRect = image.getBoundingClientRect();
-          const visibleHeight = logoRect.height * bounds.visible / bounds.total;
-          const visibleCenter = logoRect.top + logoRect.height * bounds.top / bounds.total + visibleHeight / 2;
-          const reviewStyle = getComputedStyle(card.querySelector('.bj-hgp-review-pill'));
+          const containScale = Math.min(logoRect.width / bounds.width, logoRect.height / bounds.total);
+          const visibleHeight = bounds.visible * containScale;
+          const visibleCenter = logoRect.top + bounds.top * containScale + visibleHeight / 2;
+          const visibleLeft = logoRect.left + bounds.left * containScale;
+          const visibleTop = logoRect.top + bounds.top * containScale;
+          const review = card.querySelector('.bj-hgp-review-pill');
+          const reviewRect = review.getBoundingClientRect();
+          const reviewStyle = getComputedStyle(review);
           return {
+            brand,
             id: card.dataset.bjHgpProduct,
             promo: Boolean(card.querySelector('.bj-hgp-promo')),
             review: card.querySelector('.bj-hgp-review-pill').textContent.trim(),
             reviewBottom: reviewStyle.bottom,
             visibleLogoHeight: visibleHeight,
             logoInfoCenterDelta: Math.abs(visibleCenter - (infoRect.top + infoRect.height / 2)),
+            visibleLogoLeftDelta: visibleLeft - imageRect.left,
+            visibleLogoTopDelta: visibleTop - imageRect.top,
+            logoWidth: logoRect.width,
+            logoLeftRatio: parseFloat(getComputedStyle(logo).getPropertyValue('--bj-hgp-logo-left-ratio') || 0),
+            reviewLeftDelta: reviewRect.left - imageRect.left,
             cardPadding: parseFloat(getComputedStyle(card).paddingTop),
             imageHeight: imageRect.height,
             imageTopDelta: imageRect.top - cardRect.top,
@@ -191,6 +202,7 @@ async function routeLocalAssets(page) {
       result.nextControl.boxShadow.includes('rgba(8, 56, 248'), `${width}: next control size/glow/centering mismatch ${JSON.stringify(result.nextControl)}`);
     assert(result.cards.every((card) => Math.abs(card.visibleLogoHeight - 14) < 0.15), `${width}: visible logo height is not 14px`);
     assert(result.cards.every((card) => card.logoInfoCenterDelta < 0.75), `${width}: logo/info centers are not aligned`);
+    assert(result.cards.every((card) => Math.abs(card.visibleLogoLeftDelta - 6) < 0.5 && Math.abs(card.reviewLeftDelta - 6) < 0.5), `${width}: visible logo/review left alignment drift ${JSON.stringify(result.cards)}`);
     assert(result.cards.every((card) => card.cardBorder === 'rgb(217, 228, 247)' && card.logoBackground === 'rgba(0, 0, 0, 0)'), `${width}: card border or logo transparency mismatch`);
     assert(result.cards.every((card) => card.productNaturalWidth > 0 && card.productNaturalHeight > 0 && card.productOpacity === '1' && card.productVisibility === 'visible' && card.productDisplay !== 'none' && card.productBlendMode === 'normal'), `${width}: a product cutout is not visibly loaded ${JSON.stringify(result.cards)}`);
     const expectedPriceLabelFontSize = (width <= 780 ? 7 : 10) + (2 * 96 / 72);
@@ -198,8 +210,9 @@ async function routeLocalAssets(page) {
     assert(result.stickyPrimaryText === '✅내 견적 확인' && !result.stickyPrimaryHasIcon, `${width}: sticky CTA mismatch`);
     assert(!result.horizontalOverflow, `${width}: page overflows horizontally`);
     if (width <= 780) {
+      assert(result.cards.every((card) => Math.abs(card.visibleLogoTopDelta - 5) < 0.5), `${width}: visible logo top inset drift ${JSON.stringify(result.cards)}`);
       assert(result.cards.every((card) => card.cardPadding === 0), `${width}: mobile card is not full bleed`);
-      assert(result.cards.every((card) => Math.abs(card.imageHeight - 118.453125) < 0.5), `${width}: mobile thumbnail height mismatch`);
+      assert(result.cards.every((card) => Math.abs(card.imageHeight - 120) < 0.5), `${width}: mobile thumbnail height mismatch`);
       assert(result.cards.every((card) => card.imageTopDelta <= 1.1 && card.imageLeftDelta <= 1.1), `${width}: mobile thumbnail has outer whitespace`);
       assert(result.cards.every((card) => card.productTransform === 'matrix(1.12, 0, 0, 1.12, 0, 5)'), `${width}: mobile product image offset mismatch`);
       assert(result.cards.every((card) => Math.abs(card.actionHeight - 28) < 0.5), `${width}: mobile action height mismatch`);
