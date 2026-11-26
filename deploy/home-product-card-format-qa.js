@@ -73,6 +73,9 @@ async function routeLocalAssets(page) {
     await routeLocalAssets(page);
     await page.goto('https://billyjo.co.kr/', { waitUntil: 'domcontentloaded', timeout: 60000 });
     await page.waitForSelector('#bj-home-gift-promos[data-bj-product-card-design="fullbleed-review-promo-v1"]', { timeout: 30000 });
+    for (const band of await page.locator('#bj-home-gift-promos .bj-hgp-band').all()) {
+      await band.scrollIntoViewIfNeeded();
+    }
     await page.waitForFunction(() => [...document.querySelectorAll('#bj-home-gift-promos img')].every((img) => img.complete && img.naturalWidth));
     await page.waitForTimeout(100);
 
@@ -95,6 +98,10 @@ async function routeLocalAssets(page) {
           const card = section.querySelector(`.bj-hgp-band:not(.bj-hgp-band--featured) [data-bj-hgp-product="${id}"]`);
           return [id, card?.querySelector('.bj-hgp-promo')?.getAttribute('aria-label') || ''];
         })),
+        promoStyles: [...section.querySelectorAll('.bj-hgp-promo')].map((promo) => {
+          const style = getComputedStyle(promo);
+          return { background: style.backgroundColor, color: style.color, borderTop: style.borderTopColor };
+        }),
         cards: cards.map((card) => {
           const shell = card.querySelector('.bj-hgp-image-shell');
           const image = card.querySelector('.bj-hgp-image');
@@ -119,6 +126,12 @@ async function routeLocalAssets(page) {
             imageTopDelta: imageRect.top - cardRect.top,
             imageLeftDelta: imageRect.left - cardRect.left,
             productTransform: getComputedStyle(product).transform,
+            productNaturalWidth: product.naturalWidth,
+            productNaturalHeight: product.naturalHeight,
+            productOpacity: getComputedStyle(product).opacity,
+            productVisibility: getComputedStyle(product).visibility,
+            productDisplay: getComputedStyle(product).display,
+            productBlendMode: getComputedStyle(product).mixBlendMode,
             actionHeight: card.querySelector('.bj-hgp-detail').getBoundingClientRect().height,
             cardBorder: getComputedStyle(card).borderTopColor,
             logoBackground: getComputedStyle(logo).backgroundColor,
@@ -136,11 +149,13 @@ async function routeLocalAssets(page) {
     assert(result.reviewCount === 26, `${width}: every card needs a review pill`);
     assert(result.generalHeadingText === '월요금대별 추천제품' && result.generalHeadingBeforeBands, `${width}: general-product divider missing`);
     assert(result.promoById['34614'] === '50% 할인 · 공기청정기 1대 증정', `${width}: 34614 promo mismatch (${result.promoById['34614']})`);
-    assert(result.promoById['32596'] === '50% 할인', `${width}: 32596 promo mismatch (${result.promoById['32596']})`);
+    assert(/^50% 할인 · (?:\d+일 남음|오늘 마감)$/.test(result.promoById['32596']), `${width}: 32596 promo countdown mismatch (${result.promoById['32596']})`);
     assert(result.promoById['32586'] === '47% 할인 · 공기청정기 1대 증정', `${width}: 32586 promo mismatch (${result.promoById['32586']})`);
+    assert(result.promoStyles.every((style) => style.background === 'rgb(47, 102, 189)' && style.color === 'rgb(255, 255, 255)' && style.borderTop === 'rgb(24, 75, 155)'), `${width}: promotion strip contrast drift ${JSON.stringify(result.promoStyles)}`);
     assert(result.cards.every((card) => Math.abs(card.visibleLogoHeight - 14) < 0.15), `${width}: visible logo height is not 14px`);
     assert(result.cards.every((card) => card.logoInfoCenterDelta < 0.75), `${width}: logo/info centers are not aligned`);
     assert(result.cards.every((card) => card.cardBorder === 'rgb(217, 228, 247)' && card.logoBackground === 'rgba(0, 0, 0, 0)'), `${width}: card border or logo transparency mismatch`);
+    assert(result.cards.every((card) => card.productNaturalWidth > 0 && card.productNaturalHeight > 0 && card.productOpacity === '1' && card.productVisibility === 'visible' && card.productDisplay !== 'none' && card.productBlendMode === 'normal'), `${width}: a product cutout is not visibly loaded ${JSON.stringify(result.cards)}`);
     assert(result.stickyPrimaryText === '✅내 견적 확인' && !result.stickyPrimaryHasIcon, `${width}: sticky CTA mismatch`);
     assert(!result.horizontalOverflow, `${width}: page overflows horizontally`);
     if (width <= 780) {
@@ -159,6 +174,13 @@ async function routeLocalAssets(page) {
       await page.locator('#bj-home-gift-promos').screenshot({
         path: path.join(process.env.BJ_QA_SCREENSHOT_DIR, `product-cards-${width}.png`),
       });
+      if (width === 390) {
+        for (const id of ['32918', '33000', '29036', '33632']) {
+          await page.locator(`[data-bj-hgp-product="${id}"] .bj-hgp-image`).first().screenshot({
+            path: path.join(process.env.BJ_QA_SCREENSHOT_DIR, `product-cutout-${id}-${width}.png`),
+          });
+        }
+      }
     }
 
     if (width === 320) {

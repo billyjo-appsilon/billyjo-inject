@@ -3453,6 +3453,13 @@
     if (!gift || /^(?:추가\s*)?사은품(?:\s*증정)?$/.test(gift)) return '';
     return gift.replace(/\s*대상$/, '');
   }
+  function snapshotDaysLeft(month) {
+    if (!/^\d{4}-\d{2}$/.test(month || '') || currentMonthKst() !== month) return null;
+    var year = Number(month.slice(0, 4));
+    var monthNumber = Number(month.slice(5, 7));
+    var day = Number(new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Seoul', day: '2-digit' }).format(new Date()));
+    return Math.max(0, new Date(Date.UTC(year, monthNumber, 0)).getUTCDate() - day);
+  }
   function findHeading() {
     var headings = document.querySelectorAll('h2');
     for (var i = 0; i < headings.length; i++) {
@@ -3544,11 +3551,11 @@
       '.bj-hgp-model{top:27px;right:7px;bottom:auto}' +
       '.bj-hgp-review-pill{position:absolute;z-index:5;left:6px;bottom:6px;display:flex;height:18px;padding:0 6px;align-items:center;border:1px solid #dce2ea;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 2px 7px rgba(15,23,42,.1);color:#596579;font-size:9px;font-weight:900;line-height:1;text-decoration:none;white-space:nowrap;backdrop-filter:blur(3px)}' +
       '.bj-hgp-image-shell.has-promo .bj-hgp-review-pill{bottom:31px}' +
-      '.bj-hgp-promo{display:block;width:100%;height:25px;padding:0 7px;overflow:hidden;border-top:1px solid #b8caf2;background:#e3ebff;color:#314a73;white-space:nowrap}' +
+      '.bj-hgp-promo{display:block;width:100%;height:25px;padding:0 7px;overflow:hidden;border-top:1px solid #184b9b;background:#2f66bd;color:#fff;white-space:nowrap}' +
       '.bj-hgp-promo-track{display:inline-flex;width:max-content;height:24px;align-items:center;white-space:nowrap;transform:translate3d(0,0,0)}' +
       '.bj-hgp-promo-copy{display:block;flex:0 0 auto;font-size:9.5px;font-weight:850;letter-spacing:-.035em}' +
       '.bj-hgp-promo-copy[aria-hidden="true"]{display:none}' +
-      '.bj-hgp-promo-discount{color:#d94a3a;font-weight:950}' +
+      '.bj-hgp-promo-discount{color:#ffe36a;font-weight:950}' +
       '.bj-hgp-promo.is-rolling .bj-hgp-promo-track{will-change:transform;animation:bj-hgp-promo-roll var(--bj-hgp-promo-duration,9s) linear infinite}' +
       '.bj-hgp-promo.is-rolling .bj-hgp-promo-copy[aria-hidden="true"]{display:block;margin-left:var(--bj-hgp-promo-gap,24px)}' +
       '.bj-hgp-promo:hover .bj-hgp-promo-track{animation-play-state:paused}' +
@@ -3807,11 +3814,13 @@
         : '<span class="bj-hgp-brand-fallback">' + p.brand + '</span>') + '</div>';
       var discount = actualDiscount(p);
       var gift = exactGift(p);
+      var daysLeft = snapshotDaysLeft(month);
       var promoParts = [];
       if (discount) promoParts.push('<span class="bj-hgp-promo-discount">' + discount + '% 할인</span>');
       if (gift) promoParts.push('<span class="bj-hgp-promo-gift">' + gift + '</span>');
+      if (discount && !gift && daysLeft !== null) promoParts.push('<span class="bj-hgp-promo-deadline">' + (daysLeft === 0 ? '오늘 마감' : daysLeft + '일 남음') + '</span>');
       var promoInner = promoParts.join('<span aria-hidden="true"> · </span>');
-      var promoText = (discount ? discount + '% 할인' : '') + (discount && gift ? ' · ' : '') + gift;
+      var promoText = promoParts.map(function (part) { return part.replace(/<[^>]+>/g, ''); }).join(' · ');
       var promo = promoInner ? '<div class="bj-hgp-promo" aria-label="' + promoText + '"><span class="bj-hgp-promo-track"><span class="bj-hgp-promo-copy">' + promoInner + '</span><span class="bj-hgp-promo-copy" aria-hidden="true">' + promoInner + '</span></span></div>' : '';
       return '<article class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" data-bj-hgp-tier="' + p.tier + '">' +
         '<div class="bj-hgp-main">' +
