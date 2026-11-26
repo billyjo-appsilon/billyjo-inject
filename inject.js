@@ -3432,6 +3432,17 @@
     '세스코': 0,
     '삼성': -3.2941
   };
+  var BRAND_LOGO_LEFT_RATIOS = {
+    '웰스': 0.0076923,
+    'LG전자': 0,
+    '청호나이스': 0.0068966,
+    '쿠쿠': 0.038835,
+    '루헨스': 0.0275862,
+    '코웨이': 0.0350877,
+    '현대렌탈케어': 0.0082305,
+    '세스코': 0,
+    '삼성': 0.0421053
+  };
 
   function currentMonthKst() {
     var parts = new Intl.DateTimeFormat('en-US', {
@@ -3548,8 +3559,8 @@
       '.bj-hgp-card{border-color:#d9e4f7;box-shadow:0 7px 22px rgba(8,56,248,.07)}' +
       '.bj-hgp-image>img:not(.bj-hgp-brand-logo){transform:scale(1.003)}' +
       '.bj-hgp-brandrow,.bj-hgp-meta{display:none}' +
-      '.bj-hgp-brandmark{position:absolute;z-index:5;top:7px;left:7px;display:flex;width:auto;max-width:118px;height:auto;align-items:flex-start;background:transparent;pointer-events:none}' +
-      '.bj-hgp-brand-logo{display:block;width:auto;height:var(--bj-hgp-logo-height,14px);max-width:112px;object-fit:contain;object-position:left top;background:transparent;mix-blend-mode:normal;transform:translateY(var(--bj-hgp-logo-shift,0px))}' +
+      '.bj-hgp-brandmark{position:absolute;z-index:5;top:7px;left:6px;display:flex;width:auto;max-width:118px;height:auto;align-items:flex-start;background:transparent;pointer-events:none}' +
+      '.bj-hgp-brand-logo{display:block;width:auto;height:var(--bj-hgp-logo-height,14px);max-width:112px;object-fit:contain;object-position:left top;background:transparent;mix-blend-mode:normal;transform:translate(calc(-100% * var(--bj-hgp-logo-left-ratio,0)),var(--bj-hgp-logo-shift,0px))}' +
       '.bj-hgp-model-toggle{top:5px;right:7px;bottom:auto;width:18px;height:18px;border:0;border-radius:0;background:transparent;box-shadow:none;color:#596579;font-size:14px;backdrop-filter:none}' +
       '.bj-hgp-model{top:27px;right:7px;bottom:auto}' +
       '.bj-hgp-review-pill{position:absolute;z-index:5;left:6px;bottom:3px;display:flex;height:18px;padding:0 6px;align-items:center;border:1px solid #dce2ea;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 2px 7px rgba(15,23,42,.1);color:#596579;font-size:9px;font-weight:900;line-height:1;text-decoration:none;white-space:nowrap;backdrop-filter:blur(3px)}' +
@@ -3567,8 +3578,8 @@
       '@keyframes bj-hgp-promo-roll{0%,14%{transform:translate3d(0,0,0)}86%,100%{transform:translate3d(calc(-1 * var(--bj-hgp-promo-distance)),0,0)}}' +
       '@media(prefers-reduced-motion:reduce){.bj-hgp-promo.is-rolling .bj-hgp-promo-track{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;animation:none}.bj-hgp-promo.is-rolling .bj-hgp-promo-copy:first-child{width:100%;overflow:hidden;text-overflow:ellipsis}.bj-hgp-promo.is-rolling .bj-hgp-promo-copy[aria-hidden="true"]{display:none}}' +
       '@media(max-width:780px){#bj-home-gift-promos{margin:8px -2px 0;padding:6px 6px 0}.bj-hgp-half-banner{grid-template-columns:minmax(0,63%) minmax(0,37%);min-height:146px;border-radius:18px;margin-bottom:12px}.bj-hgp-half-copy{padding:14px 4px 14px 16px}.bj-hgp-half-copy h2{font-size:25px}.bj-hgp-half-copy p{margin-top:6px;font-size:11.5px;line-height:1.45;letter-spacing:-.03em;white-space:nowrap}.bj-hgp-month-timer{margin-top:5px;gap:4px}.bj-hgp-flip-digit{width:18px;height:24px;border-radius:5px;font-size:13px}.bj-hgp-flip-unit{font-size:9.5px}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;padding-top:15px;font-size:13px}.bj-hgp-band--featured .bj-hgp-band-title{padding-top:0;font-size:16px}.bj-hgp-grid{grid-auto-columns:calc((100% - 8px)/2);gap:8px;padding-bottom:7px}.bj-hgp-slide-button{width:36px;height:36px}.bj-hgp-slide-button--prev{left:-7px}.bj-hgp-slide-button--next{right:-7px}.bj-hgp-card{display:flex;padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{min-height:0;aspect-ratio:16/10;border-radius:10px}.bj-hgp-image>img:not(.bj-hgp-brand-logo){transform:scale(1.12)}.bj-hgp-info{min-width:0;padding:6px 1px 0}.bj-hgp-brandrow{gap:3px;margin-bottom:4px}.bj-hgp-brandmark{max-width:54px;height:17px}.bj-hgp-brand-logo{width:auto;height:14.4px;max-width:54px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{font-size:11.5px;line-height:1.38}.bj-hgp-model-toggle{right:6px;bottom:6px;width:23px;height:23px;font-size:14px}.bj-hgp-model{right:34px;bottom:7px;max-width:calc(100% - 42px);padding:4px 6px;font-size:8px}.bj-hgp-pricebox{margin-top:5px;padding:5px 7px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:calc(7px + 2pt)}.bj-hgp-price b{font-size:16px}.bj-hgp-meta{gap:3px;margin-top:5px}.bj-hgp-reviews{gap:2px;font-size:9.5px;letter-spacing:-.04em}.bj-hgp-reviews strong{font-size:10px}.bj-hgp-gift{min-height:28px;padding:5px 6px;border-radius:8px;font-size:10px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:30px;border-radius:8px;font-size:11px}}' +
-      '@media(max-width:780px){.bj-hgp-general-heading{margin-top:20px;font-size:12px}.bj-hgp-card{padding:0;overflow:hidden}.bj-hgp-image{height:118.453125px;aspect-ratio:auto;border-radius:13px 13px 0 0}.bj-hgp-image>img:not(.bj-hgp-brand-logo){transform:translateY(5px) scale(1.12)}.bj-hgp-brandmark{top:2px;left:6px;max-width:60px}.bj-hgp-brand-logo{height:var(--bj-hgp-logo-height,14px);max-width:60px}.bj-hgp-model-toggle{top:0;right:7px;bottom:auto;width:18px;height:18px}.bj-hgp-model{top:22px;right:7px;bottom:auto;max-width:calc(100% - 14px)}.bj-hgp-info{padding:6px 9px 0}.bj-hgp-actions{margin:6px 8px 8px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:28px}.bj-hgp-image-shell:not(.has-promo) .bj-hgp-image{border-radius:13px 13px 0 0}}' +
-      '@media(max-width:350px){.bj-hgp-brandmark{max-width:52px}.bj-hgp-brand-logo{max-width:52px;height:var(--bj-hgp-logo-height,14px)}}';
+      '@media(max-width:780px){.bj-hgp-general-heading{margin-top:20px;font-size:12px}.bj-hgp-card{padding:0;overflow:hidden}.bj-hgp-image{height:120px;aspect-ratio:auto;border-radius:13px 13px 0 0}.bj-hgp-image>img:not(.bj-hgp-brand-logo){transform:translateY(5px) scale(1.12)}.bj-hgp-brandmark{top:5px;left:6px;max-width:114px}.bj-hgp-brand-logo{height:var(--bj-hgp-logo-height,14px);max-width:114px}.bj-hgp-model-toggle{top:3px;right:7px;bottom:auto;width:18px;height:18px}.bj-hgp-model{top:25px;right:7px;bottom:auto;max-width:calc(100% - 14px)}.bj-hgp-info{padding:6px 9px 0}.bj-hgp-actions{margin:6px 8px 8px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:28px}.bj-hgp-image-shell:not(.has-promo) .bj-hgp-image{border-radius:13px 13px 0 0}}' +
+      '@media(max-width:350px){.bj-hgp-brandmark{max-width:114px}.bj-hgp-brand-logo{max-width:114px;height:var(--bj-hgp-logo-height,14px)}}';
     (document.head || document.documentElement).appendChild(style);
   }
   function startHomeMonthCountdown(section) {
@@ -3815,7 +3826,7 @@
       var reviews = '<a class="bj-hgp-review-pill" href="/html/dh_prod/prod_view/' + p.productId + '" aria-label="' + reviewText + '">' + reviewText + '</a>';
       var logo = BRAND_LOGOS[p.brand];
       var brand = '<div class="bj-hgp-brandmark">' + (logo
-        ? '<img class="bj-hgp-brand-logo" style="--bj-hgp-logo-height:' + (BRAND_LOGO_HEIGHTS[p.brand] || 14) + 'px;--bj-hgp-logo-shift:' + (BRAND_LOGO_SHIFTS[p.brand] || 0) + 'px" src="' + homeAssetUrl(logo) + '" alt="' + p.brand + ' 로고"><span class="bj-hgp-brand-fallback" hidden>' + p.brand + '</span>'
+        ? '<img class="bj-hgp-brand-logo" style="--bj-hgp-logo-height:' + (BRAND_LOGO_HEIGHTS[p.brand] || 14) + 'px;--bj-hgp-logo-shift:' + (BRAND_LOGO_SHIFTS[p.brand] || 0) + 'px;--bj-hgp-logo-left-ratio:' + (BRAND_LOGO_LEFT_RATIOS[p.brand] || 0) + '" src="' + homeAssetUrl(logo) + '" alt="' + p.brand + ' 로고"><span class="bj-hgp-brand-fallback" hidden>' + p.brand + '</span>'
         : '<span class="bj-hgp-brand-fallback">' + p.brand + '</span>') + '</div>';
       var discount = actualDiscount(p);
       var gift = exactGift(p);
