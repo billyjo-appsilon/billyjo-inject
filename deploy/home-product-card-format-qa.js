@@ -114,6 +114,22 @@ async function routeLocalAssets(page) {
             leftInset: discountRect.left - promoRect.left, rightInset: promoRect.right - deadlineRect.right,
             centerDelta: Math.abs((discountRect.top + discountRect.height / 2) - (deadlineRect.top + deadlineRect.height / 2)) };
         }),
+        nextControl: (() => {
+          const button = firstGeneralBand.querySelector('.bj-hgp-slide-button--next');
+          const icon = button.querySelector('svg');
+          const pathBounds = icon.querySelector('path').getBBox();
+          const buttonRect = button.getBoundingClientRect();
+          const iconRect = icon.getBoundingClientRect();
+          return {
+            width: buttonRect.width,
+            height: buttonRect.height,
+            centerDeltaX: Math.abs((buttonRect.left + buttonRect.width / 2) - (iconRect.left + iconRect.width / 2)),
+            centerDeltaY: Math.abs((buttonRect.top + buttonRect.height / 2) - (iconRect.top + iconRect.height / 2)),
+            pathCenterDeltaX: Math.abs(12 - (pathBounds.x + pathBounds.width / 2)),
+            boxShadow: getComputedStyle(button).boxShadow,
+            iconAriaHidden: icon.getAttribute('aria-hidden'),
+          };
+        })(),
         cards: cards.map((card) => {
           const shell = card.querySelector('.bj-hgp-image-shell');
           const image = card.querySelector('.bj-hgp-image');
@@ -146,6 +162,7 @@ async function routeLocalAssets(page) {
             productVisibility: getComputedStyle(product).visibility,
             productDisplay: getComputedStyle(product).display,
             productBlendMode: getComputedStyle(product).mixBlendMode,
+            priceLabelFontSize: parseFloat(getComputedStyle(card.querySelector('.bj-hgp-price-label')).fontSize),
             actionHeight: card.querySelector('.bj-hgp-detail').getBoundingClientRect().height,
             cardBorder: getComputedStyle(card).borderTopColor,
             logoBackground: getComputedStyle(logo).backgroundColor,
@@ -168,15 +185,21 @@ async function routeLocalAssets(page) {
     assert(result.promoById['32586'] === '47% 할인 · 공기청정기 1대 증정', `${width}: 32586 promo mismatch (${result.promoById['32586']})`);
     assert(result.promoStyles.every((style) => style.background === 'rgb(47, 102, 189)' && style.color === 'rgb(255, 255, 255)' && style.borderTop === 'rgb(24, 75, 155)'), `${width}: promotion strip contrast drift ${JSON.stringify(result.promoStyles)}`);
     assert(result.deadlineLayouts.length > 0 && result.deadlineLayouts.every((layout) => layout.fontSize === 11.5 && layout.justify === 'space-between' && layout.align === 'center' && Math.abs(layout.leftInset - 7) < 0.75 && Math.abs(layout.rightInset - 7) < 0.75 && layout.centerDelta < 0.75), `${width}: promo deadline alignment drift ${JSON.stringify(result.deadlineLayouts)}`);
+    const expectedControlSize = width <= 780 ? 36 : 40;
+    assert(Math.abs(result.nextControl.width - expectedControlSize) < 0.5 && Math.abs(result.nextControl.height - expectedControlSize) < 0.5 &&
+      result.nextControl.centerDeltaX < 0.5 && result.nextControl.centerDeltaY < 0.5 && result.nextControl.pathCenterDeltaX < 0.05 && result.nextControl.iconAriaHidden === 'true' &&
+      result.nextControl.boxShadow.includes('rgba(8, 56, 248'), `${width}: next control size/glow/centering mismatch ${JSON.stringify(result.nextControl)}`);
     assert(result.cards.every((card) => Math.abs(card.visibleLogoHeight - 14) < 0.15), `${width}: visible logo height is not 14px`);
     assert(result.cards.every((card) => card.logoInfoCenterDelta < 0.75), `${width}: logo/info centers are not aligned`);
     assert(result.cards.every((card) => card.cardBorder === 'rgb(217, 228, 247)' && card.logoBackground === 'rgba(0, 0, 0, 0)'), `${width}: card border or logo transparency mismatch`);
     assert(result.cards.every((card) => card.productNaturalWidth > 0 && card.productNaturalHeight > 0 && card.productOpacity === '1' && card.productVisibility === 'visible' && card.productDisplay !== 'none' && card.productBlendMode === 'normal'), `${width}: a product cutout is not visibly loaded ${JSON.stringify(result.cards)}`);
+    const expectedPriceLabelFontSize = (width <= 780 ? 7 : 10) + (2 * 96 / 72);
+    assert(result.cards.every((card) => Math.abs(card.priceLabelFontSize - expectedPriceLabelFontSize) < 0.1), `${width}: monthly fee label is not 2pt larger`);
     assert(result.stickyPrimaryText === '✅내 견적 확인' && !result.stickyPrimaryHasIcon, `${width}: sticky CTA mismatch`);
     assert(!result.horizontalOverflow, `${width}: page overflows horizontally`);
     if (width <= 780) {
       assert(result.cards.every((card) => card.cardPadding === 0), `${width}: mobile card is not full bleed`);
-      assert(result.cards.every((card) => Math.abs(card.imageHeight - 115.453125) < 0.5), `${width}: mobile thumbnail height mismatch`);
+      assert(result.cards.every((card) => Math.abs(card.imageHeight - 118.453125) < 0.5), `${width}: mobile thumbnail height mismatch`);
       assert(result.cards.every((card) => card.imageTopDelta <= 1.1 && card.imageLeftDelta <= 1.1), `${width}: mobile thumbnail has outer whitespace`);
       assert(result.cards.every((card) => card.productTransform === 'matrix(1.12, 0, 0, 1.12, 0, 5)'), `${width}: mobile product image offset mismatch`);
       assert(result.cards.every((card) => Math.abs(card.actionHeight - 28) < 0.5), `${width}: mobile action height mismatch`);
