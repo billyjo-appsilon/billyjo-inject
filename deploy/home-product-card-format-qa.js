@@ -102,6 +102,18 @@ async function routeLocalAssets(page) {
           const style = getComputedStyle(promo);
           return { background: style.backgroundColor, color: style.color, borderTop: style.borderTopColor };
         }),
+        deadlineLayouts: [...section.querySelectorAll('.bj-hgp-promo.has-deadline')].map((promo) => {
+          const copy = promo.querySelector('.bj-hgp-promo-copy:not([aria-hidden="true"])');
+          const discount = promo.querySelector('.bj-hgp-promo-discount');
+          const deadline = promo.querySelector('.bj-hgp-promo-deadline');
+          const promoRect = promo.getBoundingClientRect();
+          const discountRect = discount.getBoundingClientRect();
+          const deadlineRect = deadline.getBoundingClientRect();
+          const copyStyle = getComputedStyle(copy);
+          return { fontSize: parseFloat(copyStyle.fontSize), justify: copyStyle.justifyContent, align: copyStyle.alignItems,
+            leftInset: discountRect.left - promoRect.left, rightInset: promoRect.right - deadlineRect.right,
+            centerDelta: Math.abs((discountRect.top + discountRect.height / 2) - (deadlineRect.top + deadlineRect.height / 2)) };
+        }),
         cards: cards.map((card) => {
           const shell = card.querySelector('.bj-hgp-image-shell');
           const image = card.querySelector('.bj-hgp-image');
@@ -152,6 +164,7 @@ async function routeLocalAssets(page) {
     assert(/^50% 할인 · (?:\d+일 남음|오늘 마감)$/.test(result.promoById['32596']), `${width}: 32596 promo countdown mismatch (${result.promoById['32596']})`);
     assert(result.promoById['32586'] === '47% 할인 · 공기청정기 1대 증정', `${width}: 32586 promo mismatch (${result.promoById['32586']})`);
     assert(result.promoStyles.every((style) => style.background === 'rgb(47, 102, 189)' && style.color === 'rgb(255, 255, 255)' && style.borderTop === 'rgb(24, 75, 155)'), `${width}: promotion strip contrast drift ${JSON.stringify(result.promoStyles)}`);
+    assert(result.deadlineLayouts.length > 0 && result.deadlineLayouts.every((layout) => layout.fontSize === 11.5 && layout.justify === 'space-between' && layout.align === 'center' && Math.abs(layout.leftInset - 7) < 0.75 && Math.abs(layout.rightInset - 7) < 0.75 && layout.centerDelta < 0.75), `${width}: promo deadline alignment drift ${JSON.stringify(result.deadlineLayouts)}`);
     assert(result.cards.every((card) => Math.abs(card.visibleLogoHeight - 14) < 0.15), `${width}: visible logo height is not 14px`);
     assert(result.cards.every((card) => card.logoInfoCenterDelta < 0.75), `${width}: logo/info centers are not aligned`);
     assert(result.cards.every((card) => card.cardBorder === 'rgb(217, 228, 247)' && card.logoBackground === 'rgba(0, 0, 0, 0)'), `${width}: card border or logo transparency mismatch`);

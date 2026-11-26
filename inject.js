@@ -3553,8 +3553,10 @@
       '.bj-hgp-image-shell.has-promo .bj-hgp-review-pill{bottom:31px}' +
       '.bj-hgp-promo{display:block;width:100%;height:25px;padding:0 7px;overflow:hidden;border-top:1px solid #184b9b;background:#2f66bd;color:#fff;white-space:nowrap}' +
       '.bj-hgp-promo-track{display:inline-flex;width:max-content;height:24px;align-items:center;white-space:nowrap;transform:translate3d(0,0,0)}' +
-      '.bj-hgp-promo-copy{display:block;flex:0 0 auto;font-size:9.5px;font-weight:850;letter-spacing:-.035em}' +
+      '.bj-hgp-promo-copy{display:flex;flex:0 0 auto;align-items:center;font-size:11.5px;font-weight:850;line-height:1;letter-spacing:-.035em}' +
       '.bj-hgp-promo-copy[aria-hidden="true"]{display:none}' +
+      '.bj-hgp-promo.has-deadline .bj-hgp-promo-track,.bj-hgp-promo.has-deadline .bj-hgp-promo-copy:first-child{width:100%}' +
+      '.bj-hgp-promo.has-deadline .bj-hgp-promo-copy:first-child{justify-content:space-between}' +
       '.bj-hgp-promo-discount{color:#ffe36a;font-weight:950}' +
       '.bj-hgp-promo.is-rolling .bj-hgp-promo-track{will-change:transform;animation:bj-hgp-promo-roll var(--bj-hgp-promo-duration,9s) linear infinite}' +
       '.bj-hgp-promo.is-rolling .bj-hgp-promo-copy[aria-hidden="true"]{display:block;margin-left:var(--bj-hgp-promo-gap,24px)}' +
@@ -3818,10 +3820,11 @@
       var promoParts = [];
       if (discount) promoParts.push('<span class="bj-hgp-promo-discount">' + discount + '% 할인</span>');
       if (gift) promoParts.push('<span class="bj-hgp-promo-gift">' + gift + '</span>');
-      if (discount && !gift && daysLeft !== null) promoParts.push('<span class="bj-hgp-promo-deadline">' + (daysLeft === 0 ? '오늘 마감' : daysLeft + '일 남음') + '</span>');
+      var hasDeadline = discount && !gift && daysLeft !== null;
+      if (hasDeadline) promoParts.push('<span class="bj-hgp-promo-deadline">' + (daysLeft === 0 ? '오늘 마감' : daysLeft + '일 남음') + '</span>');
       var promoInner = promoParts.join('<span aria-hidden="true"> · </span>');
       var promoText = promoParts.map(function (part) { return part.replace(/<[^>]+>/g, ''); }).join(' · ');
-      var promo = promoInner ? '<div class="bj-hgp-promo" aria-label="' + promoText + '"><span class="bj-hgp-promo-track"><span class="bj-hgp-promo-copy">' + promoInner + '</span><span class="bj-hgp-promo-copy" aria-hidden="true">' + promoInner + '</span></span></div>' : '';
+      var promo = promoInner ? '<div class="bj-hgp-promo' + (hasDeadline ? ' has-deadline' : '') + '" aria-label="' + promoText + '"><span class="bj-hgp-promo-track"><span class="bj-hgp-promo-copy">' + promoInner + '</span><span class="bj-hgp-promo-copy" aria-hidden="true">' + promoInner + '</span></span></div>' : '';
       return '<article class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" data-bj-hgp-tier="' + p.tier + '">' +
         '<div class="bj-hgp-main">' +
         '<div class="bj-hgp-image-shell' + (promo ? ' has-promo' : '') + '"><a class="bj-hgp-image" data-bj-product-cutout="true" href="/html/dh_prod/prod_view/' + p.productId + '" aria-label="' + p.name + ' 상세보기"><img src="' + homeAssetUrl(p.image) + '" alt="' + p.name + '" loading="lazy" decoding="async"></a>' +
