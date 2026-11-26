@@ -3409,6 +3409,29 @@
     '세스코': 'images/brands/cesco-horizontal-20261119.png',
     '삼성': 'images/brands/samsung-horizontal-20261119.png'
   };
+  // Rendered image height that makes each non-transparent logo silhouette 14px tall.
+  var BRAND_LOGO_HEIGHTS = {
+    '웰스': 14.875,
+    'LG전자': 14,
+    '청호나이스': 18.3077,
+    '쿠쿠': 20.5882,
+    '루헨스': 20.2222,
+    '코웨이': 19.8947,
+    '현대렌탈케어': 14.7724,
+    '세스코': 14,
+    '삼성': 20.5882
+  };
+  var BRAND_LOGO_SHIFTS = {
+    '웰스': -0.4375,
+    'LG전자': 0,
+    '청호나이스': -2.1538,
+    '쿠쿠': -3.2941,
+    '루헨스': -3.1111,
+    '코웨이': -2.9474,
+    '현대렌탈케어': -0.1216,
+    '세스코': 0,
+    '삼성': -3.2941
+  };
 
   function currentMonthKst() {
     var parts = new Intl.DateTimeFormat('en-US', {
@@ -3419,6 +3442,17 @@
     return values.year + '-' + values.month;
   }
   function won(v) { return Number(v || 0).toLocaleString('ko-KR'); }
+  function actualDiscount(p) {
+    var regular = Number(p && p.regularPrice);
+    var sale = Number(p && p.price);
+    if (!regular || !sale || sale >= regular) return 0;
+    return Math.round((regular - sale) / regular * 100);
+  }
+  function exactGift(p) {
+    var gift = String(p && p.gift || '').trim();
+    if (!gift || /^(?:추가\s*)?사은품(?:\s*증정)?$/.test(gift)) return '';
+    return gift.replace(/\s*대상$/, '');
+  }
   function findHeading() {
     var headings = document.querySelectorAll('h2');
     for (var i = 0; i < headings.length; i++) {
@@ -3500,8 +3534,29 @@
       '.bj-hgp-cart{appearance:none;border:1px solid #0838f8;background:#0838f8;color:#fff;box-shadow:0 6px 14px rgba(8,56,248,.16)}' +
       '.bj-hgp-cart:disabled{cursor:default;opacity:.72}.bj-hgp-cart.is-added{border-color:#0f9f6e;background:#0f9f6e;opacity:1}.bj-hgp-cart.is-error{border-color:#c2410c;background:#c2410c}' +
       '.bj-hgp-note{margin:14px 0 0;font-size:10px;line-height:1.5;color:#64748b}' +
+      '.bj-hgp-general-heading{display:flex;align-items:center;gap:9px;margin:24px 0 0;color:#475569;font-size:13px;font-weight:900}.bj-hgp-general-heading:before,.bj-hgp-general-heading:after{content:"";height:1px;flex:1 1 auto;background:#dbe4ff}' +
+      '.bj-hgp-card{border-color:#d9e4f7;box-shadow:0 7px 22px rgba(8,56,248,.07)}' +
+      '.bj-hgp-image>img:not(.bj-hgp-brand-logo){transform:scale(1.003)}' +
+      '.bj-hgp-brandrow,.bj-hgp-meta{display:none}' +
+      '.bj-hgp-brandmark{position:absolute;z-index:5;top:7px;left:7px;display:flex;width:auto;max-width:118px;height:auto;align-items:flex-start;background:transparent;pointer-events:none}' +
+      '.bj-hgp-brand-logo{display:block;width:auto;height:var(--bj-hgp-logo-height,14px);max-width:112px;object-fit:contain;object-position:left top;background:transparent;mix-blend-mode:normal;transform:translateY(var(--bj-hgp-logo-shift,0px))}' +
+      '.bj-hgp-model-toggle{top:5px;right:7px;bottom:auto;width:18px;height:18px;border:0;border-radius:0;background:transparent;box-shadow:none;color:#596579;font-size:14px;backdrop-filter:none}' +
+      '.bj-hgp-model{top:27px;right:7px;bottom:auto}' +
+      '.bj-hgp-review-pill{position:absolute;z-index:5;left:6px;bottom:6px;display:flex;height:18px;padding:0 6px;align-items:center;border:1px solid #dce2ea;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 2px 7px rgba(15,23,42,.1);color:#596579;font-size:9px;font-weight:900;line-height:1;text-decoration:none;white-space:nowrap;backdrop-filter:blur(3px)}' +
+      '.bj-hgp-image-shell.has-promo .bj-hgp-review-pill{bottom:31px}' +
+      '.bj-hgp-promo{display:block;width:100%;height:25px;padding:0 7px;overflow:hidden;border-top:1px solid #e4e8ee;background:#f2f4f7;color:#596579;white-space:nowrap}' +
+      '.bj-hgp-promo-track{display:inline-flex;width:max-content;height:24px;align-items:center;white-space:nowrap;transform:translate3d(0,0,0)}' +
+      '.bj-hgp-promo-copy{display:block;flex:0 0 auto;font-size:9.5px;font-weight:850;letter-spacing:-.035em}' +
+      '.bj-hgp-promo-copy[aria-hidden="true"]{display:none}' +
+      '.bj-hgp-promo-discount{color:#d94a3a;font-weight:950}' +
+      '.bj-hgp-promo.is-rolling .bj-hgp-promo-track{will-change:transform;animation:bj-hgp-promo-roll var(--bj-hgp-promo-duration,9s) linear infinite}' +
+      '.bj-hgp-promo.is-rolling .bj-hgp-promo-copy[aria-hidden="true"]{display:block;margin-left:var(--bj-hgp-promo-gap,24px)}' +
+      '.bj-hgp-promo:hover .bj-hgp-promo-track{animation-play-state:paused}' +
+      '@keyframes bj-hgp-promo-roll{0%,14%{transform:translate3d(0,0,0)}86%,100%{transform:translate3d(calc(-1 * var(--bj-hgp-promo-distance)),0,0)}}' +
+      '@media(prefers-reduced-motion:reduce){.bj-hgp-promo.is-rolling .bj-hgp-promo-track{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;animation:none}.bj-hgp-promo.is-rolling .bj-hgp-promo-copy:first-child{width:100%;overflow:hidden;text-overflow:ellipsis}.bj-hgp-promo.is-rolling .bj-hgp-promo-copy[aria-hidden="true"]{display:none}}' +
       '@media(max-width:780px){#bj-home-gift-promos{margin:8px -2px 0;padding:6px 6px 0}.bj-hgp-half-banner{grid-template-columns:minmax(0,63%) minmax(0,37%);min-height:146px;border-radius:18px;margin-bottom:12px}.bj-hgp-half-copy{padding:14px 4px 14px 16px}.bj-hgp-half-copy h2{font-size:25px}.bj-hgp-half-copy p{margin-top:6px;font-size:11.5px;line-height:1.45;letter-spacing:-.03em;white-space:nowrap}.bj-hgp-month-timer{margin-top:5px;gap:4px}.bj-hgp-flip-digit{width:18px;height:24px;border-radius:5px;font-size:13px}.bj-hgp-flip-unit{font-size:9.5px}.bj-hgp-band{margin-top:20px}.bj-hgp-band-title{margin-bottom:9px;padding-top:15px;font-size:13px}.bj-hgp-band--featured .bj-hgp-band-title{padding-top:0;font-size:16px}.bj-hgp-grid{grid-auto-columns:calc((100% - 8px)/2);gap:8px;padding-bottom:7px}.bj-hgp-slide-button{width:30px;height:30px;font-size:19px}.bj-hgp-slide-button--prev{left:-7px}.bj-hgp-slide-button--next{right:-7px}.bj-hgp-card{display:flex;padding:8px;border-radius:14px}.bj-hgp-main{display:flex;gap:0;flex-direction:column}.bj-hgp-image{min-height:0;aspect-ratio:16/10;border-radius:10px}.bj-hgp-image>img:not(.bj-hgp-brand-logo){transform:scale(1.12)}.bj-hgp-info{min-width:0;padding:6px 1px 0}.bj-hgp-brandrow{gap:3px;margin-bottom:4px}.bj-hgp-brandmark{max-width:54px;height:17px}.bj-hgp-brand-logo{width:auto;height:14.4px;max-width:54px}.bj-hgp-brand-fallback{font-size:9px}.bj-hgp-name{font-size:11.5px;line-height:1.38}.bj-hgp-model-toggle{right:6px;bottom:6px;width:23px;height:23px;font-size:14px}.bj-hgp-model{right:34px;bottom:7px;max-width:calc(100% - 42px);padding:4px 6px;font-size:8px}.bj-hgp-pricebox{margin-top:5px;padding:5px 7px;border-radius:8px}.bj-hgp-regular{font-size:7px;line-height:1.2}.bj-hgp-price{font-size:8px;line-height:1.2}.bj-hgp-price-label{font-size:7px}.bj-hgp-price b{font-size:16px}.bj-hgp-meta{gap:3px;margin-top:5px}.bj-hgp-reviews{gap:2px;font-size:9.5px;letter-spacing:-.04em}.bj-hgp-reviews strong{font-size:10px}.bj-hgp-gift{min-height:28px;padding:5px 6px;border-radius:8px;font-size:10px}.bj-hgp-actions{gap:5px;margin-top:6px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:30px;border-radius:8px;font-size:11px}}' +
-      '@media(max-width:350px){.bj-hgp-brandmark{max-width:46px}.bj-hgp-brand-logo{max-width:46px;height:13px}.bj-hgp-reviews{font-size:9px}.bj-hgp-reviews strong{font-size:9.5px}}';
+      '@media(max-width:780px){.bj-hgp-general-heading{margin-top:20px;font-size:12px}.bj-hgp-card{padding:0;overflow:hidden}.bj-hgp-image{height:115.453125px;aspect-ratio:auto;border-radius:13px 13px 0 0}.bj-hgp-image>img:not(.bj-hgp-brand-logo){transform:translateY(5px) scale(1.12)}.bj-hgp-brandmark{top:2px;left:6px;max-width:60px}.bj-hgp-brand-logo{height:var(--bj-hgp-logo-height,14px);max-width:60px}.bj-hgp-model-toggle{top:0;right:7px;bottom:auto;width:18px;height:18px}.bj-hgp-model{top:22px;right:7px;bottom:auto;max-width:calc(100% - 14px)}.bj-hgp-info{padding:6px 9px 0}.bj-hgp-actions{margin:6px 8px 8px;padding-top:6px}.bj-hgp-detail,.bj-hgp-cart{height:28px}.bj-hgp-image-shell:not(.has-promo) .bj-hgp-image{border-radius:13px 13px 0 0}}' +
+      '@media(max-width:350px){.bj-hgp-brandmark{max-width:52px}.bj-hgp-brand-logo{max-width:52px;height:var(--bj-hgp-logo-height,14px)}}';
     (document.head || document.documentElement).appendChild(style);
   }
   function startHomeMonthCountdown(section) {
@@ -3696,6 +3751,38 @@
     }
     window.requestAnimationFrame(refreshAll);
   }
+  function bindHomePromoRoll(section) {
+    var promos = Array.prototype.slice.call(section.querySelectorAll('.bj-hgp-promo'));
+    function refresh(promo) {
+      var first = promo.querySelector('.bj-hgp-promo-copy:not([aria-hidden="true"])');
+      if (!first || !promo.clientWidth) return;
+      promo.classList.remove('is-rolling');
+      promo.style.removeProperty('--bj-hgp-promo-distance');
+      promo.style.removeProperty('--bj-hgp-promo-duration');
+      var textWidth = Math.ceil(first.getBoundingClientRect().width);
+      if (textWidth <= promo.clientWidth + 1) return;
+      var gap = 24;
+      var distance = textWidth + gap;
+      promo.style.setProperty('--bj-hgp-promo-gap', gap + 'px');
+      promo.style.setProperty('--bj-hgp-promo-distance', distance + 'px');
+      promo.style.setProperty('--bj-hgp-promo-duration', Math.max(8, 3 + distance / 28).toFixed(2) + 's');
+      promo.classList.add('is-rolling');
+    }
+    function refreshAll() { promos.forEach(refresh); }
+    if (typeof ResizeObserver === 'function') {
+      var observer = new ResizeObserver(function (entries) {
+        entries.forEach(function (entry) { refresh(entry.target); });
+      });
+      promos.forEach(function (promo) { observer.observe(promo); });
+      section.__bjHomePromoObserver = observer;
+    } else {
+      window.addEventListener('resize', refreshAll, { passive: true });
+    }
+    if (document.fonts && document.fonts.ready) {
+      document.fonts.ready.then(refreshAll).catch(function () {});
+    }
+    window.requestAnimationFrame(refreshAll);
+  }
   function render(month) {
     var heading = findHeading();
     if (!heading || document.getElementById('bj-home-gift-promos')) return false;
@@ -3704,7 +3791,7 @@
     addStyle();
     var section = document.createElement('section');
     section.id = 'bj-home-gift-promos';
-    section.setAttribute('data-bj-product-card-design', 'vertical-review-right');
+    section.setAttribute('data-bj-product-card-design', 'fullbleed-review-promo-v1');
     section.setAttribute('aria-label', '이번달 가격대별 특가 및 추가 사은품 추천제품');
     function card(p, instance) {
       var modelId = 'bj-hgp-model-' + p.productId + '-' + instance;
@@ -3712,20 +3799,27 @@
         ? '<div class="bj-hgp-regular"><span>정가</span> <s>월 ' + won(p.regularPrice) + '원</s></div>' +
           '<div class="bj-hgp-price"><span class="bj-hgp-price-label">할인가</span> <span class="bj-hgp-price-value">월 <b>' + won(p.price) + '</b>원~</span></div>'
         : '<div class="bj-hgp-price"><span class="bj-hgp-price-label">월요금</span> <span class="bj-hgp-price-value">월 <b>' + won(p.price) + '</b>원~</span></div>') + '</div>';
-      var reviews = p.rating && p.reviewCount
-        ? '<div class="bj-hgp-reviews" aria-label="평점 ' + p.rating + '점, 후기 ' + p.reviewCount + '개"><strong aria-hidden="true">★</strong><span>' + p.rating + ' · 후기 ' + won(p.reviewCount) + '개</span></div>'
-        : '';
+      var reviewText = p.rating && p.reviewCount ? '⭐' + p.rating + ' (후기 ' + won(p.reviewCount) + ')' : '후기 보기';
+      var reviews = '<a class="bj-hgp-review-pill" href="/html/dh_prod/prod_view/' + p.productId + '" aria-label="' + reviewText + '">' + reviewText + '</a>';
       var logo = BRAND_LOGOS[p.brand];
       var brand = '<div class="bj-hgp-brandmark">' + (logo
-        ? '<img class="bj-hgp-brand-logo" src="' + homeAssetUrl(logo) + '" alt="' + p.brand + ' 로고"><span class="bj-hgp-brand-fallback" hidden>' + p.brand + '</span>'
+        ? '<img class="bj-hgp-brand-logo" style="--bj-hgp-logo-height:' + (BRAND_LOGO_HEIGHTS[p.brand] || 14) + 'px;--bj-hgp-logo-shift:' + (BRAND_LOGO_SHIFTS[p.brand] || 0) + 'px" src="' + homeAssetUrl(logo) + '" alt="' + p.brand + ' 로고"><span class="bj-hgp-brand-fallback" hidden>' + p.brand + '</span>'
         : '<span class="bj-hgp-brand-fallback">' + p.brand + '</span>') + '</div>';
+      var discount = actualDiscount(p);
+      var gift = exactGift(p);
+      var promoParts = [];
+      if (discount) promoParts.push('<span class="bj-hgp-promo-discount">' + discount + '% 할인</span>');
+      if (gift) promoParts.push('<span class="bj-hgp-promo-gift">' + gift + '</span>');
+      var promoInner = promoParts.join('<span aria-hidden="true"> · </span>');
+      var promoText = (discount ? discount + '% 할인' : '') + (discount && gift ? ' · ' : '') + gift;
+      var promo = promoInner ? '<div class="bj-hgp-promo" aria-label="' + promoText + '"><span class="bj-hgp-promo-track"><span class="bj-hgp-promo-copy">' + promoInner + '</span><span class="bj-hgp-promo-copy" aria-hidden="true">' + promoInner + '</span></span></div>' : '';
       return '<article class="bj-hgp-card" data-bj-hgp-product="' + p.productId + '" data-bj-hgp-tier="' + p.tier + '">' +
         '<div class="bj-hgp-main">' +
-        '<div class="bj-hgp-image-shell"><a class="bj-hgp-image" data-bj-product-cutout="true" href="/html/dh_prod/prod_view/' + p.productId + '" aria-label="' + p.name + ' 상세보기"><img src="' + homeAssetUrl(p.image) + '" alt="' + p.name + '" loading="lazy" decoding="async"></a>' +
+        '<div class="bj-hgp-image-shell' + (promo ? ' has-promo' : '') + '"><a class="bj-hgp-image" data-bj-product-cutout="true" href="/html/dh_prod/prod_view/' + p.productId + '" aria-label="' + p.name + ' 상세보기"><img src="' + homeAssetUrl(p.image) + '" alt="' + p.name + '" loading="lazy" decoding="async"></a>' +
+        brand + reviews +
         '<button type="button" class="bj-hgp-model-toggle" aria-label="' + p.name + ' 모델명 보기" aria-controls="' + modelId + '" aria-expanded="false">ⓘ</button>' +
-        '<span class="bj-hgp-model" id="' + modelId + '" hidden>모델명 ' + p.model + '</span></div>' +
-        '<a class="bj-hgp-info" href="/html/dh_prod/prod_view/' + p.productId + '"><div class="bj-hgp-brandrow">' + brand + reviews + '</div><div class="bj-hgp-name" title="' + p.name + '"><span class="bj-hgp-name-track"><span class="bj-hgp-name-copy">' + p.name + '</span><span class="bj-hgp-name-copy" aria-hidden="true">' + p.name + '</span></span></div>' +
-        price + '<div class="bj-hgp-meta"><div class="bj-hgp-gift">' + p.gift + '</div></div></a></div>' +
+        '<span class="bj-hgp-model" id="' + modelId + '" hidden>모델명 ' + p.model + '</span>' + promo + '</div>' +
+        '<a class="bj-hgp-info" href="/html/dh_prod/prod_view/' + p.productId + '"><div class="bj-hgp-name" title="' + p.name + '"><span class="bj-hgp-name-track"><span class="bj-hgp-name-copy">' + p.name + '</span><span class="bj-hgp-name-copy" aria-hidden="true">' + p.name + '</span></span></div>' + price + '</a></div>' +
         '<div class="bj-hgp-actions"><a class="bj-hgp-detail" href="/html/dh_prod/prod_view/' + p.productId + '">상세보기</a>' +
         '<button type="button" class="bj-hgp-cart" data-bj-hgp-cart="' + p.productId + '" aria-label="' + p.name + ' 견적비교 담기" aria-pressed="false">담기</button></div></article>';
     }
@@ -3742,7 +3836,8 @@
     section.innerHTML =
       campaignBanner +
       '<div class="bj-hgp-band bj-hgp-band--featured" data-bj-hgp-band="이번달 최고 혜택"><h3 class="bj-hgp-band-title">이번달 최고 혜택</h3>' +
-        slider(PRODUCTS.filter(function (p) { return p.discount; }).sort(function (a, b) { return b.discount - a.discount; }).slice(0, 2), 'featured') + '</div>' +
+        slider(PRODUCTS.filter(function (p) { return actualDiscount(p) || exactGift(p); }).sort(function (a, b) { return actualDiscount(b) - actualDiscount(a); }).slice(0, 2), 'featured') + '</div>' +
+      '<div class="bj-hgp-general-heading">월요금대별 추천제품</div>' +
       TIERS.map(function (tier) {
         var items = PRODUCTS.filter(function (p) { return p.tier === tier; });
         return '<div class="bj-hgp-band" data-bj-hgp-band="' + tier + '"><h3 class="bj-hgp-band-title">' + TIER_LABELS[tier] + '</h3>' +
@@ -3761,6 +3856,7 @@
     bindHomeBandSliders(section);
     v5.appendChild(section);
     bindHomeProductNameRoll(section);
+    bindHomePromoRoll(section);
     startHomeMonthCountdown(section);
     if (typeof window.__bjHomeReleaseV5 === 'function') {
       window.__bjHomeReleaseV5('promotion-ready');
@@ -10002,7 +10098,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
     bar.setAttribute('aria-label', '빠른 견적과 문의');
     bar.setAttribute('aria-hidden', 'true');
     bar.inert = true;
-    bar.innerHTML = '<a class="bj-hsa-primary" href="/html/dh/counsel" data-bj-consult="1" data-bj-hsa="consult"><span class="bj-hsa-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 7.5h16v11H4z"/><path d="M7 7.5V5.8A2.8 2.8 0 0 1 9.8 3h4.4A2.8 2.8 0 0 1 17 5.8v1.7M8 12h8M12 9v6"/></svg></span><span class="bj-hsa-label">내 지원금 확인하기</span></a>' +
+    bar.innerHTML = '<a class="bj-hsa-primary" href="/html/dh/counsel" data-bj-consult="1" data-bj-hsa="consult"><span class="bj-hsa-label">✅내 견적 확인</span></a>' +
       '<a class="bj-hsa-secondary" href="/html/dh/counsel" data-bj-text-inquiry="1" data-bj-hsa="inquiry"><span class="bj-hsa-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 15.5a3 3 0 0 1-3 3H9l-5 3v-6a3 3 0 0 1-1-2.2V7a3 3 0 0 1 3-3h11a3 3 0 0 1 3 3z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg></span><span class="bj-hsa-label">문의하기</span></a>';
     document.body.appendChild(bar);
     bar.addEventListener('click', function(event){
