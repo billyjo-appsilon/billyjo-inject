@@ -141,6 +141,7 @@ for (const required of [
   "class=\"bj-hgp-name-track\"",
   "class=\"bj-hgp-name-copy\" aria-hidden=\"true\"",
   ".bj-hgp-name.is-rolling .bj-hgp-name-track",
+  ".bj-hgp-promo{display:block;width:100%;height:25px;padding:0 7px;overflow:hidden;border-top:1px solid #b8caf2;background:#e3ebff;color:#314a73",
   "@keyframes bj-hgp-name-roll",
   "@media(prefers-reduced-motion:reduce)",
   "animation-play-state:paused",
@@ -172,6 +173,7 @@ for (const required of [
 }
 
 if (source.includes('(VAT 별도)')) throw new Error('VAT label must stay hidden on home promo cards');
+if (source.includes('border-top:1px solid #e4e8ee;background:#f2f4f7;color:#596579')) throw new Error('low-contrast gray promotion strip remains');
 if (source.includes('bj-hgp-discount') || source.includes('11월 특가')) throw new Error('redundant per-product monthly promo badge remains');
 if (source.includes('추가 사은품 상담 대상')) throw new Error('stale consultation-target gift copy remains');
 if (source.includes('min-height:31px')) throw new Error('mobile product names must not reserve a blank second line');
