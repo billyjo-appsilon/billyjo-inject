@@ -1312,7 +1312,7 @@
         '</div>' +
         '<div class="bj-native-business" aria-label="사업자 정보">' +
           '<p><b>회사명</b> 앱실론코퍼레이션(주) <span aria-hidden="true">|</span> <b>대표</b> 온재현</p>' +
-          '<p><b>소재지주소</b> 서울 강남구 영동대로128길 15 (삼성동, 아크로삼성)</p>' +
+          '<p><b>소재지주소</b> 서울 강남구 역삼로136, 6층(역삼동, 신명빌딩)</p>' +
           '<p><b>전산센터 주소</b> 인천 연수구 송도과학로 56 (송도동, 송도테크노파크 BT센터) 2205호</p>' +
           '<p><b>통신판매신고번호</b> 2021-서울강남-04074</p>' +
           '<p><b>사업자등록번호</b> 810-81-01685 <span aria-hidden="true">·</span> <a href="https://www.ftc.go.kr/info/bizinfo/communicationViewPopup.jsp?wrkr_no=8108101685" target="_blank" rel="noopener noreferrer">사업자등록정보 확인</a></p>' +
