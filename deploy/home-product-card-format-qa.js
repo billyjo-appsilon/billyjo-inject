@@ -127,10 +127,12 @@ async function routeLocalAssets(page) {
           const imageRect = image.getBoundingClientRect();
           const visibleHeight = logoRect.height * bounds.visible / bounds.total;
           const visibleCenter = logoRect.top + logoRect.height * bounds.top / bounds.total + visibleHeight / 2;
+          const reviewStyle = getComputedStyle(card.querySelector('.bj-hgp-review-pill'));
           return {
             id: card.dataset.bjHgpProduct,
             promo: Boolean(card.querySelector('.bj-hgp-promo')),
             review: card.querySelector('.bj-hgp-review-pill').textContent.trim(),
+            reviewBottom: reviewStyle.bottom,
             visibleLogoHeight: visibleHeight,
             logoInfoCenterDelta: Math.abs(visibleCenter - (infoRect.top + infoRect.height / 2)),
             cardPadding: parseFloat(getComputedStyle(card).paddingTop),
@@ -159,6 +161,7 @@ async function routeLocalAssets(page) {
     assert(result.promoCount === 5 && result.emptyPromoCount === 0, `${width}: promo visibility mismatch`);
     assert(result.genericGiftCount === 0 && result.noPromoShellsValid, `${width}: generic or empty promo remains`);
     assert(result.reviewCount === 26, `${width}: every card needs a review pill`);
+    assert(result.cards.every((card) => card.reviewBottom === (card.promo ? '28px' : '3px')), `${width}: review position is not exactly 3px lower ${JSON.stringify(result.cards.map((card) => ({ id: card.id, promo: card.promo, bottom: card.reviewBottom })))}`);
     assert(result.generalHeadingText === '월요금대별 추천제품' && result.generalHeadingBeforeBands, `${width}: general-product divider missing`);
     assert(result.promoById['34614'] === '50% 할인 · 공기청정기 1대 증정', `${width}: 34614 promo mismatch (${result.promoById['34614']})`);
     assert(/^50% 할인 · (?:\d+일 남음|오늘 마감)$/.test(result.promoById['32596']), `${width}: 32596 promo countdown mismatch (${result.promoById['32596']})`);
