@@ -1,14 +1,13 @@
 {
- "generated_at": "2026-11-25T19:32:24+00:00",
+ "generated_at": "2026-11-26T19:32:08+00:00",
  "baseline": "2026-07-29",
  "new_listed": [],
  "delisted_today": [
-  "32183",
-  "32184"
+  "25834"
  ],
  "source": "billyjo prod_list (ajax_prod_list) — 목록 노출 + 썸네일 보유 여부",
  "catalog": 8821,
- "listed": 6491,
+ "listed": 6490,
  "categories": 121,
  "category_failures": 0,
  "recent_pending": [
@@ -1929,6 +1928,7 @@
   "25627",
   "25763",
   "25764",
+  "25834",
   "25867",
   "25943",
   "25944",
@@ -5616,7 +5616,6 @@
   "25829",
   "25831",
   "25832",
-  "25834",
   "25835",
   "25836",
   "25842",
@@ -12109,7 +12108,6 @@
   "25829": "https://rentalshop.site/_data/file/goodsImages/9398968786f44c540cb6666c7ca78754.png",
   "25831": "https://rentalshop.site/_data/file/goodsImages/d741a8869a4999b7f2845c922e1f7695.png",
   "25832": "https://rentalshop.site/_data/file/goodsImages/093820fee3783df56066b09867400345.png",
-  "25834": "https://rentalshop.site/_data/file/goodsImages/5b4640b242f91a849c272b5ccae7531c.png",
   "25835": "https://rentalshop.site/_data/file/goodsImages/272459eb3f038a05a344df9d7e5a1b54.png",
   "25836": "https://rentalshop.site/_data/file/goodsImages/45ef152d5164fa1aad94e1493080ae26.png",
   "25842": "https://rentalshop.site/_data/file/goodsImages/248d07ba17d00c49148a91f79b8aa331.png",
@@ -18537,7 +18535,6 @@
   "25829": 20900,
   "25831": 20900,
   "25832": 21900,
-  "25834": 23900,
   "25835": 19900,
   "25836": 26900,
   "25842": 28900,
