@@ -203,12 +203,18 @@ async function inspectViewport(browser, width, height) {
       const rows = Array.from(section.querySelectorAll('.bj-hbenefit-card')).map((card) => {
         const rect = card.getBoundingClientRect();
         const image = card.querySelector('img');
+        const numberRect = card.querySelector('.bj-hbenefit-number').getBoundingClientRect();
+        const kickerRect = card.querySelector('.bj-hbenefit-kicker').getBoundingClientRect();
+        const valueRect = card.querySelector('.bj-hbenefit-value').getBoundingClientRect();
         return {
           number: card.querySelector('.bj-hbenefit-number').textContent.trim(),
           kicker: card.querySelector('.bj-hbenefit-kicker').textContent.trim(),
           value: card.querySelector('.bj-hbenefit-value').textContent.trim(),
           image: new URL(image.src).pathname.split('/').pop(),
           imageWidth: image.naturalWidth,
+          height: rect.height,
+          numberKickerCenterDelta: Math.abs((numberRect.top + numberRect.height / 2) - (kickerRect.top + kickerRect.height / 2)),
+          valueBelowFirstRow: valueRect.top >= Math.min(numberRect.bottom, kickerRect.bottom) - 1,
           left: rect.left,
           right: rect.right,
           sectionLeft: section.getBoundingClientRect().left,
@@ -289,6 +295,11 @@ async function inspectViewport(browser, width, height) {
         throw new Error(`card ${index + 1} mismatch at ${width}px: ${JSON.stringify(actual)}`);
       }
       if (row.imageWidth < 1) throw new Error(`card ${row.number} image failed at ${width}px`);
+      if (row.numberKickerCenterDelta > 1 || !row.valueBelowFirstRow) {
+        throw new Error(`card ${row.number} must render number + line 1 together and line 2 below at ${width}px: ${JSON.stringify(row)}`);
+      }
+      const maxHeight = width <= 767 ? 86 : 90;
+      if (row.height > maxHeight) throw new Error(`card ${row.number} height was not reduced at ${width}px: ${row.height}/${maxHeight}`);
       const exceedsSection = row.left < row.sectionLeft - 1 || row.right > row.sectionRight + 1;
       const exceedsScroller = row.left < result.scroller.left - 1 || row.right > result.scroller.left + result.scroller.scrollWidth + 1;
       if ((width > 767 && exceedsSection) || (width <= 767 && exceedsScroller)) {
