@@ -3544,7 +3544,7 @@
       '.bj-hgp-model{top:27px;right:7px;bottom:auto}' +
       '.bj-hgp-review-pill{position:absolute;z-index:5;left:6px;bottom:6px;display:flex;height:18px;padding:0 6px;align-items:center;border:1px solid #dce2ea;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 2px 7px rgba(15,23,42,.1);color:#596579;font-size:9px;font-weight:900;line-height:1;text-decoration:none;white-space:nowrap;backdrop-filter:blur(3px)}' +
       '.bj-hgp-image-shell.has-promo .bj-hgp-review-pill{bottom:31px}' +
-      '.bj-hgp-promo{display:block;width:100%;height:25px;padding:0 7px;overflow:hidden;border-top:1px solid #e4e8ee;background:#f2f4f7;color:#596579;white-space:nowrap}' +
+      '.bj-hgp-promo{display:block;width:100%;height:25px;padding:0 7px;overflow:hidden;border-top:1px solid #b8caf2;background:#e3ebff;color:#314a73;white-space:nowrap}' +
       '.bj-hgp-promo-track{display:inline-flex;width:max-content;height:24px;align-items:center;white-space:nowrap;transform:translate3d(0,0,0)}' +
       '.bj-hgp-promo-copy{display:block;flex:0 0 auto;font-size:9.5px;font-weight:850;letter-spacing:-.035em}' +
       '.bj-hgp-promo-copy[aria-hidden="true"]{display:none}' +
