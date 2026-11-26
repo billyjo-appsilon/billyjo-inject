@@ -141,7 +141,7 @@ for (const required of [
   "class=\"bj-hgp-name-track\"",
   "class=\"bj-hgp-name-copy\" aria-hidden=\"true\"",
   ".bj-hgp-name.is-rolling .bj-hgp-name-track",
-  ".bj-hgp-promo{display:block;width:100%;height:25px;padding:0 7px;overflow:hidden;border-top:1px solid #b8caf2;background:#e3ebff;color:#314a73",
+  ".bj-hgp-promo{display:block;width:100%;height:25px;padding:0 7px;overflow:hidden;border-top:1px solid #184b9b;background:#2f66bd;color:#fff",
   "@keyframes bj-hgp-name-roll",
   "@media(prefers-reduced-motion:reduce)",
   "animation-play-state:paused",
