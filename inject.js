@@ -3565,13 +3565,13 @@
       '.bj-hgp-model{top:27px;right:7px;bottom:auto}' +
       '.bj-hgp-review-pill{position:absolute;z-index:5;left:6px;bottom:3px;display:flex;height:18px;padding:0 6px;align-items:center;border:1px solid #dce2ea;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 2px 7px rgba(15,23,42,.1);color:#596579;font-size:9px;font-weight:900;line-height:1;text-decoration:none;white-space:nowrap;backdrop-filter:blur(3px)}' +
       '.bj-hgp-image-shell.has-promo .bj-hgp-review-pill{bottom:28px}' +
-      '.bj-hgp-promo{display:block;width:100%;height:25px;padding:0 7px;overflow:hidden;border-top:1px solid #184b9b;background:#2f66bd;color:#fff;white-space:nowrap}' +
+      '.bj-hgp-promo{display:block;width:100%;height:25px;padding:0 7px;overflow:hidden;border:0;background:#2f66bd;color:#fff;white-space:nowrap}' +
       '.bj-hgp-promo-track{display:inline-flex;width:max-content;height:24px;align-items:center;white-space:nowrap;transform:translate3d(0,0,0)}' +
       '.bj-hgp-promo-copy{display:flex;flex:0 0 auto;align-items:center;font-size:11.5px;font-weight:850;line-height:1;letter-spacing:-.035em}' +
       '.bj-hgp-promo-copy[aria-hidden="true"]{display:none}' +
       '.bj-hgp-promo.has-deadline .bj-hgp-promo-track,.bj-hgp-promo.has-deadline .bj-hgp-promo-copy:first-child{width:100%}' +
       '.bj-hgp-promo.has-deadline .bj-hgp-promo-copy:first-child{justify-content:space-between}' +
-      '.bj-hgp-promo-discount{color:#ffe36a;font-weight:950}' +
+      '.bj-hgp-promo-discount{color:#ffe36a}.bj-hgp-promo-discount,.bj-hgp-promo-gift{font-weight:400}' +
       '.bj-hgp-promo.is-rolling .bj-hgp-promo-track{will-change:transform;animation:bj-hgp-promo-roll var(--bj-hgp-promo-duration,9s) linear infinite}' +
       '.bj-hgp-promo.is-rolling .bj-hgp-promo-copy[aria-hidden="true"]{display:block;margin-left:var(--bj-hgp-promo-gap,24px)}' +
       '.bj-hgp-promo:hover .bj-hgp-promo-track{animation-play-state:paused}' +

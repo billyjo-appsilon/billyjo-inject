@@ -40,6 +40,16 @@ test('home product cards render normalized cutouts and truthful review states', 
           const rect = card.querySelector('.bj-hgp-image img')?.getBoundingClientRect();
           return [model, rect && { left: rect.left, top: rect.top, width: rect.width, height: rect.height }];
         }));
+        const promoStyles = Array.from(section.querySelectorAll('.bj-hgp-promo')).map((promo) => {
+          const style = getComputedStyle(promo);
+          return {
+            borderWidths: [style.borderTopWidth, style.borderRightWidth, style.borderBottomWidth, style.borderLeftWidth],
+          };
+        });
+        const promoTextStyles = Array.from(section.querySelectorAll('.bj-hgp-promo-discount,.bj-hgp-promo-gift')).map((node) => ({
+          className: node.className,
+          fontWeight: getComputedStyle(node).fontWeight,
+        }));
         return {
           count: cards.length,
           uniqueModels: new Set(reviews.map((node) => node.dataset.bjReviewModel)).size,
@@ -50,6 +60,8 @@ test('home product cards render normalized cutouts and truthful review states', 
           overflow: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
           byModel,
           imageRects,
+          promoStyles,
+          promoTextStyles,
         };
       });
       assert.equal(result.count, 26, `${width}px card instances`);
@@ -59,6 +71,10 @@ test('home product cards render normalized cutouts and truthful review states', 
       assert.deepEqual(result.badReviewText, [], `${width}px stale review state`);
       assert.deepEqual(result.offCenterImages, [], `${width}px off-center image`);
       assert.equal(result.overflow, false, `${width}px horizontal overflow`);
+      assert.ok(result.promoStyles.length > 0, `${width}px promotion strip exists`);
+      assert.ok(result.promoStyles.every((style) => style.borderWidths.every((value) => value === '0px')), `${width}px promotion strip border remains ${JSON.stringify(result.promoStyles)}`);
+      assert.ok(result.promoTextStyles.length > 0, `${width}px promotion discount/gift text exists`);
+      assert.ok(result.promoTextStyles.every((style) => style.fontWeight === '400'), `${width}px promotion discount/gift text is bold ${JSON.stringify(result.promoTextStyles)}`);
       assert.match(result.byModel['WI-37C90720N'], /후기 173/);
       assert.match(result.byModel['WP-50C90621N'], /후기 149/);
       assert.equal(result.imageRects['WI-37C90720N'].height, result.imageRects['WP-50C90621N'].height);
