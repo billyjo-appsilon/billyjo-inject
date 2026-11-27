@@ -26,7 +26,7 @@ async function routeLocalAssets(page) {
   await page.route(/cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject(?:@[^/]+)?\/inject(?:\.min)?\.js/, async (route) => {
     await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: injectSource });
   });
-  await page.route('**/images/brands/*-horizontal-20261119.png', async (route) => {
+  await page.route('**/images/brands/*.png', async (route) => {
     const file = path.basename(new URL(route.request().url()).pathname);
     const local = path.join(logoDir, file);
     if (!fs.existsSync(local)) return route.continue();
