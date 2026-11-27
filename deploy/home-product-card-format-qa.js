@@ -117,11 +117,10 @@ async function routeLocalAssets(page) {
         nextControl: (() => {
           const button = firstGeneralBand.querySelector('.bj-hgp-slide-button--next');
           const icon = button.querySelector('svg');
-          const firstCard = firstGeneralBand.querySelector('.bj-hgp-card');
+          const cardRects = [...firstGeneralBand.querySelectorAll('.bj-hgp-card')].map((card) => card.getBoundingClientRect());
           const pathBounds = icon.querySelector('path').getBBox();
           const buttonRect = button.getBoundingClientRect();
           const iconRect = icon.getBoundingClientRect();
-          const cardRect = firstCard.getBoundingClientRect();
           const style = getComputedStyle(button);
           return {
             width: buttonRect.width,
@@ -135,7 +134,7 @@ async function routeLocalAssets(page) {
             background: style.backgroundColor,
             borderWidth: style.borderTopWidth,
             borderRadius: style.borderRadius,
-            overlapsCard: buttonRect.left < cardRect.right && buttonRect.right > cardRect.left && buttonRect.top < cardRect.bottom && buttonRect.bottom > cardRect.top,
+            overlapsCard: cardRects.some((cardRect) => buttonRect.left < cardRect.right && buttonRect.right > cardRect.left && buttonRect.top < cardRect.bottom && buttonRect.bottom > cardRect.top),
             iconAriaHidden: icon.getAttribute('aria-hidden'),
           };
         })(),
@@ -205,15 +204,15 @@ async function routeLocalAssets(page) {
     assert(result.promoById['32586'] === '47% 할인 · 공기청정기 1대 증정', `${width}: 32586 promo mismatch (${result.promoById['32586']})`);
     assert(result.promoStyles.every((style) => style.background === 'rgb(47, 102, 189)' && style.color === 'rgb(255, 255, 255)' && style.borderTop === 'rgb(24, 75, 155)'), `${width}: promotion strip contrast drift ${JSON.stringify(result.promoStyles)}`);
     assert(result.deadlineLayouts.length > 0 && result.deadlineLayouts.every((layout) => layout.fontSize === 11.5 && layout.justify === 'space-between' && layout.align === 'center' && Math.abs(layout.leftInset - 7) < 0.75 && Math.abs(layout.rightInset - 7) < 0.75 && layout.centerDelta < 0.75), `${width}: promo deadline alignment drift ${JSON.stringify(result.deadlineLayouts)}`);
-    const expectedControlSize = 40;
+    const expectedControlSize = width <= 780 ? 36 : 40;
     assert(Math.abs(result.nextControl.width - expectedControlSize) < 0.5 && Math.abs(result.nextControl.height - expectedControlSize) < 0.5 &&
       result.nextControl.centerDeltaX < 0.5 && result.nextControl.centerDeltaY < 0.5 && result.nextControl.pathCenterDeltaX < 0.05 && result.nextControl.iconAriaHidden === 'true',
       `${width}: next control size/centering mismatch ${JSON.stringify(result.nextControl)}`);
     if (width <= 780) {
-      assert(Math.abs(result.nextControl.iconWidth - 12) < 0.5 && Math.abs(result.nextControl.iconHeight - 18) < 0.5 &&
-        result.nextControl.boxShadow === 'none' && result.nextControl.background === 'rgba(0, 0, 0, 0)' && result.nextControl.borderWidth === '0px' &&
-        result.nextControl.borderRadius === '0px' && !result.nextControl.overlapsCard,
-        `${width}: mobile next control must be a bare chevron outside the cards ${JSON.stringify(result.nextControl)}`);
+      assert(Math.abs(result.nextControl.iconWidth - 20) < 0.5 && Math.abs(result.nextControl.iconHeight - 20) < 0.5 &&
+        result.nextControl.boxShadow.includes('rgba(8, 56, 248, 0.14)') && result.nextControl.background === 'rgba(255, 255, 255, 0.76)' && result.nextControl.borderWidth === '1px' &&
+        result.nextControl.borderRadius === '50%' && result.nextControl.overlapsCard,
+        `${width}: mobile next control must retain its original circle with a translucent surface ${JSON.stringify(result.nextControl)}`);
     } else {
       assert(result.nextControl.boxShadow.includes('rgba(8, 56, 248'), `${width}: desktop next control glow mismatch ${JSON.stringify(result.nextControl)}`);
     }
