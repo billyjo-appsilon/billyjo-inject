@@ -9788,7 +9788,7 @@ if (BJ_MODULE_A_BOTTOM_BAR && location.pathname.indexOf('prod_view') !== -1) {
       'body.bj-home-promo-ready #bj-v5-injected~h2.m_tit,body.bj-home-promo-ready #bj-v5-injected~.prod_list,body.bj-home-promo-ready .m_outer>.new-mb,body.bj-home-promo-ready .m_outer>.new-mb_m,body.bj-home-promo-ready .m_outer>.prodList_wrap{display:none!important}',
       'body.bj-home-conversion-ready #bj-home-gift-promos{width:min(1280px,calc(100% - 24px));margin:14px auto 0!important;scroll-margin-top:110px}',
       '#bj-home-sticky-actions{display:none}',
-      '@media(min-width:1025px){body.bj-home-conversion-ready .new-mv .item,body.bj-home-conversion-ready .new-mv .item .pc{aspect-ratio:24/7!important}}',
+      '@media(min-width:1025px){body.bj-home-conversion-ready .new-mv .item,body.bj-home-conversion-ready .new-mv .item .pc{aspect-ratio:16/9!important}}',
       '@media(max-width:767px){',
       'body.bj-home-conversion-ready #bj-home-benefit-cards{position:relative;padding:4px 0 8px}',
       'body.bj-home-conversion-ready #bj-home-benefit-cards .bj-hbenefit-stack{--bj-benefit-card-width:min(82vw,300px);position:relative;display:flex;gap:8px;width:calc(100% - 20px);max-width:none;margin-left:20px;overflow-x:auto;clip-path:inset(0);isolation:isolate;padding:0 max(20px,calc(100% - var(--bj-benefit-card-width))) 32px 0;scroll-padding-right:20px;scroll-snap-type:x mandatory;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none}',
