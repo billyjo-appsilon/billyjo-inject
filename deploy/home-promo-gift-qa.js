@@ -5,13 +5,13 @@ const { chromium } = require('playwright');
 const injectSource = fs.readFileSync(path.join(__dirname, '..', 'inject.js'), 'utf8');
 const live1MascotUrl = 'https://live.billyjo.co.kr/images/toss-banner-mascot.webp';
 const logoFiles = [
-  'wells-horizontal-20261119.png',
+  'wells-transparent-counters-20261127.png',
   'lg-electronics-horizontal-20261119.png',
-  'chungho-horizontal-20261119.png',
-  'cuckoo-horizontal-20261119.png',
+  'chungho-transparent-counters-20261127.png',
+  'cuckoo-transparent-counters-20261127.png',
   'ruhens-horizontal-20261119.png',
-  'coway-horizontal-20261119.png',
-  'quming-horizontal-20261119.png',
+  'coway-transparent-counters-20261127.png',
+  'quming-transparent-counters-20261127.png',
   'cesco-horizontal-20261119.png',
   'samsung-horizontal-20261119.png',
 ];
@@ -34,7 +34,7 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
     await page.route(/cdn\.jsdelivr\.net\/gh\/billyjo-appsilon\/billyjo-inject(?:@[^/]+)?\/inject(?:\.min)?\.js/, async (route) => {
       await route.fulfill({ status: 200, contentType: 'application/javascript; charset=utf-8', body: injectSource });
     });
-    await page.route('**/images/brands/*-horizontal-20261119.png', async (route) => {
+    await page.route('**/images/brands/*.png', async (route) => {
       const file = path.basename(new URL(route.request().url()).pathname);
       const body = logoAssets.get(file);
       if (!body) return route.continue();
@@ -433,11 +433,11 @@ const productAssetDir = path.join(__dirname, '..', 'images', 'products', 'cutout
       throw new Error(`${testCase.name}: brand logo failed`);
     }
     const wellsCard = result.cards.find((card) => card.id === '24129');
-    if (!wellsCard || !wellsCard.brandLogoSrc.includes('wells-horizontal-20261119.png') || wellsCard.brandLogoBlendMode !== 'normal') {
+    if (!wellsCard || !wellsCard.brandLogoSrc.includes('wells-transparent-counters-20261127.png') || wellsCard.brandLogoBlendMode !== 'normal') {
       throw new Error(`${testCase.name}: transparent Wells logo is not active`);
     }
     const qumingCard = result.cards.find((card) => card.id === '35287');
-    if (!qumingCard || !qumingCard.brandLogoSrc.includes('quming-horizontal-20261119.png')) {
+    if (!qumingCard || !qumingCard.brandLogoSrc.includes('quming-transparent-counters-20261127.png')) {
       throw new Error(`${testCase.name}: supplied Quming logo is not active`);
     }
     const lgCard = result.cards.find((card) => card.id === '11327');

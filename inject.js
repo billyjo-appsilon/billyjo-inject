@@ -3399,13 +3399,13 @@
     return (HOME_ASSET_BASE || 'https://cdn.jsdelivr.net/gh/billyjo-appsilon/billyjo-inject@main/') + String(path || '').replace(/^\/+/, '');
   }
   var BRAND_LOGOS = {
-    '웰스': 'images/brands/wells-horizontal-20261119.png',
+    '웰스': 'images/brands/wells-transparent-counters-20261127.png',
     'LG전자': 'images/brands/lg-electronics-horizontal-20261119.png',
-    '청호나이스': 'images/brands/chungho-horizontal-20261119.png',
-    '쿠쿠': 'images/brands/cuckoo-horizontal-20261119.png',
+    '청호나이스': 'images/brands/chungho-transparent-counters-20261127.png',
+    '쿠쿠': 'images/brands/cuckoo-transparent-counters-20261127.png',
     '루헨스': 'images/brands/ruhens-horizontal-20261119.png',
-    '코웨이': 'images/brands/coway-horizontal-20261119.png',
-    '현대렌탈케어': 'images/brands/quming-horizontal-20261119.png',
+    '코웨이': 'images/brands/coway-transparent-counters-20261127.png',
+    '현대렌탈케어': 'images/brands/quming-transparent-counters-20261127.png',
     '세스코': 'images/brands/cesco-horizontal-20261119.png',
     '삼성': 'images/brands/samsung-horizontal-20261119.png'
   };
